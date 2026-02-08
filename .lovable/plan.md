@@ -1,182 +1,160 @@
 
-# EAI Hub - Implementatieplan
+# EAI Hub Update Plan - GitHub Integratie
 
-## 🎯 Projectoverzicht
-Een AI-ondersteund leerHUB van EAI voor voortgezetonderwijs.
+## Situatie Analyse
 
----
+### Huidige Lovable Project Status
+Het project heeft een solide basis:
+- Landing Page, Student Studio, Teacher Cockpit, Admin Panel (placeholder versies)
+- Types, SSOT data, utilities (eaiLearnAdapter, ssotParser, diagnostics)
+- Services (analytics, persistence, mastery, profile, identity)
+- Dark/Teal design system geimplementeerd
 
-## 📱 Fase 1: Fundament & Landing Page
+### GitHub Repository (EAIHUB2) Bevat Uitgebreidere Versies
+De GitHub repo bevat aanzienlijk meer geavanceerde componenten:
 
-### 1.1 Landing Page
-- **Hero sectie** met animatie en branding "EAI Studio 10.0"
-- **Feature highlights** voor de drie gebruikersrollen (Student, Docent, Admin)
-- **Call-to-action** knoppen naar de verschillende dashboards
-- **Responsive design** met dark theme (Slate 950 + Teal accenten)
-
-### 1.2 Navigatie
-- **Top navigation bar** met role-based routing
-- **Conditional visibility** (verborgen op landing/concept pages)
-- **Active state indicators** met teal highlighting
-
----
-
-## 🎓 Fase 2: Student Studio
-
-### 2.1 Chat Interface
-- **Real-time AI conversatie** met message bubbles
-- **7 didactische thema's** (Default, Devil's Advocate, Meta, Creative, Coach, System, Pragmatic)
-- **Model selectie** (Gemini Flash vs Pro)
-- **Idle nudges** die studenten activeren na inactiviteit
-
-### 2.2 Scaffolding Visualisatie
-- **10D Rubric Dashboard** met live feedback op alle dimensies
-- **Knowledge Level indicators** (K1/K2/K3)
-- **Agency score tracking** met trend visualisatie
-- **Repair badges** wanneer AI-output wordt gecorrigeerd
-
-### 2.3 Profiel Setup
-- **5-stappen onboarding flow**
-- **Vak, niveau, leerdoel selectie**
-- **Opslaan in localStorage/Supabase**
+| Component | Lovable (Huidig) | GitHub (Nieuw) |
+|-----------|------------------|----------------|
+| **SSOT** | 210 regels, 10 rubrics | 1200+ regels, volledige v15.0 met 50+ commands |
+| **ChatInterface** | Placeholder | 433 regels met 7 thema's, idle nudges, volledige integratie |
+| **Dashboard** | Statische preview | 252 regels met live 10D visualisatie |
+| **ProfileSetup** | Niet aanwezig | 280 regels met 3-stappen onboarding |
+| **TechReport** | Niet aanwezig | 656 regels met PAPER/SSOT/TRACE/TELEMETRY tabs |
+| **MessageBubble** | Niet aanwezig | 106 regels met Markdown/LaTeX support |
+| **BootSequence** | Niet aanwezig | 62 regels met diagnostics-integratie |
+| **Orchestrator** | Niet aanwezig | 191 regels backend logic (voor Edge Function) |
 
 ---
 
-## 👨‍🏫 Fase 3: Teacher Cockpit
+## Update Plan
 
-### 3.1 Klassikaal Dashboard
-- **Live overzicht** van alle actieve student-sessies
-- **Real-time analytics** per student
-- **Interventie mogelijkheden** om scaffolding aan te passen
+### Fase 1: SSOT Upgrade (Kritiek)
+De huidige SSOT (210 regels) upgraden naar de volledige v15.0 versie (1200+ regels):
+- 10 rubrics met gedetailleerde bands (K0-K3, C0-C5, P0-P5, TD0-TD6, etc.)
+- 50+ didactische commands met Nederlandse beschrijvingen
+- Uitgebreide logic gates voor K1/K2/K3 enforcement
+- Mechanistische signatures per band
 
-### 3.2 Run Approval System
-- **Queue van lopende opdrachten**
-- **Approve/Reject functionaliteit**
-- **Historisch overzicht van interventies**
+### Fase 2: Core Components Toevoegen
+Nieuwe componenten uit GitHub integreren:
+- **ChatInterface.tsx** - Volledige chat met 7 thema's
+- **Dashboard.tsx** - 10D Rubric visualizer
+- **ProfileSetup.tsx** - 3-stappen onboarding flow
+- **MessageBubble.tsx** - Markdown/LaTeX chat bubbles
+- **TechReport.tsx** - Developer diagnostics panel
+- **BootSequence.tsx** - Animated boot screen
+- **DidacticLegend.tsx** - Thema uitleg overlay
+- **GameNeuroLinker.tsx** - Gamification component
 
-### 3.3 Analytics Visualisatie
-- **Class-wide statistieken**
-- **Individual progress tracking**
-- **Heatmaps van knowledge levels**
+### Fase 3: Type Definitions Uitbreiden
+Types updaten met alle vereiste interfaces:
+- Message (met mechanical state)
+- AuditEvent, BreachEvent
+- ChatRequest, ChatResponse, NudgeRequest
+- Extended LearnerProfile
 
----
+### Fase 4: Student Studio Upgraden
+StudentStudio.tsx vervangen met werkende versie:
+- ChatInterface integratie
+- Profile setup flow
+- Dashboard sidebar
+- Thema selector
 
-## 🔧 Fase 4: Admin Panel
+### Fase 5: Teacher Cockpit Verrijken
+Uitbreiden met GitHub functionaliteit:
+- Live student monitoring
+- Assignment management
+- Human Gate approval queue
+- Real-time analytics visualisatie
 
-### 4.1 System Monitoring
-- **Health status** van alle services
-- **SSOT integrity checks**
-- **Browser environment diagnostics**
+### Fase 6: Admin Panel Voltooien
+Admin panel completeren met:
+- System health monitoring
+- SSOT browser (alle rubrics doorzoekbaar)
+- Audit log viewer
+- Telemetry dashboard
 
-### 4.2 SSOT Browser
-- **Interactieve weergave** van alle 10 dimensies
-- **Logic Gate regels** met voorbeelden
-- **Command library** met documentatie
-
-### 4.3 Developer Tools
-- **Tech Report** met PAPER, SSOT, TRACE, TELEMETRY tabs
-- **Audit log viewer**
-- **API call monitoring**
-
----
-
-## 📄 Fase 5: Concept Page (Whitepaper)
-
-### 5.1 Content
-- **Wetenschappelijke onderbouwing** van de 10D Matrix
-- **Ruijssenaars-theorie uitleg**
-- **Praktische voorbeelden** en case studies
-
-### 5.2 Interactieve Elementen
-- **Expandable sections**
-- **Visualisaties** van het rubric systeem
-
----
-
-## 🔌 Fase 6: Backend Integratie
-
-### 6.1 Supabase Setup
-- **Database tabellen** voor users, sessions, mastery_states, audit_logs
-- **Row Level Security** voor multi-tenant veiligheid
-- **Real-time subscriptions** voor live updates
-
-### 6.2 AI Service
-- **Gemini API integratie** (via Edge Function - geen browser API keys)
-- **SSOT-validatie** van AI outputs
-- **Logic Gate enforcement** om antwoord-weggeven te voorkomen
-
-### 6.3 Hybrid Persistence
-- **Automatische fallback** naar localStorage zonder Supabase
-- **Sync mechanisme** voor offline-first support
+### Fase 7: Gemini Service Voorbereiden
+Gemini integratie klaarmaken (zonder API keys in browser):
+- apiClient.ts upgraden met edge function endpoints
+- Response schema toevoegen
+- Anti-leakage filters implementeren
 
 ---
 
-## 🎨 Design Specificaties
+## Technische Details
 
-### Kleurenpalet
-- **Primary**: Slate 950 (#020617) - donkere achtergrond
-- **Accent**: Teal 400 - interactieve elementen
-- **Text**: Slate 50 - leesbare tekst
-- **Borders**: Slate 800 - subtiele scheiding
+### Nieuwe Bestanden (16 totaal)
+```text
+src/components/
+├── ChatInterface.tsx        (433 regels)
+├── Dashboard.tsx            (252 regels)
+├── ProfileSetup.tsx         (280 regels)
+├── MessageBubble.tsx        (106 regels)
+├── TechReport.tsx           (656 regels)
+├── BootSequence.tsx         (62 regels)
+├── DidacticLegend.tsx       (nieuw)
+├── GameNeuroLinker.tsx      (nieuw)
+└── CommandPalette.tsx       (nieuw)
 
-### UI Stijl
-- **Dark theme** als default
-- **Minimalistisch** met focus op content
-- **Smooth animaties** en transitions
-- **Custom scrollbars** voor premium feel
+src/data/
+└── ssot.ts                  (UPDATE: 210 -> 1200+ regels)
+
+src/services/
+└── geminiService.ts         (90 regels - API client)
+```
+
+### Bestaande Updates (8 bestanden)
+```text
+src/pages/StudentStudio.tsx      -> Integratie met ChatInterface
+src/pages/TeacherCockpit.tsx     -> Live monitoring + approvals
+src/pages/AdminPanel.tsx         -> SSOT browser + health checks
+src/types/index.ts               -> Uitgebreide type definitions
+src/utils/ssotParser.ts          -> Aangepast voor v15.0 SSOT
+src/utils/eaiLearnAdapter.ts     -> Minor updates
+src/utils/diagnostics.ts         -> Integratie met TechReport
+```
+
+### Dependencies Toevoegen
+```json
+{
+  "react-markdown": "^9.0.0",
+  "remark-gfm": "^4.0.0",
+  "remark-math": "^6.0.0",
+  "rehype-katex": "^7.0.0"
+}
+```
 
 ---
 
-## 📋 Implementatie Volgorde
+## Implementatie Volgorde
 
-| Stap | Onderdeel | Geschatte Tijd |
-|------|-----------|----------------|
-| 1 | Landing Page + Navigatie | Klein |
-| 2 | Student Studio basis (Chat) | Medium |
-| 3 | Scaffolding Dashboard | Medium |
-| 4 | Teacher Cockpit | Medium |
-| 5 | Admin Panel | Medium |
-| 6 | Supabase Backend | Medium |
-| 7 | AI Service (Edge Function) | Medium |
-| 8 | Polish & Testing | Klein |
+| Stap | Onderdeel | Impact |
+|------|-----------|--------|
+| 1 | SSOT v15.0 upgrade | Alle rubric logica verrijkt |
+| 2 | Types uitbreiden | TypeScript compilatie fix |
+| 3 | MessageBubble + BootSequence | Basis UI components |
+| 4 | ProfileSetup + Dashboard | Student flow complete |
+| 5 | ChatInterface integreren | Student Studio werkend |
+| 6 | TechReport + diagnostics | Admin Panel werkend |
+| 7 | Teacher features | Cockpit volledig |
+| 8 | Gemini service prep | Ready voor backend |
 
 ---
 
-## ⚠️ Belangrijke Aandachtspunten
+## Belangrijke Aandachtspunten
 
-1. **Geen API keys in browser** - Gemini calls via Supabase Edge Functions
-2. **SSOT als bron van waarheid** - Alle rubric logica uit ssot.ts
-3. **Logic Gates respecteren** - AI mag nooit direct antwoorden geven bij K1/K3
-4. **Hybrid persistence** - App moet werken zonder Supabase connectie
+1. **SSOT als Bron van Waarheid** - Alle rubric logica uit de v15.0 SSOT
+2. **Logic Gates Respecteren** - K1/K3 triggers HUMAN_GATE voor summatieve impact
+3. **Geen API Keys in Browser** - Gemini calls voorbereid voor Edge Functions
+4. **Hybrid Persistence** - Werkt offline met localStorage fallback
+5. **Markdown/LaTeX Support** - MessageBubble met wiskundige formules
 
-De originele prompt had dit :
+---
 
-TITEL (ENGLISH):
-EAI HUB. SSOT. DIDACTICS FIRST.
-
-CONTEXT
-I uploaded a zip “eai-studio-10.0.zip”. Keep ALL content. Do NOT delete files. If you need a clean app structure, create a NEW folder (e.g., /lovable-app) and copy the required frontend source there, but preserve the original files for reference.
-
-GOAL
-Build a polished, responsive website + prototype UI in Lovable (dark/teal, minimal, dashboard-first), using Dutch copy (except the title).
-Pages:
-1) Landing
-2) Student Studio
-3) Docent Cockpit
-4) Admin/Docs placeholder (optional)
-
-IMPORTANT
-- Prefer the frontend code under /apps/web/src if present.
-- Keep mock data and prepare a Supabase-ready data layer.
-- Never put LLM API keys in the browser.
-
-DELIVERABLE
-A Lovable project that runs cleanly, plus an unchanged /sources snapshot of the original repository content.
-
-
-IMPORTANT: Ignore the folder _sources/. It is only a reference snapshot.
-
-
-NOTE: Summative (summatief) impact triggers a HUMAN GATE. Student Studio will not call the model. Teacher Cockpit can Approve/Reject the run.
-
-
+## Verwachte Resultaat
+Na deze update:
+- Volledig werkende Student Studio met chat, profiel setup, en 10D dashboard
+- Interactieve Teacher Cockpit met live monitoring
+- Complete Admin Panel met SSOT browser en diagnostics
+- Production-ready architectuur voor Gemini integratie via Edge Functions
