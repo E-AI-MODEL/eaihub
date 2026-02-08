@@ -112,52 +112,54 @@ const StudentStudio: React.FC = () => {
 
   // Main studio view
   return (
-    <div className={`min-h-screen ${currentTheme.bg} pt-14 transition-colors duration-1000`}>
-      <div className="max-w-7xl mx-auto p-4 lg:p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div 
-            className="cursor-pointer"
-            onDoubleClick={() => setShowTechReport(true)}
-          >
-            <h1 className="text-xl lg:text-2xl font-bold text-foreground">
-              EAI Studio
-            </h1>
-            <p className="text-xs lg:text-sm text-muted-foreground">
-              {profile?.subject && profile?.level 
-                ? `${profile.subject} • ${profile.level}` 
-                : 'AI-ondersteunde leersessie'}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setDesktopDashboardOpen(!isDesktopDashboardOpen)}
-              className="hidden lg:flex"
-            >
-              Dashboard
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setShowProfileEdit(true)}
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Profiel</span>
-            </Button>
+    <div className="min-h-screen bg-slate-950 pt-14">
+      <div className="h-[calc(100vh-56px)] flex flex-col">
+        {/* Main Layout Container */}
+        <div className={`flex-1 flex transition-all duration-300 ${isDesktopDashboardOpen ? 'mr-0 sm:mr-[420px]' : ''}`}>
+          {/* Chat Area - Full Height */}
+          <div className="flex-1 flex flex-col h-full border border-slate-700 bg-slate-900 m-2 lg:m-4 overflow-hidden">
+            {profile && (
+              <ChatInterface
+                profile={profile}
+                onAnalysisUpdate={handleAnalysisUpdate}
+                sessionId={sessionId}
+              />
+            )}
           </div>
         </div>
 
-        {/* Main Layout */}
-        <div className="border border-border rounded-xl bg-card h-[calc(100vh-180px)] lg:h-[calc(100vh-160px)] flex flex-col overflow-hidden">
-          {profile && (
-            <ChatInterface
-              profile={profile}
-              onAnalysisUpdate={handleAnalysisUpdate}
-              sessionId={sessionId}
-            />
-          )}
+        {/* Mobile Dashboard Toggle */}
+        <div className="fixed bottom-4 right-4 lg:hidden z-30">
+          <button
+            onClick={() => setDesktopDashboardOpen(!isDesktopDashboardOpen)}
+            className="px-4 py-2 border border-slate-600 bg-slate-800 text-slate-100 text-sm font-medium"
+          >
+            Dashboard
+          </button>
+        </div>
+
+        {/* Desktop Dashboard Toggle */}
+        <div className="fixed top-16 right-4 hidden lg:block z-30">
+          <button
+            onClick={() => setDesktopDashboardOpen(!isDesktopDashboardOpen)}
+            className={`px-3 py-1.5 border text-xs font-medium uppercase tracking-wide transition-colors ${
+              isDesktopDashboardOpen 
+                ? 'border-indigo-500/60 bg-slate-800 text-indigo-300' 
+                : 'border-slate-600 bg-slate-800 text-slate-300 hover:text-slate-100'
+            }`}
+          >
+            {isDesktopDashboardOpen ? 'Close' : 'Dashboard'}
+          </button>
+        </div>
+
+        {/* Profile Edit Button */}
+        <div className="fixed top-16 right-28 hidden lg:block z-30">
+          <button
+            onClick={() => setShowProfileEdit(true)}
+            className="px-3 py-1.5 border border-slate-700 bg-slate-800/60 text-slate-400 text-xs font-medium uppercase tracking-wide hover:text-slate-100 transition-colors"
+          >
+            Profiel
+          </button>
         </div>
       </div>
 
