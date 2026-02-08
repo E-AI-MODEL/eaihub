@@ -1,402 +1,332 @@
 
-# Masterplan: Dynamische SSOT Integratie
+# UI/UX Restoration Plan: EAI Studio Complete Feature Recovery
 
 ## Executive Summary
 
-Dit plan transformeert de EAI-applicatie van een systeem met **hardcoded didactische data** naar een volledig **SSOT-driven architectuur**. Alle componenten (ConceptPage, DidacticLegend, Dashboard, Edge Function) zullen rechtstreeks uit `ssot_v15.json` lezen, waardoor updates automatisch doorwerken zonder handmatige synchronisatie.
+De geüploade originele bestanden onthullen een significant verlies van features en UI/UX polish in de huidige EAI Studio. Dit plan herstelt de volledige feature set terwijl de recente SSOT v15.0.0 integratie behouden blijft.
 
 ---
 
-## Huidige Situatie: Gap Analysis
+## Gap Analyse: Wat is verdwenen?
 
-### Wat WEL dynamisch is (goed)
-| Component | Data Bron | Status |
-|-----------|-----------|--------|
-| `chatService.ts` | `getLearnerObsPatterns()`, `getLogicGatesForBand()` | Dynamisch |
-| `Dashboard.tsx` | `SSOT_DATA.metadata.cycle.order` voor dimensie-volgorde | Gedeeltelijk |
-| `AdminPanel.tsx` | Volledige SSOT Browser met live data | Dynamisch |
+### Volledig Ontbrekende Componenten
 
-### Wat HARDCODED is (probleem)
-| Component | Hardcoded Data | Regels |
-|-----------|----------------|--------|
-| **ConceptPage.tsx** | `dimensions[]` array met alle 10 dimensies + bands | ~130 regels |
-| **ConceptPage.tsx** | `logicGates[]` array | ~25 regels |
-| **DidacticLegend.tsx** | `knowledgeLevels[]` (K1-K3 definities) | ~35 regels |
-| **DidacticLegend.tsx** | `logicGates[]` lokale kopie | ~25 regels |
-| **DidacticLegend.tsx** | `dimensionMeta{}` (goals hardcoded) | ~12 regels |
-| **Dashboard.tsx** | `DIMENSION_LABELS{}` met descriptions | ~12 regels |
-| **eai-chat Edge Function** | Volledig statische system prompt | ~130 regels |
+| Component | Regels | Functie |
+|-----------|--------|---------|
+| `TechReport.tsx` | 685 | Engineering console met 5 tabs: PAPER, SSOT, TRACE, TELEMETRY, HEALTH |
+| `GameNeuroLinker.tsx` | 460 | Canvas-based focus reset game met level progressie |
+| `CommandPalette.tsx` | 94 | Doorzoekbare SSOT command bibliotheek |
+| `SecretLogin.tsx` | 71 | Beveiligde engineering toegang |
 
-**Totaal risico:** ~370 regels die kunnen divergeren van SSOT v15.0.0
+### Verarmde Componenten
 
----
+| Component | Origineel | Huidig | Verlies |
+|-----------|-----------|--------|---------|
+| **ChatInterface** | 458 regels | 301 regels | 34% - Toolbox, theming, neural grid, idle timer, game integratie |
+| **Dashboard** | 482 regels | 196 regels | 59% - Sliding panel, dimension cards, scaffolding visuals, G-Factor |
+| **BootSequence** | 111 regels | 55 regels | 50% - Animated logo, real-time logs, progress bar |
 
-## Fase 1: Centrale SSOT Utility Layer
+### Utility Bestanden Discrepanties
 
-### 1.1 Nieuwe utility: `src/utils/ssotHelpers.ts`
-
-Creëer een centrale utility die alle UI-ready data genereert uit de SSOT JSON:
-
-```text
-ssotHelpers.ts bevat:
-
-1. getDimensionsForUI()
-   - Retourneert array van dimensies met code, name, goal, bands
-   - Haalt uit: SSOT_DATA.rubrics + cycle.order
-
-2. getLogicGatesForUI()
-   - Retourneert logic gates met trigger, condition, enforcement, priority
-   - Haalt uit: SSOT_DATA.interaction_protocol.logic_gates
-
-3. getKnowledgeLevelsForUI()
-   - Retourneert K1-K3 met label, description, fix, gate, color
-   - Haalt uit: K_KennisType rubric + logic_gates
-
-4. getDimensionMeta()
-   - Retourneert styling metadata per dimensie (colors, borders)
-   - Combineert rubric data met consistente kleurenschema
-
-5. getDimensionLabels()
-   - Retourneert korte labels en descriptions voor Dashboard
-   - Haalt uit: rubric.name + rubric.goal
-
-6. generateSystemPrompt(profile)
-   - Genereert dynamische system prompt voor edge function
-   - Haalt uit: alle rubrics, commands, logic_gates, srl_model
-```
-
-### 1.2 Architectuur Diagram
-
-```text
-+-------------------+
-|  ssot_v15.json    |  <-- Single Source of Truth
-+-------------------+
-         |
-         v
-+-------------------+
-|   ssotHelpers.ts  |  <-- Centrale transformatie-laag
-+-------------------+
-    |    |    |    |
-    v    v    v    v
-+------+ +------+ +------+ +------+
-|Concept| |Legend| |Dash  | |Edge  |
-|Page   | |      | |board | |Func  |
-+------+ +------+ +------+ +------+
-```
+| Bestand | Origineel | Huidig | Status |
+|---------|-----------|--------|--------|
+| `ssotParser.ts` | 142 regels | Verwijderd | Logica gemigreerd naar `ssotHelpers.ts` |
+| `eaiLearnAdapter.ts` | 497 regels | 331 regels | Behouden maar mist Phase 3/4/5 comments |
+| `diagnostics.ts` | 89 regels | 77 regels | Functioneel equivalent |
 
 ---
 
-## Fase 2: Component Migratie
+## Architectuur Reconciliatie
 
-### 2.1 ConceptPage.tsx Refactor
+### Import Updates (Alle Componenten)
 
-**Huidige staat:** 
-- Regels 6-135: hardcoded `dimensions[]` array
-- Regels 137-159: hardcoded `logicGates[]` array
+De originele bestanden importeren van `ssotParser.ts` die nu verwijderd is:
 
-**Nieuwe implementatie:**
 ```text
-// Verwijder alle hardcoded arrays
-// Importeer helpers
-import { getDimensionsForUI, getLogicGatesForUI } from '@/utils/ssotHelpers';
+// ORIGINEEL (verouderd)
+import { getEAICore, SSOTBand, EAI_CORE } from '../utils/ssotParser';
 
-// In component:
-const dimensions = getDimensionsForUI();
-const logicGates = getLogicGatesForUI();
+// NIEUW (SSOT v15 compatible)  
+import { getEAICore, SSOTBand, EAI_CORE } from '../utils/ssotHelpers';
 ```
 
-**Impact:**
-- Dimensie descriptions komen nu uit `rubric.bands[0].description` of dedicated SSOT goal
-- Band labels komen uit `band.label`
-- Logic gate enforcements zijn volledig uit SSOT
+### Service Mapping
 
-### 2.2 DidacticLegend.tsx Refactor
+De originele `ChatInterface` gebruikt `geminiService.ts` die niet bestaat:
 
-**Huidige staat:**
-- Regels 15-26: hardcoded `dimensionMeta{}` met goals
-- Regels 28-63: hardcoded `knowledgeLevels[]`
-- Regels 65-88: hardcoded `logicGates[]`
-
-**Nieuwe implementatie:**
 ```text
-import { 
-  getDimensionMeta, 
-  getKnowledgeLevelsForUI, 
-  getLogicGatesForUI 
-} from '@/utils/ssotHelpers';
+// ORIGINEEL
+import { sendMessageToGemini, sendSystemNudge } from '../services/geminiService';
 
-// In component:
-const dimensionMeta = getDimensionMeta();
-const knowledgeLevels = getKnowledgeLevelsForUI();
-const logicGates = getLogicGatesForUI();
+// NIEUW (bestaande service)
+import { sendChat } from '@/services/chatService';
 ```
 
-**Extra verbetering:**
-- Goals komen uit `rubric.goal` veld in SSOT
-- K-niveau fixes komen uit `band.fix_ref`
-- Gate descriptions komen uit `gate.enforcement`
-
-### 2.3 Dashboard.tsx Refactor
-
-**Huidige staat:**
-- Regels 12-23: hardcoded `DIMENSION_LABELS{}`
-
-**Nieuwe implementatie:**
-```text
-import { getDimensionLabels } from '@/utils/ssotHelpers';
-
-// In component:
-const DIMENSION_LABELS = getDimensionLabels();
-```
+We moeten `sendSystemNudge` toevoegen aan de bestaande chatService.
 
 ---
 
-## Fase 3: Edge Function Dynamische Prompt
+## Fase 1: Ontbrekende Componenten Toevoegen
 
-### 3.1 Server-side SSOT Loading
+### 1.1 GameNeuroLinker.tsx
 
-De edge function heeft momenteel een 130-regel statische prompt. Dit moet dynamisch worden gegenereerd.
+- Canvas-based focus reset spel
+- Geen externe dependencies, direct kopieerbaar
+- Level progressie met localStorage highscore
+- Touch + keyboard support
 
-**Optie A: Client-side prompt generation (aanbevolen)**
-- Frontend genereert volledige prompt
-- Stuurt mee in request body
-- Edge function gebruikt deze direct
+### 1.2 CommandPalette.tsx
 
-**Optie B: Bundled SSOT in Edge Function**
-- SSOT JSON wordt meegecompileerd in edge function
-- Edge function genereert prompt runtime
+- Doorzoekbare SSOT command bibliotheek
+- Update import: `EAI_CORE` van `ssotHelpers.ts`
+- Geen andere wijzigingen nodig
 
-**Gekozen: Optie A** (eenvoudiger, geen dubbele SSOT)
+### 1.3 TechReport.tsx (685 regels)
 
-### 3.2 Nieuwe Edge Function Structuur
+- 5 tabs: PAPER, SSOT, TRACE, TELEMETRY, HEALTH
+- Update import: `getEAICore, SSOTBand` van `ssotHelpers.ts`
+- Phase 3 G-Factor visualisatie
+- TTL breakdown calculator
 
-```text
-eai-chat/index.ts wijzigingen:
+### 1.4 SecretLogin.tsx
 
-1. Request body krijgt nieuw veld:
-   systemPrompt?: string  // Optioneel, als niet meegegeven: fallback
-
-2. Frontend genereert prompt via:
-   import { generateSystemPrompt } from '@/utils/ssotHelpers';
-   const systemPrompt = generateSystemPrompt(profile);
-
-3. chatService.ts stuurt prompt mee:
-   body: JSON.stringify({
-     ...bestaande velden,
-     systemPrompt: generateSystemPrompt(profile)
-   })
-```
-
-### 3.3 Dynamische Prompt Generator
-
-```text
-generateSystemPrompt(profile) genereert:
-
-1. Header sectie (kernprincipes - statisch)
-2. 10D Rubric tabellen (uit SSOT_DATA.rubrics):
-   - Loop door cycle.order
-   - Voor elke rubric: genereer markdown tabel
-   - Kolommen: Band | Label | Fix | Principe
-3. Logic Gates sectie (uit interaction_protocol.logic_gates)
-4. SRL Model (uit srl_model.states)
-5. Commands referentie (uit command_library.commands)
-6. Context sectie (profile data)
-```
+- Engineering console toegang
+- PIN-based authenticatie
+- Direct kopieerbaar
 
 ---
 
-## Fase 4: E-Dimensie Synchronisatie
+## Fase 2: Dashboard Transformatie
 
-### 4.1 Huidige Discrepantie
+### Huidige Dashboard (196 regels)
+- Inline component in grid layout
+- Static dimension bars
+- Basic agency score
 
-**SSOT v15.0.0 definities (correct):**
-| Band | Label |
-|------|-------|
-| E0 | Schijnzekerheid |
-| E1 | Ongeverifieerd |
-| E2 | Bron-Noodzaak |
-| E3 | Geverifieerd |
-| E4 | Kritisch |
-| E5 | Autoriteit |
+### Originele Dashboard (482 regels)
+- Fixed right sliding panel (`isOpen` controlled)
+- Expandable dimension cards met click toggle
+- Profile context section met edit button
+- Semantic Integrity (G-Factor) visualisatie
+- Scaffolding history window (visual bars)
+- Telemetry forensics (router decision, repair log)
 
-**Edge function prompt (verouderd):**
-| Band | Label |
-|------|-------|
-| E0 | Ongedefinieerd |
-| E1 | Speculatief |
-| E2 | Subjectief |
-| E3 | Interpretatief |
-| E4 | Empirisch |
-| E5 | Geverifieerd |
-
-### 4.2 Automatische Fix
-
-Door de prompt dynamisch te genereren uit SSOT vervalt dit probleem automatisch.
-
----
-
-## Fase 5: SSOT Helper Functies Specificatie
-
-### 5.1 Type Definities
+### Wijzigingen
 
 ```text
-interface DimensionForUI {
-  code: string;           // 'K', 'P', 'TD', etc.
-  name: string;           // 'Kennis & Automatisering'
-  goal: string;           // Uit rubric.goal of bands[0].didactic_principle
-  bands: BandForUI[];
+// HUIDIGE Props
+interface DashboardProps {
+  analysis: EAIAnalysis | null;
+  scaffolding?: ScaffoldingState;
 }
 
-interface BandForUI {
-  id: string;             // 'K1', 'K2', etc.
-  label: string;          // 'Feitenkennis'
-  description: string;    // Volledige beschrijving
-  fix?: string;           // Fix command
-  fix_ref?: string;       // Fix reference
-  principle?: string;     // Didactisch principe
-}
-
-interface LogicGateForUI {
-  trigger: string;        // 'K1'
-  condition: string;      // 'Feitenkennis'
-  enforcement: string;    // 'MAX_TD = TD2'
-  description: string;    // Volledige enforcement tekst
-  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM';
-}
-
-interface KnowledgeLevelForUI {
-  id: string;             // 'K1'
-  label: string;          // 'Feitenkennis'
-  desc: string;           // Beschrijving
-  gate: string;           // 'MAX_TD = TD2'
-  gateDesc: string;       // Gate uitleg
-  fix: string;            // '/flits'
-  color: string;          // Tailwind class
-  border: string;         // Border class
-  bg: string;             // Background class
+// ORIGINELE Props (toe te voegen)
+interface DashboardProps {
+  analysis: EAIAnalysis | null;
+  mechanical: MechanicalState | null;  // NIEUW
+  isOpen: boolean;                      // NIEUW - sliding panel
+  onClose: () => void;                  // NIEUW
+  theme: Theme;                         // NIEUW - theming
+  isLoading?: boolean;                  // NIEUW
+  profile?: LearnerProfile | null;      // NIEUW - context
+  eaiState?: EAIStateLike | null;       // NIEUW - history
+  onEditProfile?: () => void;           // NIEUW
 }
 ```
 
-### 5.2 Kleurenschema Mapping
+### Nieuwe Features
+1. Profile context section (naam, niveau, vak, leerjaar)
+2. Semantic Integrity (G-Factor) meter met penalties
+3. Scaffolding trend bars (history_window visualisatie)
+4. Expandable dimension cards met didactic_principle
+5. Telemetry forensics (repair attempts, router decision)
+
+---
+
+## Fase 3: ChatInterface Verrijking
+
+### Huidige ChatInterface (301 regels)
+- Basic theme selector (7 buttons)
+- Simple message list
+- Static idle nudge (2 min fixed)
+- No toolbox
+
+### Originele ChatInterface (458 regels)
+- Dynamic theming met color schemes per modus
+- Neural grid background animatie
+- Toolbox met 6 categorieën (START, UITLEG, UITDAGEN, CHECK, REFLECTIE, PAUZE)
+- Desktop sidebar met dashboard toggle
+- Mobile tab navigatie (chat/dashboard)
+- Dynamic idle timer (TTL gebaseerd op analysis)
+- Game integratie (Neuro-Linker)
+- TechReport toegang (double-click EAI logo)
+- DidacticLegend modal trigger
+
+### Toe te voegen Features
 
 ```text
-const DIMENSION_COLORS: Record<string, { text, border, bg }> = {
-  K:  { text: 'text-yellow-400',  border: 'border-yellow-500/30', bg: 'bg-yellow-900/10' },
-  P:  { text: 'text-cyan-400',    border: 'border-cyan-500/30',   bg: 'bg-cyan-900/10' },
-  TD: { text: 'text-orange-400',  border: 'border-orange-500/30', bg: 'bg-orange-900/10' },
-  C:  { text: 'text-blue-400',    border: 'border-blue-500/30',   bg: 'bg-blue-900/10' },
-  V:  { text: 'text-emerald-400', border: 'border-emerald-500/30',bg: 'bg-emerald-900/10' },
-  T:  { text: 'text-pink-400',    border: 'border-pink-500/30',   bg: 'bg-pink-900/10' },
-  E:  { text: 'text-purple-400',  border: 'border-purple-500/30', bg: 'bg-purple-900/10' },
-  L:  { text: 'text-teal-400',    border: 'border-teal-500/30',   bg: 'bg-teal-900/10' },
-  S:  { text: 'text-indigo-400',  border: 'border-indigo-500/30', bg: 'bg-indigo-900/10' },
-  B:  { text: 'text-rose-400',    border: 'border-rose-500/30',   bg: 'bg-rose-900/10' },
-};
+1. THEMES object (7 kleurschema's met bg, sidebar, border, accent, glow)
+2. GET_TOOL_CATEGORIES() - 15+ interventie tools in 6 categorieën
+3. Neural grid background met CSS gradient
+4. showGame, showTechReport, showLegend state
+5. idleTimerRef met calculateDynamicTTL()
+6. sendSystemNudge() voor proactieve nudges
+7. Desktop sidebar met toolbox access
+8. Mobile tab navigatie
+```
+
+### Service Extensie
+
+```text
+// Toe te voegen aan chatService.ts
+export async function sendSystemNudge(
+  lastAnalysis: EAIAnalysis,
+  profile: LearnerProfile
+): Promise<ChatResponse> {
+  // Generate nudge based on current state
+  // Uses proactive prompting
+}
 ```
 
 ---
 
-## Fase 6: Implementatie Volgorde
+## Fase 4: BootSequence Animatie
 
-### Stap 1: Creëer ssotHelpers.ts
-- Nieuwe file in `src/utils/`
-- Implementeer alle helper functies
-- Unit tests voor elke functie
+### Huidige BootSequence (55 regels)
+- Minimal pulsing dot
+- No logs, no progress bar
+- Single "Initializing" text
 
-### Stap 2: Migreer Dashboard.tsx
-- Kleinste impact, goede test-case
-- Vervang `DIMENSION_LABELS` door `getDimensionLabels()`
+### Originele BootSequence (111 regels)
+- Animated EAI core logo (3 rotating circles)
+- Real-time boot logs met status icons
+- Progress bar (0% - 100%)
+- Proper fade-out transition
+- Version badge
 
-### Stap 3: Migreer DidacticLegend.tsx
-- Vervang alle drie hardcoded arrays
-- Test alle tabs (KENNIS, GATES, DIMENSIES)
-
-### Stap 4: Migreer ConceptPage.tsx
-- Grootste file, meeste impact
-- Vervang dimensions en logicGates arrays
-- Verifieer alle UI elementen
-
-### Stap 5: Update chatService.ts
-- Voeg `generateSystemPrompt()` aanroep toe
-- Stuur dynamische prompt mee naar edge function
-
-### Stap 6: Update eai-chat Edge Function
-- Accept optionele `systemPrompt` in request
-- Fallback naar basis prompt indien niet meegegeven
-- Deploy en test
-
----
-
-## Fase 7: Validatie & Testing
-
-### 7.1 Automated Checks
-
+### Toe te voegen
 ```text
-Voeg toe aan AdminPanel.tsx SSOT Browser:
-- Validatie: Alle rubrics hebben bands
-- Validatie: Alle bands hebben fix_ref
-- Validatie: Logic gates refereren bestaande bands
-- Validatie: Cycle order matcht rubric count
+1. Animated rotating circles (3 nested, different speeds)
+2. logs state array voor terminal output
+3. progress state (0-100%)
+4. Log elke diagnostics result met [OK]/[WARNING]/[CRITICAL]
+5. Version badge uit SSOT_DATA.version
 ```
 
-### 7.2 End-to-End Tests
+---
 
-| Test | Verificatie |
-|------|-------------|
-| ConceptPage laadt | Alle 10 dimensies zichtbaar |
-| DidacticLegend K-tab | K1-K3 met correcte gates |
-| DidacticLegend Gates-tab | 3 logic gates uit SSOT |
-| Dashboard 10D bars | Alle dimensies met labels |
-| Chat K1 vraag | TD beperkt tot TD2 |
-| Chat E-dimensie | Correcte labels (Schijnzekerheid, etc.) |
+## Fase 5: StudentStudio Orchestratie
+
+### Wijzigingen aan StudentStudio.tsx
+
+```text
+// Nieuwe imports
+import TechReport from '@/components/TechReport';
+import GameNeuroLinker from '@/components/GameNeuroLinker';
+import CommandPalette from '@/components/CommandPalette';
+
+// Nieuwe state
+const [showGame, setShowGame] = useState(false);
+const [showTechReport, setShowTechReport] = useState(false);
+const [showCommandPalette, setShowCommandPalette] = useState(false);
+const [currentTheme, setCurrentTheme] = useState(THEMES.DEFAULT);
+const [eaiState, setEaiState] = useState<EAIStateLike>(createInitialEAIState());
+
+// Pass theme prop naar Dashboard
+<Dashboard
+  analysis={currentAnalysis}
+  mechanical={currentMechanical}
+  isOpen={isDesktopDashboardOpen}
+  onClose={() => setDesktopDashboardOpen(false)}
+  theme={currentTheme}
+  profile={profile}
+  eaiState={eaiState}
+  onEditProfile={() => setShowProfileEdit(true)}
+/>
+
+// Render modals
+{showGame && <GameNeuroLinker onClose={() => setShowGame(false)} />}
+{showTechReport && <TechReport ... />}
+{showCommandPalette && <CommandPalette ... />}
+```
 
 ---
 
-## Fase 8: Rollback Plan
+## Fase 6: Type Extensies
 
-Indien problemen:
-1. Alle wijzigingen zijn in aparte commits
-2. ssotHelpers.ts is volledig nieuw (geen bestaande code gewijzigd)
-3. Components kunnen terugvallen op originele hardcoded arrays door import te switchen
+### types/index.ts Uitbreidingen
+
+```text
+// Toevoegen aan MechanicalState (al aanwezig, verificatie)
+interface MechanicalState {
+  // ...existing
+  routerDecision?: RouterDecision;      // Voor TELEMETRY tab
+  semanticValidation?: SemanticValidation;  // Voor G-Factor
+  repairLog?: RepairLog;                // Voor TRACE tab
+  supervisorLog?: SupervisorLog;        // Voor breaches
+}
+
+// Toevoegen aan ScaffoldingState (al aanwezig, verificatie)
+interface ScaffoldingState {
+  history_window: number[];  // Voor visual bars
+}
+```
+
+---
+
+## Implementatie Volgorde
+
+| Stap | Component | Actie | Risico |
+|------|-----------|-------|--------|
+| 1 | `GameNeuroLinker.tsx` | Kopieer, geen wijzigingen | Laag |
+| 2 | `CommandPalette.tsx` | Kopieer, update import | Laag |
+| 3 | `TechReport.tsx` | Kopieer, update imports | Medium |
+| 4 | `SecretLogin.tsx` | Kopieer, geen wijzigingen | Laag |
+| 5 | `BootSequence.tsx` | Merge animaties | Laag |
+| 6 | `chatService.ts` | Voeg sendSystemNudge toe | Medium |
+| 7 | `Dashboard.tsx` | Volledig vervangen met origineel + SSOT updates | Hoog |
+| 8 | `ChatInterface.tsx` | Merge met origineel | Hoog |
+| 9 | `StudentStudio.tsx` | Orchestratie updates | Medium |
+
+---
+
+## Versie Updates
+
+Alle versiereferenties worden dynamisch uit SSOT geladen:
+
+```text
+// BootSequence: "v7.0" -> SSOT_DATA.version (15.0.0)
+// TechReport: "EAI CONSOLE v7.0" -> "EAI CONSOLE v15.0"
+// CommandPalette: "v3.1" -> "v15.0"
+```
 
 ---
 
 ## Technische Details
 
-### Bestanden die GEWIJZIGD worden:
+### Bestanden die GECREËERD worden
 
-| Bestand | Wijziging |
-|---------|-----------|
-| `src/utils/ssotHelpers.ts` | NIEUW - centrale helper functies |
-| `src/pages/ConceptPage.tsx` | Verwijder ~130 regels hardcoded data, import helpers |
-| `src/components/DidacticLegend.tsx` | Verwijder ~70 regels hardcoded data, import helpers |
-| `src/components/Dashboard.tsx` | Verwijder `DIMENSION_LABELS`, import helper |
-| `src/services/chatService.ts` | Voeg prompt generation toe aan request |
-| `supabase/functions/eai-chat/index.ts` | Accept dynamische prompt |
+| Bestand | Regels | Bron |
+|---------|--------|------|
+| `src/components/TechReport.tsx` | ~700 | Origineel + SSOT fixes |
+| `src/components/GameNeuroLinker.tsx` | ~460 | Origineel (geen wijzigingen) |
+| `src/components/CommandPalette.tsx` | ~95 | Origineel + import fix |
+| `src/components/SecretLogin.tsx` | ~71 | Origineel |
 
-### Bestanden die ONGEWIJZIGD blijven:
+### Bestanden die VOLLEDIG VERVANGEN worden
 
-| Bestand | Reden |
-|---------|-------|
-| `src/data/ssot_v15.json` | Authoritative source, geen wijzigingen |
-| `src/data/ssot.ts` | Bestaande typed wrapper, wordt hergebruikt |
-| `src/pages/AdminPanel.tsx` | Al volledig dynamisch |
+| Bestand | Huidige | Nieuw | Delta |
+|---------|---------|-------|-------|
+| `Dashboard.tsx` | 196 | ~490 | +294 |
+| `BootSequence.tsx` | 55 | ~110 | +55 |
 
----
+### Bestanden die GEMERGED worden
 
-## Verwachte Resultaten
-
-### Voor implementatie:
-- 6 plaatsen met potentieel verouderde data
-- 370+ regels duplicatie
-- E-dimensie labels incorrect in edge function
-- Handmatige synchronisatie nodig bij SSOT updates
-
-### Na implementatie:
-- 1 source of truth: `ssot_v15.json`
-- 0 duplicatie
-- Automatische E-dimensie synchronisatie
-- SSOT updates werken automatisch door in hele applicatie
+| Bestand | Huidige | Nieuw | Delta |
+|---------|---------|-------|-------|
+| `ChatInterface.tsx` | 301 | ~470 | +169 |
+| `StudentStudio.tsx` | 114 | ~180 | +66 |
+| `chatService.ts` | ? | +50 | sendSystemNudge |
 
 ---
 
@@ -404,8 +334,19 @@ Indien problemen:
 
 | Risico | Impact | Mitigatie |
 |--------|--------|-----------|
-| Breaking change in SSOT structuur | Hoog | Type-safe helpers met fallbacks |
-| Performance door runtime parsing | Laag | Cache parsed data met useMemo |
-| Edge function deployment faalt | Medium | Fallback prompt behouden |
-| UI regression | Medium | Uitgebreide visuele tests |
+| geminiService referenties | Hoog | Map naar bestaande chatService |
+| Theme type conflicts | Medium | Gebruik consistente Theme interface |
+| Dashboard props breaking | Hoog | Optionele props met defaults |
+| ssotParser imports | Medium | Alle imports naar ssotHelpers |
 
+---
+
+## Verwacht Resultaat
+
+Na volledige implementatie:
+- 4 nieuwe componenten (TechReport, Game, CommandPalette, SecretLogin)
+- Dashboard transformeert naar sliding panel met alle originele features
+- ChatInterface krijgt toolbox, dynamic theming, en idle timer
+- BootSequence toont animated logo en real-time logs
+- StudentStudio orchestreert alle nieuwe modals
+- Volledige pariteit met originele EAI Studio
