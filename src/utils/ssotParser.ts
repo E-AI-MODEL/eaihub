@@ -1,4 +1,4 @@
-import { SSOT_DATA } from '../data/ssot';
+import { SSOT_DATA, type RubricBand } from '../data/ssot';
 
 export interface SSOTCommand {
   command: string;
@@ -69,7 +69,7 @@ const parseSSOT = (data: typeof SSOT_DATA): SSOTStructure => {
     const rubrics: SSOTRubric[] = (raw.rubrics || []).map((r) => ({
       rubric_id: r.rubric_id,
       name: r.name,
-      bands: (r.bands || []).map((b: Record<string, unknown>) => ({
+      bands: (r.bands || []).map((b: RubricBand) => ({
         band_id: b.band_id as string,
         label: b.label as string,
         description: b.description as string,

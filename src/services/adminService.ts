@@ -159,6 +159,7 @@ const runLogicSelfTest = (): 'OPERATIONAL' | 'COMPROMISED' => {
       coregulation_bands: [],
       secondary_dimensions: [],
       active_fix: null,
+      active_flags: [],
       current_profile: { name: 'Test', subject: null, level: null, grade: null },
       task_density_balance: 50,
       epistemic_status: 'ONBEKEND' as const,

@@ -148,6 +148,7 @@ export interface EAIAnalysis {
   task_densities: string[];
   secondary_dimensions: string[];
   active_fix: string | null;
+  active_flags: string[];
   reasoning: string;
   current_profile: LearnerProfile;
   task_density_balance: number;
