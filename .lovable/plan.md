@@ -1,161 +1,220 @@
 
-# EAI Hub - Fine-Tuning Plan (Micro & Nano Niveau)
 
-## ✅ IMPLEMENTATIE VOLTOOID
+# EAI Hub - Comprehensive Technical Audit & Finalization Plan
 
-### ✅ Endpoints Werkend
-| Endpoint | Status | Response |
-|----------|--------|----------|
-| `/functions/v1/eai-chat` | ✅ 200 OK | Streaming SSE actief |
-| Lovable AI Gateway | ✅ Actief | `google/gemini-3-flash-preview` |
-| LOVABLE_API_KEY | ✅ Geconfigureerd | Secret aanwezig |
+## Audit Overzicht
 
-### ✅ Core Infrastructure
-- **Supabase Project**: `fmgrjsjsrbtmybdiywxf` - Operationeel
-- **Edge Function Logs**: Geen errors, boot time 22ms
-- **CORS Headers**: Correct geconfigureerd
-- **Streaming**: SSE chunks worden correct geparsed
+Na uitgebreide analyse van alle TypeScript/TSX bestanden, Edge Functions, services en componenten heb ik de volgende status en verbeterpunten geidentificeerd.
 
 ---
 
-## Geïdentificeerde Verbeterpunten
+## Status per Laag
 
-### NIVEAU 1: KRITIEK (Micro)
+### Edge Function (eai-chat) - Status: GOED
+| Check | Status | Opmerkingen |
+|-------|--------|-------------|
+| CORS Headers | OK | Alle vereiste headers aanwezig |
+| Streaming SSE | OK | Correct geimplementeerd |
+| History Limit | OK | 10 messages (synced met client) |
+| Error Handling | OK | 429/402 specifieke responses |
+| System Prompt | OK | 10D rubric + logic gates |
+| Model | OK | gemini-3-flash-preview |
 
-#### 1.1 Edge Function - Token Counting Incorrect
-**Locatie**: `supabase/functions/eai-chat/index.ts`
-**Probleem**: Geen echte token counting - client-side schatting is onnauwkeurig
-**Fix**: Token counts uit de AI Gateway response extracten (al beschikbaar in `usage` object)
+### Client Services - Status: KLEINE VERBETERINGEN NODIG
 
-#### 1.2 History Truncation Race Condition
-**Locatie**: `src/services/chatService.ts` regel 99
-**Probleem**: Edge function sliced naar 10 messages, client naar 20 - inconsistentie
-**Fix**: Uniform maken naar 10 in beide locaties
+| Service | Status | Issues |
+|---------|--------|--------|
+| chatService.ts | 95% | Token schatting is approximatie |
+| profileService.ts | OK | localStorage werkt |
+| masteryService.ts | OK | localStorage werkt |
+| identity.ts | OK | UUID generatie correct |
+| persistence.ts | OK | Fallback naar localStorage |
+| analyticsService.ts | OK | Mock peers functioneel |
+| assignmentService.ts | OK | localStorage werkt |
 
-#### 1.3 Missing Error Toast voor Rate Limits
-**Locatie**: `src/services/chatService.ts`
-**Probleem**: 429/402 errors worden niet als toast getoond
-**Fix**: Toast integration toevoegen bij rate limit detection
+### Components - Status: KLEINE VERBETERINGEN NODIG
 
-### NIVEAU 2: HIGH (Micro)
+| Component | Status | Issues |
+|-----------|--------|--------|
+| ChatInterface.tsx | 98% | Timer cleanup is correct met useRef |
+| Dashboard.tsx | 95% | Agency bar minimum width al toegevoegd |
+| MessageBubble.tsx | OK | KaTeX CSS geimporteerd |
+| ProfileSetup.tsx | OK | Cancel button correct geimplementeerd |
+| BootSequence.tsx | OK | Diagnostics integratie werkt |
+| DidacticLegend.tsx | OK | Alle content aanwezig |
+| TopNav.tsx | OK | Route highlighting werkt |
 
-#### 2.1 Analysis Generation - Hardcoded Values
-**Locatie**: `src/services/chatService.ts` regel 274-299
-**Probleem**: `generateAnalysis()` retourneert statische bands (K2, C2, P3)
-**Fix**: AI laten returnen via structured output OF post-process analyse
+### Pages - Status: VERBETERINGEN NODIG
 
-#### 2.2 Dashboard - Missing Secondary Dimensions Parsing
-**Locatie**: `src/components/Dashboard.tsx` regel 69-81
-**Probleem**: `secondary_dimensions` worden niet volledig geparsed naar alle 10 dimensies
-**Fix**: Complete dimension extraction uit alle band arrays
+| Page | Status | Issues |
+|------|--------|--------|
+| StudentStudio.tsx | OK | Volledige flow werkt |
+| TeacherCockpit.tsx | 70% | Mock data, geen live connectie |
+| AdminPanel.tsx | 95% | Live SSOT data al geintegreerd |
+| LandingPage.tsx | 90% | Versie mismatch (v10.0 vs v15.0) |
+| ConceptPage.tsx | Niet gereviewed | Niet kritiek |
 
-#### 2.3 ProfileSetup - Missing Cancel Button Visibility
-**Locatie**: `src/components/ProfileSetup.tsx`
-**Probleem**: `onCancel` prop bestaat maar knop is niet zichtbaar in UI
-**Fix**: Cancel button toevoegen indien `onCancel` prop aanwezig
+### Types & Utils - Status: GOED
 
-### NIVEAU 3: MEDIUM (Nano)
+| File | Status | Opmerkingen |
+|------|--------|-------------|
+| types/index.ts | OK | Alle interfaces compleet |
+| ssotParser.ts | OK | Correct parsing van SSOT |
+| eaiLearnAdapter.ts | OK | Complete validatie logica |
+| diagnostics.ts | OK | 10D integriteit check |
+| data/ssot.ts | OK | 10 rubrics, 40 commands, 5 gates |
+| data/curriculum.ts | OK | 3 learning paths |
 
-#### 3.1 ChatInterface - Idle Timer Memory Leak Prevention
-**Locatie**: `src/components/ChatInterface.tsx` regel 53-79
-**Probleem**: Timer cleanup kan beter met useRef pattern
-**Fix**: Optimaliseer cleanup logic
+---
 
-#### 3.2 Message ID Generation
-**Locatie**: `src/components/ChatInterface.tsx` regel 84, 104
-**Probleem**: `Date.now()` kan duplicaten genereren bij snelle berichten
-**Fix**: UUID of crypto.randomUUID() gebruiken
+## Geidentificeerde Verbeterpunten
 
-#### 3.3 Dashboard Agency Score Display
-**Locatie**: `src/components/Dashboard.tsx` regel 156-160
-**Probleem**: Gradient bar toont niet correct bij lage scores
-**Fix**: Minimum width toevoegen voor visibility
+### KRITIEK (Moet gefixed worden)
 
-### NIVEAU 4: POLISH (Nano)
+#### 1. Versie Inconsistentie
+**Locaties**: LandingPage.tsx (regel 16, 71, 169), TopNav.tsx (regel 22)
+**Probleem**: Tonen "v10.0" maar SSOT is v15.0
+**Impact**: Verwarring bij gebruikers
+**Fix**: Update alle versie referenties naar v15.0
 
-#### 4.1 MessageBubble - KaTeX CSS Missing
-**Locatie**: `src/components/MessageBubble.tsx`
-**Probleem**: KaTeX CSS niet geïmporteerd - math formulas render niet correct
-**Fix**: KaTeX CSS import toevoegen in main.tsx of MessageBubble
+### MEDIUM (Aanbevolen)
 
-#### 4.2 SSOT Browser - Live Data
-**Locatie**: `src/pages/AdminPanel.tsx`
-**Probleem**: Hardcoded mock data i.p.v. live SSOT_DATA
-**Fix**: Import en display van echte SSOT rubrics
+#### 2. TeacherCockpit Mock Data
+**Locatie**: TeacherCockpit.tsx (regels 7-18)
+**Probleem**: Hardcoded mock students en approvals
+**Impact**: Geen live data in demo
+**Fix**: Integratie met analyticsService.ts voor live student data
 
-#### 4.3 Edge Function - Model Name Hardcoded
-**Locatie**: `supabase/functions/eai-chat/index.ts` regel 112
-**Probleem**: Model "google/gemini-3-flash-preview" is hardcoded
-**Fix**: Environment variable of request parameter maken
+#### 3. ChatInterface Theme Command Mapping
+**Locatie**: ChatInterface.tsx (regel 150-161)
+**Probleem**: getThemeCommand retourneert lege string voor DEFAULT
+**Impact**: Geen visuele feedback bij DEFAULT theme selectie
+**Fix**: Return null i.p.v. lege string voor betere logica
+
+#### 4. Dashboard Dimension Order Mismatch
+**Locatie**: Dashboard.tsx (regel 89)
+**Probleem**: Gebruikt SSOT_DATA.metadata.cycle.order maar sommige dimensies ontbreken in analysis
+**Impact**: Inconsistente weergave
+**Fix**: Fallback voor ontbrekende dimensies
+
+### LAAG (Nice to have)
+
+#### 5. AdminPanel Runtime Stats Mock
+**Locatie**: AdminPanel.tsx (regels 92-106)
+**Probleem**: Hardcoded stats (847 sessions, 12.4k API calls)
+**Impact**: Stats zijn niet live
+**Fix**: Ophalen uit analytics of persistence layer
+
+#### 6. BootSequence Timing Hardcoded
+**Locatie**: BootSequence.tsx (regel 13)
+**Probleem**: 1500ms wait is hardcoded
+**Impact**: Geen adaptieve boot
+**Fix**: Optioneel parameter voor boot duration
+
+#### 7. ProfileSetup Step 2 Scroll Issue
+**Locatie**: ProfileSetup.tsx (regel 172)
+**Probleem**: Grid kan overflown op kleine schermen
+**Impact**: UX issue op mobile
+**Fix**: max-height + overflow-y-auto toevoegen
 
 ---
 
 ## Implementatie Plan
 
-### Fase A: Kritieke Fixes (15 min)
-1. Synchroniseer history truncation limits
-2. Voeg toast errors toe voor rate limits
-3. Fix token counting in chatService
+### Fase 1: Versie Synchronisatie (5 min)
+1. Update LandingPage.tsx versie referenties naar v15.0
+2. Update TopNav.tsx versie naar v15.0
+3. Consistent kernel versie overal
 
-### Fase B: Analyse Verbetering (20 min)
-1. Verbeter `generateAnalysis()` met content-aware heuristieken
-2. Fix Dashboard dimension parsing
-3. Voeg cancel button toe aan ProfileSetup
+### Fase 2: TeacherCockpit Live Data (15 min)
+1. Import analyticsService.fetchAnalytics
+2. Replace mock students met live data
+3. Add useEffect voor data fetching
+4. Add loading states
 
-### Fase C: Polish & Stability (15 min)
-1. UUID voor message IDs
-2. KaTeX CSS import
-3. Admin Panel live SSOT data
-4. Agency score minimum width
+### Fase 3: Minor Fixes (10 min)
+1. ChatInterface theme command logica
+2. Dashboard dimension fallbacks
+3. ProfileSetup scroll fix
 
-### Fase D: Optional Enhancements
-1. AI-gegenereerde analysis via tool calling
-2. Model selection parameter
-3. Real-time telemetry in Admin
+### Fase 4: AdminPanel Enhancement (10 min)
+1. Replace mock runtime stats met localStorage counts
+2. Add refresh button voor stats
 
 ---
 
-## Technische Wijzigingen per Bestand
+## Technische Details per Fix
 
+### Fix 1: Versie Synchronisatie
 ```text
-supabase/functions/eai-chat/index.ts
-├── Lijn 112: Model naar env variable
-└── Return: Usage stats doorgeven
+LandingPage.tsx:
+- Regel 16: "v10.0" -> "v15.0"
+- Regel 71: "Kernel v15.0 Active" (al correct)
+- Regel 169: "EAI STUDIO 10.0" -> "EAI STUDIO 15.0"
 
-src/services/chatService.ts
-├── Lijn 20: History limit → 10 (sync met edge function)
-├── Lijn 39-41: Toast import + rate limit handling
-├── Lijn 116-119: Token counts uit response halen
-└── Lijn 274-299: generateAnalysis() verbeteren
+TopNav.tsx:
+- Regel 22: "EAI Studio 10.0" -> "EAI Studio 15.0"
+```
 
-src/components/ChatInterface.tsx
-├── Lijn 40: sessionId → crypto.randomUUID()
-├── Lijn 84, 104: Message ID → crypto.randomUUID()
-└── Lijn 53-79: Timer cleanup optimalisatie
+### Fix 2: TeacherCockpit Integration
+```text
+TeacherCockpit.tsx:
+- Add import: import { fetchAnalytics } from '@/services/analyticsService';
+- Add state: const [analytics, setAnalytics] = useState<AnalyticsSnapshot | null>(null);
+- Add useEffect met fetchAnalytics call
+- Replace mockStudents met analytics?.students
+- Replace pendingApprovals met filtered students waar alerts.length > 0
+```
 
-src/components/Dashboard.tsx
-├── Lijn 69-81: Complete dimension extraction
-└── Lijn 156-160: Min-width voor agency bar
+### Fix 3: ChatInterface Theme Logic
+```text
+ChatInterface.tsx (regel 150-161):
+- Return null voor DEFAULT i.p.v. lege string
+- Update handleThemeSelect om null te checken
+```
 
-src/components/ProfileSetup.tsx
-└── Lijn 244-261: Cancel button visibility fix
+### Fix 4: Dashboard Fallbacks
+```text
+Dashboard.tsx (regel 60-86):
+- Ensure all 10 dimensions have default values
+- Merge met currentBands voor volledige set
+```
 
-src/components/MessageBubble.tsx
-└── Lijn 1-10: KaTeX CSS import
-
-src/main.tsx of src/index.css
-└── KaTeX CSS import toevoegen
-
-src/pages/AdminPanel.tsx
-├── Lijn 15-26: SSOT_DATA import
-└── Lijn 118-145: Live rubric data rendering
+### Fix 5: ProfileSetup Mobile Fix
+```text
+ProfileSetup.tsx (regel 172):
+- Add max-h-[60vh] overflow-y-auto aan grid container
 ```
 
 ---
 
-## Verwacht Resultaat
-Na implementatie:
-- **Betrouwbaarder**: Consistente history, correcte token counts
-- **Betere UX**: Toast feedback bij errors, werkende math formulas
-- **Live Data**: Admin panel toont echte SSOT configuratie
-- **Stabiel**: Geen memory leaks, unieke message IDs
+## Validation Checklist Post-Implementation
+
+| Test | Verwacht Resultaat |
+|------|-------------------|
+| Student Studio chat | AI reageert, Dashboard update, Streaming werkt |
+| Teacher Cockpit load | Live student data i.p.v. mock |
+| Admin Panel SSOT tab | 10 rubrics, 40 commands, 5 gates zichtbaar |
+| Landing page versie | v15.0 overal consistent |
+| Profile setup mobile | Scrollbaar op kleine schermen |
+| Theme switching | Commands correct toegevoegd aan input |
+
+---
+
+## Samenvatting
+
+Het systeem is 95% compleet en functioneel. De belangrijkste verbeteringen zijn:
+
+1. **Versie sync** - 10.0 naar 15.0 (4 locaties)
+2. **Teacher Cockpit** - Mock naar live data
+3. **Minor UX fixes** - Scroll, theme logic, fallbacks
+
+Totale geschatte tijd: 40 minuten
+
+Na deze fixes is het EAI Hub volledig production-ready met:
+- Werkende AI chat via Edge Function
+- Live 10D Dashboard
+- SSOT v15.0 integratie
+- Consistente versioning
+- Responsive UI
+
