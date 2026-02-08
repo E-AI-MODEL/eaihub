@@ -169,7 +169,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
                 <h2 className="text-3xl md:text-4xl font-light text-foreground mb-4 tracking-tight">{t.step2_title}</h2>
                 <p className="text-muted-foreground mb-10 text-lg">{t.step2_sub}</p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-h-[60vh] overflow-y-auto">
                   {LEARNING_ROUTES.map(route => (
                     <button
                       key={route.id}

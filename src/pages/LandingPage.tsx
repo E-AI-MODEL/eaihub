@@ -13,7 +13,7 @@ const LandingPage = () => {
         <div className="flex items-center gap-3">
           <div className="w-3 h-3 bg-primary rounded-full animate-pulse eai-glow-teal" aria-hidden="true" />
           <span className="text-xs font-bold tracking-[0.2em] uppercase text-foreground">
-            EAI Studio <span className="text-muted-foreground">v10.0</span>
+            EAI Studio <span className="text-muted-foreground">v15.0</span>
           </span>
         </div>
         <ul className="flex gap-6 text-xs font-bold tracking-widest uppercase items-center list-none m-0 p-0">
@@ -166,7 +166,7 @@ const LandingPage = () => {
       <footer className="border-t border-border/50 py-12 px-6 bg-card">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="text-center md:text-left">
-            <div className="text-lg font-bold tracking-tight text-foreground mb-1">EAI STUDIO 10.0</div>
+            <div className="text-lg font-bold tracking-tight text-foreground mb-1">EAI STUDIO 15.0</div>
             <p className="text-xs text-muted-foreground">© 2025 Educational Artificial Intelligence Engineering.</p>
           </div>
           
