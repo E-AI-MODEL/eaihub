@@ -8,17 +8,18 @@ interface DashboardProps {
   scaffolding?: ScaffoldingState;
 }
 
+// SSOT v15.0.0 synchronized dimension labels
 const DIMENSION_LABELS: Record<string, { label: string; description: string }> = {
-  K: { label: 'Knowledge', description: 'Kennisniveau (K1-K3)' },
-  C: { label: 'Cognitive', description: 'Cognitieve belasting' },
-  P: { label: 'Precision', description: 'Precisie fase' },
-  TD: { label: 'Task Density', description: 'Agency / ondersteuning' },
-  V: { label: 'Verification', description: 'Verificatie status' },
-  E: { label: 'Epistemic', description: 'Epistemische status' },
-  T: { label: 'Time', description: 'Tijdsfactor' },
-  S: { label: 'Scaffolding', description: 'Ondersteuningsniveau' },
-  L: { label: 'Modality', description: 'Leermodaliteit (content type)' },
-  B: { label: 'Behavior', description: 'Gedragspatroon' },
+  K: { label: 'Kennis', description: 'Kennis & Automatisering (K0-K3)' },
+  C: { label: 'Co-Regulatie', description: 'Regieverdeling leerling/AI' },
+  P: { label: 'Procesfase', description: 'Leerfase context' },
+  TD: { label: 'Taakdichtheid', description: 'Verdeling denkhandelingen' },
+  V: { label: 'Vaardigheid', description: 'Cognitieve beweging' },
+  E: { label: 'Epistemisch', description: 'Betrouwbaarheid van claims' },
+  T: { label: 'Tool', description: 'Technologische integratie' },
+  S: { label: 'Sociaal', description: 'Sociale interactie context' },
+  L: { label: 'Leer', description: 'Continuiteit & Transfer' },
+  B: { label: 'Bias', description: 'Bias & Inclusie correctie' },
 };
 
 const extractBandLevel = (bandId: string): number => {
@@ -88,7 +89,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ analysis, scaffolding }) =
   };
 
   const currentBands = getCurrentBands();
-  const dimensions = SSOT_DATA.metadata.cycle.order;
+  // Extract short dimension keys from full rubric IDs (e.g., "K_KennisType" -> "K")
+  const dimensions = SSOT_DATA.metadata.cycle.order.map(id => id.split('_')[0]);
 
   const TrendIcon = ({ trend }: { trend?: 'RISING' | 'STABLE' | 'FALLING' }) => {
     if (trend === 'RISING') return <TrendingUp className="w-3 h-3 text-green-500" />;

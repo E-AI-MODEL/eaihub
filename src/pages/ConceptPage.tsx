@@ -79,16 +79,16 @@ const ConceptPage = () => {
           <h2 className="text-2xl font-bold mb-6">De 10 Dimensies</h2>
           <div className="space-y-4">
             {[
-              { code: 'K', name: 'Knowledge', desc: 'Huidige kennisstand en conceptueel begrip' },
-              { code: 'C', name: 'Cognitive Load', desc: 'Mentale belasting en werkgeheugen' },
-              { code: 'P', name: 'Precision', desc: 'Nauwkeurigheid van leerling-input' },
-              { code: 'TD', name: 'Task Difficulty', desc: 'Complexiteit van de leertaak' },
-              { code: 'V', name: 'Verification', desc: 'Verificatie en validatie status' },
-              { code: 'E', name: 'Engagement', desc: 'Betrokkenheid en motivatie' },
-              { code: 'T', name: 'Time', desc: 'Tijdsfactoren en leertempo' },
-              { code: 'S', name: 'Scaffolding', desc: 'Niveau van ondersteuning' },
-              { code: 'L', name: 'Learning Modality', desc: 'Content type (narratief/technisch)' },
-              { code: 'B', name: 'Behavior', desc: 'Gedragspatronen en interactie' },
+              { code: 'K', name: 'Kennis & Automatisering', desc: 'Type kennis: feiten, procedures, metacognitie' },
+              { code: 'C', name: 'Co-regulatie', desc: 'Regieverdeling tussen leerling en AI' },
+              { code: 'P', name: 'Procesfase', desc: 'Oriëntatie → Voorkennis → Instructie → Toepassing → Evaluatie' },
+              { code: 'TD', name: 'Taakdichtheid', desc: 'Verdeling van denkhandelingen (agency)' },
+              { code: 'V', name: 'Vaardigheidspotentieel', desc: 'Cognitieve beweging: verkennen → creëren' },
+              { code: 'E', name: 'Epistemische Betrouwbaarheid', desc: 'Status van claims: speculatief → geverifieerd' },
+              { code: 'T', name: 'Tool Awareness', desc: 'Begrip van AI als instrument' },
+              { code: 'S', name: 'Sociale Interactie', desc: 'Context: solitair → collectief leren' },
+              { code: 'L', name: 'Leercontinuïteit', desc: 'Transfer: geïsoleerd → duurzaam' },
+              { code: 'B', name: 'Bias & Inclusie', desc: 'Kritisch bewustzijn en correctie' },
             ].map((dim, i) => (
               <div 
                 key={dim.code}
@@ -108,24 +108,36 @@ const ConceptPage = () => {
 
         {/* Knowledge Levels */}
         <section className="mb-16">
-          <h2 className="text-2xl font-bold mb-6">Knowledge Levels</h2>
+          <h2 className="text-2xl font-bold mb-6">Kennisniveaus (K)</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-6 rounded-xl border border-yellow-500/30 bg-yellow-500/5">
               <span className="text-2xl font-bold text-yellow-500">K1</span>
+              <h4 className="text-sm font-semibold text-foreground mt-1">Feitenkennis</h4>
               <p className="text-sm text-muted-foreground mt-2">
-                Basisbegrip ontbreekt. Maximale scaffolding vereist. Human Gate mogelijk.
+                Termen, definities, eigenschappen. Doel: snel en foutloos ophalen (drillen).
+              </p>
+              <p className="text-xs text-yellow-500/80 mt-2 font-mono">
+                MAX TD2 — Alleen bevragen, corrigeren, herhalen
               </p>
             </div>
             <div className="p-6 rounded-xl border border-primary/30 bg-primary/5">
               <span className="text-2xl font-bold text-primary">K2</span>
+              <h4 className="text-sm font-semibold text-foreground mt-1">Procedurele Kennis</h4>
               <p className="text-sm text-muted-foreground mt-2">
-                Ontwikkelend begrip. Adaptieve ondersteuning met Socratische methode.
+                Handelingen, stappen, beslismomenten. Doel: correct uitvoeren.
+              </p>
+              <p className="text-xs text-primary/80 mt-2 font-mono">
+                ALLOW TD4 — Modeling: voordoen → samen → nadoen
               </p>
             </div>
             <div className="p-6 rounded-xl border border-green-500/30 bg-green-500/5">
               <span className="text-2xl font-bold text-green-500">K3</span>
+              <h4 className="text-sm font-semibold text-foreground mt-1">Metacognitie</h4>
               <p className="text-sm text-muted-foreground mt-2">
-                Diep begrip. Minimale scaffolding. Uitdaging en verdieping mogelijk.
+                Plannen, monitoren, evalueren van aanpak. Doel: betere strategie-keuzes.
+              </p>
+              <p className="text-xs text-green-500/80 mt-2 font-mono">
+                MAX TD2 — Reflectie centraal, AI geeft geen eindconclusie
               </p>
             </div>
           </div>
