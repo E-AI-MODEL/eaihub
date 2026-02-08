@@ -1,26 +1,15 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TrendingUp, TrendingDown, Minus, Activity, Target, Brain, Gauge } from 'lucide-react';
 import type { EAIAnalysis, ScaffoldingState } from '@/types';
 import { SSOT_DATA } from '@/data/ssot';
+import { getDimensionLabels } from '@/utils/ssotHelpers';
 
 interface DashboardProps {
   analysis: EAIAnalysis | null;
   scaffolding?: ScaffoldingState;
 }
 
-// SSOT v15 / EAI MODEL 8.0 — Exacte dimensie-definities uit whitepaper
-const DIMENSION_LABELS: Record<string, { label: string; description: string }> = {
-  K: { label: 'Kennis', description: 'Kennisobject: feit (K1), procedure (K2), metacognitie (K3)' },
-  P: { label: 'Procesfase', description: 'Oriëntatie → voorkennis → instructie → toepassen → evaluatie' },
-  TD: { label: 'Taakdichtheid', description: 'Wie doet het werk? TD1=leerling, TD5=AI-dominant' },
-  C: { label: 'Co-Regulatie', description: 'AI-monoloog → gedeelde regie → leerling-geankerd' },
-  V: { label: 'Vaardigheid', description: 'Verkennen → verbinden → toepassen → herzien → verankeren' },
-  T: { label: 'Tool', description: 'Opaque → functioneel → transparant → synergetisch → kritisch partner' },
-  E: { label: 'Epistemisch', description: 'Schijnzekerheid → ongeverifieerd → bron-noodzaak → geverifieerd' },
-  L: { label: 'Continuïteit', description: 'Gefragmenteerd → taakgebonden → conceptueel → transfer → duurzaam' },
-  S: { label: 'Sociaal', description: 'Isolatie → tutor → brug → partner → katalysator' },
-  B: { label: 'Bias', description: 'Blind → impliciet → bewust → correctie → systemisch' },
-};
+// Dynamic dimension labels from SSOT v15.0.0
 
 const extractBandLevel = (bandId: string): number => {
   const match = bandId.match(/\d+/);
@@ -57,6 +46,9 @@ const getMaxBands = (dimension: string): number => {
 };
 
 export const Dashboard: React.FC<DashboardProps> = ({ analysis, scaffolding }) => {
+  // Get dimension labels from SSOT dynamically (cached)
+  const DIMENSION_LABELS = useMemo(() => getDimensionLabels(), []);
+
   // Extract current bands from analysis with complete dimension parsing
   const getCurrentBands = (): Record<string, number> => {
     // Default values for all 10 dimensions

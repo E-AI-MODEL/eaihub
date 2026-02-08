@@ -1,6 +1,6 @@
 // Chat Service - Handles communication with EAI backend via Edge Function
 // Uses Lovable AI Gateway with streaming support
-// Version 15.0 - Uses authoritative SSOT v15.0.0 JSON
+// Version 15.0 - Uses authoritative SSOT v15.0.0 JSON with dynamic prompt
 
 import type { ChatRequest, ChatResponse, EAIAnalysis, MechanicalState, LearnerProfile } from '@/types';
 import { toast } from '@/hooks/use-toast';
@@ -12,6 +12,7 @@ import {
   getLogicGatesForBand,
   SSOT_DATA
 } from '@/data/ssot';
+import { generateSystemPrompt } from '@/utils/ssotHelpers';
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-chat`;
 const HISTORY_LIMIT = 10;
@@ -39,6 +40,9 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
   let history = sessionHistory.get(request.sessionId) || [];
   
   try {
+    // Generate dynamic system prompt from SSOT
+    const systemPrompt = generateSystemPrompt(request.profile);
+    
     const response = await fetch(CHAT_URL, {
       method: 'POST',
       headers: {
@@ -50,6 +54,7 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
         userId: request.userId,
         message: request.message,
         profile: request.profile,
+        systemPrompt, // Send dynamic prompt
         history: history.map(m => ({ role: m.role, content: m.content })),
       }),
     });
@@ -190,6 +195,9 @@ export const streamChat = async ({
   let history = sessionHistory.get(request.sessionId) || [];
 
   try {
+    // Generate dynamic system prompt from SSOT
+    const systemPrompt = generateSystemPrompt(request.profile);
+    
     const response = await fetch(CHAT_URL, {
       method: 'POST',
       headers: {
@@ -201,6 +209,7 @@ export const streamChat = async ({
         userId: request.userId,
         message: request.message,
         profile: request.profile,
+        systemPrompt, // Send dynamic prompt
         history: history.map(m => ({ role: m.role, content: m.content })),
       }),
     });
