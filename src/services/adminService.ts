@@ -154,15 +154,15 @@ const runLogicSelfTest = (): 'OPERATIONAL' | 'COMPROMISED' => {
     const testPayload = {
       process_phases: ['UNKNOWN_PHASE_XYZ'], 
       task_densities: ['TD5'], 
-      srl_state: 'INVALID_STATE',
+      srl_state: 'UNKNOWN' as const,
       reasoning: 'Test',
       coregulation_bands: [],
       secondary_dimensions: [],
       active_fix: null,
       current_profile: { name: 'Test', subject: null, level: null, grade: null },
       task_density_balance: 50,
-      epistemic_status: 'ONBEKEND',
-      cognitive_mode: 'ONBEKEND',
+      epistemic_status: 'ONBEKEND' as const,
+      cognitive_mode: 'ONBEKEND' as const,
       mastery_check: false
     };
 
