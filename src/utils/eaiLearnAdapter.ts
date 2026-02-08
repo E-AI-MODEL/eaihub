@@ -1,4 +1,4 @@
-import { getEAICore } from './ssotParser';
+import { getEAICore } from './ssotHelpers';
 import type { EAIAnalysis, MechanicalState, LogicGateBreach, ScaffoldingState, SemanticValidation } from '../types';
 
 export interface EAIBands {

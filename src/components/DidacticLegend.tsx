@@ -24,8 +24,8 @@ const DidacticLegend: React.FC<DidacticLegendProps> = ({ onClose }) => {
         <div className="p-4 border-b border-border bg-muted/50">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="text-foreground font-bold text-sm tracking-wide uppercase">SSOT v{SSOT_DATA.version} Didactiek</h3>
-              <p className="text-[10px] text-muted-foreground">EAI MODEL 8.0 — Wetenschappelijk fundament</p>
+              <h3 className="text-foreground font-bold text-sm tracking-wide uppercase">EAI v{SSOT_DATA.version} Didactiek</h3>
+              <p className="text-[10px] text-muted-foreground">Wetenschappelijk fundament — Single Source of Truth</p>
             </div>
             <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
