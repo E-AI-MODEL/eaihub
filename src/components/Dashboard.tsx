@@ -105,9 +105,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   const containerClasses = `
-    fixed inset-y-0 right-0 w-full sm:w-96 bg-[#0b1120] border-l border-slate-700 
-    z-[100] transform transition-transform duration-300 ease-in-out flex flex-col shadow-2xl
-    ${isOpen ? 'translate-x-0' : 'translate-x-full'}
+    fixed top-14 bottom-0 right-0 w-full sm:w-96 bg-[#0b1120] border-l border-slate-700 
+    z-50 transform transition-transform duration-300 ease-in-out flex flex-col shadow-2xl
+    ${isOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'}
   `;
 
   const renderDimCard = (
@@ -187,8 +187,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <>
-      {isOpen && <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] lg:hidden" onClick={onClose} />}
-      <div className={containerClasses}>
+      {isOpen && <div className="fixed inset-0 top-14 bg-black/60 backdrop-blur-sm z-40 lg:hidden" onClick={onClose} />}
+      <div className={containerClasses} style={{ pointerEvents: isOpen ? 'auto' : 'none' }}>
         
         {/* Header */}
         <div className="h-14 flex items-center justify-between px-4 bg-slate-900 border-b border-slate-700 shrink-0">
