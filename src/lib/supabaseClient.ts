@@ -1,19 +1,18 @@
-// Supabase Client - Hybrid Persistence Layer
-// Provides conditional Supabase connectivity with localStorage fallback
+// Supabase Client - Re-exports from integrations
+// This file provides backwards compatibility with the new Lovable Cloud setup
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+export { supabase } from '@/integrations/supabase/client';
+export type { Database } from '@/integrations/supabase/types';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-export const supabaseEnabled = !!(supabaseUrl && supabaseAnonKey);
-
-export const supabase: SupabaseClient | null = supabaseEnabled
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null;
+// Check if Supabase is properly configured
+export const supabaseEnabled = !!(
+  import.meta.env.VITE_SUPABASE_URL && 
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+);
 
 export const getSupabaseStatus = () => ({
   enabled: supabaseEnabled,
-  url: supabaseUrl ? 'configured' : 'missing',
-  key: supabaseAnonKey ? 'configured' : 'missing'
+  url: import.meta.env.VITE_SUPABASE_URL ? 'configured' : 'missing',
+  key: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ? 'configured' : 'missing',
+  projectId: import.meta.env.VITE_SUPABASE_PROJECT_ID || 'unknown'
 });
