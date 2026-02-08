@@ -184,7 +184,7 @@ const ConceptPage = () => {
             Wetenschappelijk Fundament
           </span>
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            SSOT v15 Didactische Matrix
+            EAI SSOT
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Evidence-informed AI in het onderwijsleerproces. Deterministische didactische policy bovenop een probabilistisch model.
