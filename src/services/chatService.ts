@@ -1,32 +1,37 @@
 // Chat Service - Handles communication with EAI backend via Edge Function
 // Uses Lovable AI Gateway with streaming support
-// Version 15.1 - SSOT-coupled detection and fix suggestions
+// Version 15.0 - Uses authoritative SSOT v15.0.0 JSON
 
 import type { ChatRequest, ChatResponse, EAIAnalysis, MechanicalState, LearnerProfile } from '@/types';
 import { toast } from '@/hooks/use-toast';
-import { getFixForBand, getFlagsForBands, getLearnerObsPatterns } from '@/data/ssot';
+import { 
+  getFixForBand, 
+  getFlagsForBands, 
+  getLearnerObsPatterns,
+  getBand,
+  getLogicGatesForBand,
+  SSOT_DATA
+} from '@/data/ssot';
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-chat`;
-const HISTORY_LIMIT = 10; // Synced with edge function
+const HISTORY_LIMIT = 10;
 
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
 }
 
-// Store conversation history per session
 const sessionHistory: Map<string, ChatMessage[]> = new Map();
 
-// Cache learner observation patterns from SSOT
-const kPatterns = getLearnerObsPatterns('knowledge');
-const pPatterns = getLearnerObsPatterns('precision');
-const bPatterns = getLearnerObsPatterns('behavior');
-const vPatterns = getLearnerObsPatterns('verification');
+// Cache learner observation patterns from SSOT v15
+const kPatterns = getLearnerObsPatterns('K_KennisType');
+const pPatterns = getLearnerObsPatterns('P_Procesfase');
+const cPatterns = getLearnerObsPatterns('C_CoRegulatie');
+const tdPatterns = getLearnerObsPatterns('TD_Taakdichtheid');
+const vPatterns = getLearnerObsPatterns('V_Vaardigheidspotentieel');
 
 export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
   const startTime = Date.now();
-  
-  // Get or initialize history for this session
   let history = sessionHistory.get(request.sessionId) || [];
   
   try {
@@ -45,12 +50,10 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       }),
     });
 
-    // Handle error responses with toast notifications
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
       const errorMsg = errorData.error || `HTTP ${response.status}`;
       
-      // Show toast for rate limits and payment issues
       if (response.status === 429) {
         toast({
           title: "Rate Limit",
@@ -68,7 +71,6 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       throw new Error(errorMsg);
     }
 
-    // Handle streaming response
     if (!response.body) {
       throw new Error('No response body');
     }
@@ -84,7 +86,6 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
 
       textBuffer += decoder.decode(value, { stream: true });
 
-      // Process line-by-line
       let newlineIndex: number;
       while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
         let line = textBuffer.slice(0, newlineIndex);
@@ -100,11 +101,8 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
         try {
           const parsed = JSON.parse(jsonStr);
           const content = parsed.choices?.[0]?.delta?.content;
-          if (content) {
-            fullText += content;
-          }
+          if (content) fullText += content;
         } catch {
-          // Incomplete JSON, put it back
           textBuffer = line + '\n' + textBuffer;
           break;
         }
@@ -130,7 +128,6 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
 
     const latencyMs = Date.now() - startTime;
 
-    // Update session history (synced with edge function limit)
     history = [
       ...history,
       { role: 'user' as const, content: request.message },
@@ -138,7 +135,6 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     ].slice(-HISTORY_LIMIT);
     sessionHistory.set(request.sessionId, history);
 
-    // Generate analysis based on response content
     const analysis = generateAnalysis(request.message, fullText, request.profile);
     const mechanical: MechanicalState = {
       latencyMs,
@@ -160,7 +156,6 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
   } catch (error) {
     console.error('[ChatService] Error:', error);
     
-    // Return error response
     return {
       sessionId: request.sessionId,
       text: `❌ Er is een fout opgetreden: ${error instanceof Error ? error.message : 'Onbekende fout'}. Probeer het opnieuw.`,
@@ -178,7 +173,6 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
   }
 };
 
-// Streaming version for real-time updates
 export const streamChat = async ({
   request,
   onDelta,
@@ -244,7 +238,7 @@ export const streamChat = async ({
           const content = parsed.choices?.[0]?.delta?.content;
           if (content) {
             fullText += content;
-            onDelta(content); // Stream to UI
+            onDelta(content);
           }
         } catch {
           textBuffer = line + '\n' + textBuffer;
@@ -255,7 +249,6 @@ export const streamChat = async ({
 
     const latencyMs = Date.now() - startTime;
 
-    // Update history (synced with edge function limit)
     history = [
       ...history,
       { role: 'user' as const, content: request.message },
@@ -297,184 +290,259 @@ export const streamChat = async ({
   }
 };
 
-// Detect knowledge level using SSOT learner_obs patterns
-function detectKnowledgeLevel(input: string): string {
+// ============= SSOT-BASED DETECTION FUNCTIONS =============
+
+/**
+ * Detect knowledge type using SSOT K_KennisType patterns
+ * K0 = Ongedefinieerd, K1 = Feitenkennis, K2 = Procedureel, K3 = Metacognitie
+ */
+function detectKnowledgeType(input: string): string {
   const lowerInput = input.toLowerCase();
   
-  // Use SSOT patterns for detection
-  if (kPatterns.get('K1')?.test(lowerInput)) return 'K1';
-  if (kPatterns.get('K3')?.test(lowerInput)) return 'K3';
-  if (kPatterns.get('K2')?.test(lowerInput)) return 'K2';
+  // Use SSOT patterns
+  if (kPatterns.get('K3')?.test(lowerInput)) return 'K3'; // Metacognitie
+  if (kPatterns.get('K2')?.test(lowerInput)) return 'K2'; // Procedureel
+  if (kPatterns.get('K1')?.test(lowerInput)) return 'K1'; // Feitenkennis
   
-  // Fallback patterns
-  if (/wat is|definitie|noem|betekent|heet/.test(lowerInput)) return 'K1';
-  if (/hoe|stappen|methode|procedure|aanpak/.test(lowerInput)) return 'K3';
+  // Fallback patterns based on SSOT learner_obs
+  if (/wanneer gebruik|welke aanpak|hoe bepaal|strategie/.test(lowerInput)) return 'K3';
+  if (/hoe|stappen|procedure|methode|uitvoeren/.test(lowerInput)) return 'K2';
+  if (/wat is|definitie|noem|betekent|eigenschappen/.test(lowerInput)) return 'K1';
   
-  return 'K2'; // Default conceptueel
+  return 'K0'; // Ongedefinieerd
 }
 
-// Detect precision phase using SSOT patterns
-function detectPrecisionPhase(output: string): string {
+/**
+ * Detect process phase using SSOT P_Procesfase patterns
+ * P0-P5: Ongedefinieerd -> Oriëntatie -> Voorkennis -> Instructie -> Toepassing -> Evaluatie
+ */
+function detectProcessPhase(input: string, output: string): string {
+  const lowerInput = input.toLowerCase();
   const lowerOutput = output.toLowerCase();
   
-  if (pPatterns.get('P1')?.test(lowerOutput)) return 'P1';
-  if (pPatterns.get('P5')?.test(lowerOutput)) return 'P5';
-  if (pPatterns.get('P4')?.test(lowerOutput)) return 'P4';
-  if (pPatterns.get('P2')?.test(lowerOutput)) return 'P2';
+  // Check output for AI behavior patterns
+  if (pPatterns.get('P5')?.test(lowerOutput)) return 'P5'; // Evaluatie
+  if (pPatterns.get('P4')?.test(lowerOutput)) return 'P4'; // Toepassing
+  if (pPatterns.get('P3')?.test(lowerOutput)) return 'P3'; // Instructie
+  if (pPatterns.get('P2')?.test(lowerOutput)) return 'P2'; // Voorkennis
+  if (pPatterns.get('P1')?.test(lowerOutput)) return 'P1'; // Oriëntatie
   
   // Fallback
-  if (lowerOutput.includes('wat weet je al') || lowerOutput.includes('voorkennis')) return 'P1';
-  if (lowerOutput.includes('probeer') || lowerOutput.includes('mogelijkheden')) return 'P2';
-  if (lowerOutput.includes('verbind') || lowerOutput.includes('samenvat')) return 'P4';
-  if (lowerOutput.includes('transfer') || lowerOutput.includes('toepas')) return 'P5';
+  if (/wat weet je al|voorkennis|noem 3/.test(lowerOutput)) return 'P1';
+  if (/maak.*lijst|conceptmap|ordenen/.test(lowerOutput)) return 'P2';
+  if (/uitleg|instructie|demonstr/.test(lowerOutput)) return 'P3';
+  if (/pas toe|oefen|casus/.test(lowerOutput)) return 'P4';
+  if (/evaluer|terugkijk|reflecteer/.test(lowerOutput)) return 'P5';
   
-  return 'P3'; // Default instructie
+  return 'P0';
 }
 
-// Detect behavior pattern using SSOT patterns
-function detectBehavior(input: string, hasQuestion: boolean): string {
+/**
+ * Detect co-regulation level using SSOT C_CoRegulatie patterns
+ * C0-C5: Ongedefinieerd -> AI-monoloog -> AI-geleid -> Gedeelde start -> Gedeelde regie -> Leerling-geankerd
+ */
+function detectCoRegulation(input: string, output: string): string {
   const lowerInput = input.toLowerCase();
+  const lowerOutput = output.toLowerCase();
+  const hasQuestion = output.includes('?');
+  const inputLength = input.length;
   
-  // Check for proactive indicators
-  if (bPatterns.get('B4')?.test(lowerInput) || /volgende stap|plan|vooruit/.test(lowerInput)) return 'B4';
-  if (bPatterns.get('B3')?.test(lowerInput) || hasQuestion) return 'B3';
-  if (bPatterns.get('B1')?.test(lowerInput) || input.length < 20) return 'B1';
+  // Check for learner initiative patterns
+  if (cPatterns.get('C5')?.test(lowerInput)) return 'C5'; // Leerling stuurt volledig
+  if (cPatterns.get('C4')?.test(lowerInput)) return 'C4'; // Leerling verantwoordt keuzes
+  if (cPatterns.get('C3')?.test(lowerInput)) return 'C3'; // Leerling doet voorstel
   
-  return 'B2'; // Default reactief
+  // Based on output patterns
+  if (/advocaat van de duivel|randgeval|tegenwerping/.test(lowerOutput)) return 'C5';
+  if (/waarom.*keuze|rationale|alternatief/.test(lowerOutput)) return 'C4';
+  if (/proces.*check|bevestig.*initiatief/.test(lowerOutput)) return 'C3';
+  if (/route a.*b|kies.*optie/.test(lowerOutput)) return 'C2';
+  if (!hasQuestion && output.length > 500) return 'C1'; // AI monologue
+  
+  return 'C2'; // Default: AI-geleid
 }
 
-// Detect verification status using SSOT patterns
-function detectVerification(input: string, output: string): string {
+/**
+ * Detect task density using SSOT TD_Taakdichtheid patterns
+ * TD0-TD5: Ongedefinieerd -> Leerling-geleid -> Gedeeld -> Gestuurd -> AI-geleid -> AI-dominant
+ */
+function detectTaskDensity(input: string, output: string): string {
   const lowerInput = input.toLowerCase();
   const lowerOutput = output.toLowerCase();
   
-  // Check for transfer indicators
-  if (/nieuwe context|ander voorbeeld|eigen voorbeeld/.test(lowerInput)) return 'V5';
-  if (vPatterns.get('V4')?.test(lowerOutput) || /toepassing|oefening correct/.test(lowerOutput)) return 'V4';
-  if (vPatterns.get('V3')?.test(lowerOutput) || output.includes('?')) return 'V3';
-  if (vPatterns.get('V2')?.test(lowerInput) || /snap het|begrijp/.test(lowerInput)) return 'V2';
+  // Check learner observations
+  if (tdPatterns.get('TD1')?.test(lowerInput)) return 'TD1'; // Leerling leidt
+  if (tdPatterns.get('TD5')?.test(lowerInput)) return 'TD5'; // Vraagt kant-en-klaar
   
-  return 'V1'; // Default niet geverifieerd
-}
-
-// Detect time factor based on complexity
-function detectTimeFactor(sentenceCount: number, hasCode: boolean): string {
-  if (sentenceCount <= 2 && !hasCode) return 'T1';
-  if (sentenceCount <= 5) return 'T2';
-  if (sentenceCount <= 10) return 'T3';
-  if (sentenceCount <= 20 || hasCode) return 'T4';
-  return 'T5';
-}
-
-// Generate EAI analysis from response with SSOT-coupled heuristics
-function generateAnalysis(input: string, output: string, profile: LearnerProfile): EAIAnalysis {
-  const isCommand = input.startsWith('/');
-  const lowerOutput = output.toLowerCase();
-  
-  // Content-aware detection using SSOT patterns
-  const knowledgeLevel = detectKnowledgeLevel(input);
-  
-  // Cognitive load estimation based on response complexity
-  const sentenceCount = (output.match(/[.!?]/g) || []).length;
-  const hasCode = output.includes('```');
-  const hasList = output.includes('- ') || output.includes('1.');
-  
-  let cognitiveLoad = 'C2';
-  if (sentenceCount > 10 || hasCode) cognitiveLoad = 'C3';
-  if (sentenceCount > 20) cognitiveLoad = 'C4';
-  if (sentenceCount <= 3) cognitiveLoad = 'C1';
-  
-  // Precision phase detection using SSOT patterns
-  const precisionPhase = detectPrecisionPhase(output);
-  
-  // Task density based on scaffolding signals
-  let taskDensity = 'TD3';
+  // Based on AI behavior
   const hintCount = (lowerOutput.match(/hint|tip|probeer|denk/g) || []).length;
   const hasQuestion = output.includes('?');
-  if (hintCount >= 3) taskDensity = 'TD2';
-  if (hintCount === 0 && hasQuestion) taskDensity = 'TD4';
-  if (!hasQuestion && sentenceCount <= 2) taskDensity = 'TD5';
-  if (hintCount >= 5) taskDensity = 'TD1';
+  const hasModelStep = /ik doe.*voor|demonstr|voorbeeld.*stap/.test(lowerOutput);
   
-  // Agency score calculation
-  const agencyScore = taskDensity === 'TD1' ? 0.2 : 
-                      taskDensity === 'TD2' ? 0.35 : 
-                      taskDensity === 'TD3' ? 0.5 : 
-                      taskDensity === 'TD4' ? 0.7 : 0.85;
+  if (hasModelStep) return 'TD4'; // AI modeling
+  if (hintCount >= 4) return 'TD3'; // Gestuurd
+  if (hintCount >= 2 && hasQuestion) return 'TD2'; // Gedeeld
+  if (hasQuestion && hintCount === 0) return 'TD1'; // Leerling-geleid
   
-  // Epistemic status from output
-  let epistemicStatus: 'FEIT' | 'INTERPRETATIE' | 'SPECULATIE' | 'ONBEKEND' = 'INTERPRETATIE';
-  if (lowerOutput.includes('feit') || lowerOutput.includes('bewezen') || lowerOutput.includes('consensus')) {
-    epistemicStatus = 'FEIT';
-  } else if (lowerOutput.includes('speculatie') || lowerOutput.includes('misschien') || lowerOutput.includes('hypothese')) {
-    epistemicStatus = 'SPECULATIE';
-  } else if (lowerOutput.includes('onbekend') || output.length === 0) {
-    epistemicStatus = 'ONBEKEND';
+  return 'TD2'; // Default: Gedeeld
+}
+
+/**
+ * Detect skill potential using SSOT V_Vaardigheidspotentieel patterns
+ * V0-V5: Ongedefinieerd -> Verkennen -> Verbinden -> Toepassen -> Herzien -> Creëren
+ */
+function detectSkillPotential(input: string, output: string): string {
+  const lowerInput = input.toLowerCase();
+  const lowerOutput = output.toLowerCase();
+  
+  if (vPatterns.get('V5')?.test(lowerInput)) return 'V5'; // Creëren
+  if (vPatterns.get('V4')?.test(lowerInput)) return 'V4'; // Herzien
+  if (vPatterns.get('V3')?.test(lowerInput)) return 'V3'; // Toepassen
+  if (vPatterns.get('V2')?.test(lowerInput)) return 'V2'; // Verbinden
+  if (vPatterns.get('V1')?.test(lowerInput)) return 'V1'; // Verkennen
+  
+  // Fallback
+  if (/creëer|ontwerp|eigen.*maak/.test(lowerInput)) return 'V5';
+  if (/feedback|verbeter|revis/.test(lowerInput)) return 'V4';
+  if (/pas toe|gebruik.*in|casus/.test(lowerInput)) return 'V3';
+  if (/vergelijk|patroon|verband/.test(lowerInput)) return 'V2';
+  if (/wat|welke|verken/.test(lowerInput)) return 'V1';
+  
+  return 'V0';
+}
+
+/**
+ * Detect epistemic reliability using SSOT E_EpistemischeBetrouwbaarheid
+ */
+function detectEpistemicStatus(output: string): string {
+  const lowerOutput = output.toLowerCase();
+  
+  if (/bewezen|wetenschappelijk|consensus|peer-reviewed/.test(lowerOutput)) return 'E5';
+  if (/onderzoek.*toont|studies.*wijzen/.test(lowerOutput)) return 'E4';
+  if (/interpretatie|perspectief|beargument/.test(lowerOutput)) return 'E3';
+  if (/mening|ik denk|misschien|speculatie/.test(lowerOutput)) return 'E2';
+  if (/onzeker|niet zeker|kan niet verifi/.test(lowerOutput)) return 'E1';
+  
+  return 'E0';
+}
+
+/**
+ * Detect SRL state based on SSOT srl_model
+ */
+function detectSRLState(input: string, output: string): 'PLAN' | 'MONITOR' | 'REFLECT' | 'ADJUST' {
+  const combined = (input + ' ' + output).toLowerCase();
+  
+  if (/plan|doel|eerst|begin|strategie/.test(combined)) return 'PLAN';
+  if (/check|voortgang|hoe gaat|monitor/.test(combined)) return 'MONITOR';
+  if (/reflecteer|terugkijk|evalueer|wat heb/.test(combined)) return 'REFLECT';
+  if (/aanpas|anders|wijzig|verbeter/.test(combined)) return 'ADJUST';
+  
+  return 'MONITOR'; // Default
+}
+
+/**
+ * Check logic gates and determine enforced constraints
+ */
+function checkLogicGates(knowledgeType: string): { maxTD: string | null; enforcement: string | null } {
+  const gates = getLogicGatesForBand(knowledgeType);
+  
+  for (const gate of gates) {
+    if (gate.priority === 'CRITICAL') {
+      // Parse enforcement for TD constraints
+      const tdMatch = gate.enforcement.match(/MAX_TD\s*=\s*(TD\d)/);
+      if (tdMatch) {
+        return { 
+          maxTD: tdMatch[1], 
+          enforcement: gate.enforcement 
+        };
+      }
+    }
   }
   
-  // SRL state detection
-  let srlState: 'PLAN' | 'MONITOR' | 'REFLECT' | 'ADJUST' = 'MONITOR';
-  if (lowerOutput.includes('plan') || lowerOutput.includes('eerst')) srlState = 'PLAN';
-  else if (lowerOutput.includes('reflecteer') || lowerOutput.includes('terugkijk')) srlState = 'REFLECT';
-  else if (lowerOutput.includes('aanpas') || lowerOutput.includes('anders')) srlState = 'ADJUST';
+  return { maxTD: null, enforcement: null };
+}
+
+// ============= MAIN ANALYSIS FUNCTION =============
+
+function generateAnalysis(input: string, output: string, profile: LearnerProfile): EAIAnalysis {
+  const isCommand = input.startsWith('/');
   
-  // Detect secondary dimensions using SSOT patterns
-  const behavior = detectBehavior(input, hasQuestion);
-  const verification = detectVerification(input, output);
-  const timeFactor = detectTimeFactor(sentenceCount, hasCode);
-  const scaffoldingLevel = `S${parseInt(taskDensity.replace('TD', ''))}`;
-  const modalityLevel = hasList ? 'L3' : hasCode ? 'L4' : 'L2';
-  const epistemicLevel = epistemicStatus === 'FEIT' ? 'E5' : 
-                         epistemicStatus === 'SPECULATIE' ? 'E2' : 
-                         epistemicStatus === 'ONBEKEND' ? 'E1' : 'E3';
+  // Detect all dimensions using SSOT patterns
+  const knowledgeType = detectKnowledgeType(input);
+  const processPhase = detectProcessPhase(input, output);
+  const coRegulation = detectCoRegulation(input, output);
+  let taskDensity = detectTaskDensity(input, output);
+  const skillPotential = detectSkillPotential(input, output);
+  const epistemicBand = detectEpistemicStatus(output);
+  
+  // Check logic gates and enforce constraints
+  const { maxTD, enforcement } = checkLogicGates(knowledgeType);
+  if (maxTD && parseInt(taskDensity.replace('TD', '')) > parseInt(maxTD.replace('TD', ''))) {
+    taskDensity = maxTD; // Enforce logic gate constraint
+  }
+  
+  // Calculate agency score from TD level
+  const tdLevel = parseInt(taskDensity.replace('TD', ''));
+  const agencyScore = tdLevel === 1 ? 0.85 : 
+                      tdLevel === 2 ? 0.65 : 
+                      tdLevel === 3 ? 0.5 : 
+                      tdLevel === 4 ? 0.35 : 0.15;
+  
+  // Detect SRL state
+  const srlState = detectSRLState(input, output);
+  
+  // Get epistemic status for type
+  const epistemicLevel = parseInt(epistemicBand.replace('E', ''));
+  const epistemicStatus: 'FEIT' | 'INTERPRETATIE' | 'SPECULATIE' | 'ONBEKEND' = 
+    epistemicLevel >= 4 ? 'FEIT' : 
+    epistemicLevel === 3 ? 'INTERPRETATIE' : 
+    epistemicLevel === 2 ? 'SPECULATIE' : 'ONBEKEND';
   
   // Collect all detected bands
   const allBands = [
-    knowledgeLevel, 
-    cognitiveLoad, 
-    precisionPhase, 
-    taskDensity, 
-    verification, 
-    epistemicLevel, 
-    timeFactor, 
-    scaffoldingLevel, 
-    modalityLevel, 
-    behavior
+    knowledgeType,
+    processPhase, 
+    coRegulation,
+    taskDensity,
+    skillPotential,
+    epistemicBand
   ];
   
-  // Get flags from SSOT for all detected bands
+  // Get flags from SSOT
   const activeFlags = getFlagsForBands(allBands);
   
-  // Determine active fix from SSOT (prioritize command, then cognitive load, then knowledge level)
+  // Determine active fix
   let activeFix: string | null = null;
   if (isCommand) {
     activeFix = input.split(' ')[0];
-  } else if (cognitiveLoad === 'C4') {
-    activeFix = getFixForBand('C4'); // /chunk
-  } else if (cognitiveLoad === 'C3') {
-    activeFix = getFixForBand('C3'); // /hint_soft
   } else {
-    activeFix = getFixForBand(knowledgeLevel); // K1->/anchor, K2->/connect, K3->/sequence
+    // Get fix based on most relevant dimension
+    activeFix = getFixForBand(knowledgeType) || getFixForBand(coRegulation) || getFixForBand(taskDensity);
   }
   
+  // Get cognitive mode
+  const hasQuestion = output.includes('?');
+  const cognitiveMode = hasQuestion ? 'REFLECTIEF' : 
+                        knowledgeType === 'K3' ? 'SYSTEMISCH' : 'ANALYTISCH';
+  
   return {
-    process_phases: ['WORKING'],
-    coregulation_bands: [knowledgeLevel, cognitiveLoad, precisionPhase],
+    process_phases: [processPhase],
+    coregulation_bands: [knowledgeType, coRegulation, processPhase],
     task_densities: [taskDensity],
-    secondary_dimensions: [verification, epistemicLevel, timeFactor, scaffoldingLevel, modalityLevel, behavior],
+    secondary_dimensions: [skillPotential, epistemicBand, `T${Math.min(5, Math.ceil(output.length / 200))}`],
     active_fix: activeFix,
     active_flags: activeFlags,
-    reasoning: `${knowledgeLevel} detected via SSOT patterns, ${cognitiveLoad} load, ${taskDensity} density. Flags: ${activeFlags.slice(0, 3).join(', ')}`,
+    reasoning: `SSOT v15: ${knowledgeType} (${getBand(knowledgeType)?.label || 'n/a'}), ${coRegulation} co-reg, ${taskDensity} density. ${enforcement ? `Gate: ${enforcement}` : ''}`,
     current_profile: profile,
     task_density_balance: agencyScore - 0.5,
     epistemic_status: epistemicStatus,
-    cognitive_mode: hasQuestion ? 'REFLECTIEF' : 'ANALYTISCH',
+    cognitive_mode: cognitiveMode as any,
     srl_state: srlState,
     scaffolding: {
       agency_score: agencyScore,
       trend: agencyScore > 0.5 ? 'RISING' : agencyScore < 0.4 ? 'FALLING' : 'STABLE',
       advice: hasQuestion ? 'Beantwoord de vraag om verder te gaan.' : 
-              cognitiveLoad === 'C4' ? 'Neem een pauze, veel informatie om te verwerken.' : null,
+              tdLevel >= 4 ? 'Neem de regie terug - te veel AI-dominantie.' : null,
       history_window: [agencyScore - 0.1, agencyScore - 0.05, agencyScore],
     },
   };
