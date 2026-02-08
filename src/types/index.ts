@@ -9,13 +9,38 @@ export interface EAIAnalysis {
   active_fix?: string | null;
   cognitive_mode?: string | null;
   epistemic_status?: string | null;
+  reasoning?: string;
+  current_profile?: {
+    name?: string | null;
+    subject?: string | null;
+    level?: string | null;
+    grade?: string | null;
+    goal?: string | null;
+  };
+  task_density_balance?: number;
+  mastery_check?: boolean;
 }
 
 export interface MechanicalState {
-  timescale: string;
-  fast: number;
-  mid: number;
-  slow: number;
+  latencyMs?: number;
+  inputTokens?: number;
+  outputTokens?: number;
+  model?: string;
+  temperature?: number;
+  timestamp?: string;
+  logicGateBreach?: LogicGateBreach;
+  repairAttempts?: number;
+  repairLog?: {
+    timestamp: number;
+    error: string;
+    brokenPayload: string;
+  };
+  semanticValidation?: SemanticValidation;
+  // Legacy fields
+  timescale?: string;
+  fast?: number;
+  mid?: number;
+  slow?: number;
 }
 
 export interface LogicGateBreach {
@@ -67,6 +92,14 @@ export type DidacticTheme =
 
 export type KnowledgeLevel = 'K1' | 'K2' | 'K3';
 
+export interface LearnerProfile {
+  name: string;
+  subject: string | null;
+  level: string | null;
+  grade?: string | null;
+  goal?: string | null;
+}
+
 export interface StudentProfile {
   id: string;
   name: string;
@@ -92,4 +125,27 @@ export interface TeacherInterventionRequest {
   question: string;
   timestamp: number;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
+
+export interface MasteryStateV2 {
+  userId: string;
+  pathId: string;
+  currentNodeId: string | null;
+  status: 'INTRO' | 'WORKING' | 'CHECKING' | 'MASTERED';
+  history: Array<{
+    nodeId: string;
+    evidence: string;
+    createdAt: number;
+    score: number | null;
+  }>;
+}
+
+export interface LearningNode {
+  id: string;
+  title: string;
+  description: string;
+  didactic_focus: string;
+  mastery_criteria: string;
+  common_misconceptions?: string[];
+  study_load_minutes: number;
 }
