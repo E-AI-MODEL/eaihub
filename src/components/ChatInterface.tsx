@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Sparkles, Zap, Brain, Palette, Users, Settings, Terminal, Lightbulb, RotateCcw, Info } from 'lucide-react';
+import { Send, Sparkles, Zap, Brain, Palette, Users, Settings, Terminal, Lightbulb, RotateCcw, Info, Grid3X3, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import MessageBubble from '@/components/MessageBubble';
 import DidacticLegend from '@/components/DidacticLegend';
 import type { Message, DidacticTheme, LearnerProfile, EAIAnalysis, MechanicalState } from '@/types';
 import { sendChat } from '@/services/chatService';
 import { getOrCreateUserId } from '@/services/identity';
+import { calculateDynamicTTL } from '@/utils/eaiLearnAdapter';
+import { pushTrace } from '@/lib/reliabilityPipeline';
 
 interface ChatInterfaceProps {
   profile: LearnerProfile;
@@ -14,7 +15,8 @@ interface ChatInterfaceProps {
   sessionId?: string;
 }
 
-const THEMES: { id: DidacticTheme; label: string; icon: React.ReactNode; color: string }[] = [
+// Theme definitions with visual properties
+const THEME_BUTTONS: { id: DidacticTheme; label: string; icon: React.ReactNode; color: string }[] = [
   { id: 'DEFAULT', label: 'Standaard', icon: <Sparkles className="w-4 h-4" />, color: 'bg-primary' },
   { id: 'DEVIL', label: "Devil's Advocate", icon: <Zap className="w-4 h-4" />, color: 'bg-destructive' },
   { id: 'META', label: 'Meta-Cognitief', icon: <Brain className="w-4 h-4" />, color: 'bg-purple-500' },
@@ -24,13 +26,57 @@ const THEMES: { id: DidacticTheme; label: string; icon: React.ReactNode; color: 
   { id: 'PRAGMATIC', label: 'Pragmatisch', icon: <Terminal className="w-4 h-4" />, color: 'bg-orange-500' },
 ];
 
-const IDLE_NUDGES = [
-  "Waar loop je vast? Beschrijf je probleem zo specifiek mogelijk.",
-  "Wat is het laatste dat je wel begreep?",
-  "Probeer je vraag in eigen woorden te formuleren.",
-  "Welk onderdeel van de stof vind je het moeilijkst?",
-  "Kun je een voorbeeld geven van wat je niet snapt?",
-];
+// Intervention Toolbox Categories
+const TOOL_CATEGORIES: Record<string, { label: string; command: string; icon: string; desc: string; mode: DidacticTheme }[]> = {
+  START: [
+    { label: "Bepaal doel", command: "/checkin", icon: "📍", desc: "Maak afspraken over doel en rol", mode: "COACH" },
+    { label: "Kernvraag", command: "/leervraag", icon: "💡", desc: "Vind de kern van je leervraag", mode: "DEFAULT" },
+    { label: "Proces check", command: "/fase_check", icon: "⏱️", desc: "Check waar je staat in het proces", mode: "SYSTEM" },
+  ],
+  UITLEG: [
+    { label: "Structureer", command: "/schema", icon: "📐", desc: "Zet tekst om in structuur", mode: "SYSTEM" },
+    { label: "Visualiseer", command: "/beeld", icon: "🎨", desc: "Krijg uitleg via een metafoor", mode: "CREATIVE" },
+    { label: "Stap-voor-stap", command: "/stappenplan", icon: "📝", desc: "Splits op in kleine stappen", mode: "PRAGMATIC" },
+  ],
+  UITDAGEN: [
+    { label: "Devil's Advocate", command: "/devil", icon: "😈", desc: "Test je idee tegen kritiek", mode: "DEVIL" },
+    { label: "Draai om", command: "/twist", icon: "🔄", desc: "Bekijk het van de andere kant", mode: "DEVIL" },
+    { label: "Edge cases", command: "/randgeval", icon: "⚡", desc: "Wat als het anders gaat?", mode: "META" },
+  ],
+  CHECK: [
+    { label: "Test mij", command: "/quizgen", icon: "📝", desc: "Test kennis met 3 vragen", mode: "COACH" },
+    { label: "Samenvatten", command: "/beurtvraag", icon: "🎤", desc: "Vat samen in eigen woorden", mode: "PRAGMATIC" },
+    { label: "Rubric", command: "/rubric", icon: "📊", desc: "Beoordeel je eigen werk", mode: "SYSTEM" },
+  ],
+  REFLECTIE: [
+    { label: "Helikopter", command: "/meta", icon: "🧠", desc: "Reflecteer op je aanpak", mode: "META" },
+    { label: "Transfer", command: "/transfer", icon: "🔗", desc: "Pas toe in andere context", mode: "CREATIVE" },
+    { label: "Evalueer", command: "/proces_eval", icon: "📈", desc: "Evalueer het leerproces", mode: "META" },
+  ],
+  PAUZE: [
+    { label: "Neuro-Linker", command: "GAME_NEURO", icon: "💠", desc: "Reset je focus met een spel", mode: "DEFAULT" },
+    { label: "Ademhaling", command: "/adem", icon: "🌬️", desc: "Korte ademhalingsoefening", mode: "COACH" },
+  ],
+};
+
+// Idle nudge messages by escalation level
+const IDLE_NUDGES: Record<number, string[]> = {
+  1: [ // Affectief - zachte check
+    "💭 Neem je tijd. Waar denk je over na?",
+    "🌱 Het is oké om even stil te staan. Wat speelt er?",
+    "💡 Soms helpt het om hardop te denken. Wat zie je?",
+  ],
+  2: [ // Hint - inhoudelijke richting
+    "🔍 Probeer de vraag in kleinere stukjes te splitsen.",
+    "📐 Welke concepten ken je al die hierbij kunnen helpen?",
+    "🎯 Focus op het eerste wat je moet weten om verder te komen.",
+  ],
+  3: [ // Scaffold - concrete ondersteuning
+    "📝 Laten we samen de eerste stap zetten. Wat is het doel?",
+    "🛠️ Ik kan een stappenplan maken. Wil je dat?",
+    "💬 Beschrijf wat je al geprobeerd hebt, dan gaan we daarop verder.",
+  ],
+};
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysisUpdate, sessionId: externalSessionId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -38,10 +84,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
   const [isLoading, setIsLoading] = useState(false);
   const [activeTheme, setActiveTheme] = useState<DidacticTheme>('DEFAULT');
   const [showLegend, setShowLegend] = useState(false);
+  const [showToolbox, setShowToolbox] = useState(false);
+  const [activeToolTab, setActiveToolTab] = useState('START');
   const [internalSessionId] = useState(() => `session_${crypto.randomUUID()}`);
   const sessionId = externalSessionId || internalSessionId;
+  
+  // Idle timer refs for escalation
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const idleTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastInteractionRef = useRef<number>(Date.now());
+  const nudgeLevelRef = useRef<number>(0); // 0 = None, 1 = Affective, 2 = Hint, 3 = Scaffold
+  const analysisRef = useRef<EAIAnalysis | null>(null);
   const messageCounterRef = useRef(0);
 
   const scrollToBottom = useCallback(() => {
@@ -52,52 +105,114 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  // Idle nudge timer with proper cleanup
+  // Update analysis ref for idle timer
   useEffect(() => {
-    // Clear any existing timer
+    if (messages.length > 0) {
+      const lastModelMsg = [...messages].reverse().find(m => m.role === 'model' && m.analysis);
+      if (lastModelMsg?.analysis) {
+        analysisRef.current = lastModelMsg.analysis;
+      }
+    }
+  }, [messages]);
+
+  // Idle timer with escalation
+  useEffect(() => {
+    // Clear existing timer
     if (idleTimerRef.current) {
-      clearTimeout(idleTimerRef.current);
+      clearInterval(idleTimerRef.current);
       idleTimerRef.current = null;
     }
-    
-    // Only set timer if we have messages and not loading
-    if (messages.length > 0 && !isLoading) {
-      idleTimerRef.current = setTimeout(() => {
-        const nudge = IDLE_NUDGES[Math.floor(Math.random() * IDLE_NUDGES.length)];
-        messageCounterRef.current += 1;
-        const nudgeMessage: Message = {
-          id: `nudge_${crypto.randomUUID()}`,
-          role: 'model',
-          text: `💡 *Tip:* ${nudge}`,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, nudgeMessage]);
-      }, 120000); // 2 minutes
-    }
 
-    // Cleanup function
+    // Only run if we have messages and not loading
+    if (messages.length === 0 || isLoading) return;
+
+    idleTimerRef.current = setInterval(() => {
+      // Stop if max level reached
+      if (nudgeLevelRef.current >= 3) return;
+
+      const now = Date.now();
+      const idleTime = now - lastInteractionRef.current;
+      const dynamicTTL = calculateDynamicTTL(analysisRef.current);
+
+      if (idleTime > dynamicTTL) {
+        triggerProactiveNudge();
+        lastInteractionRef.current = Date.now();
+      }
+    }, 5000); // Check every 5s
+
     return () => {
       if (idleTimerRef.current) {
-        clearTimeout(idleTimerRef.current);
+        clearInterval(idleTimerRef.current);
         idleTimerRef.current = null;
       }
     };
   }, [messages.length, isLoading]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const triggerProactiveNudge = () => {
+    const nextLevel = Math.min(nudgeLevelRef.current + 1, 3) as 1 | 2 | 3;
+    nudgeLevelRef.current = nextLevel;
+
+    const nudges = IDLE_NUDGES[nextLevel];
+    const nudgeText = nudges[Math.floor(Math.random() * nudges.length)];
+
+    pushTrace(sessionId, {
+      severity: 'INFO',
+      source: 'ENGINE',
+      step: 'RENDER',
+      message: `Proactive nudge triggered at level ${nextLevel}`,
+      data: { nudgeLevel: nextLevel, idleTimeMs: Date.now() - lastInteractionRef.current },
+    });
+
+    messageCounterRef.current += 1;
+    const nudgeMessage: Message = {
+      id: `nudge_${crypto.randomUUID()}`,
+      role: 'model',
+      text: nudgeText,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, nudgeMessage]);
+  };
+
+  const resetInteraction = () => {
+    lastInteractionRef.current = Date.now();
+    nudgeLevelRef.current = 0;
+  };
+
+  const handleSend = async (textOverride?: string) => {
+    const textToSend = textOverride || input.trim();
+    
+    // Handle special commands
+    if (textToSend === 'GAME_NEURO') {
+      setShowToolbox(false);
+      // TODO: Trigger game modal via parent
+      return;
+    }
+
+    if (!textToSend || isLoading) return;
+
+    // Reset idle timer on interaction
+    resetInteraction();
+    setShowToolbox(false);
 
     messageCounterRef.current += 1;
     const userMessage: Message = {
       id: `msg_${crypto.randomUUID()}`,
       role: 'user',
-      text: input.trim(),
+      text: textToSend,
       timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+
+    // Update theme based on command
+    if (textToSend.startsWith('/')) {
+      const tool = Object.values(TOOL_CATEGORIES).flat().find(t => t.command === textToSend.split(' ')[0]);
+      if (tool) {
+        setActiveTheme(tool.mode);
+      }
+    }
 
     try {
       const userId = getOrCreateUserId();
@@ -123,18 +238,27 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
       if (response.analysis && onAnalysisUpdate) {
         onAnalysisUpdate(response.analysis, response.mechanical);
       }
+
+      // Update theme based on active_fix
+      if (response.analysis?.active_fix) {
+        const tool = Object.values(TOOL_CATEGORIES).flat().find(t => t.command === response.analysis?.active_fix);
+        if (tool) {
+          setActiveTheme(tool.mode);
+        }
+      }
     } catch (error) {
       messageCounterRef.current += 1;
       const errorMessage: Message = {
         id: `msg_${crypto.randomUUID()}`,
         role: 'model',
-        text: 'Er is een fout opgetreden. Probeer het opnieuw.',
+        text: '❌ Er is een fout opgetreden. Probeer het opnieuw.',
         timestamp: new Date(),
         isError: true,
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      resetInteraction();
     }
   };
 
@@ -145,44 +269,41 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    resetInteraction(); // Reset idle timer on typing
+  };
+
   const handleClearChat = () => {
     setMessages([]);
+    nudgeLevelRef.current = 0;
+    analysisRef.current = null;
   };
 
-  const getThemeCommand = (theme: DidacticTheme): string | null => {
-    const commands: Record<DidacticTheme, string | null> = {
-      DEFAULT: null,
-      DEVIL: '/devil',
-      META: '/meta',
-      CREATIVE: '/twist',
-      COACH: '/checkin',
-      SYSTEM: '/fase_check',
-      PRAGMATIC: '/proces_eval',
-    };
-    return commands[theme];
-  };
-
-  const handleThemeSelect = (theme: DidacticTheme) => {
-    setActiveTheme(theme);
-    const command = getThemeCommand(theme);
-    if (command !== null && messages.length > 0) {
-      setInput(command + ' ');
-    }
-  };
+  const currentCategoryTools = TOOL_CATEGORIES[activeToolTab] || [];
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
+      {/* Neural Grid Background */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-5 z-0" 
+        style={{ 
+          backgroundImage: 'linear-gradient(hsl(var(--primary) / 0.2) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary) / 0.2) 1px, transparent 1px)', 
+          backgroundSize: '40px 40px' 
+        }}
+      />
+
       {/* Theme Selector */}
-      <div className="flex items-center gap-2 p-3 border-b border-border bg-card/50">
+      <div className="flex items-center gap-2 p-3 border-b border-border bg-card/50 backdrop-blur-sm z-10 relative">
         <span className="text-xs text-muted-foreground mr-2">Modus:</span>
         <div className="flex gap-1 flex-wrap">
-          {THEMES.map((theme) => (
+          {THEME_BUTTONS.map((theme) => (
             <button
               key={theme.id}
-              onClick={() => handleThemeSelect(theme.id)}
+              onClick={() => setActiveTheme(theme.id)}
               className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs transition-all ${
                 activeTheme === theme.id
-                  ? `${theme.color} text-white`
+                  ? `${theme.color} text-white shadow-lg`
                   : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
               }`}
               title={theme.label}
@@ -215,10 +336,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 relative z-10">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 animate-pulse">
               <Lightbulb className="w-8 h-8 text-primary" />
             </div>
             <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -232,11 +353,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
               <Button variant="outline" size="sm" onClick={() => setInput("Ik begrijp dit concept niet: ")}>
                 Concept uitleggen
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setInput("Kun je me helpen met: ")}>
-                Hulpvraag stellen
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setInput("/checkin")}>
+              <Button variant="outline" size="sm" onClick={() => handleSend("/checkin")}>
                 Check-in starten
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowToolbox(true)}>
+                <Grid3X3 className="w-4 h-4 mr-1" />
+                Toolbox
               </Button>
             </div>
           </div>
@@ -249,13 +371,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
               />
             ))}
             {isLoading && (
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2 text-muted-foreground px-4 py-2 bg-card/50 rounded-lg border border-border/50 backdrop-blur-sm">
                 <div className="flex gap-1">
                   <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                   <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                   <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
-                <span className="text-sm">EAI denkt na...</span>
+                <span className="text-sm font-mono uppercase tracking-wide">Processing...</span>
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -264,28 +386,39 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
       </div>
 
       {/* Input Area */}
-      <div className="p-4 border-t border-border bg-card/50">
-        <div className="flex items-center gap-3">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Stel je vraag of gebruik een /command..."
-            className="flex-1 bg-secondary"
-            disabled={isLoading}
-          />
-          <Button 
-            onClick={handleSend} 
-            disabled={!input.trim() || isLoading}
-            className="px-6"
+      <div className="p-4 border-t border-border bg-card/80 backdrop-blur-sm z-10 relative">
+        <div className="flex items-end gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 shrink-0"
+            onClick={() => setShowToolbox(!showToolbox)}
+            title="Intervention Toolbox"
           >
-            <Send className="w-4 h-4 mr-2" />
-            Verstuur
+            <Grid3X3 className="w-5 h-5" />
+          </Button>
+          <div className="flex-1 relative">
+            <textarea
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder="Typ een bericht of gebruik /command..."
+              className="w-full min-h-[44px] max-h-32 px-4 py-3 bg-secondary border border-border rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground placeholder:text-muted-foreground text-[16px]"
+              rows={1}
+              disabled={isLoading}
+            />
+          </div>
+          <Button 
+            onClick={() => handleSend()} 
+            disabled={!input.trim() || isLoading}
+            className="h-10 px-4"
+          >
+            <Send className="w-4 h-4" />
           </Button>
         </div>
         <div className="flex items-center justify-between mt-2">
           <p className="text-xs text-muted-foreground">
-            Tip: Gebruik <code className="bg-secondary px-1 rounded">/help</code> voor beschikbare commando's
+            Tip: Open de <button onClick={() => setShowToolbox(true)} className="text-primary hover:underline">toolbox</button> voor interventies
           </p>
           <span className="text-xs text-muted-foreground">
             {profile.level && `${profile.level} • `}
@@ -293,6 +426,61 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
           </span>
         </div>
       </div>
+
+      {/* Toolbox Modal */}
+      {showToolbox && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setShowToolbox(false)} />
+          <div className="absolute bottom-0 left-0 right-0 lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:bottom-auto lg:w-[640px] lg:rounded-2xl bg-card border border-border rounded-t-2xl p-4 max-h-[70vh] lg:max-h-[80vh] overflow-y-auto animate-in slide-in-from-bottom-full lg:animate-none lg:zoom-in-95 duration-300 shadow-2xl">
+            {/* Mobile handle */}
+            <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-4 lg:hidden" />
+            
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6 border-b border-border pb-3">
+              <h2 className="text-lg font-bold text-foreground tracking-wide uppercase">Intervention Toolbox</h2>
+              <Button variant="ghost" size="icon" onClick={() => setShowToolbox(false)}>
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {/* Category Tabs */}
+            <div className="flex gap-2 overflow-x-auto pb-4 mb-2 scrollbar-hide snap-x">
+              {Object.keys(TOOL_CATEGORIES).map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveToolTab(cat)}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all border snap-center ${
+                    activeToolTab === cat
+                      ? 'bg-primary/20 text-primary border-primary/50 shadow-[0_0_10px_hsl(var(--primary)/0.2)]'
+                      : 'bg-secondary text-muted-foreground border-transparent hover:text-foreground hover:bg-secondary/80'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Tools Grid */}
+            <div key={activeToolTab} className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                {currentCategoryTools.map((tool) => (
+                  <button
+                    key={tool.command}
+                    onClick={() => handleSend(tool.command)}
+                    className="flex items-center gap-4 p-3 rounded-xl bg-secondary border border-border hover:bg-secondary/80 hover:border-primary/50 transition-all active:scale-[0.98] group text-left"
+                  >
+                    <span className="text-xl shrink-0 group-hover:scale-110 transition-transform">{tool.icon}</span>
+                    <div className="min-w-0">
+                      <div className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{tool.label}</div>
+                      <div className="text-xs text-muted-foreground truncate">{tool.desc}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Didactic Legend Modal */}
       {showLegend && <DidacticLegend onClose={() => setShowLegend(false)} />}
