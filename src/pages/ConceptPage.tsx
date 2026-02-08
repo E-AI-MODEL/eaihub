@@ -1,162 +1,13 @@
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Brain, Layers, Shield, Sparkles, BookOpen, AlertTriangle, Zap } from 'lucide-react';
+import { getDimensionsForUI, getLogicGatesForUI } from '@/utils/ssotHelpers';
+import { SSOT_DATA } from '@/data/ssot';
 
 const ConceptPage = () => {
-  // SSOT v15 / EAI MODEL 8.0 — Exacte definities uit whitepaper
-  const dimensions = [
-    { 
-      code: 'K', 
-      name: 'Kennis & Automatisering',
-      goal: 'Kennisobject bepalen (feit / procedure / metacognitie) en daarbij passende didactiek afdwingen.',
-      bands: [
-        { id: 'K0', label: 'Ongedefinieerd', desc: 'Het gevraagde kennisobject is nog niet scherp.' },
-        { id: 'K1', label: 'Feitenkennis', desc: 'Termen, definities, eigenschappen (doel: snel en foutloos ophalen).' },
-        { id: 'K2', label: 'Procedurele Kennis', desc: 'Handelingen, stappen en beslismomenten (doel: correct uitvoeren).' },
-        { id: 'K3', label: 'Metacognitie', desc: 'Plannen, monitoren en evalueren van aanpak (doel: betere strategie-keuzes).' },
-      ]
-    },
-    { 
-      code: 'P', 
-      name: 'Procesfase',
-      goal: 'Fase van het leerproces bepalen voor passende interventie.',
-      bands: [
-        { id: 'P0', label: 'Ongedefinieerd', desc: 'Procesfase is niet te bepalen.' },
-        { id: 'P1', label: 'Oriëntatie', desc: 'Verkennen van opdracht, eisen, context en startpunt.' },
-        { id: 'P2', label: 'Voorkennis', desc: 'Voorkennis activeren en ordenen om een werkbaar schema te bouwen.' },
-        { id: 'P3', label: 'Instructie', desc: 'Begrip opbouwen en relaties verklaren.' },
-        { id: 'P4', label: 'Toepassen', desc: 'Oefenen in een (nieuwe) context en fouten gebruiken als leersignaal.' },
-        { id: 'P5', label: 'Evaluatie', desc: 'Kwaliteit toetsen aan criteria en conclusies trekken.' },
-      ]
-    },
-    { 
-      code: 'TD', 
-      name: 'Taakdichtheid',
-      goal: 'Wie doet het werk? Balanceert leerlingactiviteit versus AI-overname.',
-      bands: [
-        { id: 'TD0', label: 'Ongedefinieerd', desc: 'Verdeling van taken is onduidelijk.' },
-        { id: 'TD1', label: 'Leerling-dominant', desc: 'Leerling voert vrijwel alles zelf uit; AI is klankbord.' },
-        { id: 'TD2', label: 'Leerling-geleid', desc: 'Leerling doet kernwerk; AI structureert en ondersteunt.' },
-        { id: 'TD3', label: 'Gedeeld', desc: 'Co-constructie; leerling en AI bouwen om beurten aan resultaat.' },
-        { id: 'TD4', label: 'AI-geleid', desc: 'AI neemt tijdelijk de leiding om een procedure te modelleren.' },
-        { id: 'TD5', label: 'AI-dominant', desc: 'AI doet vrijwel alles; hoog risico op agency-verlies.' },
-      ]
-    },
-    { 
-      code: 'C', 
-      name: 'Co-regulatie',
-      goal: 'Mate van gedeelde regie (AI-monoloog → leerling-geankerd).',
-      bands: [
-        { id: 'C0', label: 'Ongedefinieerd', desc: 'Interactieregie is onduidelijk of afwezig.' },
-        { id: 'C1', label: 'AI-monoloog', desc: 'De leerling levert te weinig eigen taal/denken.' },
-        { id: 'C2', label: 'AI-geleid', desc: 'AI bepaalt tempo en volgorde; leerling volgt.' },
-        { id: 'C3', label: 'Gedeelde start', desc: 'Leerling neemt initiatief, maar zoekt nog regie-bevestiging.' },
-        { id: 'C4', label: 'Gedeelde regie', desc: 'Dialoog over inhoud én aanpak; leerling verantwoordt keuzes.' },
-        { id: 'C5', label: 'Leerling-geankerd', desc: 'Leerling stuurt het proces en beoordeelt de kwaliteit.' },
-      ]
-    },
-    { 
-      code: 'V', 
-      name: 'Vaardigheidspotentieel',
-      goal: 'Soort leerhandeling en vaardigheidsdiepte.',
-      bands: [
-        { id: 'V0', label: 'Ongedefinieerd', desc: 'Er is nog geen herkenbare denkhandeling of leeractiviteit zichtbaar.' },
-        { id: 'V1', label: 'Verkennen', desc: 'Ophalen, verkennen en vragen genereren.' },
-        { id: 'V2', label: 'Verbinden', desc: 'Relaties leggen, vergelijken en patronen herkennen.' },
-        { id: 'V3', label: 'Toepassen', desc: 'Kennis inzetten in een specifieke context of casus.' },
-        { id: 'V4', label: 'Herzien', desc: 'Evalueren, fouten diagnosticeren en verbeteren.' },
-        { id: 'V5', label: 'Verankeren', desc: 'Integreren en transfer naar nieuwe domeinen.' },
-      ]
-    },
-    { 
-      code: 'T', 
-      name: 'Tool Awareness',
-      goal: 'Transparantie en kritisch partnerschap met AI.',
-      bands: [
-        { id: 'T0', label: 'Ongedefinieerd', desc: 'Onheldere rol van AI/tool in het leerproces.' },
-        { id: 'T1', label: 'Opaque', desc: 'AI wordt behandeld als orakel; weinig controle of begrip.' },
-        { id: 'T2', label: 'Functioneel', desc: 'AI wordt gebruikt als gereedschap voor deeltaken.' },
-        { id: 'T3', label: 'Transparant', desc: 'De werkwijze is bespreekbaar en navolgbaar (Glass Box).' },
-        { id: 'T4', label: 'Synergetisch', desc: 'Leerling en AI versterken elkaar; leerling gebruikt AI als sparring.' },
-        { id: 'T5', label: 'Kritisch Partnerschap', desc: 'Wederzijdse correctie en bias-bewust gebruik.' },
-      ]
-    },
-    { 
-      code: 'E', 
-      name: 'Epistemische Veiligheid',
-      goal: 'Van schijnzekerheid naar geverifieerde autoriteit.',
-      bands: [
-        { id: 'E0', label: 'Schijnzekerheid', desc: 'Er wordt met te veel zekerheid gesproken zonder basis.' },
-        { id: 'E1', label: 'Ongeverifieerd', desc: 'Claims staan los van bronnen of controleerbare gegevens.' },
-        { id: 'E2', label: 'Bron-Noodzaak', desc: 'Uitspraak vereist onderbouwing voordat je verder bouwt.' },
-        { id: 'E3', label: 'Geverifieerd', desc: 'Er is controle uitgevoerd met betrouwbare bronnen.' },
-        { id: 'E4', label: 'Kritisch', desc: 'Er wordt actief gezocht naar tegenbewijs en randgevallen.' },
-        { id: 'E5', label: 'Autoriteit', desc: 'Conclusies zijn gebaseerd op weging van bewijs en onzekerheden.' },
-      ]
-    },
-    { 
-      code: 'L', 
-      name: 'Leercontinuïteit',
-      goal: 'Leercontinuïteit en transfer over tijd en contexten heen.',
-      bands: [
-        { id: 'L0', label: 'Ongedefinieerd', desc: 'Er is nog geen afronding of borging.' },
-        { id: 'L1', label: 'Gefragmenteerd', desc: 'Resultaat is taak- of momentgebonden en moeilijk te herhalen.' },
-        { id: 'L2', label: 'Taakgebonden', desc: 'Leerling kan de taak uitvoeren maar mist het onderliggende principe.' },
-        { id: 'L3', label: 'Conceptueel', desc: 'Leerling begrijpt het principe en kan het verwoorden.' },
-        { id: 'L4', label: 'Transfer', desc: 'Leerling kan het toepassen in een andere, nieuwe context.' },
-        { id: 'L5', label: 'Duurzaam', desc: 'Kennis/vaardigheid is verankerd en zelfstandig inzetbaar.' },
-      ]
-    },
-    { 
-      code: 'S', 
-      name: 'Sociale Interactie',
-      goal: 'Sociale laag: isolatie → katalysator voor samenwerking.',
-      bands: [
-        { id: 'S0', label: 'Ongedefinieerd', desc: 'Sociale context is niet gespecificeerd.' },
-        { id: 'S1', label: 'Isolatie', desc: 'Menselijke feedback/peers verdwijnen uit beeld.' },
-        { id: 'S2', label: 'Tutor', desc: '1-op-1 leren met AI als functionele coach.' },
-        { id: 'S3', label: 'Brug', desc: 'Voorbereiding op een gesprek/feedback met een mens.' },
-        { id: 'S4', label: 'Partner', desc: 'AI werkt mee als teamlid in een groepstaak.' },
-        { id: 'S5', label: 'Katalysator', desc: 'AI ondersteunt collectieve intelligentie en synthese.' },
-      ]
-    },
-    { 
-      code: 'B', 
-      name: 'Bias & Inclusie',
-      goal: 'Van blind naar systemisch corrigeren.',
-      bands: [
-        { id: 'B0', label: 'Ongedefinieerd', desc: 'Bias/inclusie is (nog) niet relevant voor de taak.' },
-        { id: 'B1', label: 'Blind', desc: 'Stereotypen of eenzijdige aannames worden ongemerkt gereproduceerd.' },
-        { id: 'B2', label: 'Impliciet', desc: 'Er is lichte spanning/uitsluiting, maar het blijft onbesproken.' },
-        { id: 'B3', label: 'Bewust', desc: 'Bias wordt herkend en er is intentie tot neutraler taalgebruik.' },
-        { id: 'B4', label: 'Correctie', desc: 'Actieve aanpassing van framing, voorbeelden en perspectieven.' },
-        { id: 'B5', label: 'Systemisch', desc: 'Analyse van oorzaken van bias en impact op besluitvorming.' },
-      ]
-    },
-  ];
-
-  const logicGates = [
-    {
-      trigger: 'K1',
-      condition: 'Feitenkennis',
-      enforcement: 'MAX_TD = TD2',
-      description: 'Doel: ophalen en automatiseren. Geen conceptuele uitleg; alleen bevragen, corrigeren, herhalen.',
-      priority: 'CRITICAL'
-    },
-    {
-      trigger: 'K2', 
-      condition: 'Procedurele kennis',
-      enforcement: 'ALLOW_TD = TD4',
-      description: 'Modeling toegestaan: voordoen (hardop), samen oefenen, daarna laten nadoen.',
-      priority: 'HIGH'
-    },
-    {
-      trigger: 'K3',
-      condition: 'Metacognitie',
-      enforcement: 'MAX_TD = TD2',
-      description: 'Reflectie en regulatie centraal. AI geeft geen oplossing of eindconclusie.',
-      priority: 'CRITICAL'
-    },
-  ];
+  // Dynamic SSOT data (cached)
+  const dimensions = useMemo(() => getDimensionsForUI(), []);
+  const logicGates = useMemo(() => getLogicGatesForUI(), []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -272,7 +123,7 @@ const ConceptPage = () => {
         <section className="mb-16">
           <div className="flex items-center gap-3 mb-6">
             <BookOpen className="w-6 h-6 text-primary" />
-            <h2 className="text-2xl font-bold">De 10 Dimensies (SSOT v15)</h2>
+            <h2 className="text-2xl font-bold">De 10 Dimensies (SSOT v{SSOT_DATA.version})</h2>
           </div>
           <p className="text-sm text-muted-foreground mb-6">
             Elke interactie wordt geclassificeerd langs 10 orthogonale rubrics. 
@@ -307,7 +158,7 @@ const ConceptPage = () => {
                           <span className="text-xs font-mono font-bold text-primary">{band.id}</span>
                           <span className="text-xs font-medium text-foreground">{band.label}</span>
                         </div>
-                        <p className="text-[10px] text-muted-foreground leading-relaxed">{band.desc}</p>
+                        <p className="text-[10px] text-muted-foreground leading-relaxed">{band.description}</p>
                       </div>
                     ))}
                   </div>
@@ -351,14 +202,16 @@ const ConceptPage = () => {
 
         {/* CTA */}
         <div className="text-center py-12 border-t border-border">
-          <p className="text-muted-foreground mb-6">
-            Klaar om het in actie te zien?
+          <h2 className="text-2xl font-bold mb-4">Klaar om te starten?</h2>
+          <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
+            Probeer EAI nu met je eigen leervraag en ervaar didactisch verantwoorde AI-begeleiding.
           </p>
-          <Link 
-            to="/student" 
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-lg font-bold uppercase tracking-widest text-sm hover:bg-primary/90 transition-colors"
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
           >
-            Start Student Studio
+            Start een sessie
+            <ArrowLeft className="w-4 h-4 rotate-180" />
           </Link>
         </div>
       </main>

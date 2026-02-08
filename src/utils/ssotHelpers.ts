@@ -1,0 +1,355 @@
+// ============= SSOT Helpers - Central transformation layer =============
+// Generates UI-ready data from authoritative SSOT v15.0.0 JSON
+// All components should import from here instead of hardcoding data
+
+import { 
+  SSOT_DATA, 
+  getLogicGates, 
+  getRubric, 
+  getRubricByShortKey,
+  getShortKey,
+  getCommands,
+  getSRLStates,
+  type Rubric,
+  type RubricBand,
+  type LogicGate
+} from '@/data/ssot';
+
+// ============= TYPE DEFINITIONS =============
+
+export interface DimensionForUI {
+  code: string;           // 'K', 'P', 'TD', etc.
+  name: string;           // 'Kennis & Automatisering'
+  goal: string;           // From rubric.goal or band didactic_principle
+  bands: BandForUI[];
+}
+
+export interface BandForUI {
+  id: string;             // 'K1', 'K2', etc.
+  label: string;          // 'Feitenkennis'
+  description: string;    // Full description
+  fix?: string;           // Fix command
+  fix_ref?: string;       // Fix reference
+  principle?: string;     // Didactic principle
+}
+
+export interface LogicGateForUI {
+  trigger: string;        // 'K1'
+  condition: string;      // 'Feitenkennis' - from band label
+  enforcement: string;    // 'MAX_TD = TD2'
+  description: string;    // Full enforcement text
+  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM';
+}
+
+export interface KnowledgeLevelForUI {
+  id: string;             // 'K1'
+  label: string;          // 'Feitenkennis'
+  desc: string;           // Description
+  gate: string;           // 'MAX_TD = TD2'
+  gateDesc: string;       // Gate explanation
+  fix: string;            // '/flits'
+  color: string;          // Tailwind class
+  border: string;         // Border class
+  bg: string;             // Background class
+}
+
+export interface DimensionMeta {
+  text: string;
+  border: string;
+  bg: string;
+  goal: string;
+}
+
+export interface DimensionLabel {
+  label: string;
+  description: string;
+}
+
+// ============= COLOR SCHEME =============
+
+const DIMENSION_COLORS: Record<string, { text: string; border: string; bg: string }> = {
+  K:  { text: 'text-yellow-400',  border: 'border-yellow-500/30', bg: 'bg-yellow-900/10' },
+  P:  { text: 'text-cyan-400',    border: 'border-cyan-500/30',   bg: 'bg-cyan-900/10' },
+  TD: { text: 'text-orange-400',  border: 'border-orange-500/30', bg: 'bg-orange-900/10' },
+  C:  { text: 'text-blue-400',    border: 'border-blue-500/30',   bg: 'bg-blue-900/10' },
+  V:  { text: 'text-emerald-400', border: 'border-emerald-500/30',bg: 'bg-emerald-900/10' },
+  T:  { text: 'text-pink-400',    border: 'border-pink-500/30',   bg: 'bg-pink-900/10' },
+  E:  { text: 'text-purple-400',  border: 'border-purple-500/30', bg: 'bg-purple-900/10' },
+  L:  { text: 'text-teal-400',    border: 'border-teal-500/30',   bg: 'bg-teal-900/10' },
+  S:  { text: 'text-indigo-400',  border: 'border-indigo-500/30', bg: 'bg-indigo-900/10' },
+  B:  { text: 'text-rose-400',    border: 'border-rose-500/30',   bg: 'bg-rose-900/10' },
+};
+
+const DEFAULT_COLORS = { text: 'text-primary', border: 'border-border', bg: 'bg-secondary/30' };
+
+// ============= HELPER FUNCTIONS =============
+
+/**
+ * Get all dimensions with bands for UI display
+ * Used by ConceptPage and DidacticLegend
+ */
+export function getDimensionsForUI(): DimensionForUI[] {
+  const cycleOrder = SSOT_DATA.metadata.cycle.order;
+  const dimensions: DimensionForUI[] = [];
+  
+  for (const rubricId of cycleOrder) {
+    const rubric = getRubric(rubricId);
+    if (!rubric) continue;
+    
+    const shortKey = getShortKey(rubricId);
+    
+    dimensions.push({
+      code: shortKey,
+      name: rubric.name,
+      goal: rubric.goal || rubric.bands[0]?.didactic_principle || '',
+      bands: rubric.bands.map(band => ({
+        id: band.band_id,
+        label: band.label,
+        description: band.description,
+        fix: band.fix,
+        fix_ref: band.fix_ref,
+        principle: band.didactic_principle,
+      })),
+    });
+  }
+  
+  return dimensions;
+}
+
+/**
+ * Get logic gates formatted for UI display
+ * Used by ConceptPage, DidacticLegend
+ */
+export function getLogicGatesForUI(): LogicGateForUI[] {
+  const gates = getLogicGates();
+  
+  return gates.map(gate => {
+    // Get the label for the trigger band
+    const rubric = getRubricByShortKey(gate.trigger_band.replace(/\d+/, ''));
+    const band = rubric?.bands.find(b => b.band_id === gate.trigger_band);
+    
+    return {
+      trigger: gate.trigger_band,
+      condition: band?.label || gate.condition,
+      enforcement: gate.enforcement,
+      description: gate.condition,
+      priority: gate.priority,
+    };
+  });
+}
+
+/**
+ * Get K1-K3 knowledge levels with logic gates for UI
+ * Used by DidacticLegend KENNIS tab
+ */
+export function getKnowledgeLevelsForUI(): KnowledgeLevelForUI[] {
+  const kRubric = getRubric('K_KennisType');
+  const gates = getLogicGates();
+  
+  if (!kRubric) return [];
+  
+  // K1, K2, K3 only (skip K0)
+  return kRubric.bands.filter(band => band.band_id !== 'K0').map(band => {
+    const gate = gates.find(g => g.trigger_band === band.band_id);
+    const bandNum = parseInt(band.band_id.replace('K', ''));
+    
+    // Color mapping based on K level
+    const colors = bandNum === 1 ? DIMENSION_COLORS.K :
+                   bandNum === 2 ? DIMENSION_COLORS.P :
+                   DIMENSION_COLORS.E;
+    
+    return {
+      id: band.band_id,
+      label: band.label,
+      desc: band.description,
+      gate: gate?.enforcement || '',
+      gateDesc: gate?.condition || '',
+      fix: band.fix || band.fix_ref || '',
+      color: colors.text,
+      border: colors.border,
+      bg: colors.bg,
+    };
+  });
+}
+
+/**
+ * Get dimension metadata with colors and goals
+ * Used by DidacticLegend DIMENSIES tab
+ */
+export function getDimensionMeta(): Record<string, DimensionMeta> {
+  const meta: Record<string, DimensionMeta> = {};
+  
+  for (const rubricId of SSOT_DATA.metadata.cycle.order) {
+    const rubric = getRubric(rubricId);
+    const shortKey = getShortKey(rubricId);
+    const colors = DIMENSION_COLORS[shortKey] || DEFAULT_COLORS;
+    
+    meta[shortKey] = {
+      ...colors,
+      goal: rubric?.goal || rubric?.bands[0]?.didactic_principle || '',
+    };
+  }
+  
+  return meta;
+}
+
+/**
+ * Get dimension labels for Dashboard
+ * Returns short labels and descriptions
+ */
+export function getDimensionLabels(): Record<string, DimensionLabel> {
+  const labels: Record<string, DimensionLabel> = {};
+  
+  for (const rubricId of SSOT_DATA.metadata.cycle.order) {
+    const rubric = getRubric(rubricId);
+    const shortKey = getShortKey(rubricId);
+    
+    if (rubric) {
+      labels[shortKey] = {
+        label: rubric.name.split(' ')[0] || shortKey,
+        description: rubric.goal || rubric.bands[0]?.didactic_principle || '',
+      };
+    }
+  }
+  
+  return labels;
+}
+
+/**
+ * Get colors for a dimension
+ */
+export function getDimensionColors(shortKey: string): { text: string; border: string; bg: string } {
+  return DIMENSION_COLORS[shortKey] || DEFAULT_COLORS;
+}
+
+// ============= SYSTEM PROMPT GENERATION =============
+
+interface ProfileData {
+  name?: string | null;
+  subject?: string | null;
+  level?: string | null;
+  goal?: string | null;
+}
+
+/**
+ * Generate dynamic system prompt from SSOT data
+ * Used by chatService to send to edge function
+ */
+export function generateSystemPrompt(profile: ProfileData): string {
+  const sections: string[] = [];
+  
+  // Header section
+  sections.push(`Je bent EAI, een Educatieve AI-coach die werkt volgens het 10-Dimensionaal Didactisch Model (SSOT v${SSOT_DATA.version}).
+
+## KERNPRINCIPES
+1. **Nooit direct het antwoord geven** - Begeleid de leerling naar inzicht
+2. **Socratische methode** - Stel vragen die tot nadenken aanzetten
+3. **Scaffolding** - Pas ondersteuning aan op basis van het niveau van de leerling
+4. **Metacognitie stimuleren** - Help leerlingen reflecteren op hun leerproces`);
+
+  // 10D Rubric section - generate tables from SSOT
+  sections.push('\n## 10D RUBRIC DIMENSIES (SSOT v' + SSOT_DATA.version + ')\n');
+  
+  for (const rubricId of SSOT_DATA.metadata.cycle.order) {
+    const rubric = getRubric(rubricId);
+    if (!rubric) continue;
+    
+    const shortKey = getShortKey(rubricId);
+    sections.push(`### ${shortKey} - ${rubric.name}`);
+    sections.push('| Band | Label | Fix | Principe |');
+    sections.push('|------|-------|-----|----------|');
+    
+    for (const band of rubric.bands) {
+      const fix = band.fix || band.fix_ref || '';
+      const principle = band.didactic_principle || '';
+      sections.push(`| ${band.band_id} | ${band.label} | ${fix} | ${principle} |`);
+    }
+    sections.push('');
+  }
+
+  // Logic Gates section
+  const gates = getLogicGates();
+  if (gates.length > 0) {
+    sections.push('\n## LOGIC GATES (KRITIEK)\n');
+    for (const gate of gates) {
+      sections.push(`- **${gate.trigger_band}** (${gate.priority}): ${gate.enforcement}`);
+      sections.push(`  ${gate.condition}`);
+    }
+  }
+
+  // SRL Model section
+  const srlStates = getSRLStates();
+  if (srlStates.length > 0) {
+    sections.push('\n## SRL MODEL\n');
+    for (const state of srlStates) {
+      sections.push(`- **${state.id}**: ${state.goal}`);
+    }
+  }
+
+  // Commands reference
+  const commands = getCommands();
+  const cmdEntries = Object.entries(commands);
+  if (cmdEntries.length > 0) {
+    sections.push('\n## BESCHIKBARE COMMANDO\'S\n');
+    for (const [cmd, desc] of cmdEntries.slice(0, 15)) { // Top 15 commands
+      sections.push(`- \`${cmd}\`: ${desc}`);
+    }
+  }
+
+  // Response format
+  sections.push(`
+## RESPONSE FORMAT
+- Antwoord altijd in het Nederlands
+- Gebruik Markdown voor formatting
+- Wees beknopt maar helder
+- Stel 1-2 gerichte vragen per respons
+- Pas je modaliteit aan op de leerling`);
+
+  // Context section
+  sections.push(`
+## HUIDIGE CONTEXT
+Vak: ${profile.subject || 'Algemeen'}
+Niveau: ${profile.level || 'Onbekend'}
+Naam leerling: ${profile.name || 'Leerling'}
+Doel: ${profile.goal || 'Begrip verdiepen'}`);
+
+  return sections.join('\n');
+}
+
+// ============= VALIDATION HELPERS =============
+
+/**
+ * Validate SSOT data integrity
+ * Returns array of issues (empty if valid)
+ */
+export function validateSSOT(): string[] {
+  const issues: string[] = [];
+  
+  // Check rubric count matches cycle order
+  const cycleCount = SSOT_DATA.metadata.cycle.order.length;
+  if (cycleCount !== 10) {
+    issues.push(`Expected 10 dimensions in cycle order, found ${cycleCount}`);
+  }
+  
+  // Check each rubric has bands
+  for (const rubricId of SSOT_DATA.metadata.cycle.order) {
+    const rubric = getRubric(rubricId);
+    if (!rubric) {
+      issues.push(`Rubric not found: ${rubricId}`);
+      continue;
+    }
+    if (!rubric.bands || rubric.bands.length === 0) {
+      issues.push(`Rubric has no bands: ${rubricId}`);
+    }
+  }
+  
+  // Check logic gates reference existing bands
+  for (const gate of getLogicGates()) {
+    const rubric = getRubricByShortKey(gate.trigger_band.replace(/\d+/, ''));
+    if (!rubric) {
+      issues.push(`Logic gate references unknown dimension: ${gate.trigger_band}`);
+    }
+  }
+  
+  return issues;
+}

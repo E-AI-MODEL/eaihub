@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { SSOT_DATA } from '@/data/ssot';
+import { getDimensionMeta, getKnowledgeLevelsForUI, getLogicGatesForUI } from '@/utils/ssotHelpers';
 
 interface DidacticLegendProps {
   onClose: () => void;
@@ -11,81 +12,10 @@ const DidacticLegend: React.FC<DidacticLegendProps> = ({ onClose }) => {
   // Get short key from rubric ID (e.g., "K_KennisType" -> "K")
   const getShortKey = (rubricId: string) => rubricId.split('_')[0];
 
-  // EAI MODEL 8.0 aligned dimension metadata with accurate goals from whitepaper
-  const dimensionMeta: Record<string, { text: string; border: string; bg: string; goal: string }> = {
-    K: { text: 'text-yellow-400', border: 'border-yellow-500/30', bg: 'bg-yellow-900/10', goal: 'Kennisobject bepalen en passende didactiek afdwingen.' },
-    P: { text: 'text-cyan-400', border: 'border-cyan-500/30', bg: 'bg-cyan-900/10', goal: 'Fase van het leerproces bepalen voor passende interventie.' },
-    TD: { text: 'text-orange-400', border: 'border-orange-500/30', bg: 'bg-orange-900/10', goal: 'Wie doet het werk? Balanceert leerlingactiviteit versus AI-overname.' },
-    C: { text: 'text-blue-400', border: 'border-blue-500/30', bg: 'bg-blue-900/10', goal: 'Mate van gedeelde regie (AI-monoloog → leerling-geankerd).' },
-    V: { text: 'text-emerald-400', border: 'border-emerald-500/30', bg: 'bg-emerald-900/10', goal: 'Soort leerhandeling en vaardigheidsdiepte.' },
-    T: { text: 'text-pink-400', border: 'border-pink-500/30', bg: 'bg-pink-900/10', goal: 'Transparantie en kritisch partnerschap met AI.' },
-    E: { text: 'text-purple-400', border: 'border-purple-500/30', bg: 'bg-purple-900/10', goal: 'Van schijnzekerheid naar geverifieerde autoriteit.' },
-    L: { text: 'text-teal-400', border: 'border-teal-500/30', bg: 'bg-teal-900/10', goal: 'Leercontinuïteit en transfer over tijd en contexten.' },
-    S: { text: 'text-indigo-400', border: 'border-indigo-500/30', bg: 'bg-indigo-900/10', goal: 'Sociale laag: isolatie → katalysator voor samenwerking.' },
-    B: { text: 'text-rose-400', border: 'border-rose-500/30', bg: 'bg-rose-900/10', goal: 'Van blind naar systemisch corrigeren.' },
-  };
-
-  // EAI MODEL 8.0 — Exacte K-niveau definities uit whitepaper
-  const knowledgeLevels = [
-    {
-      id: 'K1',
-      label: 'Feitenkennis',
-      desc: 'Termen, definities, eigenschappen en losse feiten. Doel: snel en foutloos ophalen.',
-      gate: 'MAX_TD = TD2',
-      gateDesc: 'Alleen bevragen, corrigeren, herhalen. Geen conceptuele uitleg.',
-      fix: '/flits',
-      color: 'text-yellow-400',
-      border: 'border-yellow-500/30',
-      bg: 'bg-yellow-900/10'
-    },
-    {
-      id: 'K2',
-      label: 'Procedurele Kennis',
-      desc: 'Handelingen, stappen en beslismomenten. Doel: correct uitvoeren.',
-      gate: 'ALLOW_TD = TD4',
-      gateDesc: 'Modeling toegestaan: voordoen (hardop), samen oefenen, daarna nadoen.',
-      fix: '/modelen',
-      color: 'text-cyan-400',
-      border: 'border-cyan-500/30',
-      bg: 'bg-cyan-900/10'
-    },
-    {
-      id: 'K3',
-      label: 'Metacognitie',
-      desc: 'Plannen, monitoren en evalueren van aanpak. Doel: betere strategie-keuzes.',
-      gate: 'MAX_TD = TD2',
-      gateDesc: 'Reflectie en regulatie centraal. AI geeft geen oplossing of eindconclusie.',
-      fix: '/meta',
-      color: 'text-purple-400',
-      border: 'border-purple-500/30',
-      bg: 'bg-purple-900/10'
-    }
-  ];
-
-  // Logic gates from EAI MODEL 8.0
-  const logicGates = [
-    {
-      trigger: 'K1',
-      condition: 'Feitenkennis',
-      enforcement: 'MAX_TD = TD2',
-      desc: 'Doel: ophalen en automatiseren. Geen conceptuele uitleg; alleen bevragen, corrigeren, herhalen.',
-      priority: 'CRITICAL'
-    },
-    {
-      trigger: 'K2',
-      condition: 'Procedurele kennis',
-      enforcement: 'ALLOW_TD = TD4',
-      desc: 'Modeling toegestaan: voordoen (hardop), samen oefenen, daarna laten nadoen.',
-      priority: 'HIGH'
-    },
-    {
-      trigger: 'K3',
-      condition: 'Metacognitie',
-      enforcement: 'MAX_TD = TD2',
-      desc: 'Reflectie en regulatie centraal. AI geeft geen oplossing of eindconclusie.',
-      priority: 'CRITICAL'
-    }
-  ];
+  // Dynamic SSOT data (cached)
+  const dimensionMeta = useMemo(() => getDimensionMeta(), []);
+  const knowledgeLevels = useMemo(() => getKnowledgeLevelsForUI(), []);
+  const logicGates = useMemo(() => getLogicGatesForUI(), []);
 
   return (
     <div className="fixed inset-0 z-[80] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={onClose}>
@@ -94,7 +24,7 @@ const DidacticLegend: React.FC<DidacticLegendProps> = ({ onClose }) => {
         <div className="p-4 border-b border-border bg-muted/50">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="text-foreground font-bold text-sm tracking-wide uppercase">SSOT v15 Didactiek</h3>
+              <h3 className="text-foreground font-bold text-sm tracking-wide uppercase">SSOT v{SSOT_DATA.version} Didactiek</h3>
               <p className="text-[10px] text-muted-foreground">EAI MODEL 8.0 — Wetenschappelijk fundament</p>
             </div>
             <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -161,7 +91,7 @@ const DidacticLegend: React.FC<DidacticLegendProps> = ({ onClose }) => {
                   key={gate.trigger} 
                   className={`p-3 rounded-lg border animate-in slide-in-from-right-4 duration-300 ${
                     gate.priority === 'CRITICAL' 
-                      ? 'border-red-500/30 bg-red-900/10' 
+                      ? 'border-destructive/30 bg-destructive/10' 
                       : 'border-yellow-500/30 bg-yellow-900/10'
                   }`}
                   style={{ animationDelay: `${idx * 50}ms` }}
@@ -171,14 +101,14 @@ const DidacticLegend: React.FC<DidacticLegendProps> = ({ onClose }) => {
                     <span className="text-[10px] text-muted-foreground">{gate.condition}</span>
                     <span className={`ml-auto text-[8px] font-bold uppercase px-1.5 py-0.5 rounded ${
                       gate.priority === 'CRITICAL' 
-                        ? 'bg-red-500/20 text-red-400' 
+                        ? 'bg-destructive/20 text-destructive' 
                         : 'bg-yellow-500/20 text-yellow-400'
                     }`}>
                       {gate.priority}
                     </span>
                   </div>
                   <p className="text-[11px] font-mono text-primary mb-1">{gate.enforcement}</p>
-                  <p className="text-[10px] text-foreground/60">{gate.desc}</p>
+                  <p className="text-[10px] text-foreground/60">{gate.description}</p>
                 </div>
               ))}
               
