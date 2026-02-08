@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 
 interface DidacticLegendProps {
-  isOpen: boolean;
   onClose: () => void;
 }
 
-const DidacticLegend: React.FC<DidacticLegendProps> = ({ isOpen, onClose }) => {
+const DidacticLegend: React.FC<DidacticLegendProps> = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState<'MODI' | 'KENNIS'>('KENNIS');
-
-  if (!isOpen) return null;
 
   const t = {
     title: 'Didactisch Model',
