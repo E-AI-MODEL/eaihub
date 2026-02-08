@@ -8,18 +8,18 @@ interface DashboardProps {
   scaffolding?: ScaffoldingState;
 }
 
-// SSOT v15.0.0 synchronized dimension labels (cycle order: K, P, TD, C, V, T, E, L, S, B)
+// SSOT v15 / EAI MODEL 8.0 — Exacte dimensie-definities uit whitepaper
 const DIMENSION_LABELS: Record<string, { label: string; description: string }> = {
-  K: { label: 'Kennis', description: 'Type: feit (K1), procedure (K2), metacognitie (K3)' },
-  P: { label: 'Procesfase', description: 'Oriëntatie → voorkennis → instructie → toepassing → evaluatie' },
-  TD: { label: 'Taakdichtheid', description: 'Wie doet het denkwerk? TD1=leerling, TD5=AI' },
-  C: { label: 'Co-Regulatie', description: 'Regieverdeling leerling/AI' },
-  V: { label: 'Vaardigheid', description: 'Denkhandeling: verkennen → verbinden → toepassen → herzien → verankeren' },
-  T: { label: 'Tool', description: 'AI-transparantie: verborgen → kritisch partner' },
-  E: { label: 'Epistemisch', description: 'Betrouwbaarheid: speculatie → geverifieerd' },
-  L: { label: 'Continuïteit', description: 'Borging: gefragmenteerd → duurzaam' },
-  S: { label: 'Sociaal', description: 'Context: individueel → collectief' },
-  B: { label: 'Bias', description: 'Ethiek: blind → kritisch → emancipatoir' },
+  K: { label: 'Kennis', description: 'Kennisobject: feit (K1), procedure (K2), metacognitie (K3)' },
+  P: { label: 'Procesfase', description: 'Oriëntatie → voorkennis → instructie → toepassen → evaluatie' },
+  TD: { label: 'Taakdichtheid', description: 'Wie doet het werk? TD1=leerling, TD5=AI-dominant' },
+  C: { label: 'Co-Regulatie', description: 'AI-monoloog → gedeelde regie → leerling-geankerd' },
+  V: { label: 'Vaardigheid', description: 'Verkennen → verbinden → toepassen → herzien → verankeren' },
+  T: { label: 'Tool', description: 'Opaque → functioneel → transparant → synergetisch → kritisch partner' },
+  E: { label: 'Epistemisch', description: 'Schijnzekerheid → ongeverifieerd → bron-noodzaak → geverifieerd' },
+  L: { label: 'Continuïteit', description: 'Gefragmenteerd → taakgebonden → conceptueel → transfer → duurzaam' },
+  S: { label: 'Sociaal', description: 'Isolatie → tutor → brug → partner → katalysator' },
+  B: { label: 'Bias', description: 'Blind → impliciet → bewust → correctie → systemisch' },
 };
 
 const extractBandLevel = (bandId: string): number => {
