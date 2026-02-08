@@ -1,293 +1,411 @@
 
-# Grondige Audit: SSOT v15.0.0 Synchronisatie
+# Masterplan: Dynamische SSOT Integratie
 
-## Audit Resultaten
+## Executive Summary
 
-### STATUS: SSOT Data (ssot_v15.json)
-**Correct geimplementeerd**. De autoritatieve JSON bevat alle 10 rubrics met volledige metadata:
-
-| Rubric ID | Bands | fix | learner_obs | ai_obs | flag | mechanistic | nl_profile |
-|-----------|-------|-----|-------------|--------|------|-------------|------------|
-| K_KennisType | K0-K3 | Ja | Ja | Ja | - | Ja | - |
-| C_CoRegulatie | C0-C5 | Ja | Ja | Ja | Ja | Ja | Ja |
-| P_Procesfase | P0-P5 | Ja | Ja | Ja | Ja | Ja | Ja |
-| TD_Taakdichtheid | TD0-TD5 | Ja | Ja | Ja | Ja | Ja | Ja |
-| V_Vaardigheidspotentieel | V0-V5 | Ja | Ja | Ja | Ja | Ja | Ja |
-| T_TechnologischeIntegratieVisibility | T0-T5 | Ja | Ja | Ja | Ja | Ja | Ja |
-| E_EpistemischeBetrouwbaarheid | E0-E5 | Ja | Ja | Ja | Ja | Ja | Ja |
-| L_LeercontinuiteitTransfer | L0-L5 | Ja | Ja | Ja | Ja | Ja | Ja |
-| S_SocialeInteractie | S0-S5 | Ja | Ja | Ja | Ja | Ja | Ja |
-| B_BiasCorrectie | B0-B5 | Ja | Ja | Ja | Ja | Ja | Ja |
+Dit plan transformeert de EAI-applicatie van een systeem met **hardcoded didactische data** naar een volledig **SSOT-driven architectuur**. Alle componenten (ConceptPage, DidacticLegend, Dashboard, Edge Function) zullen rechtstreeks uit `ssot_v15.json` lezen, waardoor updates automatisch doorwerken zonder handmatige synchronisatie.
 
 ---
 
-## DISCREPANTIES GEVONDEN
+## Huidige Situatie: Gap Analysis
 
-### 1. ConceptPage.tsx - Onjuiste Dimensie Namen
+### Wat WEL dynamisch is (goed)
+| Component | Data Bron | Status |
+|-----------|-----------|--------|
+| `chatService.ts` | `getLearnerObsPatterns()`, `getLogicGatesForBand()` | Dynamisch |
+| `Dashboard.tsx` | `SSOT_DATA.metadata.cycle.order` voor dimensie-volgorde | Gedeeltelijk |
+| `AdminPanel.tsx` | Volledige SSOT Browser met live data | Dynamisch |
 
-**Locatie:** `src/pages/ConceptPage.tsx` (regel 81-91)
+### Wat HARDCODED is (probleem)
+| Component | Hardcoded Data | Regels |
+|-----------|----------------|--------|
+| **ConceptPage.tsx** | `dimensions[]` array met alle 10 dimensies + bands | ~130 regels |
+| **ConceptPage.tsx** | `logicGates[]` array | ~25 regels |
+| **DidacticLegend.tsx** | `knowledgeLevels[]` (K1-K3 definities) | ~35 regels |
+| **DidacticLegend.tsx** | `logicGates[]` lokale kopie | ~25 regels |
+| **DidacticLegend.tsx** | `dimensionMeta{}` (goals hardcoded) | ~12 regels |
+| **Dashboard.tsx** | `DIMENSION_LABELS{}` met descriptions | ~12 regels |
+| **eai-chat Edge Function** | Volledig statische system prompt | ~130 regels |
 
-**Probleem:** De UI toont legacy Engels/afwijkende namen die niet overeenkomen met SSOT v15:
-
-| Huidige UI | SSOT v15.0.0 Correcte Naam |
-|------------|---------------------------|
-| "Cognitive Load" | "Co-regulatie" (C_CoRegulatie) |
-| "Precision" | "Procesfase" (P_Procesfase) |
-| "Task Difficulty" | "Taakdichtheid" (TD_Taakdichtheid) |
-| "Verification" | "Vaardigheidspotentieel" (V) |
-| "Engagement" | "Epistemische Betrouwbaarheid" (E) |
-| "Time" | "Technologische Integratie Visibility" (T) |
-| "Scaffolding" | "Sociale Interactie" (S) |
-| "Learning Modality" | "Leercontinuiteit & Transfer" (L) |
-| "Behavior" | "Bias & Inclusie" (B) |
+**Totaal risico:** ~370 regels die kunnen divergeren van SSOT v15.0.0
 
 ---
 
-### 2. Dashboard.tsx - Onjuiste Dimensie Labels
+## Fase 1: Centrale SSOT Utility Layer
 
-**Locatie:** `src/components/Dashboard.tsx` (regel 11-22)
+### 1.1 Nieuwe utility: `src/utils/ssotHelpers.ts`
 
-**Probleem:** `DIMENSION_LABELS` gebruikt legacy Engelse namen:
+Creëer een centrale utility die alle UI-ready data genereert uit de SSOT JSON:
 
-```typescript
-// Huidige (incorrect):
-const DIMENSION_LABELS = {
-  K: { label: 'Knowledge', description: 'Kennisniveau (K1-K3)' },
-  C: { label: 'Cognitive', description: 'Cognitieve belasting' },
-  ...
+```text
+ssotHelpers.ts bevat:
+
+1. getDimensionsForUI()
+   - Retourneert array van dimensies met code, name, goal, bands
+   - Haalt uit: SSOT_DATA.rubrics + cycle.order
+
+2. getLogicGatesForUI()
+   - Retourneert logic gates met trigger, condition, enforcement, priority
+   - Haalt uit: SSOT_DATA.interaction_protocol.logic_gates
+
+3. getKnowledgeLevelsForUI()
+   - Retourneert K1-K3 met label, description, fix, gate, color
+   - Haalt uit: K_KennisType rubric + logic_gates
+
+4. getDimensionMeta()
+   - Retourneert styling metadata per dimensie (colors, borders)
+   - Combineert rubric data met consistente kleurenschema
+
+5. getDimensionLabels()
+   - Retourneert korte labels en descriptions voor Dashboard
+   - Haalt uit: rubric.name + rubric.goal
+
+6. generateSystemPrompt(profile)
+   - Genereert dynamische system prompt voor edge function
+   - Haalt uit: alle rubrics, commands, logic_gates, srl_model
+```
+
+### 1.2 Architectuur Diagram
+
+```text
++-------------------+
+|  ssot_v15.json    |  <-- Single Source of Truth
++-------------------+
+         |
+         v
++-------------------+
+|   ssotHelpers.ts  |  <-- Centrale transformatie-laag
++-------------------+
+    |    |    |    |
+    v    v    v    v
++------+ +------+ +------+ +------+
+|Concept| |Legend| |Dash  | |Edge  |
+|Page   | |      | |board | |Func  |
++------+ +------+ +------+ +------+
+```
+
+---
+
+## Fase 2: Component Migratie
+
+### 2.1 ConceptPage.tsx Refactor
+
+**Huidige staat:** 
+- Regels 6-135: hardcoded `dimensions[]` array
+- Regels 137-159: hardcoded `logicGates[]` array
+
+**Nieuwe implementatie:**
+```text
+// Verwijder alle hardcoded arrays
+// Importeer helpers
+import { getDimensionsForUI, getLogicGatesForUI } from '@/utils/ssotHelpers';
+
+// In component:
+const dimensions = getDimensionsForUI();
+const logicGates = getLogicGatesForUI();
+```
+
+**Impact:**
+- Dimensie descriptions komen nu uit `rubric.bands[0].description` of dedicated SSOT goal
+- Band labels komen uit `band.label`
+- Logic gate enforcements zijn volledig uit SSOT
+
+### 2.2 DidacticLegend.tsx Refactor
+
+**Huidige staat:**
+- Regels 15-26: hardcoded `dimensionMeta{}` met goals
+- Regels 28-63: hardcoded `knowledgeLevels[]`
+- Regels 65-88: hardcoded `logicGates[]`
+
+**Nieuwe implementatie:**
+```text
+import { 
+  getDimensionMeta, 
+  getKnowledgeLevelsForUI, 
+  getLogicGatesForUI 
+} from '@/utils/ssotHelpers';
+
+// In component:
+const dimensionMeta = getDimensionMeta();
+const knowledgeLevels = getKnowledgeLevelsForUI();
+const logicGates = getLogicGatesForUI();
+```
+
+**Extra verbetering:**
+- Goals komen uit `rubric.goal` veld in SSOT
+- K-niveau fixes komen uit `band.fix_ref`
+- Gate descriptions komen uit `gate.enforcement`
+
+### 2.3 Dashboard.tsx Refactor
+
+**Huidige staat:**
+- Regels 12-23: hardcoded `DIMENSION_LABELS{}`
+
+**Nieuwe implementatie:**
+```text
+import { getDimensionLabels } from '@/utils/ssotHelpers';
+
+// In component:
+const DIMENSION_LABELS = getDimensionLabels();
+```
+
+---
+
+## Fase 3: Edge Function Dynamische Prompt
+
+### 3.1 Server-side SSOT Loading
+
+De edge function heeft momenteel een 130-regel statische prompt. Dit moet dynamisch worden gegenereerd.
+
+**Optie A: Client-side prompt generation (aanbevolen)**
+- Frontend genereert volledige prompt
+- Stuurt mee in request body
+- Edge function gebruikt deze direct
+
+**Optie B: Bundled SSOT in Edge Function**
+- SSOT JSON wordt meegecompileerd in edge function
+- Edge function genereert prompt runtime
+
+**Gekozen: Optie A** (eenvoudiger, geen dubbele SSOT)
+
+### 3.2 Nieuwe Edge Function Structuur
+
+```text
+eai-chat/index.ts wijzigingen:
+
+1. Request body krijgt nieuw veld:
+   systemPrompt?: string  // Optioneel, als niet meegegeven: fallback
+
+2. Frontend genereert prompt via:
+   import { generateSystemPrompt } from '@/utils/ssotHelpers';
+   const systemPrompt = generateSystemPrompt(profile);
+
+3. chatService.ts stuurt prompt mee:
+   body: JSON.stringify({
+     ...bestaande velden,
+     systemPrompt: generateSystemPrompt(profile)
+   })
+```
+
+### 3.3 Dynamische Prompt Generator
+
+```text
+generateSystemPrompt(profile) genereert:
+
+1. Header sectie (kernprincipes - statisch)
+2. 10D Rubric tabellen (uit SSOT_DATA.rubrics):
+   - Loop door cycle.order
+   - Voor elke rubric: genereer markdown tabel
+   - Kolommen: Band | Label | Fix | Principe
+3. Logic Gates sectie (uit interaction_protocol.logic_gates)
+4. SRL Model (uit srl_model.states)
+5. Commands referentie (uit command_library.commands)
+6. Context sectie (profile data)
+```
+
+---
+
+## Fase 4: E-Dimensie Synchronisatie
+
+### 4.1 Huidige Discrepantie
+
+**SSOT v15.0.0 definities (correct):**
+| Band | Label |
+|------|-------|
+| E0 | Schijnzekerheid |
+| E1 | Ongeverifieerd |
+| E2 | Bron-Noodzaak |
+| E3 | Geverifieerd |
+| E4 | Kritisch |
+| E5 | Autoriteit |
+
+**Edge function prompt (verouderd):**
+| Band | Label |
+|------|-------|
+| E0 | Ongedefinieerd |
+| E1 | Speculatief |
+| E2 | Subjectief |
+| E3 | Interpretatief |
+| E4 | Empirisch |
+| E5 | Geverifieerd |
+
+### 4.2 Automatische Fix
+
+Door de prompt dynamisch te genereren uit SSOT vervalt dit probleem automatisch.
+
+---
+
+## Fase 5: SSOT Helper Functies Specificatie
+
+### 5.1 Type Definities
+
+```text
+interface DimensionForUI {
+  code: string;           // 'K', 'P', 'TD', etc.
+  name: string;           // 'Kennis & Automatisering'
+  goal: string;           // Uit rubric.goal of bands[0].didactic_principle
+  bands: BandForUI[];
 }
 
-// Zou moeten zijn (correct per SSOT):
-const DIMENSION_LABELS = {
-  K: { label: 'Kennis', description: 'Kennis & Automatisering (K0-K3)' },
-  C: { label: 'Co-Regulatie', description: 'Regieverdeling leerling/AI' },
-  P: { label: 'Procesfase', description: 'Leerfase context' },
-  TD: { label: 'Taakdichtheid', description: 'Verdeling denkhandelingen' },
-  V: { label: 'Vaardigheid', description: 'Cognitieve beweging' },
-  E: { label: 'Epistemisch', description: 'Betrouwbaarheid van claims' },
-  T: { label: 'Tool', description: 'Technologische integratie' },
-  S: { label: 'Sociaal', description: 'Sociale interactie context' },
-  L: { label: 'Leer', description: 'Continuiteit & Transfer' },
-  B: { label: 'Bias', description: 'Bias & Inclusie correctie' },
+interface BandForUI {
+  id: string;             // 'K1', 'K2', etc.
+  label: string;          // 'Feitenkennis'
+  description: string;    // Volledige beschrijving
+  fix?: string;           // Fix command
+  fix_ref?: string;       // Fix reference
+  principle?: string;     // Didactisch principe
+}
+
+interface LogicGateForUI {
+  trigger: string;        // 'K1'
+  condition: string;      // 'Feitenkennis'
+  enforcement: string;    // 'MAX_TD = TD2'
+  description: string;    // Volledige enforcement tekst
+  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM';
+}
+
+interface KnowledgeLevelForUI {
+  id: string;             // 'K1'
+  label: string;          // 'Feitenkennis'
+  desc: string;           // Beschrijving
+  gate: string;           // 'MAX_TD = TD2'
+  gateDesc: string;       // Gate uitleg
+  fix: string;            // '/flits'
+  color: string;          // Tailwind class
+  border: string;         // Border class
+  bg: string;             // Background class
 }
 ```
 
----
+### 5.2 Kleurenschema Mapping
 
-### 3. Dashboard.tsx - Band Parsing Probleem
-
-**Locatie:** `src/components/Dashboard.tsx` (regel 109)
-
-**Probleem:** De cycle order uit SSOT bevat volledige rubric IDs (bijv. `K_KennisType`), maar de code verwacht korte keys (bijv. `K`):
-
-```typescript
-// Huidige code:
-const dimensions = SSOT_DATA.metadata.cycle.order; 
-// Geeft: ["K_KennisType", "P_Procesfase", ...]
-
-// Maar currentBands verwacht:
-bands['K'] = level; // Korte key
-```
-
-Dit leidt tot mismatch in de visualisatie.
-
----
-
-### 4. DidacticLegend.tsx - Incomplete 10D Model
-
-**Locatie:** `src/components/DidacticLegend.tsx`
-
-**Probleem:** Toont alleen K1-K3 en 4 "Modi", maar niet de volledige 10D matrix met alle dimensies en hun bands. Geen koppeling met SSOT data.
-
----
-
-### 5. Knowledge Levels Sectie - Onjuiste Beschrijvingen
-
-**Locatie:** `src/pages/ConceptPage.tsx` (regel 113-131)
-
-**Probleem:** K3 wordt beschreven als "Diep begrip" met "minimale scaffolding", maar SSOT v15 definieert K3 als:
-- **Label:** "Metacognitie"
-- **Description:** "plannen, monitoren en evalueren van aanpak"
-- **Didactic Principle:** "Zelfregulatie"
-- **Logic Gate:** MAX TD2 - AI geeft geen oplossing
-
----
-
-### 6. RUBRIC_ID_MAP - Semantische Fouten
-
-**Locatie:** `src/data/ssot.ts` (regel 334-345)
-
-**Probleem:** Legacy mapping bevat semantisch incorrecte koppelingen:
-
-```typescript
-// Onjuist:
-'verification': 'V_Vaardigheidspotentieel',  // V = Vaardigheid, niet Verificatie
-'time': 'T_TechnologischeIntegratieVisibility', // T = Tool Awareness, niet Time
-'scaffolding': 'S_SocialeInteractie', // S = Sociaal, niet Scaffolding
-```
-
----
-
-### 7. chatService.ts - Ongebruikte Dimensies
-
-**Locatie:** `src/services/chatService.ts`
-
-**Probleem:** Detectie-functies bestaan alleen voor:
-- K (detectKnowledgeType)
-- P (detectProcessPhase)
-- C (detectCoRegulation)
-- TD (detectTaskDensity)
-- V (detectSkillPotential)
-- E (detectEpistemicStatus)
-
-**Ontbreekt:** T, S, L, B dimensies worden niet gedetecteerd, ondanks dat de SSOT volledige patronen bevat.
-
----
-
-## CORRECTIE PLAN
-
-### Fase 1: UI Labels Synchroniseren
-
-**ConceptPage.tsx** - Vervang de 10 dimensies met SSOT-correcte Nederlandse namen en beschrijvingen:
-
-```typescript
-const DIMENSIONS = [
-  { code: 'K', name: 'Kennis & Automatisering', desc: 'Type kennis: feiten, procedures, metacognitie' },
-  { code: 'C', name: 'Co-regulatie', desc: 'Regieverdeling tussen leerling en AI' },
-  { code: 'P', name: 'Procesfase', desc: 'Oriëntatie → Voorkennis → Instructie → Toepassing → Evaluatie' },
-  { code: 'TD', name: 'Taakdichtheid', desc: 'Verdeling van denkhandelingen (agency)' },
-  { code: 'V', name: 'Vaardigheidspotentieel', desc: 'Cognitieve beweging: verkennen → creëren' },
-  { code: 'E', name: 'Epistemische Betrouwbaarheid', desc: 'Status van claims: speculatief → geverifieerd' },
-  { code: 'T', name: 'Tool Awareness', desc: 'Begrip van AI als instrument' },
-  { code: 'S', name: 'Sociale Interactie', desc: 'Context: solitair → collectief leren' },
-  { code: 'L', name: 'Leercontinuïteit', desc: 'Transfer: geïsoleerd → duurzaam' },
-  { code: 'B', name: 'Bias & Inclusie', desc: 'Kritisch bewustzijn en correctie' },
-];
-```
-
----
-
-### Fase 2: Dashboard Labels
-
-**Dashboard.tsx** - Update `DIMENSION_LABELS` met SSOT-gekoppelde data:
-
-```typescript
-// Dynamisch uit SSOT halen:
-const getDimensionLabels = () => {
-  const labels: Record<string, { label: string; description: string }> = {};
-  SSOT_DATA.rubrics.forEach(rubric => {
-    const shortKey = rubric.rubric_id.split('_')[0]; // "K_KennisType" -> "K"
-    labels[shortKey] = {
-      label: rubric.name,
-      description: rubric.goal || rubric.dimension || ''
-    };
-  });
-  return labels;
+```text
+const DIMENSION_COLORS: Record<string, { text, border, bg }> = {
+  K:  { text: 'text-yellow-400',  border: 'border-yellow-500/30', bg: 'bg-yellow-900/10' },
+  P:  { text: 'text-cyan-400',    border: 'border-cyan-500/30',   bg: 'bg-cyan-900/10' },
+  TD: { text: 'text-orange-400',  border: 'border-orange-500/30', bg: 'bg-orange-900/10' },
+  C:  { text: 'text-blue-400',    border: 'border-blue-500/30',   bg: 'bg-blue-900/10' },
+  V:  { text: 'text-emerald-400', border: 'border-emerald-500/30',bg: 'bg-emerald-900/10' },
+  T:  { text: 'text-pink-400',    border: 'border-pink-500/30',   bg: 'bg-pink-900/10' },
+  E:  { text: 'text-purple-400',  border: 'border-purple-500/30', bg: 'bg-purple-900/10' },
+  L:  { text: 'text-teal-400',    border: 'border-teal-500/30',   bg: 'bg-teal-900/10' },
+  S:  { text: 'text-indigo-400',  border: 'border-indigo-500/30', bg: 'bg-indigo-900/10' },
+  B:  { text: 'text-rose-400',    border: 'border-rose-500/30',   bg: 'bg-rose-900/10' },
 };
 ```
 
 ---
 
-### Fase 3: Cycle Order Fix
+## Fase 6: Implementatie Volgorde
 
-**Dashboard.tsx** - Fix de dimension key extraction:
+### Stap 1: Creëer ssotHelpers.ts
+- Nieuwe file in `src/utils/`
+- Implementeer alle helper functies
+- Unit tests voor elke functie
 
-```typescript
-// Huidige:
-const dimensions = SSOT_DATA.metadata.cycle.order;
+### Stap 2: Migreer Dashboard.tsx
+- Kleinste impact, goede test-case
+- Vervang `DIMENSION_LABELS` door `getDimensionLabels()`
 
-// Fix:
-const dimensions = SSOT_DATA.metadata.cycle.order.map(id => id.split('_')[0]);
-// Resultaat: ["K", "P", "TD", "C", "V", "T", "E", "L", "S", "B"]
+### Stap 3: Migreer DidacticLegend.tsx
+- Vervang alle drie hardcoded arrays
+- Test alle tabs (KENNIS, GATES, DIMENSIES)
+
+### Stap 4: Migreer ConceptPage.tsx
+- Grootste file, meeste impact
+- Vervang dimensions en logicGates arrays
+- Verifieer alle UI elementen
+
+### Stap 5: Update chatService.ts
+- Voeg `generateSystemPrompt()` aanroep toe
+- Stuur dynamische prompt mee naar edge function
+
+### Stap 6: Update eai-chat Edge Function
+- Accept optionele `systemPrompt` in request
+- Fallback naar basis prompt indien niet meegegeven
+- Deploy en test
+
+---
+
+## Fase 7: Validatie & Testing
+
+### 7.1 Automated Checks
+
+```text
+Voeg toe aan AdminPanel.tsx SSOT Browser:
+- Validatie: Alle rubrics hebben bands
+- Validatie: Alle bands hebben fix_ref
+- Validatie: Logic gates refereren bestaande bands
+- Validatie: Cycle order matcht rubric count
 ```
 
----
+### 7.2 End-to-End Tests
 
-### Fase 4: DidacticLegend Uitbreiden
-
-**DidacticLegend.tsx** - Voeg een 3e tab "Dimensies" toe die dynamisch alle 10 rubrics uit SSOT laadt met hun bands en beschrijvingen.
-
----
-
-### Fase 5: Knowledge Levels Corrigeren
-
-**ConceptPage.tsx** - Update de K-level beschrijvingen volgens SSOT:
-
-```typescript
-const KNOWLEDGE_LEVELS = [
-  {
-    code: 'K1',
-    label: 'Feitenkennis',
-    description: 'Termen, definities, eigenschappen. Doel: snel en foutloos ophalen (drillen).',
-    logic: 'MAX TD2 - Alleen bevragen, corrigeren, herhalen.'
-  },
-  {
-    code: 'K2',
-    label: 'Procedurele Kennis',
-    description: 'Handelingen, stappen, beslismomenten. Doel: correct uitvoeren.',
-    logic: 'ALLOW TD4 - Modeling toegestaan: voordoen → samen → nadoen.'
-  },
-  {
-    code: 'K3',
-    label: 'Metacognitie',
-    description: 'Plannen, monitoren, evalueren van aanpak. Doel: betere strategie-keuzes.',
-    logic: 'MAX TD2 - Reflectie centraal. AI geeft geen eindconclusie.'
-  }
-];
-```
+| Test | Verificatie |
+|------|-------------|
+| ConceptPage laadt | Alle 10 dimensies zichtbaar |
+| DidacticLegend K-tab | K1-K3 met correcte gates |
+| DidacticLegend Gates-tab | 3 logic gates uit SSOT |
+| Dashboard 10D bars | Alle dimensies met labels |
+| Chat K1 vraag | TD beperkt tot TD2 |
+| Chat E-dimensie | Correcte labels (Schijnzekerheid, etc.) |
 
 ---
 
-### Fase 6: Missing Detection Functions
+## Fase 8: Rollback Plan
 
-**chatService.ts** - Voeg detectie toe voor T, S, L, B dimensies:
-
-```typescript
-const tPatterns = getLearnerObsPatterns('T_TechnologischeIntegratieVisibility');
-const sPatterns = getLearnerObsPatterns('S_SocialeInteractie');
-const lPatterns = getLearnerObsPatterns('L_LeercontinuiteitTransfer');
-const bPatterns = getLearnerObsPatterns('B_BiasCorrectie');
-
-function detectToolAwareness(input: string, output: string): string { ... }
-function detectSocialInteraction(input: string): string { ... }
-function detectLearningContinuity(input: string, output: string): string { ... }
-function detectBiasCorrection(input: string, output: string): string { ... }
-```
+Indien problemen:
+1. Alle wijzigingen zijn in aparte commits
+2. ssotHelpers.ts is volledig nieuw (geen bestaande code gewijzigd)
+3. Components kunnen terugvallen op originele hardcoded arrays door import te switchen
 
 ---
 
-### Fase 7: Legacy Map Cleanup
+## Technische Details
 
-**ssot.ts** - Verwijder of corrigeer de misleidende `RUBRIC_ID_MAP`:
-
-```typescript
-// Optie A: Verwijderen (voorkeur)
-// export const RUBRIC_ID_MAP = ...
-
-// Optie B: Corrigeren met waarschuwing
-/** @deprecated Gebruik getRubric(rubricId) direct met SSOT IDs */
-export const RUBRIC_ID_MAP = { ... };
-```
-
----
-
-## Bestanden die worden aangepast
+### Bestanden die GEWIJZIGD worden:
 
 | Bestand | Wijziging |
 |---------|-----------|
-| `src/pages/ConceptPage.tsx` | Dimensie namen en K-level beschrijvingen |
-| `src/components/Dashboard.tsx` | DIMENSION_LABELS en cycle order parsing |
-| `src/components/DidacticLegend.tsx` | Uitbreiden met 10D matrix tab |
-| `src/services/chatService.ts` | Detectie voor T, S, L, B dimensies |
-| `src/data/ssot.ts` | Legacy map cleanup + utility functie |
+| `src/utils/ssotHelpers.ts` | NIEUW - centrale helper functies |
+| `src/pages/ConceptPage.tsx` | Verwijder ~130 regels hardcoded data, import helpers |
+| `src/components/DidacticLegend.tsx` | Verwijder ~70 regels hardcoded data, import helpers |
+| `src/components/Dashboard.tsx` | Verwijder `DIMENSION_LABELS`, import helper |
+| `src/services/chatService.ts` | Voeg prompt generation toe aan request |
+| `supabase/functions/eai-chat/index.ts` | Accept dynamische prompt |
+
+### Bestanden die ONGEWIJZIGD blijven:
+
+| Bestand | Reden |
+|---------|-------|
+| `src/data/ssot_v15.json` | Authoritative source, geen wijzigingen |
+| `src/data/ssot.ts` | Bestaande typed wrapper, wordt hergebruikt |
+| `src/pages/AdminPanel.tsx` | Al volledig dynamisch |
 
 ---
 
-## Impact
+## Verwachte Resultaten
 
-Na implementatie:
-1. Alle UI labels komen overeen met SSOT v15.0.0
-2. Dashboard toont correcte dimensie namen en visualisatie
-3. DidacticLegend biedt volledige 10D uitleg
-4. Alle 10 dimensies worden gedetecteerd in chatService
-5. Geen semantische verwarring meer tussen legacy en nieuwe terminologie
+### Voor implementatie:
+- 6 plaatsen met potentieel verouderde data
+- 370+ regels duplicatie
+- E-dimensie labels incorrect in edge function
+- Handmatige synchronisatie nodig bij SSOT updates
+
+### Na implementatie:
+- 1 source of truth: `ssot_v15.json`
+- 0 duplicatie
+- Automatische E-dimensie synchronisatie
+- SSOT updates werken automatisch door in hele applicatie
+
+---
+
+## Risico's en Mitigatie
+
+| Risico | Impact | Mitigatie |
+|--------|--------|-----------|
+| Breaking change in SSOT structuur | Hoog | Type-safe helpers met fallbacks |
+| Performance door runtime parsing | Laag | Cache parsed data met useMemo |
+| Edge function deployment faalt | Medium | Fallback prompt behouden |
+| UI regression | Medium | Uitgebreide visuele tests |
+
