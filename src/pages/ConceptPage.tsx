@@ -87,7 +87,7 @@ const ConceptPage = () => {
               { code: 'E', name: 'Engagement', desc: 'Betrokkenheid en motivatie' },
               { code: 'T', name: 'Time', desc: 'Tijdsfactoren en leertempo' },
               { code: 'S', name: 'Scaffolding', desc: 'Niveau van ondersteuning' },
-              { code: 'L', name: 'Learning Style', desc: 'Persoonlijke leerstijl' },
+              { code: 'L', name: 'Learning Modality', desc: 'Content type (narratief/technisch)' },
               { code: 'B', name: 'Behavior', desc: 'Gedragspatronen en interactie' },
             ].map((dim, i) => (
               <div 

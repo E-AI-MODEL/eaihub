@@ -23,7 +23,7 @@ const EAI_SYSTEM_PROMPT = `Je bent EAI, een Educatieve AI-coach die werkt volgen
 - **E (Epistemic)**: E1=Onbekend, E2=Mening, E3=Interpretatie, E4=Consensus, E5=Feit
 - **T (Time)**: T1=Onmiddellijk tot T5=Reflectief
 - **S (Scaffolding)**: S1=Vol tot S5=Geen (fading)
-- **L (Learning)**: L1=Visueel, L2=Auditief, L3=Lezen/Schrijven, L4=Kinesthetisch
+- **L (Learning Modality)**: L1=Narratief, L2=Expositief, L3=Gestructureerd, L4=Technisch
 - **B (Behavior)**: B1=Passief, B2=Reactief, B3=Actief, B4=Proactief
 
 ## LOGIC GATES (KRITIEK)

@@ -142,13 +142,13 @@ export const SSOT_DATA = {
       ]
     },
     {
-      rubric_id: "learning_style",
-      name: "Learning Style",
+      rubric_id: "learning_modality",
+      name: "Learning Modality",
       bands: [
-        { band_id: "L1", label: "Visueel", description: "Voorkeur voor visuele info" },
-        { band_id: "L2", label: "Auditief", description: "Voorkeur voor uitleg" },
-        { band_id: "L3", label: "Lezen/Schrijven", description: "Voorkeur voor tekst" },
-        { band_id: "L4", label: "Kinesthetisch", description: "Voorkeur voor doen" }
+        { band_id: "L1", label: "Narratief", description: "Voorkeur voor doorlopende tekst en verhalen" },
+        { band_id: "L2", label: "Expositief", description: "Standaard uitleg en instructie" },
+        { band_id: "L3", label: "Gestructureerd", description: "Lijsten, stappen, opsommingen" },
+        { band_id: "L4", label: "Technisch", description: "Code, formules, formele notatie" }
       ]
     },
     {

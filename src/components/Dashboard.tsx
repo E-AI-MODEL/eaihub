@@ -17,7 +17,7 @@ const DIMENSION_LABELS: Record<string, { label: string; description: string }> =
   E: { label: 'Epistemic', description: 'Epistemische status' },
   T: { label: 'Time', description: 'Tijdsfactor' },
   S: { label: 'Scaffolding', description: 'Ondersteuningsniveau' },
-  L: { label: 'Learning', description: 'Leerstijl' },
+  L: { label: 'Modality', description: 'Leermodaliteit (content type)' },
   B: { label: 'Behavior', description: 'Gedragspatroon' },
 };
 
