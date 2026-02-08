@@ -329,25 +329,23 @@ export function getBandsForRubric(rubricId: string): RubricBand[] {
 }
 
 /**
- * Map old-style band IDs to new rubric IDs
+ * Extract short dimension key from full rubric ID
+ * @example getShortKey("K_KennisType") => "K"
  */
-export const RUBRIC_ID_MAP: Record<string, string> = {
-  'knowledge': 'K_KennisType',
-  'precision': 'P_Procesfase',
-  'cognitive_load': 'C_CoRegulatie',
-  'task_density': 'TD_Taakdichtheid',
-  'verification': 'V_Vaardigheidspotentieel',
-  'epistemic': 'E_EpistemischeBetrouwbaarheid',
-  'time': 'T_TechnologischeIntegratieVisibility',
-  'scaffolding': 'S_SocialeInteractie',
-  'learning_modality': 'L_LeercontinuiteitTransfer',
-  'behavior': 'B_BiasCorrectie',
-};
+export function getShortKey(rubricId: string): string {
+  return rubricId.split('_')[0];
+}
 
 /**
- * Get rubric by old-style ID (for backwards compatibility)
+ * Get all short dimension keys from SSOT cycle order
  */
-export function getRubricByLegacyId(legacyId: string): Rubric | undefined {
-  const newId = RUBRIC_ID_MAP[legacyId];
-  return newId ? getRubric(newId) : undefined;
+export function getDimensionKeys(): string[] {
+  return SSOT_DATA.metadata.cycle.order.map(id => id.split('_')[0]);
+}
+
+/**
+ * Get rubric by short key (e.g., "K" -> K_KennisType rubric)
+ */
+export function getRubricByShortKey(shortKey: string): Rubric | undefined {
+  return SSOT_DATA.rubrics.find(r => r.rubric_id.startsWith(shortKey + '_'));
 }

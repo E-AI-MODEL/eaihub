@@ -23,12 +23,16 @@ interface ChatMessage {
 
 const sessionHistory: Map<string, ChatMessage[]> = new Map();
 
-// Cache learner observation patterns from SSOT v15
+// Cache learner observation patterns from SSOT v15 for all 10 dimensions
 const kPatterns = getLearnerObsPatterns('K_KennisType');
 const pPatterns = getLearnerObsPatterns('P_Procesfase');
 const cPatterns = getLearnerObsPatterns('C_CoRegulatie');
 const tdPatterns = getLearnerObsPatterns('TD_Taakdichtheid');
 const vPatterns = getLearnerObsPatterns('V_Vaardigheidspotentieel');
+const tPatterns = getLearnerObsPatterns('T_TechnologischeIntegratieVisibility');
+const sPatterns = getLearnerObsPatterns('S_SocialeInteractie');
+const lPatterns = getLearnerObsPatterns('L_LeercontinuiteitTransfer');
+const bPatterns = getLearnerObsPatterns('B_BiasCorrectie');
 
 export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
   const startTime = Date.now();
@@ -427,6 +431,95 @@ function detectEpistemicStatus(output: string): string {
 }
 
 /**
+ * Detect tool awareness using SSOT T_TechnologischeIntegratieVisibility patterns
+ * T0-T5: Ongedefinieerd -> Onzichtbaar -> Verborgen -> Zichtbaar -> Actief -> Meta
+ */
+function detectToolAwareness(input: string, output: string): string {
+  const lowerInput = input.toLowerCase();
+  const lowerOutput = output.toLowerCase();
+  
+  if (tPatterns.get('T5')?.test(lowerInput)) return 'T5'; // Meta-reflectie op AI
+  if (tPatterns.get('T4')?.test(lowerInput)) return 'T4'; // Actief AI-gebruik
+  if (tPatterns.get('T3')?.test(lowerInput)) return 'T3'; // Zichtbare tool
+  if (tPatterns.get('T2')?.test(lowerInput)) return 'T2'; // Verborgen tool
+  if (tPatterns.get('T1')?.test(lowerInput)) return 'T1'; // Onzichtbaar
+  
+  // Fallback based on explicit AI awareness
+  if (/jij als ai|ai-tutor|hoe werkt de ai|prompt/.test(lowerInput)) return 'T5';
+  if (/gebruik ai|met hulp van|tool|chatbot/.test(lowerInput)) return 'T4';
+  if (/hulp|assistent|systeem/.test(lowerInput)) return 'T3';
+  
+  return 'T2'; // Default: verborgen
+}
+
+/**
+ * Detect social interaction using SSOT S_SocialeInteractie patterns
+ * S0-S5: Ongedefinieerd -> Solitair -> Parallel -> Coöperatief -> Collaboratief -> Collectief
+ */
+function detectSocialInteraction(input: string): string {
+  const lowerInput = input.toLowerCase();
+  
+  if (sPatterns.get('S5')?.test(lowerInput)) return 'S5'; // Collectief leren
+  if (sPatterns.get('S4')?.test(lowerInput)) return 'S4'; // Collaboratief
+  if (sPatterns.get('S3')?.test(lowerInput)) return 'S3'; // Coöperatief
+  if (sPatterns.get('S2')?.test(lowerInput)) return 'S2'; // Parallel
+  if (sPatterns.get('S1')?.test(lowerInput)) return 'S1'; // Solitair
+  
+  // Fallback
+  if (/wij|samen|team|groep|klas/.test(lowerInput)) return 'S4';
+  if (/anderen|klasgenoot|peer/.test(lowerInput)) return 'S3';
+  if (/ik alleen|zelfstandig|individueel/.test(lowerInput)) return 'S1';
+  
+  return 'S1'; // Default: solitair (1-op-1 met AI)
+}
+
+/**
+ * Detect learning continuity using SSOT L_LeercontinuiteitTransfer patterns
+ * L0-L5: Ongedefinieerd -> Geïsoleerd -> Verbonden -> Contextueel -> Transferabel -> Duurzaam
+ */
+function detectLearningContinuity(input: string, output: string): string {
+  const lowerInput = input.toLowerCase();
+  const lowerOutput = output.toLowerCase();
+  
+  if (lPatterns.get('L5')?.test(lowerInput)) return 'L5'; // Duurzaam
+  if (lPatterns.get('L4')?.test(lowerInput)) return 'L4'; // Transferabel
+  if (lPatterns.get('L3')?.test(lowerInput)) return 'L3'; // Contextueel
+  if (lPatterns.get('L2')?.test(lowerInput)) return 'L2'; // Verbonden
+  if (lPatterns.get('L1')?.test(lowerInput)) return 'L1'; // Geïsoleerd
+  
+  // Fallback
+  if (/toekoms|blijvend|lange termijn|portfolio/.test(lowerInput)) return 'L5';
+  if (/andere context|transfer|toepas elders/.test(lowerInput)) return 'L4';
+  if (/verband met|link naar|relatie/.test(lowerInput)) return 'L3';
+  if (/vorige les|eerder|voortbouwend/.test(lowerInput)) return 'L2';
+  
+  return 'L1'; // Default: geïsoleerd
+}
+
+/**
+ * Detect bias correction using SSOT B_BiasCorrectie patterns
+ * B0-B5: Ongedefinieerd -> Onbewust -> Herkenning -> Analyse -> Correctie -> Meta
+ */
+function detectBiasCorrection(input: string, output: string): string {
+  const lowerInput = input.toLowerCase();
+  const lowerOutput = output.toLowerCase();
+  
+  if (bPatterns.get('B5')?.test(lowerInput)) return 'B5'; // Meta-bias awareness
+  if (bPatterns.get('B4')?.test(lowerInput)) return 'B4'; // Actieve correctie
+  if (bPatterns.get('B3')?.test(lowerInput)) return 'B3'; // Analyse
+  if (bPatterns.get('B2')?.test(lowerInput)) return 'B2'; // Herkenning
+  if (bPatterns.get('B1')?.test(lowerInput)) return 'B1'; // Onbewust
+  
+  // Fallback based on critical thinking patterns
+  if (/systeem.*bias|structurel|machts/.test(lowerInput)) return 'B5';
+  if (/corrigeer|pas aan|inclusiever/.test(lowerInput)) return 'B4';
+  if (/waarom.*perspectief|ontbreekt|eenzijdig/.test(lowerInput)) return 'B3';
+  if (/bias|vooroordeel|aanname/.test(lowerInput)) return 'B2';
+  
+  return 'B1'; // Default: onbewust
+}
+
+/**
  * Detect SRL state based on SSOT srl_model
  */
 function detectSRLState(input: string, output: string): 'PLAN' | 'MONITOR' | 'REFLECT' | 'ADJUST' {
@@ -497,15 +590,24 @@ function generateAnalysis(input: string, output: string, profile: LearnerProfile
     epistemicLevel >= 4 ? 'FEIT' : 
     epistemicLevel === 3 ? 'INTERPRETATIE' : 
     epistemicLevel === 2 ? 'SPECULATIE' : 'ONBEKEND';
+  // Detect remaining 4 dimensions (T, S, L, B)
+  const toolAwareness = detectToolAwareness(input, output);
+  const socialInteraction = detectSocialInteraction(input);
+  const learningContinuity = detectLearningContinuity(input, output);
+  const biasCorrection = detectBiasCorrection(input, output);
   
-  // Collect all detected bands
+  // Collect all 10 detected bands
   const allBands = [
     knowledgeType,
     processPhase, 
     coRegulation,
     taskDensity,
     skillPotential,
-    epistemicBand
+    epistemicBand,
+    toolAwareness,
+    socialInteraction,
+    learningContinuity,
+    biasCorrection
   ];
   
   // Get flags from SSOT
@@ -529,7 +631,8 @@ function generateAnalysis(input: string, output: string, profile: LearnerProfile
     process_phases: [processPhase],
     coregulation_bands: [knowledgeType, coRegulation, processPhase],
     task_densities: [taskDensity],
-    secondary_dimensions: [skillPotential, epistemicBand, `T${Math.min(5, Math.ceil(output.length / 200))}`],
+    // Include all secondary dimensions for full 10D coverage
+    secondary_dimensions: [skillPotential, epistemicBand, toolAwareness, socialInteraction, learningContinuity, biasCorrection],
     active_fix: activeFix,
     active_flags: activeFlags,
     reasoning: `SSOT v15: ${knowledgeType} (${getBand(knowledgeType)?.label || 'n/a'}), ${coRegulation} co-reg, ${taskDensity} density. ${enforcement ? `Gate: ${enforcement}` : ''}`,
