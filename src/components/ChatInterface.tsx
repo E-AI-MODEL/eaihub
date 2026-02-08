@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import MessageBubble from '@/components/MessageBubble';
 import DidacticLegend from '@/components/DidacticLegend';
-import type { Message, DidacticTheme, LearnerProfile, EAIAnalysis, ChatResponse } from '@/types';
+import type { Message, DidacticTheme, LearnerProfile, EAIAnalysis, MechanicalState } from '@/types';
 import { sendChat } from '@/services/chatService';
 import { getOrCreateUserId } from '@/services/identity';
 
 interface ChatInterfaceProps {
   profile: LearnerProfile;
-  onAnalysisUpdate?: (analysis: EAIAnalysis) => void;
+  onAnalysisUpdate?: (analysis: EAIAnalysis, mechanical?: MechanicalState) => void;
 }
 
 const THEMES: { id: DidacticTheme; label: string; icon: React.ReactNode; color: string }[] = [
@@ -119,7 +119,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
       setMessages(prev => [...prev, modelMessage]);
       
       if (response.analysis && onAnalysisUpdate) {
-        onAnalysisUpdate(response.analysis);
+        onAnalysisUpdate(response.analysis, response.mechanical);
       }
     } catch (error) {
       messageCounterRef.current += 1;
