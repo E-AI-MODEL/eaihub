@@ -10,7 +10,7 @@ interface MessageBubbleProps {
   message: Message;
 }
 
-const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(({ message }, ref) => {
+const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isUser = message.role === 'user';
 
   // Check if JSON repair happened
@@ -140,8 +140,6 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(({ me
     </p>
   </div>
   );
-});
-
-MessageBubble.displayName = 'MessageBubble';
+};
 
 export default MessageBubble;

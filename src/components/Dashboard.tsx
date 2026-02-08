@@ -16,7 +16,7 @@ interface DashboardProps {
   onEditProfile?: () => void;
 }
 
-export const Dashboard = React.forwardRef<HTMLDivElement, DashboardProps>(({ 
+export const Dashboard: React.FC<DashboardProps> = ({ 
   analysis, 
   mechanical, 
   isOpen, 
@@ -25,7 +25,7 @@ export const Dashboard = React.forwardRef<HTMLDivElement, DashboardProps>(({
   profile, 
   eaiState, 
   onEditProfile 
-}, ref) => {
+}) => {
   const currentCore = getEAICore();
 
   // Get phase data
@@ -291,8 +291,6 @@ export const Dashboard = React.forwardRef<HTMLDivElement, DashboardProps>(({
       </div>
     </>
   );
-});
-
-Dashboard.displayName = 'Dashboard';
+};
 
 export default Dashboard;
