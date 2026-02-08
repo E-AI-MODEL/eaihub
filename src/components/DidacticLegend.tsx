@@ -11,18 +11,18 @@ const DidacticLegend: React.FC<DidacticLegendProps> = ({ onClose }) => {
   // Get short key from rubric ID (e.g., "K_KennisType" -> "K")
   const getShortKey = (rubricId: string) => rubricId.split('_')[0];
 
-  // Color mapping for dimensions
-  const dimensionColors: Record<string, { text: string; border: string; bg: string }> = {
-    K: { text: 'text-yellow-400', border: 'border-yellow-500/30', bg: 'bg-yellow-900/10' },
-    C: { text: 'text-blue-400', border: 'border-blue-500/30', bg: 'bg-blue-900/10' },
-    P: { text: 'text-cyan-400', border: 'border-cyan-500/30', bg: 'bg-cyan-900/10' },
-    TD: { text: 'text-orange-400', border: 'border-orange-500/30', bg: 'bg-orange-900/10' },
-    V: { text: 'text-emerald-400', border: 'border-emerald-500/30', bg: 'bg-emerald-900/10' },
-    E: { text: 'text-purple-400', border: 'border-purple-500/30', bg: 'bg-purple-900/10' },
-    T: { text: 'text-pink-400', border: 'border-pink-500/30', bg: 'bg-pink-900/10' },
-    S: { text: 'text-indigo-400', border: 'border-indigo-500/30', bg: 'bg-indigo-900/10' },
-    L: { text: 'text-teal-400', border: 'border-teal-500/30', bg: 'bg-teal-900/10' },
-    B: { text: 'text-rose-400', border: 'border-rose-500/30', bg: 'bg-rose-900/10' },
+  // SSOT v15.0.0 aligned dimension metadata
+  const dimensionMeta: Record<string, { text: string; border: string; bg: string; desc: string }> = {
+    K: { text: 'text-yellow-400', border: 'border-yellow-500/30', bg: 'bg-yellow-900/10', desc: 'Feit, procedure of metacognitie? Bepaalt logic gate.' },
+    P: { text: 'text-cyan-400', border: 'border-cyan-500/30', bg: 'bg-cyan-900/10', desc: 'Oriëntatie → voorkennis → instructie → toepassing → evaluatie.' },
+    TD: { text: 'text-orange-400', border: 'border-orange-500/30', bg: 'bg-orange-900/10', desc: 'Wie doet het denkwerk? TD1=leerling, TD5=AI.' },
+    C: { text: 'text-blue-400', border: 'border-blue-500/30', bg: 'bg-blue-900/10', desc: 'Regieverdeling: AI-monoloog → gedeelde start → leerling-gestuurd.' },
+    V: { text: 'text-emerald-400', border: 'border-emerald-500/30', bg: 'bg-emerald-900/10', desc: 'Verkennen → verbinden → toepassen → herzien → creëren.' },
+    T: { text: 'text-pink-400', border: 'border-pink-500/30', bg: 'bg-pink-900/10', desc: 'AI-transparantie: verborgen → zichtbaar → kritisch partner.' },
+    E: { text: 'text-purple-400', border: 'border-purple-500/30', bg: 'bg-purple-900/10', desc: 'Speculatie → interpretatie → onderbouwd → geverifieerd.' },
+    L: { text: 'text-teal-400', border: 'border-teal-500/30', bg: 'bg-teal-900/10', desc: 'Borging: gefragmenteerd → gekoppeld → duurzaam.' },
+    S: { text: 'text-indigo-400', border: 'border-indigo-500/30', bg: 'bg-indigo-900/10', desc: 'Individueel → parallel → coöperatief → collectief.' },
+    B: { text: 'text-rose-400', border: 'border-rose-500/30', bg: 'bg-rose-900/10', desc: 'Bias: blind → impliciet → bewust → kritisch.' },
   };
 
   const t = {
@@ -164,31 +164,37 @@ const DidacticLegend: React.FC<DidacticLegendProps> = ({ onClose }) => {
           {activeTab === 'DIMENSIES' && (
             <div className="space-y-3">
               <p className="text-[10px] text-muted-foreground italic mb-2">
-                De 10D-matrix uit SSOT v15.0.0. Elke dimensie heeft 6 niveaus (0-5).
+                De 10D-matrix uit SSOT v15.0.0. Volgorde = diagnostische cyclus.
               </p>
-              {SSOT_DATA.rubrics.map((rubric, idx) => {
-                const shortKey = getShortKey(rubric.rubric_id);
-                const colors = dimensionColors[shortKey] || { text: 'text-primary', border: 'border-border', bg: 'bg-secondary/30' };
+              {SSOT_DATA.metadata.cycle.order.map((rubricId, idx) => {
+                const rubric = SSOT_DATA.rubrics.find(r => r.rubric_id === rubricId);
+                if (!rubric) return null;
+                
+                const shortKey = getShortKey(rubricId);
+                const meta = dimensionMeta[shortKey] || { text: 'text-primary', border: 'border-border', bg: 'bg-secondary/30', desc: '' };
                 
                 return (
                   <div 
                     key={rubric.rubric_id} 
-                    className={`p-3 rounded-lg border ${colors.border} ${colors.bg} animate-in slide-in-from-bottom-2 duration-300`}
+                    className={`p-3 rounded-lg border ${meta.border} ${meta.bg} animate-in slide-in-from-bottom-2 duration-300`}
                     style={{ animationDelay: `${idx * 30}ms` }}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-sm font-bold font-mono ${colors.text}`}>{shortKey}</span>
+                      <span className={`text-sm font-bold font-mono ${meta.text}`}>{shortKey}</span>
                       <span className="text-xs font-medium text-foreground">{rubric.name}</span>
+                      {rubric.dimension && rubric.dimension !== 'unknown' && (
+                        <span className="text-[8px] px-1.5 py-0.5 rounded bg-background/50 text-muted-foreground ml-auto">
+                          {rubric.dimension}
+                        </span>
+                      )}
                     </div>
-                    {rubric.goal && (
-                      <p className="text-[10px] text-foreground/60 leading-relaxed">{rubric.goal}</p>
-                    )}
+                    <p className="text-[10px] text-foreground/60 leading-relaxed">{meta.desc}</p>
                     <div className="flex gap-1 mt-2 flex-wrap">
                       {rubric.bands.slice(0, 6).map((band) => (
                         <span 
                           key={band.band_id}
-                          className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-background/50 text-muted-foreground"
-                          title={band.label}
+                          className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-background/50 text-muted-foreground cursor-help"
+                          title={`${band.label}: ${band.description}`}
                         >
                           {band.band_id}
                         </span>
