@@ -252,6 +252,15 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
                   Terug
                 </button>
               )}
+              {onCancel && step === 1 && (
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className="px-6 py-3 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
+                >
+                  Annuleren
+                </button>
+              )}
               <button
                 type="submit"
                 className="px-10 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full shadow-lg transition-all transform hover:scale-105 active:scale-95 text-sm tracking-wide"
