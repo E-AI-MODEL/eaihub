@@ -56,7 +56,7 @@ const getMaxBands = (dimension: string): number => {
 };
 
 export const Dashboard: React.FC<DashboardProps> = ({ analysis, scaffolding }) => {
-  // Extract current bands from analysis
+  // Extract current bands from analysis with complete dimension parsing
   const getCurrentBands = (): Record<string, number> => {
     if (!analysis) {
       // Default/demo values
@@ -65,18 +65,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ analysis, scaffolding }) =
 
     const bands: Record<string, number> = {};
     
-    // Extract from coregulation_bands
-    analysis.coregulation_bands?.forEach(band => {
-      const dim = band.replace(/\d+/g, '');
-      bands[dim] = extractBandLevel(band);
-    });
+    // Helper to extract dimension and level from band string (e.g., "K2" -> {dim: "K", level: 2})
+    const parseBand = (band: string) => {
+      const match = band.match(/^([A-Z]+)(\d+)$/);
+      if (match) {
+        bands[match[1]] = parseInt(match[2], 10);
+      }
+    };
+    
+    // Extract from coregulation_bands (primary: K, C, P)
+    analysis.coregulation_bands?.forEach(parseBand);
 
     // Extract from task_densities
-    analysis.task_densities?.forEach(td => {
-      if (td.startsWith('TD')) {
-        bands['TD'] = extractBandLevel(td);
-      }
-    });
+    analysis.task_densities?.forEach(parseBand);
+    
+    // Extract from secondary_dimensions (V, E, T, S, L, B)
+    analysis.secondary_dimensions?.forEach(parseBand);
 
     return bands;
   };
@@ -153,7 +157,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ analysis, scaffolding }) =
               <div
                 className="h-full bg-gradient-to-r from-destructive via-yellow-500 to-green-500 rounded-full transition-all duration-500"
                 style={{ 
-                  width: `${(scaffolding?.agency_score || 0.5) * 100}%`,
+                  width: `${Math.max((scaffolding?.agency_score || 0.5) * 100, 8)}%`,
+                  minWidth: '8px',
                   opacity: 0.8 
                 }}
               />

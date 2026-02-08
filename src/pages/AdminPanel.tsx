@@ -1,6 +1,7 @@
-import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SSOT_DATA } from '@/data/ssot';
 
 const AdminPanel = () => {
   // Mock system status
@@ -11,19 +12,14 @@ const AdminPanel = () => {
     { name: 'Logic Gates', status: 'operational', latency: '8ms' },
   ];
 
-  // Mock SSOT dimensions
-  const ssotDimensions = [
-    { code: 'K', name: 'Knowledge', description: 'Kennisstand en begrip' },
-    { code: 'C', name: 'Cognitive Load', description: 'Mentale belasting' },
-    { code: 'P', name: 'Precision', description: 'Nauwkeurigheid van input' },
-    { code: 'TD', name: 'Task Difficulty', description: 'Moeilijkheidsgraad' },
-    { code: 'V', name: 'Verification', description: 'Verificatie status' },
-    { code: 'E', name: 'Engagement', description: 'Betrokkenheid' },
-    { code: 'T', name: 'Time', description: 'Tijdsfactor' },
-    { code: 'S', name: 'Scaffolding', description: 'Ondersteuningsniveau' },
-    { code: 'L', name: 'Learning Style', description: 'Leerstijl' },
-    { code: 'B', name: 'Behavior', description: 'Gedragspatronen' },
-  ];
+  // Get dimensions from live SSOT_DATA
+  const ssotDimensions = SSOT_DATA.rubrics.map(rubric => ({
+    code: rubric.bands[0]?.band_id?.replace(/\d+/g, '') || rubric.rubric_id.toUpperCase().slice(0, 2),
+    name: rubric.name,
+    description: rubric.bands.map(b => b.label).join(' → '),
+    bandCount: rubric.bands.length,
+    bands: rubric.bands
+  }));
 
   return (
     <div className="min-h-screen bg-background pt-14">
@@ -116,32 +112,108 @@ const AdminPanel = () => {
 
           {/* SSOT Browser Tab */}
           <TabsContent value="ssot">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
-                  <Database className="w-4 h-4 text-primary" />
-                  10D Matrix - Dimensies
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {ssotDimensions.map((dim) => (
-                    <div 
-                      key={dim.code}
-                      className="p-4 rounded-lg bg-secondary/50 border border-border hover:border-primary/50 transition-colors cursor-pointer"
-                    >
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="w-8 h-8 rounded bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">
-                          {dim.code}
-                        </span>
-                        <span className="text-sm font-medium text-foreground">{dim.name}</span>
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
+                    <Database className="w-4 h-4 text-primary" />
+                    10D Matrix - Rubrics (v{SSOT_DATA.version})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {ssotDimensions.map((dim) => (
+                      <div 
+                        key={dim.code}
+                        className="p-4 rounded-lg bg-secondary/50 border border-border hover:border-primary/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="w-10 h-10 rounded bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">
+                            {dim.code}
+                          </span>
+                          <div>
+                            <span className="text-sm font-medium text-foreground block">{dim.name}</span>
+                            <span className="text-[10px] text-muted-foreground">{dim.bandCount} bands</span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-3">{dim.description}</p>
+                        <div className="flex flex-wrap gap-1">
+                          {dim.bands.map((band) => (
+                            <span 
+                              key={band.band_id} 
+                              className="text-[10px] px-2 py-0.5 rounded bg-primary/10 text-primary font-mono"
+                              title={band.description}
+                            >
+                              {band.band_id}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground">{dim.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Commands Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-primary" />
+                    Command Library ({Object.keys(SSOT_DATA.command_library.commands).length} commands)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {Object.entries(SSOT_DATA.command_library.commands).map(([cmd, desc]) => (
+                      <div 
+                        key={cmd}
+                        className="p-2 rounded bg-secondary/30 border border-border"
+                      >
+                        <code className="text-xs text-primary font-mono">{cmd}</code>
+                        <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">{desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Logic Gates */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-primary" />
+                    Logic Gates ({SSOT_DATA.interaction_protocol.logic_gates.length} rules)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {SSOT_DATA.interaction_protocol.logic_gates.map((gate, idx) => (
+                      <div 
+                        key={idx}
+                        className={`p-3 rounded border ${
+                          gate.priority === 'CRITICAL' ? 'border-destructive/50 bg-destructive/5' :
+                          gate.priority === 'HIGH' ? 'border-orange-500/50 bg-orange-500/5' :
+                          'border-border bg-secondary/30'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <code className="text-xs font-mono text-foreground">{gate.trigger_band}</code>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                            gate.priority === 'CRITICAL' ? 'bg-destructive/20 text-destructive' :
+                            gate.priority === 'HIGH' ? 'bg-orange-500/20 text-orange-500' :
+                            'bg-muted text-muted-foreground'
+                          }`}>
+                            {gate.priority}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">{gate.condition}</p>
+                        <p className="text-[10px] text-primary mt-1">{gate.enforcement}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Developer Tools Tab */}

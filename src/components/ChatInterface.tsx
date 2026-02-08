@@ -37,9 +37,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
   const [isLoading, setIsLoading] = useState(false);
   const [activeTheme, setActiveTheme] = useState<DidacticTheme>('DEFAULT');
   const [showLegend, setShowLegend] = useState(false);
-  const [sessionId] = useState(() => `session_${Date.now()}`);
+  const [sessionId] = useState(() => `session_${crypto.randomUUID()}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const messageCounterRef = useRef(0);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -49,40 +50,44 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  // Idle nudge timer
+  // Idle nudge timer with proper cleanup
   useEffect(() => {
-    const resetIdleTimer = () => {
-      if (idleTimerRef.current) {
-        clearTimeout(idleTimerRef.current);
-      }
-      
-      if (messages.length > 0 && !isLoading) {
-        idleTimerRef.current = setTimeout(() => {
-          const nudge = IDLE_NUDGES[Math.floor(Math.random() * IDLE_NUDGES.length)];
-          const nudgeMessage: Message = {
-            id: `nudge_${Date.now()}`,
-            role: 'model',
-            text: `💡 *Tip:* ${nudge}`,
-            timestamp: new Date(),
-          };
-          setMessages(prev => [...prev, nudgeMessage]);
-        }, 120000); // 2 minutes
-      }
-    };
+    // Clear any existing timer
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = null;
+    }
+    
+    // Only set timer if we have messages and not loading
+    if (messages.length > 0 && !isLoading) {
+      idleTimerRef.current = setTimeout(() => {
+        const nudge = IDLE_NUDGES[Math.floor(Math.random() * IDLE_NUDGES.length)];
+        messageCounterRef.current += 1;
+        const nudgeMessage: Message = {
+          id: `nudge_${crypto.randomUUID()}`,
+          role: 'model',
+          text: `💡 *Tip:* ${nudge}`,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, nudgeMessage]);
+      }, 120000); // 2 minutes
+    }
 
-    resetIdleTimer();
+    // Cleanup function
     return () => {
       if (idleTimerRef.current) {
         clearTimeout(idleTimerRef.current);
+        idleTimerRef.current = null;
       }
     };
-  }, [messages, isLoading]);
+  }, [messages.length, isLoading]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    messageCounterRef.current += 1;
     const userMessage: Message = {
-      id: `msg_${Date.now()}`,
+      id: `msg_${crypto.randomUUID()}`,
       role: 'user',
       text: input.trim(),
       timestamp: new Date(),
@@ -101,8 +106,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
         profile,
       });
 
+      messageCounterRef.current += 1;
       const modelMessage: Message = {
-        id: `msg_${Date.now()}_response`,
+        id: `msg_${crypto.randomUUID()}`,
         role: 'model',
         text: response.text,
         timestamp: new Date(),
@@ -116,8 +122,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
         onAnalysisUpdate(response.analysis);
       }
     } catch (error) {
+      messageCounterRef.current += 1;
       const errorMessage: Message = {
-        id: `msg_${Date.now()}_error`,
+        id: `msg_${crypto.randomUUID()}`,
         role: 'model',
         text: 'Er is een fout opgetreden. Probeer het opnieuw.',
         timestamp: new Date(),
