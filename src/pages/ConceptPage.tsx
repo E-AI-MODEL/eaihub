@@ -71,11 +71,8 @@ const ConceptPage = () => {
             <span className="text-sm font-medium">Terug</span>
           </Link>
           <div className="flex items-center gap-3">
-            <span className="hidden sm:inline text-xs text-muted-foreground">
-              SSOT v{SSOT_DATA.version}
-            </span>
             <span className="text-xs font-bold tracking-wider uppercase px-2 py-1 rounded-full bg-primary/10 text-primary">
-              EAI 8.0
+              EAI v{SSOT_DATA.version}
             </span>
           </div>
         </div>

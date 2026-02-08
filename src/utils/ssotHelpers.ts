@@ -353,3 +353,114 @@ export function validateSSOT(): string[] {
   
   return issues;
 }
+
+// ============= LEGACY COMPATIBILITY =============
+// Re-export EAI_CORE structure for backward compatibility with ssotParser consumers
+
+export interface SSOTCommand {
+  command: string;
+  description: string;
+}
+
+export interface SSOTLogicGate {
+  trigger_band: string;
+  condition: string;
+  enforcement: string; 
+  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM';
+}
+
+export interface SSOTBand {
+  band_id: string;
+  label: string;
+  description: string;
+  fix?: string;
+  fix_ref?: string;
+  learner_obs?: string[];
+  ai_obs?: string[];
+  didactic_principle?: string;
+  mechanistic?: {
+    timescale: string;
+    fast: number;
+    mid: number;
+    slow: number;
+  };
+  flag?: string;
+  score_range?: [number, number];
+}
+
+export interface SSOTRubric {
+  rubric_id: string;
+  name: string;
+  dimension?: string;
+  bands: SSOTBand[];
+}
+
+export interface SSOTStructure {
+  commands: SSOTCommand[];
+  rubrics: SSOTRubric[];
+  cycleOrder: string[];
+  metadata: {
+    version: string;
+    system: string;
+  };
+  interaction_protocol?: {
+    logic_gates: SSOTLogicGate[];
+  };
+}
+
+let cachedCore: SSOTStructure | null = null;
+
+/**
+ * Get EAI Core structure (legacy compatibility layer)
+ * Used by eaiLearnAdapter, diagnostics, adminService
+ */
+export function getEAICore(): SSOTStructure {
+  if (cachedCore) return cachedCore;
+  
+  const commandsObj = SSOT_DATA.command_library?.commands || {};
+  const commands: SSOTCommand[] = Object.entries(commandsObj).map(([cmd, desc]) => ({
+    command: cmd,
+    description: desc as string
+  }));
+
+  const rubrics: SSOTRubric[] = SSOT_DATA.rubrics.map(r => ({
+    rubric_id: r.rubric_id,
+    name: r.name,
+    dimension: r.dimension,
+    bands: r.bands.map(b => ({
+      band_id: b.band_id,
+      label: b.label,
+      description: b.description,
+      fix: b.fix,
+      fix_ref: b.fix_ref,
+      learner_obs: b.learner_obs,
+      ai_obs: b.ai_obs,
+      didactic_principle: b.didactic_principle,
+      mechanistic: b.mechanistic,
+      flag: b.flag,
+      score_range: b.score_range
+    }))
+  }));
+
+  const logic_gates: SSOTLogicGate[] = (SSOT_DATA.interaction_protocol?.logic_gates || []).map(g => ({
+    trigger_band: g.trigger_band,
+    condition: g.condition,
+    enforcement: g.enforcement,
+    priority: g.priority
+  }));
+
+  cachedCore = {
+    commands,
+    rubrics,
+    cycleOrder: SSOT_DATA.metadata.cycle.order,
+    metadata: {
+      version: SSOT_DATA.version,
+      system: SSOT_DATA.metadata.system || 'EAI'
+    },
+    interaction_protocol: { logic_gates }
+  };
+  
+  return cachedCore;
+}
+
+export const EAI_CORE = getEAICore();

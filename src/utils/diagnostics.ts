@@ -1,4 +1,4 @@
-import { getEAICore } from './ssotParser';
+import { getEAICore } from './ssotHelpers';
 import type { DiagnosticResult } from '../types';
 
 export const runDiagnostics = async (
