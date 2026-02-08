@@ -14,34 +14,54 @@ interface MessageBubbleProps {
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message, themeClasses }) => {
   const isUser = message.role === 'user';
 
-  const userStyle = themeClasses || 'bg-secondary text-foreground';
-  const modelStyle = 'bg-background text-foreground';
-  const errorStyle = 'bg-destructive/20 text-destructive';
+  const userStyle = themeClasses || 'bg-primary/10 border border-primary/30 text-foreground backdrop-blur-sm';
+  const modelStyle = 'bg-card/80 border border-border text-foreground backdrop-blur-sm shadow-sm';
+  const errorStyle = 'bg-destructive/20 border border-destructive/50 text-destructive backdrop-blur-sm';
 
+  // Check if JSON repair happened
   const wasRepaired = message.mechanical && message.mechanical.repairAttempts && message.mechanical.repairAttempts > 0;
+  
+  // Check G-Factor alignment
+  const gFactor = message.mechanical?.semanticValidation?.gFactor;
+  const hasWarning = gFactor !== undefined && gFactor < 0.8;
 
   return (
     <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
       <div
-        className={`max-w-[95%] sm:max-w-[85%] rounded-2xl px-5 py-4 text-sm leading-relaxed relative group transition-all duration-300 shadow-sm ${
+        className={`max-w-[95%] sm:max-w-[85%] rounded-2xl px-5 py-4 text-sm leading-relaxed relative group transition-all duration-300 ${
           message.isError ? errorStyle : (isUser ? userStyle : modelStyle)
         }`}
       >
-        <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-border/30 opacity-50">
+        {/* Header with role, badges, timestamp */}
+        <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-border/30">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest">
-              {isUser ? 'JIJ' : 'EAI'}
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              {isUser ? 'OPERATOR' : 'EAI CORE'}
             </span>
 
+            {/* Repair Badge */}
             {wasRepaired && (
-              <div className="flex items-center gap-1 bg-primary/20 rounded px-1.5 py-0.5" title="System automatically repaired malformed output">
-                <span className="text-[9px] text-primary">Fixed</span>
+              <div 
+                className="flex items-center gap-1 bg-green-500/20 border border-green-500/30 rounded px-1.5 py-0.5" 
+                title={`System automatically repaired malformed output (${message.mechanical?.repairAttempts} attempt${(message.mechanical?.repairAttempts || 0) > 1 ? 's' : ''})`}
+              >
+                <span className="text-[9px] font-bold text-green-400">⚡ FIXED</span>
+              </div>
+            )}
+
+            {/* G-Factor Warning Badge */}
+            {hasWarning && (
+              <div 
+                className="flex items-center gap-1 bg-yellow-500/20 border border-yellow-500/30 rounded px-1.5 py-0.5" 
+                title={`Semantic integrity: ${Math.round((gFactor || 0) * 100)}%`}
+              >
+                <span className="text-[9px] font-bold text-yellow-400">⚠️ {Math.round((gFactor || 0) * 100)}%</span>
               </div>
             )}
           </div>
 
           <span className="text-[9px] font-mono text-muted-foreground">
-            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </span>
         </div>
 
@@ -86,9 +106,18 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, themeClasses }) 
           )}
         </div>
 
+        {/* Debug Info on Hover */}
         {!isUser && message.mechanical && (
-          <div className="hidden group-hover:block absolute -bottom-6 right-0 text-[10px] text-muted-foreground font-medium">
-            {message.mechanical.model} • {message.mechanical.latencyMs}ms
+          <div className="hidden group-hover:flex absolute -bottom-6 right-0 text-[9px] text-muted-foreground font-mono bg-card/90 backdrop-blur-md px-2 py-0.5 rounded border border-border gap-2 z-10">
+            <span>{message.mechanical.model}</span>
+            <span>•</span>
+            <span>{message.mechanical.latencyMs}ms</span>
+            {message.mechanical.repairAttempts ? (
+              <>
+                <span>•</span>
+                <span className="text-green-400">{message.mechanical.repairAttempts} repair{message.mechanical.repairAttempts > 1 ? 's' : ''}</span>
+              </>
+            ) : null}
           </div>
         )}
       </div>
