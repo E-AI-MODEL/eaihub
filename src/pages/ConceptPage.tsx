@@ -77,18 +77,21 @@ const ConceptPage = () => {
         {/* 10D Dimensions */}
         <section className="mb-16">
           <h2 className="text-2xl font-bold mb-6">De 10 Dimensies</h2>
+          <p className="text-sm text-muted-foreground mb-6">
+            Elke interactie wordt geclassificeerd langs 10 onafhankelijke assen. De volgorde bepaalt de diagnostische cyclus.
+          </p>
           <div className="space-y-4">
             {[
-              { code: 'K', name: 'Kennis & Automatisering', desc: 'Type kennis: feiten, procedures, metacognitie' },
-              { code: 'C', name: 'Co-regulatie', desc: 'Regieverdeling tussen leerling en AI' },
-              { code: 'P', name: 'Procesfase', desc: 'Oriëntatie → Voorkennis → Instructie → Toepassing → Evaluatie' },
-              { code: 'TD', name: 'Taakdichtheid', desc: 'Verdeling van denkhandelingen (agency)' },
-              { code: 'V', name: 'Vaardigheidspotentieel', desc: 'Cognitieve beweging: verkennen → creëren' },
-              { code: 'E', name: 'Epistemische Betrouwbaarheid', desc: 'Status van claims: speculatief → geverifieerd' },
-              { code: 'T', name: 'Tool Awareness', desc: 'Begrip van AI als instrument' },
-              { code: 'S', name: 'Sociale Interactie', desc: 'Context: solitair → collectief leren' },
-              { code: 'L', name: 'Leercontinuïteit', desc: 'Transfer: geïsoleerd → duurzaam' },
-              { code: 'B', name: 'Bias & Inclusie', desc: 'Kritisch bewustzijn en correctie' },
+              { code: 'K', name: 'Kennis & Automatisering', desc: 'Wat voor kennis? Feit (K1), procedure (K2), of metacognitie (K3). Bepaalt de logic gate.' },
+              { code: 'P', name: 'Procesfase', desc: 'Fase in het leerproces: oriëntatie → voorkennis → instructie → toepassing → evaluatie.' },
+              { code: 'TD', name: 'Taakdichtheid', desc: 'Wie doet het denkwerk? Van leerling-geleid (TD1) tot AI-dominant (TD5).' },
+              { code: 'C', name: 'Co-regulatie', desc: 'Regieverdeling: AI-monoloog (C1) → gedeelde start (C3) → leerling-gestuurd (C5).' },
+              { code: 'V', name: 'Vaardigheidspotentieel', desc: 'Cognitieve beweging: verkennen → verbinden → toepassen → herzien → creëren.' },
+              { code: 'T', name: 'Technologische Integratie', desc: 'Transparantie van AI: verborgen → zichtbaar → synergetisch → kritisch partnerschap.' },
+              { code: 'E', name: 'Epistemische Betrouwbaarheid', desc: 'Status van claims: speculatie → interpretatie → onderbouwd → geverifieerd.' },
+              { code: 'L', name: 'Leercontinuïteit', desc: 'Borging en transfer: gefragmenteerd → gekoppeld → geïntegreerd → duurzaam.' },
+              { code: 'S', name: 'Sociale Interactie', desc: 'Leercontext: individueel → parallel → coöperatief → collectief.' },
+              { code: 'B', name: 'Bias & Inclusie', desc: 'Ethisch bewustzijn: blind → impliciet → bewust → kritisch → emancipatoir.' },
             ].map((dim, i) => (
               <div 
                 key={dim.code}

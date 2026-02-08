@@ -8,18 +8,18 @@ interface DashboardProps {
   scaffolding?: ScaffoldingState;
 }
 
-// SSOT v15.0.0 synchronized dimension labels
+// SSOT v15.0.0 synchronized dimension labels (cycle order: K, P, TD, C, V, T, E, L, S, B)
 const DIMENSION_LABELS: Record<string, { label: string; description: string }> = {
-  K: { label: 'Kennis', description: 'Kennis & Automatisering (K0-K3)' },
+  K: { label: 'Kennis', description: 'Type: feit (K1), procedure (K2), metacognitie (K3)' },
+  P: { label: 'Procesfase', description: 'Oriëntatie → voorkennis → instructie → toepassing → evaluatie' },
+  TD: { label: 'Taakdichtheid', description: 'Wie doet het denkwerk? TD1=leerling, TD5=AI' },
   C: { label: 'Co-Regulatie', description: 'Regieverdeling leerling/AI' },
-  P: { label: 'Procesfase', description: 'Leerfase context' },
-  TD: { label: 'Taakdichtheid', description: 'Verdeling denkhandelingen' },
-  V: { label: 'Vaardigheid', description: 'Cognitieve beweging' },
-  E: { label: 'Epistemisch', description: 'Betrouwbaarheid van claims' },
-  T: { label: 'Tool', description: 'Technologische integratie' },
-  S: { label: 'Sociaal', description: 'Sociale interactie context' },
-  L: { label: 'Leer', description: 'Continuiteit & Transfer' },
-  B: { label: 'Bias', description: 'Bias & Inclusie correctie' },
+  V: { label: 'Vaardigheid', description: 'Cognitieve beweging: verkennen → creëren' },
+  T: { label: 'Tool', description: 'AI-transparantie: verborgen → kritisch partner' },
+  E: { label: 'Epistemisch', description: 'Betrouwbaarheid: speculatie → geverifieerd' },
+  L: { label: 'Continuïteit', description: 'Borging: gefragmenteerd → duurzaam' },
+  S: { label: 'Sociaal', description: 'Context: individueel → collectief' },
+  B: { label: 'Bias', description: 'Ethiek: blind → kritisch → emancipatoir' },
 };
 
 const extractBandLevel = (bandId: string): number => {
