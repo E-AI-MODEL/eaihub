@@ -8,15 +8,10 @@ import 'katex/dist/katex.min.css';
 
 interface MessageBubbleProps {
   message: Message;
-  themeClasses?: string;
 }
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({ message, themeClasses }) => {
+const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isUser = message.role === 'user';
-
-  const userStyle = themeClasses || 'bg-primary/10 border border-primary/30 text-foreground backdrop-blur-sm';
-  const modelStyle = 'bg-card/80 border border-border text-foreground backdrop-blur-sm shadow-sm';
-  const errorStyle = 'bg-destructive/20 border border-destructive/50 text-destructive backdrop-blur-sm';
 
   // Check if JSON repair happened
   const wasRepaired = message.mechanical && message.mechanical.repairAttempts && message.mechanical.repairAttempts > 0;
@@ -25,80 +20,80 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, themeClasses }) 
   const gFactor = message.mechanical?.semanticValidation?.gFactor;
   const hasWarning = gFactor !== undefined && gFactor < 0.8;
 
-  return (
-    <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
-      <div
-        className={`max-w-[95%] sm:max-w-[85%] rounded-2xl px-5 py-4 text-sm leading-relaxed relative group transition-all duration-300 ${
-          message.isError ? errorStyle : (isUser ? userStyle : modelStyle)
-        }`}
-      >
-        {/* Header with role, badges, timestamp */}
-        <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-border/30">
+  // ═══════════════════════════════════════════════════════════════════
+  // SYSTEM MESSAGE (EAI Core response)
+  // ═══════════════════════════════════════════════════════════════════
+  if (!isUser) {
+    return (
+      <div className="max-w-2xl mb-4 px-4 py-3 border border-slate-700 bg-slate-800/40">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-slate-800">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              {isUser ? 'OPERATOR' : 'EAI CORE'}
+            <span className="text-[10px] font-medium uppercase tracking-wider text-slate-400">
+              EAI CORE
             </span>
 
             {/* Repair Badge */}
             {wasRepaired && (
-              <div 
-                className="flex items-center gap-1 bg-green-500/20 border border-green-500/30 rounded px-1.5 py-0.5" 
-                title={`System automatically repaired malformed output (${message.mechanical?.repairAttempts} attempt${(message.mechanical?.repairAttempts || 0) > 1 ? 's' : ''})`}
+              <span 
+                className="text-[9px] font-medium text-amber-300 border border-amber-500/60 px-1.5 py-0.5"
+                title={`System repaired output (${message.mechanical?.repairAttempts} attempt${(message.mechanical?.repairAttempts || 0) > 1 ? 's' : ''})`}
               >
-                <span className="text-[9px] font-bold text-green-400">⚡ FIXED</span>
-              </div>
+                REPAIRED
+              </span>
             )}
 
-            {/* G-Factor Warning Badge */}
+            {/* G-Factor Warning */}
             {hasWarning && (
-              <div 
-                className="flex items-center gap-1 bg-yellow-500/20 border border-yellow-500/30 rounded px-1.5 py-0.5" 
+              <span 
+                className="text-[9px] font-medium text-amber-300 border border-amber-500/60 px-1.5 py-0.5"
                 title={`Semantic integrity: ${Math.round((gFactor || 0) * 100)}%`}
               >
-                <span className="text-[9px] font-bold text-yellow-400">⚠️ {Math.round((gFactor || 0) * 100)}%</span>
-              </div>
+                {Math.round((gFactor || 0) * 100)}%
+              </span>
             )}
           </div>
 
-          <span className="text-[9px] font-mono text-muted-foreground">
+          <span className="text-[9px] font-mono text-slate-400">
             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </span>
         </div>
 
-        <div className="markdown-body">
-          {isUser ? (
-            <p className="whitespace-pre-wrap font-sans text-base font-light">{message.text}</p>
+        {/* Content */}
+        <div className="text-slate-100 text-sm leading-relaxed">
+          {message.isError ? (
+            <p className="text-red-300">{message.text}</p>
           ) : (
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkMath]}
               rehypePlugins={[[rehypeKatex, { strict: false }]]}
               components={{
-                ul: ({node, ...props}) => <ul className="list-disc list-outside ml-4 mb-2 space-y-1 text-muted-foreground" {...props} />,
-                ol: ({node, ...props}) => <ol className="list-decimal list-outside ml-4 mb-2 space-y-1 text-muted-foreground" {...props} />,
-                li: ({node, ...props}) => <li className="" {...props} />,
-                p: ({node, ...props}) => <p className="mb-3 last:mb-0 text-foreground" {...props} />,
-                strong: ({node, ...props}) => <strong className="font-semibold text-foreground" {...props} />,
-                h1: ({node, ...props}) => <h1 className="text-lg font-bold text-foreground mb-2 mt-4" {...props} />,
-                h2: ({node, ...props}) => <h2 className="text-base font-bold text-foreground mb-2 mt-3" {...props} />,
+                ul: ({node, ...props}) => <ul className="list-disc list-outside ml-4 mb-2 space-y-1 text-slate-300" {...props} />,
+                ol: ({node, ...props}) => <ol className="list-decimal list-outside ml-4 mb-2 space-y-1 text-slate-300" {...props} />,
+                li: ({node, ...props}) => <li {...props} />,
+                p: ({node, ...props}) => <p className="mb-3 last:mb-0 text-slate-100" {...props} />,
+                strong: ({node, ...props}) => <strong className="font-semibold text-slate-100" {...props} />,
+                h1: ({node, ...props}) => <h1 className="text-base font-semibold text-slate-100 mb-2 mt-3" {...props} />,
+                h2: ({node, ...props}) => <h2 className="text-sm font-semibold text-slate-100 mb-2 mt-2" {...props} />,
 
                 table: ({node, ...props}) => (
-                  <div className="overflow-x-auto my-4 rounded-xl bg-card">
-                    <table className="w-full text-left text-xs sm:text-sm border-collapse" {...props} />
+                  <div className="overflow-x-auto my-3 border border-slate-700 bg-slate-900/60">
+                    <table className="w-full text-left text-xs border-collapse" {...props} />
                   </div>
                 ),
-                thead: ({node, ...props}) => <thead className="bg-muted text-primary uppercase font-bold tracking-wider" {...props} />,
-                tbody: ({node, ...props}) => <tbody className="divide-y divide-border" {...props} />,
-                tr: ({node, ...props}) => <tr className="hover:bg-muted/50 transition-colors" {...props} />,
-                th: ({node, ...props}) => <th className="px-4 py-3 font-mono whitespace-nowrap text-[10px] sm:text-xs" {...props} />,
-                td: ({node, ...props}) => <td className="px-4 py-3 align-top border-l border-border first:border-l-0 text-muted-foreground" {...props} />,
+                thead: ({node, ...props}) => <thead className="bg-slate-800 text-slate-300 uppercase text-[10px] tracking-wider" {...props} />,
+                tbody: ({node, ...props}) => <tbody className="divide-y divide-slate-800" {...props} />,
+                tr: ({node, ...props}) => <tr className="hover:bg-slate-800/50 transition-colors" {...props} />,
+                th: ({node, ...props}) => <th className="px-3 py-2 font-medium whitespace-nowrap" {...props} />,
+                td: ({node, ...props}) => <td className="px-3 py-2 align-top text-slate-300" {...props} />,
 
-                code: ({node, ...props}) => <code className="bg-card text-primary px-1.5 py-0.5 rounded font-mono text-xs mx-0.5" {...props} />,
+                code: ({node, ...props}) => <code className="bg-slate-900 text-slate-300 px-1.5 py-0.5 font-mono text-xs border border-slate-800" {...props} />,
 
                 pre: ({node, ...props}) => (
-                  <pre className="bg-card rounded-xl p-4 overflow-x-auto my-4 text-xs font-mono text-muted-foreground" {...props} />
+                  <pre className="bg-slate-900 border border-slate-700 p-3 overflow-x-auto my-3 text-xs font-mono text-slate-300" {...props} />
                 ),
 
-                blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-primary/50 pl-4 italic text-muted-foreground my-4" {...props} />,
+                blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-slate-600 pl-3 italic text-slate-400 my-3" {...props} />,
               }}
             >
               {message.text}
@@ -106,21 +101,43 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, themeClasses }) 
           )}
         </div>
 
-        {/* Debug Info on Hover */}
-        {!isUser && message.mechanical && (
-          <div className="hidden group-hover:flex absolute -bottom-6 right-0 text-[9px] text-muted-foreground font-mono bg-card/90 backdrop-blur-md px-2 py-0.5 rounded border border-border gap-2 z-10">
+        {/* Debug Info (hover state for desktop) */}
+        {message.mechanical && (
+          <div className="mt-3 pt-2 border-t border-slate-800 flex items-center gap-3 text-[9px] font-mono text-slate-500">
             <span>{message.mechanical.model}</span>
             <span>•</span>
             <span>{message.mechanical.latencyMs}ms</span>
-            {message.mechanical.repairAttempts ? (
+            {wasRepaired && (
               <>
                 <span>•</span>
-                <span className="text-green-400">{message.mechanical.repairAttempts} repair{message.mechanical.repairAttempts > 1 ? 's' : ''}</span>
+                <span className="text-amber-400">{message.mechanical.repairAttempts} repair{(message.mechanical?.repairAttempts || 0) > 1 ? 's' : ''}</span>
               </>
-            ) : null}
+            )}
           </div>
         )}
       </div>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // STUDENT MESSAGE (User input)
+  // ═══════════════════════════════════════════════════════════════════
+  return (
+    <div className="max-w-xl ml-6 mb-4 px-4 py-3 border border-slate-800 bg-slate-900/40">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-slate-800">
+        <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
+          LEERLING
+        </span>
+        <span className="text-[9px] font-mono text-slate-500">
+          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+        </span>
+      </div>
+
+      {/* Content */}
+      <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-300">
+        {message.text}
+      </p>
     </div>
   );
 };
