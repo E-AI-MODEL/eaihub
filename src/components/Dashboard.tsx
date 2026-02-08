@@ -14,7 +14,7 @@ const DIMENSION_LABELS: Record<string, { label: string; description: string }> =
   P: { label: 'Procesfase', description: 'Oriëntatie → voorkennis → instructie → toepassing → evaluatie' },
   TD: { label: 'Taakdichtheid', description: 'Wie doet het denkwerk? TD1=leerling, TD5=AI' },
   C: { label: 'Co-Regulatie', description: 'Regieverdeling leerling/AI' },
-  V: { label: 'Vaardigheid', description: 'Cognitieve beweging: verkennen → creëren' },
+  V: { label: 'Vaardigheid', description: 'Denkhandeling: verkennen → verbinden → toepassen → herzien → verankeren' },
   T: { label: 'Tool', description: 'AI-transparantie: verborgen → kritisch partner' },
   E: { label: 'Epistemisch', description: 'Betrouwbaarheid: speculatie → geverifieerd' },
   L: { label: 'Continuïteit', description: 'Borging: gefragmenteerd → duurzaam' },

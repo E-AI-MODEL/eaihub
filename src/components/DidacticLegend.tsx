@@ -17,7 +17,7 @@ const DidacticLegend: React.FC<DidacticLegendProps> = ({ onClose }) => {
     P: { text: 'text-cyan-400', border: 'border-cyan-500/30', bg: 'bg-cyan-900/10', desc: 'Oriëntatie → voorkennis → instructie → toepassing → evaluatie.' },
     TD: { text: 'text-orange-400', border: 'border-orange-500/30', bg: 'bg-orange-900/10', desc: 'Wie doet het denkwerk? TD1=leerling, TD5=AI.' },
     C: { text: 'text-blue-400', border: 'border-blue-500/30', bg: 'bg-blue-900/10', desc: 'Regieverdeling: AI-monoloog → gedeelde start → leerling-gestuurd.' },
-    V: { text: 'text-emerald-400', border: 'border-emerald-500/30', bg: 'bg-emerald-900/10', desc: 'Verkennen → verbinden → toepassen → herzien → creëren.' },
+    V: { text: 'text-emerald-400', border: 'border-emerald-500/30', bg: 'bg-emerald-900/10', desc: 'Denkhandeling: verkennen → verbinden → toepassen → herzien → verankeren.' },
     T: { text: 'text-pink-400', border: 'border-pink-500/30', bg: 'bg-pink-900/10', desc: 'AI-transparantie: verborgen → zichtbaar → kritisch partner.' },
     E: { text: 'text-purple-400', border: 'border-purple-500/30', bg: 'bg-purple-900/10', desc: 'Speculatie → interpretatie → onderbouwd → geverifieerd.' },
     L: { text: 'text-teal-400', border: 'border-teal-500/30', bg: 'bg-teal-900/10', desc: 'Borging: gefragmenteerd → gekoppeld → duurzaam.' },

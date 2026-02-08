@@ -86,7 +86,7 @@ const ConceptPage = () => {
               { code: 'P', name: 'Procesfase', desc: 'Fase in het leerproces: oriëntatie → voorkennis → instructie → toepassing → evaluatie.' },
               { code: 'TD', name: 'Taakdichtheid', desc: 'Wie doet het denkwerk? Van leerling-geleid (TD1) tot AI-dominant (TD5).' },
               { code: 'C', name: 'Co-regulatie', desc: 'Regieverdeling: AI-monoloog (C1) → gedeelde start (C3) → leerling-gestuurd (C5).' },
-              { code: 'V', name: 'Vaardigheidspotentieel', desc: 'Cognitieve beweging: verkennen → verbinden → toepassen → herzien → creëren.' },
+              { code: 'V', name: 'Vaardigheidspotentieel', desc: 'Denkhandeling: verkennen → verbinden → toepassen → herzien → verankeren.' },
               { code: 'T', name: 'Technologische Integratie', desc: 'Transparantie van AI: verborgen → zichtbaar → synergetisch → kritisch partnerschap.' },
               { code: 'E', name: 'Epistemische Betrouwbaarheid', desc: 'Status van claims: speculatie → interpretatie → onderbouwd → geverifieerd.' },
               { code: 'L', name: 'Leercontinuïteit', desc: 'Borging en transfer: gefragmenteerd → gekoppeld → geïntegreerd → duurzaam.' },
