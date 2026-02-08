@@ -1,8 +1,10 @@
 // Chat Service - Handles communication with EAI backend via Edge Function
 // Uses Lovable AI Gateway with streaming support
+// Version 15.1 - SSOT-coupled detection and fix suggestions
 
 import type { ChatRequest, ChatResponse, EAIAnalysis, MechanicalState, LearnerProfile } from '@/types';
 import { toast } from '@/hooks/use-toast';
+import { getFixForBand, getFlagsForBands, getLearnerObsPatterns } from '@/data/ssot';
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-chat`;
 const HISTORY_LIMIT = 10; // Synced with edge function
@@ -14,6 +16,12 @@ interface ChatMessage {
 
 // Store conversation history per session
 const sessionHistory: Map<string, ChatMessage[]> = new Map();
+
+// Cache learner observation patterns from SSOT
+const kPatterns = getLearnerObsPatterns('knowledge');
+const pPatterns = getLearnerObsPatterns('precision');
+const bPatterns = getLearnerObsPatterns('behavior');
+const vPatterns = getLearnerObsPatterns('verification');
 
 export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
   const startTime = Date.now();
@@ -289,43 +297,104 @@ export const streamChat = async ({
   }
 };
 
-// Generate EAI analysis from response with content-aware heuristics
-function generateAnalysis(input: string, output: string, profile: LearnerProfile): EAIAnalysis {
-  const isCommand = input.startsWith('/');
+// Detect knowledge level using SSOT learner_obs patterns
+function detectKnowledgeLevel(input: string): string {
+  const lowerInput = input.toLowerCase();
+  
+  // Use SSOT patterns for detection
+  if (kPatterns.get('K1')?.test(lowerInput)) return 'K1';
+  if (kPatterns.get('K3')?.test(lowerInput)) return 'K3';
+  if (kPatterns.get('K2')?.test(lowerInput)) return 'K2';
+  
+  // Fallback patterns
+  if (/wat is|definitie|noem|betekent|heet/.test(lowerInput)) return 'K1';
+  if (/hoe|stappen|methode|procedure|aanpak/.test(lowerInput)) return 'K3';
+  
+  return 'K2'; // Default conceptueel
+}
+
+// Detect precision phase using SSOT patterns
+function detectPrecisionPhase(output: string): string {
+  const lowerOutput = output.toLowerCase();
+  
+  if (pPatterns.get('P1')?.test(lowerOutput)) return 'P1';
+  if (pPatterns.get('P5')?.test(lowerOutput)) return 'P5';
+  if (pPatterns.get('P4')?.test(lowerOutput)) return 'P4';
+  if (pPatterns.get('P2')?.test(lowerOutput)) return 'P2';
+  
+  // Fallback
+  if (lowerOutput.includes('wat weet je al') || lowerOutput.includes('voorkennis')) return 'P1';
+  if (lowerOutput.includes('probeer') || lowerOutput.includes('mogelijkheden')) return 'P2';
+  if (lowerOutput.includes('verbind') || lowerOutput.includes('samenvat')) return 'P4';
+  if (lowerOutput.includes('transfer') || lowerOutput.includes('toepas')) return 'P5';
+  
+  return 'P3'; // Default instructie
+}
+
+// Detect behavior pattern using SSOT patterns
+function detectBehavior(input: string, hasQuestion: boolean): string {
+  const lowerInput = input.toLowerCase();
+  
+  // Check for proactive indicators
+  if (bPatterns.get('B4')?.test(lowerInput) || /volgende stap|plan|vooruit/.test(lowerInput)) return 'B4';
+  if (bPatterns.get('B3')?.test(lowerInput) || hasQuestion) return 'B3';
+  if (bPatterns.get('B1')?.test(lowerInput) || input.length < 20) return 'B1';
+  
+  return 'B2'; // Default reactief
+}
+
+// Detect verification status using SSOT patterns
+function detectVerification(input: string, output: string): string {
   const lowerInput = input.toLowerCase();
   const lowerOutput = output.toLowerCase();
   
-  // Content-aware knowledge level detection
-  let knowledgeLevel = 'K2';
-  if (lowerInput.includes('wat is') || lowerInput.includes('definitie') || lowerInput.includes('noem')) {
-    knowledgeLevel = 'K1'; // Factual
-  } else if (lowerInput.includes('hoe') || lowerInput.includes('stappen') || lowerInput.includes('methode')) {
-    knowledgeLevel = 'K3'; // Procedural
-  }
+  // Check for transfer indicators
+  if (/nieuwe context|ander voorbeeld|eigen voorbeeld/.test(lowerInput)) return 'V5';
+  if (vPatterns.get('V4')?.test(lowerOutput) || /toepassing|oefening correct/.test(lowerOutput)) return 'V4';
+  if (vPatterns.get('V3')?.test(lowerOutput) || output.includes('?')) return 'V3';
+  if (vPatterns.get('V2')?.test(lowerInput) || /snap het|begrijp/.test(lowerInput)) return 'V2';
+  
+  return 'V1'; // Default niet geverifieerd
+}
+
+// Detect time factor based on complexity
+function detectTimeFactor(sentenceCount: number, hasCode: boolean): string {
+  if (sentenceCount <= 2 && !hasCode) return 'T1';
+  if (sentenceCount <= 5) return 'T2';
+  if (sentenceCount <= 10) return 'T3';
+  if (sentenceCount <= 20 || hasCode) return 'T4';
+  return 'T5';
+}
+
+// Generate EAI analysis from response with SSOT-coupled heuristics
+function generateAnalysis(input: string, output: string, profile: LearnerProfile): EAIAnalysis {
+  const isCommand = input.startsWith('/');
+  const lowerOutput = output.toLowerCase();
+  
+  // Content-aware detection using SSOT patterns
+  const knowledgeLevel = detectKnowledgeLevel(input);
   
   // Cognitive load estimation based on response complexity
   const sentenceCount = (output.match(/[.!?]/g) || []).length;
   const hasCode = output.includes('```');
   const hasList = output.includes('- ') || output.includes('1.');
+  
   let cognitiveLoad = 'C2';
   if (sentenceCount > 10 || hasCode) cognitiveLoad = 'C3';
   if (sentenceCount > 20) cognitiveLoad = 'C4';
   if (sentenceCount <= 3) cognitiveLoad = 'C1';
   
-  // Precision phase based on conversation flow
-  const hasQuestion = output.includes('?');
-  let precisionPhase = 'P3';
-  if (lowerOutput.includes('wat weet je al') || lowerOutput.includes('voorkennis')) precisionPhase = 'P1';
-  else if (lowerOutput.includes('probeer') || lowerOutput.includes('mogelijkheden')) precisionPhase = 'P2';
-  else if (lowerOutput.includes('verbind') || lowerOutput.includes('samenvat')) precisionPhase = 'P4';
-  else if (lowerOutput.includes('transfer') || lowerOutput.includes('toepas')) precisionPhase = 'P5';
+  // Precision phase detection using SSOT patterns
+  const precisionPhase = detectPrecisionPhase(output);
   
   // Task density based on scaffolding signals
   let taskDensity = 'TD3';
   const hintCount = (lowerOutput.match(/hint|tip|probeer|denk/g) || []).length;
+  const hasQuestion = output.includes('?');
   if (hintCount >= 3) taskDensity = 'TD2';
   if (hintCount === 0 && hasQuestion) taskDensity = 'TD4';
   if (!hasQuestion && sentenceCount <= 2) taskDensity = 'TD5';
+  if (hintCount >= 5) taskDensity = 'TD1';
   
   // Agency score calculation
   const agencyScore = taskDensity === 'TD1' ? 0.2 : 
@@ -333,7 +402,7 @@ function generateAnalysis(input: string, output: string, profile: LearnerProfile
                       taskDensity === 'TD3' ? 0.5 : 
                       taskDensity === 'TD4' ? 0.7 : 0.85;
   
-  // Epistemic status from output - must match type: 'FEIT' | 'INTERPRETATIE' | 'SPECULATIE' | 'ONBEKEND'
+  // Epistemic status from output
   let epistemicStatus: 'FEIT' | 'INTERPRETATIE' | 'SPECULATIE' | 'ONBEKEND' = 'INTERPRETATIE';
   if (lowerOutput.includes('feit') || lowerOutput.includes('bewezen') || lowerOutput.includes('consensus')) {
     epistemicStatus = 'FEIT';
@@ -349,20 +418,53 @@ function generateAnalysis(input: string, output: string, profile: LearnerProfile
   else if (lowerOutput.includes('reflecteer') || lowerOutput.includes('terugkijk')) srlState = 'REFLECT';
   else if (lowerOutput.includes('aanpas') || lowerOutput.includes('anders')) srlState = 'ADJUST';
   
+  // Detect secondary dimensions using SSOT patterns
+  const behavior = detectBehavior(input, hasQuestion);
+  const verification = detectVerification(input, output);
+  const timeFactor = detectTimeFactor(sentenceCount, hasCode);
+  const scaffoldingLevel = `S${parseInt(taskDensity.replace('TD', ''))}`;
+  const modalityLevel = hasList ? 'L3' : hasCode ? 'L4' : 'L2';
+  const epistemicLevel = epistemicStatus === 'FEIT' ? 'E5' : 
+                         epistemicStatus === 'SPECULATIE' ? 'E2' : 
+                         epistemicStatus === 'ONBEKEND' ? 'E1' : 'E3';
+  
+  // Collect all detected bands
+  const allBands = [
+    knowledgeLevel, 
+    cognitiveLoad, 
+    precisionPhase, 
+    taskDensity, 
+    verification, 
+    epistemicLevel, 
+    timeFactor, 
+    scaffoldingLevel, 
+    modalityLevel, 
+    behavior
+  ];
+  
+  // Get flags from SSOT for all detected bands
+  const activeFlags = getFlagsForBands(allBands);
+  
+  // Determine active fix from SSOT (prioritize command, then cognitive load, then knowledge level)
+  let activeFix: string | null = null;
+  if (isCommand) {
+    activeFix = input.split(' ')[0];
+  } else if (cognitiveLoad === 'C4') {
+    activeFix = getFixForBand('C4'); // /chunk
+  } else if (cognitiveLoad === 'C3') {
+    activeFix = getFixForBand('C3'); // /hint_soft
+  } else {
+    activeFix = getFixForBand(knowledgeLevel); // K1->/anchor, K2->/connect, K3->/sequence
+  }
+  
   return {
     process_phases: ['WORKING'],
     coregulation_bands: [knowledgeLevel, cognitiveLoad, precisionPhase],
     task_densities: [taskDensity],
-    secondary_dimensions: [
-      `V${hasQuestion ? 2 : 3}`, 
-      `E${epistemicStatus === 'FEIT' ? 5 : epistemicStatus === 'SPECULATIE' ? 2 : 3}`,
-      `T${sentenceCount > 10 ? 4 : sentenceCount > 5 ? 3 : 2}`,
-      `S${parseInt(taskDensity.replace('TD', ''))}`,
-      `L${hasList ? 3 : hasCode ? 4 : 2}`,
-      `B${hasQuestion ? 3 : 2}`
-    ],
-    active_fix: isCommand ? input.split(' ')[0] : null,
-    reasoning: `${knowledgeLevel} detected, ${cognitiveLoad} load, ${taskDensity} density`,
+    secondary_dimensions: [verification, epistemicLevel, timeFactor, scaffoldingLevel, modalityLevel, behavior],
+    active_fix: activeFix,
+    active_flags: activeFlags,
+    reasoning: `${knowledgeLevel} detected via SSOT patterns, ${cognitiveLoad} load, ${taskDensity} density. Flags: ${activeFlags.slice(0, 3).join(', ')}`,
     current_profile: profile,
     task_density_balance: agencyScore - 0.5,
     epistemic_status: epistemicStatus,
