@@ -57,6 +57,21 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // EAI Custom colors
+        eai: {
+          teal: "hsl(var(--eai-teal))",
+          "teal-glow": "hsl(var(--eai-teal-glow))",
+          purple: "hsl(var(--eai-purple))",
+          slate: {
+            950: "hsl(var(--eai-slate-950))",
+            900: "hsl(var(--eai-slate-900))",
+            800: "hsl(var(--eai-slate-800))",
+            700: "hsl(var(--eai-slate-700))",
+            500: "hsl(var(--eai-slate-500))",
+            400: "hsl(var(--eai-slate-400))",
+            300: "hsl(var(--eai-slate-300))",
+          },
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
