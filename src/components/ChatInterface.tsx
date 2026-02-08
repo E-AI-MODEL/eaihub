@@ -11,6 +11,7 @@ import { getOrCreateUserId } from '@/services/identity';
 interface ChatInterfaceProps {
   profile: LearnerProfile;
   onAnalysisUpdate?: (analysis: EAIAnalysis, mechanical?: MechanicalState) => void;
+  sessionId?: string;
 }
 
 const THEMES: { id: DidacticTheme; label: string; icon: React.ReactNode; color: string }[] = [
@@ -31,13 +32,14 @@ const IDLE_NUDGES = [
   "Kun je een voorbeeld geven van wat je niet snapt?",
 ];
 
-export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysisUpdate }) => {
+export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysisUpdate, sessionId: externalSessionId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTheme, setActiveTheme] = useState<DidacticTheme>('DEFAULT');
   const [showLegend, setShowLegend] = useState(false);
-  const [sessionId] = useState(() => `session_${crypto.randomUUID()}`);
+  const [internalSessionId] = useState(() => `session_${crypto.randomUUID()}`);
+  const sessionId = externalSessionId || internalSessionId;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messageCounterRef = useRef(0);

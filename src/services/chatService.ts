@@ -1,6 +1,7 @@
 // Chat Service - Handles communication with EAI backend via Edge Function
 // Uses Lovable AI Gateway with streaming support
 // Version 15.0 - Uses authoritative SSOT v15.0.0 JSON with dynamic prompt
+// Includes reliability pipeline: parse/repair, SSOT-healing, epistemic guard
 
 import type { ChatRequest, ChatResponse, EAIAnalysis, MechanicalState, LearnerProfile } from '@/types';
 import { toast } from '@/hooks/use-toast';
@@ -13,6 +14,12 @@ import {
   SSOT_DATA
 } from '@/data/ssot';
 import { generateSystemPrompt } from '@/utils/ssotHelpers';
+import { 
+  executePipeline, 
+  pushTrace, 
+  getTraceEvents,
+  type TraceEvent 
+} from '@/lib/reliabilityPipeline';
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-chat`;
 const HISTORY_LIMIT = 10;
@@ -38,6 +45,15 @@ const bPatterns = getLearnerObsPatterns('B_BiasCorrectie');
 export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
   const startTime = Date.now();
   let history = sessionHistory.get(request.sessionId) || [];
+  
+  // Log pipeline start
+  pushTrace(request.sessionId, {
+    severity: 'INFO',
+    source: 'ENGINE',
+    step: 'PROMPT_ASSEMBLY',
+    message: 'Starting chat request',
+    data: { messageLength: request.message.length, historyLength: history.length },
+  });
   
   try {
     // Generate dynamic system prompt from SSOT
@@ -144,8 +160,9 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     ].slice(-HISTORY_LIMIT);
     sessionHistory.set(request.sessionId, history);
 
-    const analysis = generateAnalysis(request.message, fullText, request.profile);
-    const mechanical: MechanicalState = {
+    // Generate initial analysis
+    const rawAnalysis = generateAnalysis(request.message, fullText, request.profile);
+    const rawMechanical: MechanicalState = {
       latencyMs,
       inputTokens: request.message.length * 2,
       outputTokens: fullText.length,
@@ -154,11 +171,14 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       timestamp: new Date().toISOString(),
     };
 
+    // Execute reliability pipeline: SSOT-healing, epistemic guard, semantic validation
+    const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
+
     return {
       sessionId: request.sessionId,
       text: fullText,
-      analysis,
-      mechanical,
+      analysis: pipelineResult.analysis,
+      mechanical: pipelineResult.mechanical,
       auditId: `audit_${Date.now()}`,
     };
 
@@ -269,18 +289,25 @@ export const streamChat = async ({
     ].slice(-HISTORY_LIMIT);
     sessionHistory.set(request.sessionId, history);
 
+    // Generate initial analysis and run pipeline
+    const rawAnalysis = generateAnalysis(request.message, fullText, request.profile);
+    const rawMechanical: MechanicalState = {
+      latencyMs,
+      inputTokens: request.message.length * 2,
+      outputTokens: fullText.length,
+      model: 'gemini-3-flash-preview',
+      temperature: 0.7,
+      timestamp: new Date().toISOString(),
+    };
+    
+    // Execute reliability pipeline
+    const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
+
     onDone({
       sessionId: request.sessionId,
       text: fullText,
-      analysis: generateAnalysis(request.message, fullText, request.profile),
-      mechanical: {
-        latencyMs,
-        inputTokens: request.message.length * 2,
-        outputTokens: fullText.length,
-        model: 'gemini-3-flash-preview',
-        temperature: 0.7,
-        timestamp: new Date().toISOString(),
-      },
+      analysis: pipelineResult.analysis,
+      mechanical: pipelineResult.mechanical,
       auditId: `audit_${Date.now()}`,
     });
 
@@ -663,3 +690,7 @@ function generateAnalysis(input: string, output: string, profile: LearnerProfile
 export const clearSessionHistory = (sessionId: string): void => {
   sessionHistory.delete(sessionId);
 };
+
+// Re-export trace functions for UI access
+export { getTraceEvents, pushTrace, downloadTraceJSON, clearTrace } from '@/lib/reliabilityPipeline';
+export type { TraceEvent, TraceSeverity, TraceSource, PipelineStep } from '@/lib/reliabilityPipeline';
