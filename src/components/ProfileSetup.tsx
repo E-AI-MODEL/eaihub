@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { LearnerProfile } from '../types';
 
 interface ProfileSetupProps {
-  onComplete: (profile: LearnerProfile, goal: string) => void;
-  isOpen: boolean;
-  currentProfile?: LearnerProfile;
+  onComplete: (profile: LearnerProfile) => void;
+  initialProfile?: LearnerProfile;
+  onCancel?: () => void;
 }
 
-const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, isOpen, currentProfile }) => {
+const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile, onCancel }) => {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [formData, setFormData] = useState<LearnerProfile>({
     name: '',
@@ -85,16 +85,16 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, isOpen, current
   };
 
   useEffect(() => {
-    if (isOpen && currentProfile) {
+    if (initialProfile) {
       setFormData(prev => ({
         ...prev,
-        name: currentProfile.name || '',
-        subject: currentProfile.subject || '',
-        level: currentProfile.level || '',
-        grade: currentProfile.grade || ''
+        name: initialProfile.name || '',
+        subject: initialProfile.subject || '',
+        level: initialProfile.level || '',
+        grade: initialProfile.grade || ''
       }));
     }
-  }, [isOpen, currentProfile]);
+  }, [initialProfile]);
 
   const handleStepChange = (nextStep: 1 | 2 | 3) => {
     setIsFading(true);
@@ -116,7 +116,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, isOpen, current
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    onComplete(formData, goal || "Ik start met de module.");
+    onComplete({ ...formData, goal: goal || "Ik start met de module." });
   };
 
   const handleRouteSelect = (route: typeof LEARNING_ROUTES[0]) => {
@@ -128,7 +128,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, isOpen, current
     handleStepChange(3);
   };
 
-  if (!isOpen) return null;
+  // Always render - no isOpen check needed
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background text-foreground font-sans transition-all duration-700">

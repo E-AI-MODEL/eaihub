@@ -1,94 +1,130 @@
-import { MessageSquare, Sparkles, Settings } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ChatInterface } from '@/components/ChatInterface';
+import { Dashboard } from '@/components/Dashboard';
+import ProfileSetup from '@/components/ProfileSetup';
+import BootSequence from '@/components/BootSequence';
+import { fetchProfile, updateProfile } from '@/services/profileService';
+import { getOrCreateUserId } from '@/services/identity';
+import type { LearnerProfile, EAIAnalysis, ScaffoldingState } from '@/types';
 
-const StudentStudio = () => {
+type AppPhase = 'BOOT' | 'PROFILE_SETUP' | 'READY';
+
+const StudentStudio: React.FC = () => {
+  const [phase, setPhase] = useState<AppPhase>('BOOT');
+  const [profile, setProfile] = useState<LearnerProfile | null>(null);
+  const [currentAnalysis, setCurrentAnalysis] = useState<EAIAnalysis | null>(null);
+  const [scaffoldingState, setScaffoldingState] = useState<ScaffoldingState | undefined>();
+  const [showProfileEdit, setShowProfileEdit] = useState(false);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      const userId = getOrCreateUserId();
+      const { profile: storedProfile } = await fetchProfile(userId);
+      
+      if (storedProfile && storedProfile.name && storedProfile.subject) {
+        setProfile(storedProfile);
+        // Skip to ready if profile exists
+        setPhase('READY');
+      }
+    };
+
+    loadProfile();
+  }, []);
+
+  const handleBootComplete = () => {
+    if (profile && profile.name && profile.subject) {
+      setPhase('READY');
+    } else {
+      setPhase('PROFILE_SETUP');
+    }
+  };
+
+  const handleProfileComplete = async (newProfile: LearnerProfile) => {
+    const userId = getOrCreateUserId();
+    await updateProfile(userId, newProfile);
+    setProfile(newProfile);
+    setPhase('READY');
+    setShowProfileEdit(false);
+  };
+
+  const handleAnalysisUpdate = (analysis: EAIAnalysis) => {
+    setCurrentAnalysis(analysis);
+    if (analysis.scaffolding) {
+      setScaffoldingState(analysis.scaffolding);
+    }
+  };
+
+  // Boot sequence
+  if (phase === 'BOOT') {
+    return <BootSequence onComplete={handleBootComplete} />;
+  }
+
+  // Profile setup
+  if (phase === 'PROFILE_SETUP' || showProfileEdit) {
+    return (
+      <div className="min-h-screen bg-background pt-14">
+        <div className="max-w-2xl mx-auto p-6">
+          <ProfileSetup
+            initialProfile={profile || undefined}
+            onComplete={handleProfileComplete}
+            onCancel={showProfileEdit ? () => setShowProfileEdit(false) : undefined}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Main studio view
   return (
     <div className="min-h-screen bg-background pt-14">
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-4 lg:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Student Studio</h1>
-            <p className="text-sm text-muted-foreground">AI-ondersteunde leersessie</p>
+            <h1 className="text-xl lg:text-2xl font-bold text-foreground">
+              EAI Studio
+            </h1>
+            <p className="text-xs lg:text-sm text-muted-foreground">
+              {profile?.subject && profile?.level 
+                ? `${profile.subject} • ${profile.level}` 
+                : 'AI-ondersteunde leersessie'}
+            </p>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowProfileEdit(true)}
+            >
               <Settings className="w-4 h-4 mr-2" />
-              Profiel
+              <span className="hidden sm:inline">Profiel</span>
             </Button>
           </div>
         </div>
 
-        {/* Main chat area placeholder */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Chat Interface */}
-          <div className="lg:col-span-3">
-            <div className="border border-border rounded-xl bg-card h-[600px] flex flex-col">
-              {/* Chat messages area */}
-              <div className="flex-1 p-6 overflow-y-auto">
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <MessageSquare className="w-8 h-8 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    Welkom bij Student Studio
-                  </h3>
-                  <p className="text-muted-foreground max-w-md">
-                    Start een gesprek met je AI-coach. Stel een vraag over je lesstof en ontvang begeleiding die je helpt zelf het antwoord te ontdekken.
-                  </p>
-                </div>
-              </div>
-
-              {/* Input area */}
-              <div className="p-4 border-t border-border">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="text"
-                    placeholder="Stel je vraag..."
-                    className="flex-1 bg-secondary text-foreground border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <Button className="px-6">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Verstuur
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Tip: Wees specifiek over wat je niet begrijpt.
-                </p>
-              </div>
+        {/* Main Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
+          {/* Chat Interface - Takes 3 columns on large screens */}
+          <div className="lg:col-span-3 order-2 lg:order-1">
+            <div className="border border-border rounded-xl bg-card h-[calc(100vh-180px)] lg:h-[calc(100vh-160px)] flex flex-col overflow-hidden">
+              {profile && (
+                <ChatInterface
+                  profile={profile}
+                  onAnalysisUpdate={handleAnalysisUpdate}
+                />
+              )}
             </div>
           </div>
 
-          {/* Sidebar - Scaffolding Dashboard Preview */}
-          <div className="lg:col-span-1">
-            <div className="border border-border rounded-xl bg-card p-4">
-              <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">
-                10D Rubric
-              </h3>
-              <div className="space-y-3">
-                {['K', 'C', 'P', 'TD', 'V', 'E', 'T', 'S', 'L', 'B'].map((dim) => (
-                  <div key={dim} className="flex items-center justify-between">
-                    <span className="text-xs font-mono text-muted-foreground">{dim}</span>
-                    <div className="w-24 h-2 bg-secondary rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-primary/50 rounded-full" 
-                        style={{ width: `${Math.random() * 60 + 20}%` }} 
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="mt-6 pt-4 border-t border-border">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-muted-foreground">Knowledge Level</span>
-                  <span className="text-xs font-mono text-primary">K2</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Agency Score</span>
-                  <span className="text-xs font-mono text-primary">0.72</span>
-                </div>
-              </div>
+          {/* Dashboard Sidebar - Takes 1 column on large screens */}
+          <div className="lg:col-span-1 order-1 lg:order-2">
+            <div className="lg:sticky lg:top-20 space-y-4 max-h-[300px] lg:max-h-[calc(100vh-160px)] overflow-y-auto">
+              <Dashboard
+                analysis={currentAnalysis}
+                scaffolding={scaffoldingState}
+              />
             </div>
           </div>
         </div>
