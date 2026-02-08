@@ -147,9 +147,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
     setMessages([]);
   };
 
-  const getThemeCommand = (theme: DidacticTheme): string => {
-    const commands: Record<DidacticTheme, string> = {
-      DEFAULT: '',
+  const getThemeCommand = (theme: DidacticTheme): string | null => {
+    const commands: Record<DidacticTheme, string | null> = {
+      DEFAULT: null,
       DEVIL: '/devil',
       META: '/meta',
       CREATIVE: '/twist',
@@ -163,7 +163,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onAnalysi
   const handleThemeSelect = (theme: DidacticTheme) => {
     setActiveTheme(theme);
     const command = getThemeCommand(theme);
-    if (command && messages.length > 0) {
+    if (command !== null && messages.length > 0) {
       setInput(command + ' ');
     }
   };

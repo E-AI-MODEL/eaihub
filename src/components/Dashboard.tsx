@@ -58,12 +58,14 @@ const getMaxBands = (dimension: string): number => {
 export const Dashboard: React.FC<DashboardProps> = ({ analysis, scaffolding }) => {
   // Extract current bands from analysis with complete dimension parsing
   const getCurrentBands = (): Record<string, number> => {
+    // Default values for all 10 dimensions
+    const defaults: Record<string, number> = { K: 2, C: 2, P: 3, TD: 3, V: 2, E: 3, T: 2, S: 3, L: 2, B: 3 };
+    
     if (!analysis) {
-      // Default/demo values
-      return { K: 2, C: 2, P: 3, TD: 3, V: 2, E: 3, T: 2, S: 3, L: 2, B: 3 };
+      return defaults;
     }
 
-    const bands: Record<string, number> = {};
+    const bands: Record<string, number> = { ...defaults };
     
     // Helper to extract dimension and level from band string (e.g., "K2" -> {dim: "K", level: 2})
     const parseBand = (band: string) => {
