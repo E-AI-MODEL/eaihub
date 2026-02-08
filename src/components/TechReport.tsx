@@ -3,6 +3,12 @@ import { EAIAnalysis, MechanicalState, Message, DiagnosticResult } from '../type
 import { getEAICore, SSOTBand } from '@/utils/ssotHelpers';
 import { runDiagnostics } from '../utils/diagnostics';
 import { calculateDynamicTTL, EAIStateLike } from '@/utils/eaiLearnAdapter';
+import { 
+  getTraceEvents, 
+  downloadTraceJSON, 
+  clearTrace,
+  type TraceEvent 
+} from '@/lib/reliabilityPipeline';
 
 interface TechReportProps {
   onClose: () => void;
@@ -10,20 +16,26 @@ interface TechReportProps {
   lastMechanical: MechanicalState | null;
   messages: Message[];
   eaiState: EAIStateLike;
+  sessionId?: string;
 }
 
 type TabMode = 'PAPER' | 'SSOT' | 'TRACE' | 'TELEMETRY' | 'HEALTH';
 
-const TechReport: React.FC<TechReportProps> = ({ onClose, lastAnalysis, lastMechanical, messages, eaiState }) => {
+const TechReport: React.FC<TechReportProps> = ({ onClose, lastAnalysis, lastMechanical, messages, eaiState, sessionId }) => {
   const [activeTab, setActiveTab] = useState<TabMode>('PAPER');
   const [diagnostics, setDiagnostics] = useState<DiagnosticResult[]>([]);
+  const [traceEvents, setTraceEvents] = useState<TraceEvent[]>([]);
   const core = getEAICore();
 
   useEffect(() => {
     if (activeTab === 'HEALTH') {
       runDiagnostics(messages.length, lastMechanical?.latencyMs).then(setDiagnostics);
     }
-  }, [activeTab, messages.length, lastMechanical]);
+    if (activeTab === 'TRACE' && sessionId) {
+      const events = getTraceEvents(sessionId);
+      setTraceEvents(events);
+    }
+  }, [activeTab, messages.length, lastMechanical, sessionId]);
 
   const getTabClass = (mode: TabMode) => {
     const base = "px-4 py-3 sm:py-1 text-xs font-bold uppercase rounded transition-all whitespace-nowrap snap-center shrink-0 border border-transparent";
@@ -130,92 +142,100 @@ const TechReport: React.FC<TechReportProps> = ({ onClose, lastAnalysis, lastMech
           <div className="max-w-4xl mx-auto py-8 px-4 h-full flex flex-col">
             <div className="flex items-center justify-between mb-8 border-b border-slate-800 pb-4">
               <div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">Live Logic Stream</h2>
-                <p className="text-xs text-slate-400 font-mono mt-1">REAL-TIME DECISION TREE MAPPED TO SSOT</p>
+                <h2 className="text-2xl font-bold text-white tracking-tight">Reliability Pipeline Trace</h2>
+                <p className="text-xs text-slate-400 font-mono mt-1">PARSE → REPAIR → HEAL → GUARD → VALIDATE</p>
+              </div>
+              <div className="flex gap-2">
+                {sessionId && (
+                  <>
+                    <button 
+                      onClick={() => downloadTraceJSON(sessionId)}
+                      className="text-xs bg-cyan-900/30 hover:bg-cyan-900/50 border border-cyan-800 text-cyan-300 px-3 py-1.5 rounded transition-colors"
+                    >
+                      Export JSON
+                    </button>
+                    <button 
+                      onClick={() => {
+                        clearTrace(sessionId);
+                        setTraceEvents([]);
+                      }}
+                      className="text-xs bg-red-900/30 hover:bg-red-900/50 border border-red-800 text-red-300 px-3 py-1.5 rounded transition-colors"
+                    >
+                      Clear
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
-            {lastAnalysis ? (
-              <div className="space-y-6">
-                {/* Classification Block */}
-                <div className="bg-[#0f172a] border border-slate-700 rounded-xl overflow-hidden">
-                  <div className="bg-slate-800/50 p-2 border-b border-slate-700 px-4 flex justify-between items-center">
-                    <span className="text-xs font-bold text-cyan-400 uppercase tracking-widest">Phase 1: Classification</span>
-                    <span className="text-[10px] text-slate-500 font-mono">STEP 1/3</span>
-                  </div>
-                  <div className="p-4 space-y-4">
-                    {[
-                      ...(lastAnalysis.process_phases || []),
-                      ...(lastAnalysis.coregulation_bands || []),
-                      ...(lastAnalysis.task_densities || []),
-                      ...(lastAnalysis.secondary_dimensions || [])
-                    ].map(code => {
-                      const def = getBandDef(code);
-                      if (!def) return null;
-                      return (
-                        <div key={code} className="flex gap-4 p-3 bg-black/20 rounded border border-slate-800/50">
-                          <div className="w-10 text-center shrink-0">
-                            <code className="text-xs font-bold text-cyan-300 bg-cyan-900/20 px-1.5 py-0.5 rounded border border-cyan-800">{code}</code>
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex justify-between items-start">
-                              <h4 className="text-xs font-bold text-white">{def.label}</h4>
-                              <span className="text-[9px] text-slate-500 uppercase">{def.didactic_principle}</span>
-                            </div>
-                            <div className="mt-2 text-[10px] space-y-1">
-                              <div className="flex gap-2">
-                                <span className="text-slate-500 uppercase font-bold min-w-[70px]">Diagnosis:</span>
-                                <ul className="text-slate-300 list-disc pl-3">
-                                  {(def.learner_obs || []).map((o: string, i: number) => <li key={i}>{o}</li>)}
-                                </ul>
-                              </div>
-                            </div>
-                          </div>
+            {/* Pipeline Trace Events */}
+            {traceEvents.length > 0 ? (
+              <div className="flex-1 overflow-y-auto space-y-2 font-mono text-xs">
+                {traceEvents.slice().reverse().map((event, idx) => {
+                  const severityColors = {
+                    INFO: 'border-slate-700 bg-slate-900/50 text-slate-300',
+                    WARNING: 'border-yellow-800 bg-yellow-900/20 text-yellow-300',
+                    REPAIR: 'border-orange-800 bg-orange-900/20 text-orange-300',
+                    GATE: 'border-purple-800 bg-purple-900/20 text-purple-300',
+                    ERROR: 'border-red-800 bg-red-900/20 text-red-300',
+                  };
+                  const stepColors = {
+                    PROMPT_ASSEMBLY: 'text-blue-400',
+                    MODEL_CALL: 'text-cyan-400',
+                    PARSE: 'text-green-400',
+                    REPAIR: 'text-orange-400',
+                    SCHEMA_VALIDATE: 'text-purple-400',
+                    SSOT_HEAL: 'text-yellow-400',
+                    EPISTEMIC_GUARD: 'text-pink-400',
+                    LOGIC_GATE_CHECK: 'text-red-400',
+                    RENDER: 'text-emerald-400',
+                  };
+                  
+                  return (
+                    <div 
+                      key={idx} 
+                      className={`p-3 rounded border ${severityColors[event.severity]} transition-all hover:bg-white/5`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className={`font-bold ${stepColors[event.step] || 'text-slate-400'}`}>
+                            [{event.step}]
+                          </span>
+                          <span className="text-slate-500">{event.source}</span>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Reasoning Block */}
-                <div className="bg-[#0f172a] border border-slate-700 rounded-xl overflow-hidden">
-                  <div className="bg-slate-800/50 p-2 border-b border-slate-700 px-4 flex justify-between items-center">
-                    <span className="text-xs font-bold text-purple-400 uppercase tracking-widest">Phase 2: Reasoning Engine</span>
-                    <span className="text-[10px] text-slate-500 font-mono">STEP 2/3</span>
-                  </div>
-                  <div className="p-4">
-                    <p className="font-mono text-xs text-purple-200 leading-relaxed">{">"} {lastAnalysis.reasoning}</p>
-                  </div>
-                </div>
-
-                {/* Intervention Block */}
-                <div className="bg-[#0f172a] border border-slate-700 rounded-xl overflow-hidden">
-                  <div className="bg-slate-800/50 p-2 border-b border-slate-700 px-4 flex justify-between items-center">
-                    <span className="text-xs font-bold text-green-400 uppercase tracking-widest">Phase 3: Selected Intervention</span>
-                    <span className="text-[10px] text-slate-500 font-mono">STEP 3/3</span>
-                  </div>
-                  <div className="p-4">
-                    {lastAnalysis.active_fix ? (
-                      <div className="bg-green-900/10 border border-green-500/20 rounded p-3">
-                        <div className="flex items-center gap-2 mb-2">
-                          <code className="text-xs font-bold text-green-400 bg-green-900/30 px-2 py-0.5 rounded border border-green-500/30">
-                            {lastAnalysis.active_fix}
-                          </code>
-                          <span className="text-xs text-white font-bold">
-                            {core.commands.find(c => c.command === lastAnalysis.active_fix)?.description || "Dynamic Fix"}
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                            event.severity === 'ERROR' ? 'bg-red-500/20 text-red-400' :
+                            event.severity === 'WARNING' ? 'bg-yellow-500/20 text-yellow-400' :
+                            event.severity === 'REPAIR' ? 'bg-orange-500/20 text-orange-400' :
+                            event.severity === 'GATE' ? 'bg-purple-500/20 text-purple-400' :
+                            'bg-slate-500/20 text-slate-400'
+                          }`}>
+                            {event.severity}
+                          </span>
+                          <span className="text-slate-600 text-[10px]">
+                            {event.ts.split('T')[1]?.replace('Z', '')}
                           </span>
                         </div>
                       </div>
-                    ) : (
-                      <div className="text-xs text-slate-500 italic">No specific intervention protocol active.</div>
-                    )}
-                  </div>
-                </div>
+                      <p className="text-slate-200">{event.message}</p>
+                      {event.data && (
+                        <pre className="mt-2 text-[10px] text-slate-500 bg-black/30 p-2 rounded overflow-x-auto">
+                          {JSON.stringify(event.data, null, 2)}
+                        </pre>
+                      )}
+                      {event.durationMs && (
+                        <span className="text-[10px] text-slate-500 mt-1 block">Duration: {event.durationMs}ms</span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-64 text-slate-600 border border-dashed border-slate-800 rounded-xl bg-black/20">
-                <p className="text-sm font-bold uppercase tracking-widest mb-2">System Idle</p>
-                <p className="text-xs">Start a conversation to capture logic traces.</p>
+                <p className="text-sm font-bold uppercase tracking-widest mb-2">No Trace Events</p>
+                <p className="text-xs">Start a conversation to capture pipeline traces.</p>
+                <p className="text-xs text-slate-500 mt-2">Events: PARSE → REPAIR → SSOT_HEAL → EPISTEMIC_GUARD → VALIDATE</p>
               </div>
             )}
           </div>

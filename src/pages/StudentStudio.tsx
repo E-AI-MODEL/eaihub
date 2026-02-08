@@ -48,6 +48,7 @@ const StudentStudio: React.FC = () => {
   const [showTechReport, setShowTechReport] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(16).slice(2)}`);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -154,6 +155,7 @@ const StudentStudio: React.FC = () => {
             <ChatInterface
               profile={profile}
               onAnalysisUpdate={handleAnalysisUpdate}
+              sessionId={sessionId}
             />
           )}
         </div>
@@ -183,6 +185,7 @@ const StudentStudio: React.FC = () => {
           lastMechanical={currentMechanical} 
           messages={messages}
           eaiState={eaiState}
+          sessionId={sessionId}
         />
       )}
     </div>
