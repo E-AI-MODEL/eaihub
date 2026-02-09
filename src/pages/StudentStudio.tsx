@@ -5,6 +5,7 @@ import ProfileSetup from '@/components/ProfileSetup';
 import BootSequence from '@/components/BootSequence';
 import GameNeuroLinker from '@/components/GameNeuroLinker';
 import TechReport from '@/components/TechReport';
+import TopicSelector from '@/components/TopicSelector';
 import { fetchProfile, updateProfile } from '@/services/profileService';
 import { getOrCreateUserId } from '@/services/identity';
 import { createInitialEAIState, updateStateFromAnalysis, EAIStateLike } from '@/utils/eaiLearnAdapter';
@@ -54,6 +55,15 @@ const StudentStudio: React.FC = () => {
     setProfile(newProfile);
     setPhase('READY');
     setShowProfileEdit(false);
+  };
+
+  const handleNodeChange = async (nodeId: string | null) => {
+    if (profile) {
+      const updatedProfile = { ...profile, currentNodeId: nodeId };
+      setProfile(updatedProfile);
+      const userId = getOrCreateUserId();
+      await updateProfile(userId, updatedProfile);
+    }
   };
 
   const handleAnalysisUpdate = (analysis: EAIAnalysis, mechanical?: MechanicalState) => {
@@ -118,6 +128,18 @@ const StudentStudio: React.FC = () => {
         
         {/* Desktop Controls */}
         <div className="fixed top-16 right-4 hidden lg:flex items-center gap-2 z-30">
+          {/* Topic Selector - Compact Mode */}
+          {profile && (
+            <div className="w-48">
+              <TopicSelector
+                subject={profile.subject}
+                level={profile.level}
+                currentNodeId={profile.currentNodeId || null}
+                onNodeChange={handleNodeChange}
+                compact
+              />
+            </div>
+          )}
           <button
             onClick={() => setShowProfileEdit(true)}
             className="h-8 px-3 border border-slate-700 bg-slate-900/90 text-slate-400 text-[10px] font-medium uppercase tracking-wider hover:text-slate-100 hover:border-slate-600 transition-colors"

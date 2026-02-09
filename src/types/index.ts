@@ -23,6 +23,7 @@ export interface LearnerProfile {
   level: string | null;
   grade: string | null;
   goal?: string | null;
+  currentNodeId?: string | null;  // Reference to curriculum learning node
 }
 
 export interface ConsentRecord {
