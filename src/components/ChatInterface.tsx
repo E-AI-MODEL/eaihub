@@ -110,9 +110,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     if (!textToSend || isLoading) return;
     resetInteraction();
 
+    const isCommand = textToSend.startsWith('/');
+
     messageCounterRef.current += 1;
-    const userMessage: Message = { id: `msg_${crypto.randomUUID()}`, role: 'user', text: textToSend, timestamp: new Date() };
-    setMessages(prev => [...prev, userMessage]);
+    // Don't show /commands as user messages — the student shouldn't see them
+    if (!isCommand) {
+      const userMessage: Message = { id: `msg_${crypto.randomUUID()}`, role: 'user', text: textToSend, timestamp: new Date() };
+      setMessages(prev => [...prev, userMessage]);
+    }
     setInput('');
     setIsLoading(true);
 
@@ -121,7 +126,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
     try {
       const userId = getOrCreateUserId();
-      const response = await sendChat({ sessionId, userId, message: userMessage.text, profile });
+      const response = await sendChat({ sessionId, userId, message: textToSend, profile });
       messageCounterRef.current += 1;
       const modelMessage: Message = { id: `msg_${crypto.randomUUID()}`, role: 'model', text: response.text, timestamp: new Date(), analysis: response.analysis, mechanical: response.mechanical };
       setMessages(prev => [...prev, modelMessage]);
@@ -229,10 +234,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         <div className="flex items-end gap-2 max-w-2xl mx-auto">
           <button
             onClick={handleClearChat}
-            className="p-2 text-slate-600 hover:text-slate-400 transition-colors shrink-0 mb-0.5"
-            title="Chat wissen"
+            className="flex items-center gap-1.5 p-2 text-slate-500 hover:text-slate-300 transition-colors shrink-0 mb-0.5"
+            title="Gesprek wissen"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span className="text-[9px] font-mono uppercase tracking-wider hidden sm:inline">Wis</span>
           </button>
           <div className="flex-1 relative">
             <textarea

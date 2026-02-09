@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { LearnerProfile } from '../types';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ChevronRight, ArrowLeft } from 'lucide-react';
+import type { LearnerProfile } from '../types';
+import { getLearningPath, CURRICULUM_PATHS } from '@/data/curriculum';
 
 interface ProfileSetupProps {
   onComplete: (profile: LearnerProfile) => void;
@@ -7,92 +9,33 @@ interface ProfileSetupProps {
   onCancel?: () => void;
 }
 
+const LEARNING_ROUTES = [
+  { id: 'pilot_bio', label: 'Biologie', level: 'VWO', subject: 'Biologie', desc: 'Eiwitsynthese', icon: '🧬', isPilot: true },
+  { id: 'pilot_wis', label: 'Wiskunde B', level: 'VWO', subject: 'Wiskunde B', desc: 'Differentiëren', icon: '📐', isPilot: true },
+  { id: 'pilot_eco', label: 'Economie', level: 'HAVO', subject: 'Economie', desc: 'Marktwerking', icon: '💰', isPilot: true },
+  { id: 'gen_vmbo', label: 'VMBO', level: 'VMBO', subject: 'Algemeen', desc: 'Vrije ondersteuning', icon: '🎓', isPilot: false },
+  { id: 'gen_havo', label: 'HAVO', level: 'HAVO', subject: 'Algemeen', desc: 'Vrije ondersteuning', icon: '🎓', isPilot: false },
+  { id: 'gen_vwo', label: 'VWO', level: 'VWO', subject: 'Algemeen', desc: 'Vrije ondersteuning', icon: '🎓', isPilot: false },
+];
+
+const STEP_LABELS = ['Naam', 'Vak', 'Leerdoel'];
+
 const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile, onCancel }) => {
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [formData, setFormData] = useState<LearnerProfile>({
-    name: '',
-    subject: '',
-    level: '',
-    grade: ''
-  });
-  const [goal, setGoal] = useState('');
+  const [name, setName] = useState('');
+  const [selectedRoute, setSelectedRoute] = useState<typeof LEARNING_ROUTES[0] | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isFading, setIsFading] = useState(false);
 
-  const LEARNING_ROUTES = [
-    {
-      id: 'pilot_bio',
-      label: '🧬 Biologie',
-      levelLabel: 'VWO',
-      subject: 'Biologie',
-      level: 'VWO',
-      desc: 'Module: Eiwitsynthese',
-      isPilot: true
-    },
-    {
-      id: 'pilot_wis',
-      label: '📐 Wiskunde B',
-      levelLabel: 'VWO',
-      subject: 'Wiskunde B',
-      level: 'VWO',
-      desc: 'Module: Differentiëren',
-      isPilot: true
-    },
-    {
-      id: 'pilot_eco',
-      label: '💰 Economie',
-      levelLabel: 'HAVO',
-      subject: 'Economie',
-      level: 'HAVO',
-      desc: 'Module: Marktwerking',
-      isPilot: true
-    },
-    {
-      id: 'gen_vmbo',
-      label: '🎓 VMBO',
-      levelLabel: 'Algemeen',
-      subject: 'Algemeen',
-      level: 'VMBO',
-      desc: 'Vrije ondersteuning',
-      isPilot: false
-    },
-    {
-      id: 'gen_havo',
-      label: '🎓 HAVO',
-      levelLabel: 'Algemeen',
-      subject: 'Algemeen',
-      level: 'HAVO',
-      desc: 'Vrije ondersteuning',
-      isPilot: false
-    },
-    {
-      id: 'gen_vwo',
-      label: '🎓 VWO',
-      levelLabel: 'Algemeen',
-      subject: 'Algemeen',
-      level: 'VWO',
-      desc: 'Vrije ondersteuning',
-      isPilot: false
-    }
-  ];
-
-  const t = {
-    step1_title: "Welkom bij EAI Studio.",
-    step1_sub: "Laten we beginnen met je naam.",
-    step2_title: "Kies je leerroute.",
-    step2_sub: "Kies een volledige SLO-module of start een vrije sessie.",
-    step3_title: "Je startpunt.",
-    step3_sub: "Omschrijf kort wat je al weet over dit onderwerp.",
-  };
+  const curriculumNodes = useMemo(() => {
+    if (!selectedRoute) return [];
+    const path = getLearningPath(selectedRoute.subject, selectedRoute.level);
+    return path?.nodes || [];
+  }, [selectedRoute]);
 
   useEffect(() => {
     if (initialProfile) {
-      setFormData(prev => ({
-        ...prev,
-        name: initialProfile.name || '',
-        subject: initialProfile.subject || '',
-        level: initialProfile.level || '',
-        grade: initialProfile.grade || ''
-      }));
+      setName(initialProfile.name || '');
     }
   }, [initialProfile]);
 
@@ -101,175 +44,225 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
     setTimeout(() => {
       setStep(nextStep);
       setIsFading(false);
-    }, 300);
-  };
-
-  const goNext = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (step < 3) handleStepChange((step + 1) as 1 | 2 | 3);
-    else handleSubmit();
-  };
-
-  const goBack = () => {
-    if (step > 1) handleStepChange((step - 1) as 1 | 2 | 3);
-  };
-
-  const handleSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    onComplete({ ...formData, goal: goal || "Ik start met de module." });
+    }, 200);
   };
 
   const handleRouteSelect = (route: typeof LEARNING_ROUTES[0]) => {
-    setFormData({
-      ...formData,
-      subject: route.subject,
-      level: route.level
-    });
-    handleStepChange(3);
+    setSelectedRoute(route);
+    setSelectedNodeId(null);
+    const path = getLearningPath(route.subject, route.level);
+    if (path && path.nodes.length > 0) {
+      handleStepChange(3);
+    } else {
+      // No curriculum nodes — complete directly
+      onComplete({
+        name,
+        subject: route.subject,
+        level: route.level,
+        grade: null,
+        currentNodeId: null,
+      });
+    }
   };
 
-  // Always render - no isOpen check needed
+  const handleComplete = () => {
+    if (!selectedRoute) return;
+    onComplete({
+      name,
+      subject: selectedRoute.subject,
+      level: selectedRoute.level,
+      grade: null,
+      currentNodeId: selectedNodeId,
+    });
+  };
+
+  const goBack = () => {
+    if (step === 3) handleStepChange(2);
+    else if (step === 2) handleStepChange(1);
+  };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background text-foreground font-sans transition-all duration-700">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-muted/20 rounded-full blur-[100px] pointer-events-none"></div>
+    <div className="fixed inset-0 z-[60] bg-slate-950 flex items-center justify-center">
+      <div className="w-full max-w-2xl px-6 relative">
 
-      <div className="w-full max-w-4xl px-4 sm:px-8 relative z-10">
-        <div className="flex justify-center gap-3 mb-12">
-          {[1, 2, 3].map(i => (
-            <div
-              key={i}
-              className={`h-1.5 w-1.5 rounded-full transition-all duration-500 ${i === step ? 'bg-primary scale-125' : 'bg-muted'}`}
-            ></div>
+        {/* ── Step Indicator ── */}
+        <div className="flex items-center justify-center gap-0 mb-10">
+          {STEP_LABELS.map((label, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && (
+                <div className={`w-12 h-px ${i <= step - 1 ? 'bg-indigo-500/50' : 'bg-slate-800'}`} />
+              )}
+              <div className="flex flex-col items-center gap-1.5">
+                <div className={`w-2 h-2 transition-all duration-300 ${
+                  i <= step - 1 ? 'bg-indigo-400' : 'bg-slate-700'
+                }`} />
+                <span className={`text-[9px] font-mono uppercase tracking-widest ${
+                  i === step - 1 ? 'text-indigo-300' : 'text-slate-600'
+                }`}>
+                  {label}
+                </span>
+              </div>
+            </React.Fragment>
           ))}
         </div>
 
-        <form onSubmit={step === 3 ? handleSubmit : goNext} className={`transition-opacity duration-300 ${isFading ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
+        {/* ── Step Content ── */}
+        <div className={`transition-all duration-200 ${isFading ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
 
-          <div className="min-h-[400px] flex flex-col items-center text-center">
+          {/* STEP 1 — Naam */}
+          {step === 1 && (
+            <div className="text-center">
+              <div className="w-12 h-12 border border-slate-700 bg-slate-800/40 flex items-center justify-center mb-6 mx-auto">
+                <span className="text-indigo-400 text-sm font-mono font-bold tracking-tighter">EAI</span>
+              </div>
+              <h2 className="text-sm text-slate-200 font-medium mb-1">Welkom bij EAI Studio</h2>
+              <p className="text-[11px] text-slate-500 mb-8">Laten we je werkplek inrichten. Hoe heet je?</p>
 
-            {step === 1 && (
-              <>
-                <h2 className="text-3xl md:text-4xl font-light text-foreground mb-4 tracking-tight">{t.step1_title}</h2>
-                <p className="text-muted-foreground mb-10 text-lg">{t.step1_sub}</p>
+              <form onSubmit={(e) => { e.preventDefault(); if (name.trim()) handleStepChange(2); }}>
                 <input
                   type="text"
                   autoFocus
-                  required
-                  value={formData.name || ''}
-                  onChange={e => setFormData({...formData, name: e.target.value})}
-                  className="w-full max-w-md bg-transparent border-b border-border px-2 py-4 text-2xl text-center text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition-colors"
-                  placeholder="Typ je naam..."
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="Typ je naam…"
+                  className="w-full max-w-sm mx-auto block bg-slate-900 border border-slate-700 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-colors text-center"
                 />
-              </>
-            )}
+                <div className="mt-8 flex items-center justify-center gap-3">
+                  {onCancel && (
+                    <button type="button" onClick={onCancel} className="px-4 py-2 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors">
+                      Annuleren
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={!name.trim()}
+                    className="flex items-center gap-1.5 px-5 py-2 border border-indigo-500/40 bg-indigo-500/15 text-indigo-300 text-[10px] font-mono uppercase tracking-wider hover:bg-indigo-500/25 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Volgende <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
 
-            {step === 2 && (
-              <>
-                <h2 className="text-3xl md:text-4xl font-light text-foreground mb-4 tracking-tight">{t.step2_title}</h2>
-                <p className="text-muted-foreground mb-10 text-lg">{t.step2_sub}</p>
+          {/* STEP 2 — Vak kiezen */}
+          {step === 2 && (
+            <div>
+              <h2 className="text-sm text-slate-200 font-medium mb-1 text-center">Kies je leerroute</h2>
+              <p className="text-[11px] text-slate-500 mb-6 text-center">
+                Hoi <span className="text-slate-300">{name}</span>, selecteer een module of start vrij.
+              </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-h-[60vh] overflow-y-auto">
-                  {LEARNING_ROUTES.map(route => (
+              {/* Pilot routes */}
+              <div className="mb-4">
+                <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-2 block">SLO Modules</span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {LEARNING_ROUTES.filter(r => r.isPilot).map(route => (
                     <button
                       key={route.id}
-                      type="button"
                       onClick={() => handleRouteSelect(route)}
-                      className={`group relative p-5 rounded-2xl border text-left transition-all duration-300 active:scale-95 flex flex-col justify-between min-h-[140px] ${
-                        route.isPilot
-                          ? 'bg-card border-primary/30 hover:border-primary hover:bg-muted hover:shadow-lg'
-                          : 'bg-card/50 border-border hover:border-muted-foreground hover:bg-card'
-                      }`}
+                      className="p-3 border border-slate-800 bg-slate-900/60 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-left group"
                     >
-                      <div className="flex justify-between items-start w-full mb-2">
-                        <span className={`text-xl font-bold ${route.isPilot ? 'text-foreground' : 'text-muted-foreground'}`}>
-                          {route.label}
-                        </span>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${
-                          route.isPilot
-                            ? 'bg-primary/10 text-primary border-primary/30'
-                            : 'bg-muted text-muted-foreground border-border'
-                        }`}>
-                          {route.levelLabel}
-                        </span>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm">{route.icon}</span>
+                        <span className="text-[9px] font-mono text-indigo-400 border border-indigo-500/30 px-1.5 py-0.5">{route.level}</span>
                       </div>
-
-                      <div>
-                        <div className={`text-xs ${route.isPilot ? 'text-primary/80' : 'text-muted-foreground'} mb-3`}>
-                          {route.desc}
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          {route.isPilot ? (
-                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary">
-                              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                              SLO ACTIVE
-                            </div>
-                          ) : (
-                            <div className="text-[10px] text-muted-foreground italic">
-                              SLO volgt later
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                      <span className="text-xs text-slate-300 group-hover:text-slate-100 block font-medium">{route.label}</span>
+                      <span className="text-[10px] text-slate-600 block">{route.desc}</span>
                     </button>
                   ))}
                 </div>
-              </>
-            )}
+              </div>
 
-            {step === 3 && (
-              <>
-                <h2 className="text-3xl md:text-4xl font-light text-foreground mb-4 tracking-tight">{t.step3_title}</h2>
-                <p className="text-muted-foreground mb-8 text-lg">{t.step3_sub}</p>
-
-                <div className="bg-muted/50 p-4 rounded-xl mb-6 border border-border">
-                  <div className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Gekozen Route</div>
-                  <div className="text-lg font-bold text-primary">
-                    {formData.subject} <span className="text-muted-foreground">|</span> {formData.level}
-                  </div>
+              {/* General routes */}
+              <div>
+                <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-2 block">Vrije Sessie</span>
+                <div className="grid grid-cols-3 gap-2">
+                  {LEARNING_ROUTES.filter(r => !r.isPilot).map(route => (
+                    <button
+                      key={route.id}
+                      onClick={() => handleRouteSelect(route)}
+                      className="p-2.5 border border-slate-800/60 bg-slate-900/30 hover:border-slate-700 hover:bg-slate-900/50 transition-all text-left group"
+                    >
+                      <span className="text-xs text-slate-400 group-hover:text-slate-300 block">{route.label}</span>
+                      <span className="text-[10px] text-slate-600 block">{route.desc}</span>
+                    </button>
+                  ))}
                 </div>
+              </div>
 
-                <textarea
-                  autoFocus
-                  value={goal}
-                  onChange={e => setGoal(e.target.value)}
-                  className="w-full max-w-lg h-32 bg-card rounded-xl px-6 py-5 text-lg text-foreground placeholder-muted-foreground focus:bg-muted focus:ring-1 focus:ring-primary/50 outline-none transition-all resize-none leading-relaxed border border-border"
-                  placeholder="Ik wil oefenen met..."
-                />
-              </>
-            )}
-          </div>
-
-          <div className="mt-12 flex flex-col items-center gap-6">
-            <div className="flex gap-4">
-              {step > 1 && (
-                <button
-                  type="button"
-                  onClick={goBack}
-                  className="px-6 py-3 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
-                >
-                  Terug
+              <div className="mt-6 flex justify-center">
+                <button onClick={goBack} className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors">
+                  <ArrowLeft className="w-3 h-3" /> Terug
                 </button>
-              )}
-              {onCancel && step === 1 && (
-                <button
-                  type="button"
-                  onClick={onCancel}
-                  className="px-6 py-3 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
-                >
-                  Annuleren
-                </button>
-              )}
-              <button
-                type="submit"
-                className="px-10 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full shadow-lg transition-all transform hover:scale-105 active:scale-95 text-sm tracking-wide"
-              >
-                {step === 3 ? "Start Sessie" : "Volgende"}
-              </button>
+              </div>
             </div>
-          </div>
-        </form>
+          )}
+
+          {/* STEP 3 — Leerdoel kiezen */}
+          {step === 3 && selectedRoute && (
+            <div>
+              <h2 className="text-sm text-slate-200 font-medium mb-1 text-center">Kies je leerdoel</h2>
+              <p className="text-[11px] text-slate-500 mb-1 text-center">
+                <span className="text-slate-300">{selectedRoute.label} {selectedRoute.level}</span> — waar wil je aan werken?
+              </p>
+              <p className="text-[10px] text-slate-600 mb-6 text-center">
+                Je kunt dit later altijd wijzigen via de header.
+              </p>
+
+              <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+                {curriculumNodes.map((node, i) => (
+                  <button
+                    key={node.id}
+                    onClick={() => setSelectedNodeId(node.id)}
+                    className={`w-full p-3 border text-left transition-all group ${
+                      selectedNodeId === node.id
+                        ? 'border-indigo-500/50 bg-indigo-500/10'
+                        : 'border-slate-800 bg-slate-900/40 hover:border-slate-700 hover:bg-slate-900/60'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className={`text-[10px] font-mono mt-0.5 shrink-0 ${
+                        selectedNodeId === node.id ? 'text-indigo-400' : 'text-slate-600'
+                      }`}>
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <div className="min-w-0">
+                        <span className={`text-xs block font-medium ${
+                          selectedNodeId === node.id ? 'text-indigo-200' : 'text-slate-300 group-hover:text-slate-100'
+                        }`}>
+                          {node.title}
+                        </span>
+                        <span className="text-[10px] text-slate-500 block mt-0.5">{node.description}</span>
+                        <div className="flex items-center gap-3 mt-1.5">
+                          <span className="text-[9px] font-mono text-slate-600">~{node.study_load_minutes} min</span>
+                          {node.common_misconceptions && node.common_misconceptions.length > 0 && (
+                            <span className="text-[9px] font-mono text-amber-500/60">
+                              {node.common_misconceptions.length} aandachtspunten
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-6 flex items-center justify-between">
+                <button onClick={goBack} className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors">
+                  <ArrowLeft className="w-3 h-3" /> Terug
+                </button>
+                <button
+                  onClick={handleComplete}
+                  disabled={!selectedNodeId}
+                  className="flex items-center gap-1.5 px-5 py-2 border border-indigo-500/40 bg-indigo-500/15 text-indigo-300 text-[10px] font-mono uppercase tracking-wider hover:bg-indigo-500/25 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  Start Sessie <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
