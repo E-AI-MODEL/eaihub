@@ -25,6 +25,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
   const [name, setName] = useState('');
   const [selectedRoute, setSelectedRoute] = useState<typeof LEARNING_ROUTES[0] | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [customSubject, setCustomSubject] = useState('');
   const [isFading, setIsFading] = useState(false);
 
   const curriculumNodes = useMemo(() => {
@@ -50,29 +51,20 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
   const handleRouteSelect = (route: typeof LEARNING_ROUTES[0]) => {
     setSelectedRoute(route);
     setSelectedNodeId(null);
-    const path = getLearningPath(route.subject, route.level);
-    if (path && path.nodes.length > 0) {
-      handleStepChange(3);
-    } else {
-      // No curriculum nodes — complete directly
-      onComplete({
-        name,
-        subject: route.subject,
-        level: route.level,
-        grade: null,
-        currentNodeId: null,
-      });
-    }
+    setCustomSubject('');
+    // Always go to step 3 — either node selection or subject input
+    handleStepChange(3);
   };
 
   const handleComplete = () => {
     if (!selectedRoute) return;
+    const hasCurriculum = curriculumNodes.length > 0;
     onComplete({
       name,
-      subject: selectedRoute.subject,
+      subject: hasCurriculum ? selectedRoute.subject : (customSubject.trim() || selectedRoute.subject),
       level: selectedRoute.level,
       grade: null,
-      currentNodeId: selectedNodeId,
+      currentNodeId: hasCurriculum ? selectedNodeId : null,
     });
   };
 
@@ -199,67 +191,103 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
             </div>
           )}
 
-          {/* STEP 3 — Leerdoel kiezen */}
+          {/* STEP 3 — Leerdoel of Vak kiezen */}
           {step === 3 && selectedRoute && (
             <div>
-              <h2 className="text-sm text-slate-200 font-medium mb-1 text-center">Kies je leerdoel</h2>
-              <p className="text-[11px] text-slate-500 mb-1 text-center">
-                <span className="text-slate-300">{selectedRoute.label} {selectedRoute.level}</span> — waar wil je aan werken?
-              </p>
-              <p className="text-[10px] text-slate-600 mb-6 text-center">
-                Je kunt dit later altijd wijzigen via de header.
-              </p>
+              {curriculumNodes.length > 0 ? (
+                /* ── Curriculum route: pick a learning node ── */
+                <>
+                  <h2 className="text-sm text-slate-200 font-medium mb-1 text-center">Kies je leerdoel</h2>
+                  <p className="text-[11px] text-slate-500 mb-1 text-center">
+                    <span className="text-slate-300">{selectedRoute.label} {selectedRoute.level}</span> — waar wil je aan werken?
+                  </p>
+                  <p className="text-[10px] text-slate-600 mb-6 text-center">
+                    Je kunt dit later altijd wijzigen via de header.
+                  </p>
 
-              <div className="space-y-2 max-h-[50vh] overflow-y-auto">
-                {curriculumNodes.map((node, i) => (
-                  <button
-                    key={node.id}
-                    onClick={() => setSelectedNodeId(node.id)}
-                    className={`w-full p-3 border text-left transition-all group ${
-                      selectedNodeId === node.id
-                        ? 'border-indigo-500/50 bg-indigo-500/10'
-                        : 'border-slate-800 bg-slate-900/40 hover:border-slate-700 hover:bg-slate-900/60'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className={`text-[10px] font-mono mt-0.5 shrink-0 ${
-                        selectedNodeId === node.id ? 'text-indigo-400' : 'text-slate-600'
-                      }`}>
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-                      <div className="min-w-0">
-                        <span className={`text-xs block font-medium ${
-                          selectedNodeId === node.id ? 'text-indigo-200' : 'text-slate-300 group-hover:text-slate-100'
-                        }`}>
-                          {node.title}
-                        </span>
-                        <span className="text-[10px] text-slate-500 block mt-0.5">{node.description}</span>
-                        <div className="flex items-center gap-3 mt-1.5">
-                          <span className="text-[9px] font-mono text-slate-600">~{node.study_load_minutes} min</span>
-                          {node.common_misconceptions && node.common_misconceptions.length > 0 && (
-                            <span className="text-[9px] font-mono text-amber-500/60">
-                              {node.common_misconceptions.length} aandachtspunten
+                  <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+                    {curriculumNodes.map((node, i) => (
+                      <button
+                        key={node.id}
+                        onClick={() => setSelectedNodeId(node.id)}
+                        className={`w-full p-3 border text-left transition-all group ${
+                          selectedNodeId === node.id
+                            ? 'border-indigo-500/50 bg-indigo-500/10'
+                            : 'border-slate-800 bg-slate-900/40 hover:border-slate-700 hover:bg-slate-900/60'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className={`text-[10px] font-mono mt-0.5 shrink-0 ${
+                            selectedNodeId === node.id ? 'text-indigo-400' : 'text-slate-600'
+                          }`}>
+                            {String(i + 1).padStart(2, '0')}
+                          </span>
+                          <div className="min-w-0">
+                            <span className={`text-xs block font-medium ${
+                              selectedNodeId === node.id ? 'text-indigo-200' : 'text-slate-300 group-hover:text-slate-100'
+                            }`}>
+                              {node.title}
                             </span>
-                          )}
+                            <span className="text-[10px] text-slate-500 block mt-0.5">{node.description}</span>
+                            <div className="flex items-center gap-3 mt-1.5">
+                              <span className="text-[9px] font-mono text-slate-600">~{node.study_load_minutes} min</span>
+                              {node.common_misconceptions && node.common_misconceptions.length > 0 && (
+                                <span className="text-[9px] font-mono text-amber-500/60">
+                                  {node.common_misconceptions.length} aandachtspunten
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
+                      </button>
+                    ))}
+                  </div>
 
-              <div className="mt-6 flex items-center justify-between">
-                <button onClick={goBack} className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors">
-                  <ArrowLeft className="w-3 h-3" /> Terug
-                </button>
-                <button
-                  onClick={handleComplete}
-                  disabled={!selectedNodeId}
-                  className="flex items-center gap-1.5 px-5 py-2 border border-indigo-500/40 bg-indigo-500/15 text-indigo-300 text-[10px] font-mono uppercase tracking-wider hover:bg-indigo-500/25 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >
-                  Start Sessie <ChevronRight className="w-3 h-3" />
-                </button>
-              </div>
+                  <div className="mt-6 flex items-center justify-between">
+                    <button onClick={goBack} className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors">
+                      <ArrowLeft className="w-3 h-3" /> Terug
+                    </button>
+                    <button
+                      onClick={handleComplete}
+                      disabled={!selectedNodeId}
+                      className="flex items-center gap-1.5 px-5 py-2 border border-indigo-500/40 bg-indigo-500/15 text-indigo-300 text-[10px] font-mono uppercase tracking-wider hover:bg-indigo-500/25 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Start Sessie <ChevronRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                </>
+              ) : (
+                /* ── General route: ask which subject ── */
+                <>
+                  <h2 className="text-sm text-slate-200 font-medium mb-1 text-center">Welk vak?</h2>
+                  <p className="text-[11px] text-slate-500 mb-6 text-center">
+                    Je hebt <span className="text-slate-300">{selectedRoute.level}</span> gekozen. Over welk vak gaat je vraag?
+                  </p>
+
+                  <form onSubmit={(e) => { e.preventDefault(); if (customSubject.trim()) handleComplete(); }}>
+                    <input
+                      type="text"
+                      autoFocus
+                      value={customSubject}
+                      onChange={e => setCustomSubject(e.target.value)}
+                      placeholder="Bijv. Nederlands, Scheikunde, Geschiedenis…"
+                      className="w-full max-w-sm mx-auto block bg-slate-900 border border-slate-700 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-colors text-center"
+                    />
+                    <div className="mt-8 flex items-center justify-center gap-3">
+                      <button type="button" onClick={goBack} className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors">
+                        <ArrowLeft className="w-3 h-3" /> Terug
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!customSubject.trim()}
+                        className="flex items-center gap-1.5 px-5 py-2 border border-indigo-500/40 bg-indigo-500/15 text-indigo-300 text-[10px] font-mono uppercase tracking-wider hover:bg-indigo-500/25 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Start Sessie <ChevronRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </form>
+                </>
+              )}
             </div>
           )}
         </div>
