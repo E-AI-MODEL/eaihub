@@ -100,15 +100,11 @@ const StudentStudio: React.FC = () => {
 
   if (phase === 'PROFILE_SETUP' || showProfileEdit) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="max-w-2xl w-full p-6">
-          <ProfileSetup
-            initialProfile={profile || undefined}
-            onComplete={handleProfileComplete}
-            onCancel={showProfileEdit ? () => setShowProfileEdit(false) : undefined}
-          />
-        </div>
-      </div>
+      <ProfileSetup
+        initialProfile={profile || undefined}
+        onComplete={handleProfileComplete}
+        onCancel={showProfileEdit ? () => setShowProfileEdit(false) : undefined}
+      />
     );
   }
 
