@@ -136,4 +136,22 @@
       linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
     background-size: 60px 60px;
   }
+
+  /* Studio grid bg — subtler variant for chat well */
+  .studio-grid-bg {
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
+
+/* Shimmer animation for loading bar */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
+.shimmer-bar {
+  animation: shimmer 1.5s ease-in-out infinite;
 }

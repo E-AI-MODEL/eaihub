@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 const TopNav = () => {
   const location = useLocation();
-  const isLanding = location.pathname === '/' || location.pathname === '/concept';
+  const isLanding = location.pathname === '/' || location.pathname === '/concept' || location.pathname === '/student';
 
   // Hide generic nav on landing and concept page
   if (isLanding) return null;
