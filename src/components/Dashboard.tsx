@@ -176,97 +176,97 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 }) => (
   <>
     {/* PROCESFASE */}
-    <div className="p-4 border-b border-slate-800">
-      <div className="flex items-center gap-2 mb-3">
-        <Brain className="w-4 h-4 text-indigo-400" />
-        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Procesfase</span>
+    <div className="px-3 py-2.5 border-b border-slate-800">
+      <div className="flex items-center gap-1.5 mb-2">
+        <Brain className="w-3 h-3 text-indigo-400" />
+        <span className="text-[8px] font-medium text-slate-400 uppercase tracking-widest">Procesfase</span>
       </div>
 
       {/* Phase stepper */}
-      <div className="flex items-center gap-1 mb-3">
+      <div className="flex items-center gap-0.5 mb-1.5">
         {PHASE_STEPS.map((step, i) => (
           <React.Fragment key={step}>
-            <div className={`flex-1 h-1.5 transition-colors ${i <= currentPhaseIdx ? 'bg-indigo-500/70' : 'bg-slate-800'}`} />
+            <div className={`flex-1 h-1 transition-colors ${i <= currentPhaseIdx ? 'bg-indigo-500/70' : 'bg-slate-800'}`} />
           </React.Fragment>
         ))}
       </div>
-      <div className="flex justify-between mb-3">
+      <div className="flex justify-between mb-2">
         {PHASE_LABELS.map((label, i) => (
-          <span key={label} className={`text-[8px] font-mono uppercase tracking-wider ${i === currentPhaseIdx ? 'text-indigo-300' : 'text-slate-700'}`}>
+          <span key={label} className={`text-[7px] font-mono uppercase tracking-wider ${i === currentPhaseIdx ? 'text-indigo-300' : 'text-slate-700'}`}>
             {label}
           </span>
         ))}
       </div>
 
-      <div className="p-3 border-2 border-indigo-500/60 bg-slate-900/80">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] font-mono text-indigo-400 uppercase tracking-wider">ACTIEF</span>
-          <span className="text-xs font-mono text-slate-500">{phase?.id || '—'}</span>
+      <div className="p-2 border border-indigo-500/60 bg-slate-900/80">
+        <div className="flex items-center justify-between mb-0.5">
+          <span className="text-[8px] font-mono text-indigo-400 uppercase tracking-wider">ACTIEF</span>
+          <span className="text-[9px] font-mono text-slate-500">{phase?.id || '—'}</span>
         </div>
-        <div className="text-lg font-semibold text-slate-100 tracking-tight">
+        <div className="text-xs font-semibold text-slate-100 tracking-tight">
           {phase?.label || 'Wachten op input...'}
         </div>
       </div>
     </div>
 
     {/* INTERVENTIE */}
-    <div className="p-4 border-b border-slate-800">
-      <div className="flex items-center gap-2 mb-2">
-        <Zap className="w-3.5 h-3.5 text-slate-500" />
-        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Interventie</span>
+    <div className="px-3 py-2.5 border-b border-slate-800">
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <Zap className="w-3 h-3 text-slate-500" />
+        <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider">Interventie</span>
       </div>
       {analysis?.active_fix ? (
         <div>
-          <code className="text-xs font-mono text-indigo-300 bg-indigo-500/10 px-2 py-1 border border-indigo-500/30">
+          <code className="text-[10px] font-mono text-indigo-300 bg-indigo-500/10 px-1.5 py-0.5 border border-indigo-500/30">
             {analysis.active_fix}
           </code>
-          <p className="text-[11px] text-slate-400 mt-2 leading-relaxed">{activeFixDetails?.description || 'Actieve interventie'}</p>
+          <p className="text-[9px] text-slate-400 mt-1.5 leading-relaxed">{activeFixDetails?.description || 'Actieve interventie'}</p>
         </div>
       ) : (
-        <span className="text-[11px] text-slate-600 italic">Geen actieve interventie</span>
+        <span className="text-[9px] text-slate-600 italic">Geen actieve interventie</span>
       )}
     </div>
 
     {/* EPISTEMISCHE STATUS */}
-    <div className="p-4 border-b border-slate-800">
-      <div className="flex items-center gap-2 mb-2">
-        <Activity className="w-3.5 h-3.5 text-amber-400" />
-        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Epistemische Status</span>
+    <div className="px-3 py-2.5 border-b border-slate-800">
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <Activity className="w-3 h-3 text-amber-400" />
+        <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider">Epistemische Status</span>
       </div>
-      <div className={`p-3 border ${
+      <div className={`p-2 border ${
         epistemic?.flag ? 'border-red-500/60 bg-red-950/20' :
         epistemic?.id === 'E1' ? 'border-amber-500/60 bg-amber-950/20' :
         'border-slate-600 bg-slate-900/40'
       }`}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {epistemic?.flag ? <AlertTriangle className="w-4 h-4 text-red-400" /> : <CheckCircle2 className="w-4 h-4 text-slate-500" />}
-            <span className={`text-sm font-medium ${epistemic?.flag ? 'text-red-300' : epistemic?.id === 'E1' ? 'text-amber-300' : 'text-slate-300'}`}>
+          <div className="flex items-center gap-1.5">
+            {epistemic?.flag ? <AlertTriangle className="w-3 h-3 text-red-400" /> : <CheckCircle2 className="w-3 h-3 text-slate-500" />}
+            <span className={`text-[10px] font-medium ${epistemic?.flag ? 'text-red-300' : epistemic?.id === 'E1' ? 'text-amber-300' : 'text-slate-300'}`}>
               {epistemic?.flag ? 'CAUTION' : (epistemic?.label || 'Onbekend')}
             </span>
           </div>
-          <span className="text-xs font-mono text-slate-500">{epistemic?.id || '—'}</span>
+          <span className="text-[9px] font-mono text-slate-500">{epistemic?.id || '—'}</span>
         </div>
       </div>
     </div>
 
     {/* ZELFSTANDIGHEID */}
     {eaiState?.scaffolding && (
-      <div className="p-4 border-b border-slate-800">
-        <div className="flex items-center gap-2 mb-2">
-          <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Zelfstandigheid</span>
+      <div className="px-3 py-2.5 border-b border-slate-800">
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <TrendingUp className="w-3 h-3 text-emerald-400" />
+          <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider">Zelfstandigheid</span>
         </div>
-        <div className="p-3 border border-slate-700 bg-slate-900/60">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-2xl font-mono font-bold text-slate-100">
-              {eaiState.scaffolding.agency_score}<span className="text-sm text-slate-500">%</span>
+        <div className="p-2 border border-slate-700 bg-slate-900/60">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-lg font-mono font-bold text-slate-100">
+              {eaiState.scaffolding.agency_score}<span className="text-[10px] text-slate-500">%</span>
             </span>
-            <span className={`text-lg ${eaiState.scaffolding.trend === 'RISING' ? 'text-emerald-400' : eaiState.scaffolding.trend === 'FALLING' ? 'text-red-400' : 'text-slate-500'}`}>
+            <span className={`text-sm ${eaiState.scaffolding.trend === 'RISING' ? 'text-emerald-400' : eaiState.scaffolding.trend === 'FALLING' ? 'text-red-400' : 'text-slate-500'}`}>
               {eaiState.scaffolding.trend === 'RISING' ? '↑' : eaiState.scaffolding.trend === 'FALLING' ? '↓' : '—'}
             </span>
           </div>
-          <div className="h-6 flex items-end gap-0.5 mb-2">
+          <div className="h-4 flex items-end gap-0.5 mb-1.5">
             {eaiState.scaffolding.history_window.map((score, i) => (
               <div key={i} className="flex-1 bg-slate-800 relative overflow-hidden rounded-sm">
                 <div className={`absolute bottom-0 w-full rounded-sm transition-all duration-300 ${score >= 60 ? 'bg-emerald-600' : score >= 40 ? 'bg-slate-600' : 'bg-amber-600'}`} style={{ height: `${Math.max(score, 5)}%` }} />
@@ -274,7 +274,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             ))}
           </div>
           {eaiState.scaffolding.advice && (
-            <div className="text-[10px] text-amber-300 border-t border-slate-800 pt-2 mt-1">💡 {eaiState.scaffolding.advice}</div>
+            <div className="text-[8px] text-amber-300 border-t border-slate-800 pt-1.5 mt-1">💡 {eaiState.scaffolding.advice}</div>
           )}
         </div>
       </div>
@@ -282,31 +282,31 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 
     {/* G-FACTOR */}
     {gFactorPercent !== null && (
-      <div className="p-4 border-b border-slate-800">
-        <div className="flex items-center gap-2 mb-2">
-          <Cpu className="w-3.5 h-3.5 text-slate-400" />
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Semantic Integrity</span>
+      <div className="px-3 py-2.5 border-b border-slate-800">
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <Cpu className="w-3 h-3 text-slate-400" />
+          <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider">Semantic Integrity</span>
         </div>
-        <div className={`p-3 border ${
+        <div className={`p-2 border ${
           mechanical?.semanticValidation?.alignment_status === 'CRITICAL' ? 'border-red-500/60 bg-red-950/20' :
           mechanical?.semanticValidation?.alignment_status === 'DRIFT' ? 'border-amber-500/60 bg-amber-950/20' :
           'border-slate-600 bg-slate-900/40'
         }`}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-mono text-slate-500 uppercase">G-FACTOR</span>
-            <span className={`text-lg font-mono font-bold ${
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[8px] font-mono text-slate-500 uppercase">G-FACTOR</span>
+            <span className={`text-sm font-mono font-bold ${
               mechanical?.semanticValidation?.alignment_status === 'CRITICAL' ? 'text-red-300' :
               mechanical?.semanticValidation?.alignment_status === 'DRIFT' ? 'text-amber-300' : 'text-slate-200'
             }`}>{gFactorPercent}%</span>
           </div>
-          <div className="h-1.5 w-full bg-slate-800 overflow-hidden rounded-full">
+          <div className="h-1 w-full bg-slate-800 overflow-hidden rounded-full">
             <div className={`h-full rounded-full transition-all duration-500 ${
               mechanical?.semanticValidation?.alignment_status === 'CRITICAL' ? 'bg-red-500' :
               mechanical?.semanticValidation?.alignment_status === 'DRIFT' ? 'bg-amber-500' : 'bg-emerald-500'
             }`} style={{ width: `${gFactorPercent}%` }} />
           </div>
           {mechanical?.semanticValidation?.penalties && mechanical.semanticValidation.penalties.length > 0 && (
-            <div className="text-[10px] text-slate-400 space-y-0.5 border-t border-slate-800 pt-2 mt-2">
+            <div className="text-[8px] text-slate-400 space-y-0.5 border-t border-slate-800 pt-1.5 mt-1.5">
               {mechanical.semanticValidation.penalties.map((p, i) => (
                 <div key={i} className="flex items-start gap-1"><span className="text-red-400">•</span><span>{p}</span></div>
               ))}
@@ -318,19 +318,19 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 
     {/* LEERDER CONTEXT */}
     {profile && (
-      <div className="p-4 border-b border-slate-800">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Leerder</span>
+      <div className="px-3 py-2.5 border-b border-slate-800">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider">Leerder</span>
           {onEditProfile && (
-            <button onClick={onEditProfile} className="text-[9px] text-slate-600 hover:text-slate-400 uppercase tracking-wider transition-colors">Wijzig</button>
+            <button onClick={onEditProfile} className="text-[8px] text-slate-600 hover:text-slate-400 uppercase tracking-wider transition-colors">Wijzig</button>
           )}
         </div>
-        <div className="p-3 border border-slate-800 bg-slate-900/40">
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div><span className="text-slate-600 text-[9px] uppercase block">Naam</span><span className="text-slate-300">{profile.name || '—'}</span></div>
-            <div><span className="text-slate-600 text-[9px] uppercase block">Niveau</span><span className="text-slate-300">{profile.level || '—'}</span></div>
-            <div><span className="text-slate-600 text-[9px] uppercase block">Vak</span><span className="text-slate-300">{profile.subject || '—'}</span></div>
-            <div><span className="text-slate-600 text-[9px] uppercase block">Leerjaar</span><span className="text-slate-300">{profile.grade || '—'}</span></div>
+        <div className="p-2 border border-slate-800 bg-slate-900/40">
+          <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+            <div><span className="text-slate-600 text-[8px] uppercase block">Naam</span><span className="text-slate-300">{profile.name || '—'}</span></div>
+            <div><span className="text-slate-600 text-[8px] uppercase block">Niveau</span><span className="text-slate-300">{profile.level || '—'}</span></div>
+            <div><span className="text-slate-600 text-[8px] uppercase block">Vak</span><span className="text-slate-300">{profile.subject || '—'}</span></div>
+            <div><span className="text-slate-600 text-[8px] uppercase block">Leerjaar</span><span className="text-slate-300">{profile.grade || '—'}</span></div>
           </div>
         </div>
       </div>

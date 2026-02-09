@@ -12,7 +12,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { fetchProfile, updateProfile } from '@/services/profileService';
 import { getOrCreateUserId } from '@/services/identity';
 import { createInitialEAIState, updateStateFromAnalysis, EAIStateLike } from '@/utils/eaiLearnAdapter';
-import { PanelLeftClose, PanelLeftOpen, Settings, BarChart3 } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, Settings, BarChart3, Home, GraduationCap, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import type { LearnerProfile, EAIAnalysis, MechanicalState, Message } from '@/types';
 
 type AppPhase = 'BOOT' | 'PROFILE_SETUP' | 'READY';
@@ -307,65 +308,94 @@ const StudioHeader: React.FC<StudioHeaderProps> = ({
   showLeftPanel,
   onToggleLeftPanel,
   compact,
-}) => (
-  <div className="h-12 px-3 flex items-center justify-between border-b border-slate-700 bg-slate-900 shrink-0">
-    <div className="flex items-center gap-2 min-w-0">
-      {/* Left panel toggle (desktop only) */}
-      {onToggleLeftPanel && (
-        <button
-          onClick={onToggleLeftPanel}
-          className="p-1.5 text-slate-500 hover:text-slate-300 transition-colors"
-          title={showLeftPanel ? 'Leskaart verbergen' : 'Leskaart tonen'}
-        >
-          {showLeftPanel ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
-        </button>
-      )}
+}) => {
+  const navigate = useNavigate();
 
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest min-w-0">
-        {breadcrumb.map((part, i) => (
-          <React.Fragment key={i}>
-            {i > 0 && <span className="text-slate-700">›</span>}
-            <span className={i === 0 ? 'text-indigo-400 font-semibold' : 'text-slate-400 truncate'}>
-              {part}
-            </span>
-          </React.Fragment>
-        ))}
+  return (
+    <div className="h-12 px-3 flex items-center justify-between border-b border-slate-700 bg-slate-900 shrink-0">
+      <div className="flex items-center gap-2 min-w-0">
+        {/* Left panel toggle (desktop only) */}
+        {onToggleLeftPanel && (
+          <button
+            onClick={onToggleLeftPanel}
+            className="p-1.5 text-slate-500 hover:text-slate-300 transition-colors"
+            title={showLeftPanel ? 'Leskaart verbergen' : 'Leskaart tonen'}
+          >
+            {showLeftPanel ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
+          </button>
+        )}
+
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest min-w-0">
+          {breadcrumb.map((part, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && <span className="text-slate-700">›</span>}
+              <span className={i === 0 ? 'text-indigo-400 font-semibold' : 'text-slate-400 truncate'}>
+                {part}
+              </span>
+            </React.Fragment>
+          ))}
+        </div>
+
+        {/* Topic selector */}
+        {profile && !compact && (
+          <div className="w-44 ml-2">
+            <TopicSelector
+              subject={profile.subject}
+              level={profile.level}
+              currentNodeId={profile.currentNodeId || null}
+              onNodeChange={onNodeChange}
+              compact
+            />
+          </div>
+        )}
       </div>
 
-      {/* Topic selector */}
-      {profile && !compact && (
-        <div className="w-44 ml-2">
-          <TopicSelector
-            subject={profile.subject}
-            level={profile.level}
-            currentNodeId={profile.currentNodeId || null}
-            onNodeChange={onNodeChange}
-            compact
-          />
-        </div>
-      )}
-    </div>
+      <div className="flex items-center gap-1">
+        {/* Navigation buttons */}
+        <button
+          onClick={() => navigate('/')}
+          className="h-7 px-2 text-[9px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-700 transition-colors"
+          title="Home"
+        >
+          <Home className="w-3 h-3" />
+        </button>
+        <button
+          onClick={() => navigate('/teacher')}
+          className="h-7 px-2 text-[9px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-700 transition-colors"
+          title="Docent"
+        >
+          <GraduationCap className="w-3 h-3" />
+        </button>
+        <button
+          onClick={() => navigate('/admin')}
+          className="h-7 px-2 text-[9px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-700 transition-colors"
+          title="Admin"
+        >
+          <Shield className="w-3 h-3" />
+        </button>
 
-    <div className="flex items-center gap-1.5">
-      <button
-        onClick={onEditProfile}
-        className="h-7 px-2.5 text-[9px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-700 transition-colors"
-      >
-        <Settings className="w-3 h-3" />
-      </button>
-      <button
-        onClick={onToggleDashboard}
-        className={`h-7 px-2.5 text-[9px] font-mono uppercase tracking-wider transition-colors border ${
-          showDashboard
-            ? 'text-indigo-300 border-indigo-500/40 bg-indigo-500/10'
-            : 'text-slate-500 border-slate-800 hover:text-slate-300 hover:border-slate-700'
-        }`}
-      >
-        <BarChart3 className="w-3 h-3" />
-      </button>
+        <div className="w-px h-5 bg-slate-800 mx-0.5" />
+
+        <button
+          onClick={onEditProfile}
+          className="h-7 px-2.5 text-[9px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-700 transition-colors"
+        >
+          <Settings className="w-3 h-3" />
+        </button>
+        <button
+          onClick={onToggleDashboard}
+          className={`h-7 px-2.5 text-[9px] font-mono uppercase tracking-wider transition-colors border ${
+            showDashboard
+              ? 'text-indigo-300 border-indigo-500/40 bg-indigo-500/10'
+              : 'text-slate-500 border-slate-800 hover:text-slate-300 hover:border-slate-700'
+          }`}
+        >
+          <BarChart3 className="w-3 h-3" />
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default StudentStudio;
