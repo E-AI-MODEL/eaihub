@@ -1,17 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ChatInterface } from '@/components/ChatInterface';
 import Dashboard from '@/components/Dashboard';
 import ProfileSetup from '@/components/ProfileSetup';
 import BootSequence from '@/components/BootSequence';
 import GameNeuroLinker from '@/components/GameNeuroLinker';
 import TechReport from '@/components/TechReport';
+import LeskaartPanel from '@/components/LeskaartPanel';
 import TopicSelector from '@/components/TopicSelector';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { fetchProfile, updateProfile } from '@/services/profileService';
 import { getOrCreateUserId } from '@/services/identity';
 import { createInitialEAIState, updateStateFromAnalysis, EAIStateLike } from '@/utils/eaiLearnAdapter';
+import { PanelLeftClose, PanelLeftOpen, Settings, BarChart3 } from 'lucide-react';
 import type { LearnerProfile, EAIAnalysis, MechanicalState, Message } from '@/types';
 
 type AppPhase = 'BOOT' | 'PROFILE_SETUP' | 'READY';
+type MobileTab = 'leskaart' | 'chat' | 'analyse';
 
 const StudentStudio: React.FC = () => {
   const [phase, setPhase] = useState<AppPhase>('BOOT');
@@ -20,24 +25,36 @@ const StudentStudio: React.FC = () => {
   const [currentMechanical, setCurrentMechanical] = useState<MechanicalState | null>(null);
   const [eaiState, setEaiState] = useState<EAIStateLike>(() => createInitialEAIState());
   const [showProfileEdit, setShowProfileEdit] = useState(false);
-  const [isDesktopDashboardOpen, setDesktopDashboardOpen] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
   const [showGame, setShowGame] = useState(false);
   const [showTechReport, setShowTechReport] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(16).slice(2)}`);
+  const [sessionStartTime] = useState(() => Date.now());
+  const [showLeftPanel, setShowLeftPanel] = useState(true);
+  const [mobileTab, setMobileTab] = useState<MobileTab>('chat');
+  const [pendingCommand, setPendingCommand] = useState<string | null>(null);
+
+  const isMobile = useIsMobile();
+  const isTablet = !isMobile && typeof window !== 'undefined' && window.innerWidth < 1024;
+
+  // Breadcrumb
+  const breadcrumb = useMemo(() => {
+    const parts = ['EAI'];
+    if (profile?.subject) parts.push(`${profile.subject} ${profile.level || ''}`);
+    return parts;
+  }, [profile]);
 
   useEffect(() => {
     const loadProfile = async () => {
       const userId = getOrCreateUserId();
       const { profile: storedProfile } = await fetchProfile(userId);
-      
       if (storedProfile && storedProfile.name && storedProfile.subject) {
         setProfile(storedProfile);
         setPhase('READY');
       }
     };
-
     loadProfile();
   }, []);
 
@@ -68,24 +85,23 @@ const StudentStudio: React.FC = () => {
 
   const handleAnalysisUpdate = (analysis: EAIAnalysis, mechanical?: MechanicalState) => {
     setCurrentAnalysis(analysis);
-    if (mechanical) {
-      setCurrentMechanical(mechanical);
-    }
+    if (mechanical) setCurrentMechanical(mechanical);
     if (analysis.scaffolding) {
       setEaiState(prev => updateStateFromAnalysis(prev, analysis, mechanical || null));
     }
   };
 
-  // Boot sequence
-  if (phase === 'BOOT') {
-    return <BootSequence onComplete={handleBootComplete} />;
-  }
+  const handleSendCommand = (command: string) => {
+    setPendingCommand(command);
+    if (isMobile) setMobileTab('chat');
+  };
 
-  // Profile setup
+  if (phase === 'BOOT') return <BootSequence onComplete={handleBootComplete} />;
+
   if (phase === 'PROFILE_SETUP' || showProfileEdit) {
     return (
-      <div className="min-h-screen bg-slate-950 pt-14">
-        <div className="max-w-2xl mx-auto p-6">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="max-w-2xl w-full p-6">
           <ProfileSetup
             initialProfile={profile || undefined}
             onComplete={handleProfileComplete}
@@ -96,106 +112,171 @@ const StudentStudio: React.FC = () => {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════
-  // MAIN STUDIO VIEW — Analytical Instrument Layout
-  // ═══════════════════════════════════════════════════════════════════
-  return (
-    <div className="min-h-screen bg-slate-950 pt-14">
-      {/* Full Height Container */}
-      <div className="h-[calc(100vh-56px)] flex">
-        
-        {/* ═══════════════════════════════════════════════════════════════════
-            MAIN CHAT AREA — Expands/contracts based on dashboard state
-            ═══════════════════════════════════════════════════════════════════ */}
-        <div className={`flex-1 flex flex-col h-full transition-all duration-300 ${
-          isDesktopDashboardOpen ? 'lg:mr-[420px]' : ''
-        }`}>
-          {/* Chat Container with Border */}
-          <div className="flex-1 flex flex-col m-2 lg:m-3 border border-slate-700 bg-slate-900 overflow-hidden">
-            {profile && (
-              <ChatInterface
-                profile={profile}
-                onAnalysisUpdate={handleAnalysisUpdate}
-                sessionId={sessionId}
-              />
-            )}
-          </div>
-        </div>
+  // ═══════════════════════════════════════════════════════════════
+  // MOBILE LAYOUT — Tabbed interface
+  // ═══════════════════════════════════════════════════════════════
+  if (isMobile) {
+    return (
+      <div className="h-screen flex flex-col bg-slate-950">
+        {/* Studio Header — 48px */}
+        <StudioHeader
+          breadcrumb={breadcrumb}
+          profile={profile}
+          onNodeChange={handleNodeChange}
+          onEditProfile={() => setShowProfileEdit(true)}
+          showDashboard={showDashboard}
+          onToggleDashboard={() => setShowDashboard(!showDashboard)}
+          compact
+        />
 
-        {/* ═══════════════════════════════════════════════════════════════════
-            CONTROL BUTTONS — Fixed position
-            ═══════════════════════════════════════════════════════════════════ */}
-        
-        {/* Desktop Controls */}
-        <div className="fixed top-16 right-4 hidden lg:flex items-center gap-2 z-30">
-          {/* Topic Selector - Compact Mode */}
-          {profile && (
-            <div className="w-48">
-              <TopicSelector
-                subject={profile.subject}
-                level={profile.level}
-                currentNodeId={profile.currentNodeId || null}
-                onNodeChange={handleNodeChange}
-                compact
-              />
-            </div>
+        {/* Tab Content */}
+        <div className="flex-1 overflow-hidden">
+          {mobileTab === 'leskaart' && profile && (
+            <LeskaartPanel
+              profile={profile}
+              analysis={currentAnalysis}
+              onNodeChange={handleNodeChange}
+              onSendCommand={handleSendCommand}
+              sessionStartTime={sessionStartTime}
+            />
           )}
-          <button
-            onClick={() => setShowProfileEdit(true)}
-            className="h-8 px-3 border border-slate-700 bg-slate-900/90 text-slate-400 text-[10px] font-medium uppercase tracking-wider hover:text-slate-100 hover:border-slate-600 transition-colors"
-          >
-            Profiel
-          </button>
-          <button
-            onClick={() => setDesktopDashboardOpen(!isDesktopDashboardOpen)}
-            className={`h-8 px-3 border text-[10px] font-medium uppercase tracking-wider transition-colors ${
-              isDesktopDashboardOpen 
-                ? 'border-indigo-500/60 bg-indigo-500/10 text-indigo-300' 
-                : 'border-slate-700 bg-slate-900/90 text-slate-400 hover:text-slate-100 hover:border-slate-600'
-            }`}
-          >
-            {isDesktopDashboardOpen ? 'Sluit' : 'Dashboard'}
-          </button>
+          {mobileTab === 'chat' && profile && (
+            <ChatInterface
+              profile={profile}
+              onAnalysisUpdate={handleAnalysisUpdate}
+              sessionId={sessionId}
+              pendingCommand={pendingCommand}
+              onCommandConsumed={() => setPendingCommand(null)}
+            />
+          )}
+          {mobileTab === 'analyse' && (
+            <Dashboard
+              analysis={currentAnalysis}
+              mechanical={currentMechanical}
+              isOpen={true}
+              onClose={() => setMobileTab('chat')}
+              isLoading={isLoading}
+              profile={profile}
+              eaiState={eaiState}
+              onEditProfile={() => setShowProfileEdit(true)}
+              inline
+            />
+          )}
         </div>
 
-        {/* Mobile Dashboard Toggle */}
-        <div className="fixed bottom-20 right-4 lg:hidden z-30">
-          <button
-            onClick={() => setDesktopDashboardOpen(!isDesktopDashboardOpen)}
-            className={`h-10 px-4 border text-xs font-medium uppercase tracking-wider transition-colors ${
-              isDesktopDashboardOpen 
-                ? 'border-indigo-500/60 bg-indigo-500/10 text-indigo-300' 
-                : 'border-slate-600 bg-slate-900 text-slate-300'
-            }`}
-          >
-            Dashboard
-          </button>
+        {/* Tab Bar — 48px */}
+        <div className="h-12 flex border-t border-slate-700 bg-slate-900 shrink-0">
+          {(['leskaart', 'chat', 'analyse'] as MobileTab[]).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setMobileTab(tab)}
+              className={`flex-1 text-[10px] font-mono uppercase tracking-widest transition-colors ${
+                mobileTab === tab
+                  ? 'text-indigo-300 border-t-2 border-indigo-500'
+                  : 'text-slate-500 hover:text-slate-400'
+              }`}
+            >
+              {tab === 'leskaart' ? 'Leskaart' : tab === 'chat' ? 'Chat' : 'Analyse'}
+            </button>
+          ))}
         </div>
+
+        {showGame && <GameNeuroLinker onClose={() => setShowGame(false)} />}
+        {showTechReport && (
+          <TechReport
+            onClose={() => setShowTechReport(false)}
+            lastAnalysis={currentAnalysis}
+            lastMechanical={currentMechanical}
+            messages={messages}
+            eaiState={eaiState}
+            sessionId={sessionId}
+          />
+        )}
       </div>
+    );
+  }
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          DASHBOARD — Sliding Panel (420px)
-          ═══════════════════════════════════════════════════════════════════ */}
-      <Dashboard
-        analysis={currentAnalysis}
-        mechanical={currentMechanical}
-        isOpen={isDesktopDashboardOpen}
-        onClose={() => setDesktopDashboardOpen(false)}
-        isLoading={isLoading}
+  // ═══════════════════════════════════════════════════════════════
+  // DESKTOP LAYOUT — Three-zone resizable workstation
+  // ═══════════════════════════════════════════════════════════════
+  return (
+    <div className="h-screen flex flex-col bg-slate-950">
+      {/* Studio Header — 48px */}
+      <StudioHeader
+        breadcrumb={breadcrumb}
         profile={profile}
-        eaiState={eaiState}
+        onNodeChange={handleNodeChange}
         onEditProfile={() => setShowProfileEdit(true)}
+        showDashboard={showDashboard}
+        onToggleDashboard={() => setShowDashboard(!showDashboard)}
+        showLeftPanel={showLeftPanel}
+        onToggleLeftPanel={() => setShowLeftPanel(!showLeftPanel)}
       />
 
-      {/* Game Modal */}
-      {showGame && <GameNeuroLinker onClose={() => setShowGame(false)} />}
+      {/* Three-zone workspace */}
+      <div className="flex-1 overflow-hidden">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          {/* LEFT: Leskaart Panel */}
+          {showLeftPanel && (
+            <>
+              <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+                {profile && (
+                  <LeskaartPanel
+                    profile={profile}
+                    analysis={currentAnalysis}
+                    onNodeChange={handleNodeChange}
+                    onSendCommand={handleSendCommand}
+                    sessionStartTime={sessionStartTime}
+                  />
+                )}
+              </ResizablePanel>
+              <ResizableHandle className="w-px bg-slate-800 hover:bg-indigo-500/40 transition-colors" />
+            </>
+          )}
 
-      {/* Tech Report Modal */}
+          {/* CENTER: Chat workspace */}
+          <ResizablePanel defaultSize={showDashboard ? 50 : (showLeftPanel ? 80 : 100)} minSize={35}>
+            <div className="h-full studio-grid-bg">
+              {profile && (
+                <ChatInterface
+                  profile={profile}
+                  onAnalysisUpdate={handleAnalysisUpdate}
+                  sessionId={sessionId}
+                  pendingCommand={pendingCommand}
+                  onCommandConsumed={() => setPendingCommand(null)}
+                />
+              )}
+            </div>
+          </ResizablePanel>
+
+          {/* RIGHT: Dashboard/Instrument Panel */}
+          {showDashboard && (
+            <>
+              <ResizableHandle className="w-px bg-slate-800 hover:bg-indigo-500/40 transition-colors" />
+              <ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
+                <Dashboard
+                  analysis={currentAnalysis}
+                  mechanical={currentMechanical}
+                  isOpen={true}
+                  onClose={() => setShowDashboard(false)}
+                  isLoading={isLoading}
+                  profile={profile}
+                  eaiState={eaiState}
+                  onEditProfile={() => setShowProfileEdit(true)}
+                  inline
+                />
+              </ResizablePanel>
+            </>
+          )}
+        </ResizablePanelGroup>
+      </div>
+
+      {showGame && <GameNeuroLinker onClose={() => setShowGame(false)} />}
       {showTechReport && (
-        <TechReport 
-          onClose={() => setShowTechReport(false)} 
-          lastAnalysis={currentAnalysis} 
-          lastMechanical={currentMechanical} 
+        <TechReport
+          onClose={() => setShowTechReport(false)}
+          lastAnalysis={currentAnalysis}
+          lastMechanical={currentMechanical}
           messages={messages}
           eaiState={eaiState}
           sessionId={sessionId}
@@ -204,5 +285,91 @@ const StudentStudio: React.FC = () => {
     </div>
   );
 };
+
+// ═══════════════════════════════════════════════════════════════
+// STUDIO HEADER — 48px breadcrumb bar
+// ═══════════════════════════════════════════════════════════════
+interface StudioHeaderProps {
+  breadcrumb: string[];
+  profile: LearnerProfile | null;
+  onNodeChange: (nodeId: string | null) => void;
+  onEditProfile: () => void;
+  showDashboard: boolean;
+  onToggleDashboard: () => void;
+  showLeftPanel?: boolean;
+  onToggleLeftPanel?: () => void;
+  compact?: boolean;
+}
+
+const StudioHeader: React.FC<StudioHeaderProps> = ({
+  breadcrumb,
+  profile,
+  onNodeChange,
+  onEditProfile,
+  showDashboard,
+  onToggleDashboard,
+  showLeftPanel,
+  onToggleLeftPanel,
+  compact,
+}) => (
+  <div className="h-12 px-3 flex items-center justify-between border-b border-slate-700 bg-slate-900 shrink-0">
+    <div className="flex items-center gap-2 min-w-0">
+      {/* Left panel toggle (desktop only) */}
+      {onToggleLeftPanel && (
+        <button
+          onClick={onToggleLeftPanel}
+          className="p-1.5 text-slate-500 hover:text-slate-300 transition-colors"
+          title={showLeftPanel ? 'Leskaart verbergen' : 'Leskaart tonen'}
+        >
+          {showLeftPanel ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
+        </button>
+      )}
+
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest min-w-0">
+        {breadcrumb.map((part, i) => (
+          <React.Fragment key={i}>
+            {i > 0 && <span className="text-slate-700">›</span>}
+            <span className={i === 0 ? 'text-indigo-400 font-semibold' : 'text-slate-400 truncate'}>
+              {part}
+            </span>
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* Topic selector */}
+      {profile && !compact && (
+        <div className="w-44 ml-2">
+          <TopicSelector
+            subject={profile.subject}
+            level={profile.level}
+            currentNodeId={profile.currentNodeId || null}
+            onNodeChange={onNodeChange}
+            compact
+          />
+        </div>
+      )}
+    </div>
+
+    <div className="flex items-center gap-1.5">
+      <button
+        onClick={onEditProfile}
+        className="h-7 px-2.5 text-[9px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-700 transition-colors"
+      >
+        <Settings className="w-3 h-3" />
+      </button>
+      <button
+        onClick={onToggleDashboard}
+        className={`h-7 px-2.5 text-[9px] font-mono uppercase tracking-wider transition-colors border ${
+          showDashboard
+            ? 'text-indigo-300 border-indigo-500/40 bg-indigo-500/10'
+            : 'text-slate-500 border-slate-800 hover:text-slate-300 hover:border-slate-700'
+        }`}
+      >
+        <BarChart3 className="w-3 h-3" />
+      </button>
+    </div>
+  </div>
+);
 
 export default StudentStudio;
