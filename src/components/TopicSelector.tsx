@@ -48,14 +48,20 @@ export const TopicSelector: React.FC<TopicSelectorProps> = ({
     );
   }
 
+  // Handle value conversion (Radix doesn't allow empty string as value)
+  const selectValue = currentNodeId || '__none__';
+  const handleValueChange = (val: string) => {
+    onNodeChange(val === '__none__' ? null : val);
+  };
+
   if (compact) {
     return (
-      <Select value={currentNodeId || ''} onValueChange={(val) => onNodeChange(val || null)}>
+      <Select value={selectValue} onValueChange={handleValueChange}>
         <SelectTrigger className="h-8 bg-slate-900 border-slate-700 text-slate-300 text-xs">
           <SelectValue placeholder="Selecteer onderwerp..." />
         </SelectTrigger>
-        <SelectContent className="bg-slate-900 border-slate-700">
-          <SelectItem value="" className="text-slate-400 text-xs">
+        <SelectContent className="bg-slate-900 border-slate-700 z-50">
+          <SelectItem value="__none__" className="text-slate-400 text-xs">
             Geen specifiek onderwerp
           </SelectItem>
           {learningPath.nodes.map((node) => (
@@ -79,12 +85,12 @@ export const TopicSelector: React.FC<TopicSelectorProps> = ({
         <label className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">
           Lesonderwerp
         </label>
-        <Select value={currentNodeId || ''} onValueChange={(val) => onNodeChange(val || null)}>
+        <Select value={selectValue} onValueChange={handleValueChange}>
           <SelectTrigger className="h-9 bg-slate-900 border-slate-700 text-slate-200">
             <SelectValue placeholder="Selecteer je huidige lesonderwerp..." />
           </SelectTrigger>
-          <SelectContent className="bg-slate-900 border-slate-700 max-h-64">
-            <SelectItem value="" className="text-slate-400">
+          <SelectContent className="bg-slate-900 border-slate-700 max-h-64 z-50">
+            <SelectItem value="__none__" className="text-slate-400">
               Geen specifiek onderwerp
             </SelectItem>
             {learningPath.nodes.map((node, idx) => (
