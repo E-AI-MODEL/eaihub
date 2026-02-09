@@ -14,6 +14,7 @@ import {
   type RubricBand,
   type LogicGate
 } from '@/data/ssot';
+import { getNodeById, getLearningPath, type LearningNode } from '@/data/curriculum';
 
 // ============= TYPE DEFINITIONS =============
 
@@ -229,11 +230,44 @@ interface ProfileData {
   subject?: string | null;
   level?: string | null;
   goal?: string | null;
+  currentNodeId?: string | null;
+}
+
+/**
+ * Generate curriculum context block for AI prompt
+ * Injects learning node details, misconceptions, mastery criteria
+ */
+function generateCurriculumContext(profile: ProfileData): string {
+  if (!profile.currentNodeId) return '';
+  
+  const node = getNodeById(profile.currentNodeId);
+  if (!node) return '';
+  
+  const lines: string[] = [
+    '\n## CURRICULUM CONTEXT (ACTIEF LESONDERWERP)\n',
+    `**Onderwerp:** ${node.title}`,
+    `**Beschrijving:** ${node.description}`,
+    `**Didactische Focus:** ${node.didactic_focus}`,
+    `**Beheersingscriteria:** ${node.mastery_criteria}`,
+  ];
+  
+  if (node.common_misconceptions && node.common_misconceptions.length > 0) {
+    lines.push('\n**Veelvoorkomende Misconcepties (LET OP!):**');
+    node.common_misconceptions.forEach((misc, i) => {
+      lines.push(`${i + 1}. ${misc}`);
+    });
+    lines.push('\n*Wees alert op deze misconcepties en corrigeer ze proactief.*');
+  }
+  
+  lines.push(`\n**Geschatte studielast:** ${node.study_load_minutes} minuten`);
+  
+  return lines.join('\n');
 }
 
 /**
  * Generate dynamic system prompt from SSOT data
  * Used by chatService to send to edge function
+ * Now includes curriculum context when a learning node is selected
  */
 export function generateSystemPrompt(profile: ProfileData): string {
   const sections: string[] = [];
@@ -312,6 +346,12 @@ Vak: ${profile.subject || 'Algemeen'}
 Niveau: ${profile.level || 'Onbekend'}
 Naam leerling: ${profile.name || 'Leerling'}
 Doel: ${profile.goal || 'Begrip verdiepen'}`);
+
+  // CURRICULUM CONTEXT - NEW!
+  const curriculumContext = generateCurriculumContext(profile);
+  if (curriculumContext) {
+    sections.push(curriculumContext);
+  }
 
   return sections.join('\n');
 }
