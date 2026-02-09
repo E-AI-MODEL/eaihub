@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Send, RotateCcw } from 'lucide-react';
 import MessageBubble from '@/components/MessageBubble';
 import type { Message, LearnerProfile, EAIAnalysis, MechanicalState } from '@/types';
@@ -6,6 +6,7 @@ import { sendChat } from '@/services/chatService';
 import { getOrCreateUserId } from '@/services/identity';
 import { calculateDynamicTTL } from '@/utils/eaiLearnAdapter';
 import { pushTrace } from '@/lib/reliabilityPipeline';
+import { getNodeById } from '@/data/curriculum';
 
 interface ChatInterfaceProps {
   profile: LearnerProfile;
@@ -173,9 +174,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               <h2 className="text-sm text-slate-200 font-medium mb-1">
                 Hoi {profile.name || 'daar'}
               </h2>
-              <p className="text-[11px] text-slate-500 leading-relaxed mb-6">
-                Waar wil je aan werken binnen <span className="text-slate-300">{profile.subject || 'je lesstof'}</span>?
-              </p>
+              {profile.currentNodeId ? (
+                <p className="text-[11px] text-slate-500 leading-relaxed mb-6">
+                  Je werkt aan <span className="text-slate-300">{getNodeById(profile.currentNodeId)?.title || profile.subject}</span>
+                  <span className="text-slate-600"> · {profile.subject} {profile.level}</span>
+                </p>
+              ) : (
+                <p className="text-[11px] text-slate-500 leading-relaxed mb-6">
+                  Klaar om te werken aan <span className="text-slate-300">{profile.subject || 'je lesstof'}</span>
+                  {profile.level && <span className="text-slate-600"> · {profile.level}</span>}
+                </p>
+              )}
 
               {/* Starter cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
