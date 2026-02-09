@@ -9,30 +9,43 @@ interface ProfileSetupProps {
   onCancel?: () => void;
 }
 
-const LEARNING_ROUTES = [
-  { id: 'pilot_bio', label: 'Biologie', level: 'VWO', subject: 'Biologie', desc: 'Eiwitsynthese', icon: '🧬', isPilot: true },
-  { id: 'pilot_wis', label: 'Wiskunde B', level: 'VWO', subject: 'Wiskunde B', desc: 'Differentiëren', icon: '📐', isPilot: true },
-  { id: 'pilot_eco', label: 'Economie', level: 'HAVO', subject: 'Economie', desc: 'Marktwerking', icon: '💰', isPilot: true },
-  { id: 'gen_vmbo', label: 'VMBO', level: 'VMBO', subject: 'Algemeen', desc: 'Vrije ondersteuning', icon: '🎓', isPilot: false },
-  { id: 'gen_havo', label: 'HAVO', level: 'HAVO', subject: 'Algemeen', desc: 'Vrije ondersteuning', icon: '🎓', isPilot: false },
-  { id: 'gen_vwo', label: 'VWO', level: 'VWO', subject: 'Algemeen', desc: 'Vrije ondersteuning', icon: '🎓', isPilot: false },
-];
+// SLO modules mapped by level
+const SLO_MODULES: Record<string, { subject: string; desc: string; icon: string }[]> = {
+  VWO: [
+    { subject: 'Biologie', desc: 'Eiwitsynthese', icon: '🧬' },
+    { subject: 'Wiskunde B', desc: 'Differentiëren', icon: '📐' },
+  ],
+  HAVO: [
+    { subject: 'Economie', desc: 'Marktwerking', icon: '💰' },
+  ],
+  VMBO: [],
+};
 
-const STEP_LABELS = ['Naam', 'Vak', 'Leerdoel'];
+const LEVELS = ['VMBO', 'HAVO', 'VWO'] as const;
+const STEP_LABELS = ['Naam', 'Niveau', 'Vak', 'Leerdoel'];
 
 const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile, onCancel }) => {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [name, setName] = useState('');
-  const [selectedRoute, setSelectedRoute] = useState<typeof LEARNING_ROUTES[0] | null>(null);
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [level, setLevel] = useState<string | null>(null);
+  const [subject, setSubject] = useState<string | null>(null);
   const [customSubject, setCustomSubject] = useState('');
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [isSLO, setIsSLO] = useState(false);
   const [isFading, setIsFading] = useState(false);
 
+  // Curriculum nodes for the chosen SLO subject+level
   const curriculumNodes = useMemo(() => {
-    if (!selectedRoute) return [];
-    const path = getLearningPath(selectedRoute.subject, selectedRoute.level);
+    if (!subject || !level || !isSLO) return [];
+    const path = getLearningPath(subject, level);
     return path?.nodes || [];
-  }, [selectedRoute]);
+  }, [subject, level, isSLO]);
+
+  // Available SLO modules for current level
+  const availableSLO = useMemo(() => {
+    if (!level) return [];
+    return SLO_MODULES[level] || [];
+  }, [level]);
 
   useEffect(() => {
     if (initialProfile) {
@@ -40,7 +53,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
     }
   }, [initialProfile]);
 
-  const handleStepChange = (nextStep: 1 | 2 | 3) => {
+  const handleStepChange = (nextStep: 1 | 2 | 3 | 4) => {
     setIsFading(true);
     setTimeout(() => {
       setStep(nextStep);
@@ -48,30 +61,53 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
     }, 200);
   };
 
-  const handleRouteSelect = (route: typeof LEARNING_ROUTES[0]) => {
-    setSelectedRoute(route);
-    setSelectedNodeId(null);
+  const handleLevelSelect = (lvl: string) => {
+    setLevel(lvl);
+    setSubject(null);
     setCustomSubject('');
-    // Always go to step 3 — either node selection or subject input
+    setSelectedNodeId(null);
+    setIsSLO(false);
     handleStepChange(3);
   };
 
-  const handleComplete = () => {
-    if (!selectedRoute) return;
-    const hasCurriculum = curriculumNodes.length > 0;
+  const handleSLOSelect = (mod: { subject: string }) => {
+    setSubject(mod.subject);
+    setIsSLO(true);
+    setCustomSubject('');
+    setSelectedNodeId(null);
+    handleStepChange(4);
+  };
+
+  const handleCustomSubjectSubmit = () => {
+    if (!customSubject.trim()) return;
     onComplete({
       name,
-      subject: hasCurriculum ? selectedRoute.subject : (customSubject.trim() || selectedRoute.subject),
-      level: selectedRoute.level,
+      subject: customSubject.trim(),
+      level,
       grade: null,
-      currentNodeId: hasCurriculum ? selectedNodeId : null,
+      currentNodeId: null,
+    });
+  };
+
+  const handleComplete = () => {
+    onComplete({
+      name,
+      subject,
+      level,
+      grade: null,
+      currentNodeId: selectedNodeId,
     });
   };
 
   const goBack = () => {
-    if (step === 3) handleStepChange(2);
+    if (step === 4) handleStepChange(3);
+    else if (step === 3) handleStepChange(2);
     else if (step === 2) handleStepChange(1);
   };
+
+  // How many steps are visible in the indicator
+  const totalSteps = isSLO ? 4 : 3;
+  const visibleLabels = STEP_LABELS.slice(0, totalSteps);
 
   return (
     <div className="fixed inset-0 z-[60] bg-slate-950 flex items-center justify-center">
@@ -79,7 +115,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
 
         {/* ── Step Indicator ── */}
         <div className="flex items-center justify-center gap-0 mb-10">
-          {STEP_LABELS.map((label, i) => (
+          {visibleLabels.map((label, i) => (
             <React.Fragment key={i}>
               {i > 0 && (
                 <div className={`w-12 h-px ${i <= step - 1 ? 'bg-indigo-500/50' : 'bg-slate-800'}`} />
@@ -137,53 +173,27 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
             </div>
           )}
 
-          {/* STEP 2 — Vak kiezen */}
+          {/* STEP 2 — Niveau kiezen */}
           {step === 2 && (
-            <div>
-              <h2 className="text-sm text-slate-200 font-medium mb-1 text-center">Kies je leerroute</h2>
-              <p className="text-[11px] text-slate-500 mb-6 text-center">
-                Hoi <span className="text-slate-300">{name}</span>, selecteer een module of start vrij.
+            <div className="text-center">
+              <h2 className="text-sm text-slate-200 font-medium mb-1">Kies je niveau</h2>
+              <p className="text-[11px] text-slate-500 mb-8">
+                Hoi <span className="text-slate-300">{name}</span>, op welk niveau werk je?
               </p>
 
-              {/* Pilot routes */}
-              <div className="mb-4">
-                <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-2 block">SLO Modules</span>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {LEARNING_ROUTES.filter(r => r.isPilot).map(route => (
-                    <button
-                      key={route.id}
-                      onClick={() => handleRouteSelect(route)}
-                      className="p-3 border border-slate-800 bg-slate-900/60 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-left group"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm">{route.icon}</span>
-                        <span className="text-[9px] font-mono text-indigo-400 border border-indigo-500/30 px-1.5 py-0.5">{route.level}</span>
-                      </div>
-                      <span className="text-xs text-slate-300 group-hover:text-slate-100 block font-medium">{route.label}</span>
-                      <span className="text-[10px] text-slate-600 block">{route.desc}</span>
-                    </button>
-                  ))}
-                </div>
+              <div className="flex justify-center gap-3">
+                {LEVELS.map(lvl => (
+                  <button
+                    key={lvl}
+                    onClick={() => handleLevelSelect(lvl)}
+                    className="w-28 py-4 border border-slate-800 bg-slate-900/60 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-center group"
+                  >
+                    <span className="text-xs text-slate-300 group-hover:text-slate-100 font-medium block">{lvl}</span>
+                  </button>
+                ))}
               </div>
 
-              {/* General routes */}
-              <div>
-                <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-2 block">Vrije Sessie</span>
-                <div className="grid grid-cols-3 gap-2">
-                  {LEARNING_ROUTES.filter(r => !r.isPilot).map(route => (
-                    <button
-                      key={route.id}
-                      onClick={() => handleRouteSelect(route)}
-                      className="p-2.5 border border-slate-800/60 bg-slate-900/30 hover:border-slate-700 hover:bg-slate-900/50 transition-all text-left group"
-                    >
-                      <span className="text-xs text-slate-400 group-hover:text-slate-300 block">{route.label}</span>
-                      <span className="text-[10px] text-slate-600 block">{route.desc}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-6 flex justify-center">
+              <div className="mt-8 flex justify-center">
                 <button onClick={goBack} className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors">
                   <ArrowLeft className="w-3 h-3" /> Terug
                 </button>
@@ -191,103 +201,131 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
             </div>
           )}
 
-          {/* STEP 3 — Leerdoel of Vak kiezen */}
-          {step === 3 && selectedRoute && (
-            <div>
-              {curriculumNodes.length > 0 ? (
-                /* ── Curriculum route: pick a learning node ── */
-                <>
-                  <h2 className="text-sm text-slate-200 font-medium mb-1 text-center">Kies je leerdoel</h2>
-                  <p className="text-[11px] text-slate-500 mb-1 text-center">
-                    <span className="text-slate-300">{selectedRoute.label} {selectedRoute.level}</span> — waar wil je aan werken?
-                  </p>
-                  <p className="text-[10px] text-slate-600 mb-6 text-center">
-                    Je kunt dit later altijd wijzigen via de header.
-                  </p>
+          {/* STEP 3 — Vak kiezen */}
+          {step === 3 && level && (
+            <div className="text-center">
+              <h2 className="text-sm text-slate-200 font-medium mb-1">Kies je vak</h2>
+              <p className="text-[11px] text-slate-500 mb-6">
+                <span className="text-slate-300">{level}</span> — welk vak wil je oefenen?
+              </p>
 
-                  <div className="space-y-2 max-h-[50vh] overflow-y-auto">
-                    {curriculumNodes.map((node, i) => (
+              {/* SLO Modules (if available for this level) */}
+              {availableSLO.length > 0 && (
+                <div className="mb-5">
+                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-2 block">SLO Modules</span>
+                  <div className={`grid gap-2 max-w-md mx-auto ${availableSLO.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                    {availableSLO.map(mod => (
                       <button
-                        key={node.id}
-                        onClick={() => setSelectedNodeId(node.id)}
-                        className={`w-full p-3 border text-left transition-all group ${
-                          selectedNodeId === node.id
-                            ? 'border-indigo-500/50 bg-indigo-500/10'
-                            : 'border-slate-800 bg-slate-900/40 hover:border-slate-700 hover:bg-slate-900/60'
-                        }`}
+                        key={mod.subject}
+                        onClick={() => handleSLOSelect(mod)}
+                        className="p-3 border border-slate-800 bg-slate-900/60 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-left group"
                       >
-                        <div className="flex items-start gap-3">
-                          <span className={`text-[10px] font-mono mt-0.5 shrink-0 ${
-                            selectedNodeId === node.id ? 'text-indigo-400' : 'text-slate-600'
-                          }`}>
-                            {String(i + 1).padStart(2, '0')}
-                          </span>
-                          <div className="min-w-0">
-                            <span className={`text-xs block font-medium ${
-                              selectedNodeId === node.id ? 'text-indigo-200' : 'text-slate-300 group-hover:text-slate-100'
-                            }`}>
-                              {node.title}
-                            </span>
-                            <span className="text-[10px] text-slate-500 block mt-0.5">{node.description}</span>
-                            <div className="flex items-center gap-3 mt-1.5">
-                              <span className="text-[9px] font-mono text-slate-600">~{node.study_load_minutes} min</span>
-                              {node.common_misconceptions && node.common_misconceptions.length > 0 && (
-                                <span className="text-[9px] font-mono text-amber-500/60">
-                                  {node.common_misconceptions.length} aandachtspunten
-                                </span>
-                              )}
-                            </div>
-                          </div>
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-sm">{mod.icon}</span>
+                          <span className="text-[9px] font-mono text-indigo-400 border border-indigo-500/30 px-1.5 py-0.5">SLO</span>
                         </div>
+                        <span className="text-xs text-slate-300 group-hover:text-slate-100 block font-medium">{mod.subject}</span>
+                        <span className="text-[10px] text-slate-600 block">{mod.desc}</span>
                       </button>
                     ))}
                   </div>
+                </div>
+              )}
 
-                  <div className="mt-6 flex items-center justify-between">
-                    <button onClick={goBack} className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors">
+              {/* Custom subject input */}
+              <div>
+                {availableSLO.length > 0 && (
+                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-2 block">Of typ een ander vak</span>
+                )}
+                <form onSubmit={(e) => { e.preventDefault(); handleCustomSubjectSubmit(); }}>
+                  <input
+                    type="text"
+                    value={customSubject}
+                    onChange={e => setCustomSubject(e.target.value)}
+                    placeholder="Bijv. Nederlands, Scheikunde, Geschiedenis…"
+                    className="w-full max-w-sm mx-auto block bg-slate-900 border border-slate-700 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-colors text-center"
+                  />
+                  <div className="mt-6 flex items-center justify-center gap-3">
+                    <button type="button" onClick={goBack} className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors">
                       <ArrowLeft className="w-3 h-3" /> Terug
                     </button>
                     <button
-                      onClick={handleComplete}
-                      disabled={!selectedNodeId}
+                      type="submit"
+                      disabled={!customSubject.trim()}
                       className="flex items-center gap-1.5 px-5 py-2 border border-indigo-500/40 bg-indigo-500/15 text-indigo-300 text-[10px] font-mono uppercase tracking-wider hover:bg-indigo-500/25 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     >
                       Start Sessie <ChevronRight className="w-3 h-3" />
                     </button>
                   </div>
-                </>
-              ) : (
-                /* ── General route: ask which subject ── */
-                <>
-                  <h2 className="text-sm text-slate-200 font-medium mb-1 text-center">Welk vak?</h2>
-                  <p className="text-[11px] text-slate-500 mb-6 text-center">
-                    Je hebt <span className="text-slate-300">{selectedRoute.level}</span> gekozen. Over welk vak gaat je vraag?
-                  </p>
+                </form>
+              </div>
 
-                  <form onSubmit={(e) => { e.preventDefault(); if (customSubject.trim()) handleComplete(); }}>
-                    <input
-                      type="text"
-                      autoFocus
-                      value={customSubject}
-                      onChange={e => setCustomSubject(e.target.value)}
-                      placeholder="Bijv. Nederlands, Scheikunde, Geschiedenis…"
-                      className="w-full max-w-sm mx-auto block bg-slate-900 border border-slate-700 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-colors text-center"
-                    />
-                    <div className="mt-8 flex items-center justify-center gap-3">
-                      <button type="button" onClick={goBack} className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors">
-                        <ArrowLeft className="w-3 h-3" /> Terug
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={!customSubject.trim()}
-                        className="flex items-center gap-1.5 px-5 py-2 border border-indigo-500/40 bg-indigo-500/15 text-indigo-300 text-[10px] font-mono uppercase tracking-wider hover:bg-indigo-500/25 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      >
-                        Start Sessie <ChevronRight className="w-3 h-3" />
-                      </button>
+              <div className="mt-4 flex justify-center">
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4 — Leerdoel kiezen (SLO only) */}
+          {step === 4 && subject && level && (
+            <div>
+              <h2 className="text-sm text-slate-200 font-medium mb-1 text-center">Kies je leerdoel</h2>
+              <p className="text-[11px] text-slate-500 mb-1 text-center">
+                <span className="text-slate-300">{subject} {level}</span> — waar wil je aan werken?
+              </p>
+              <p className="text-[10px] text-slate-600 mb-6 text-center">
+                Je kunt dit later altijd wijzigen via de header.
+              </p>
+
+              <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+                {curriculumNodes.map((node, i) => (
+                  <button
+                    key={node.id}
+                    onClick={() => setSelectedNodeId(node.id)}
+                    className={`w-full p-3 border text-left transition-all group ${
+                      selectedNodeId === node.id
+                        ? 'border-indigo-500/50 bg-indigo-500/10'
+                        : 'border-slate-800 bg-slate-900/40 hover:border-slate-700 hover:bg-slate-900/60'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className={`text-[10px] font-mono mt-0.5 shrink-0 ${
+                        selectedNodeId === node.id ? 'text-indigo-400' : 'text-slate-600'
+                      }`}>
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <div className="min-w-0">
+                        <span className={`text-xs block font-medium ${
+                          selectedNodeId === node.id ? 'text-indigo-200' : 'text-slate-300 group-hover:text-slate-100'
+                        }`}>
+                          {node.title}
+                        </span>
+                        <span className="text-[10px] text-slate-500 block mt-0.5">{node.description}</span>
+                        <div className="flex items-center gap-3 mt-1.5">
+                          <span className="text-[9px] font-mono text-slate-600">~{node.study_load_minutes} min</span>
+                          {node.common_misconceptions && node.common_misconceptions.length > 0 && (
+                            <span className="text-[9px] font-mono text-amber-500/60">
+                              {node.common_misconceptions.length} aandachtspunten
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </form>
-                </>
-              )}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-6 flex items-center justify-between">
+                <button onClick={goBack} className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors">
+                  <ArrowLeft className="w-3 h-3" /> Terug
+                </button>
+                <button
+                  onClick={handleComplete}
+                  disabled={!selectedNodeId}
+                  className="flex items-center gap-1.5 px-5 py-2 border border-indigo-500/40 bg-indigo-500/15 text-indigo-300 text-[10px] font-mono uppercase tracking-wider hover:bg-indigo-500/25 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  Start Sessie <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
             </div>
           )}
         </div>
