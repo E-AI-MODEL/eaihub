@@ -12,7 +12,7 @@ interface MessageBubbleProps {
 
 // Presentation Guard
 const FORBIDDEN_PATTERNS = [
-  /^\/\w+/gm,
+  /\/?(?:intro|devil|schema|beeld|flits|chunk|checkin|fase_check|hint|anchor|reflectie|model|exit|quiz|meta|pauze|recap)\b/gi,
   /inventarisatie/gi,
   /diagnose/gi,
   /strategie/gi,

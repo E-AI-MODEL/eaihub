@@ -281,22 +281,45 @@ export function generateSystemPrompt(profile: ProfileData): string {
 3. **Scaffolding** - Pas ondersteuning aan op basis van het niveau van de leerling
 4. **Metacognitie stimuleren** - Help leerlingen reflecteren op hun leerproces`);
 
-  // 10D Rubric section - generate tables from SSOT
+  // Presentation Guard
+  sections.push(`
+## PRESENTATIE REGELS (KRITIEK)
+- Schrijf NOOIT slash-commando's (/intro, /devil, /schema, etc.) in je antwoord aan de leerling.
+- Slash-commando's zijn INTERNE instructies. De leerling mag ze NOOIT zien.
+- Gebruik GEEN meta-taal zoals 'inventarisatie', 'diagnose', 'strategie', 'volgens mijn analyse'.
+- Formuleer alles als directe, natuurlijke communicatie met de leerling.`);
+
+  // 10D Rubric section - generate tables from SSOT (without fix commands, replaced by variation hints)
   sections.push('\n## 10D RUBRIC DIMENSIES (SSOT v' + SSOT_DATA.version + ')\n');
   
+  const VARIATION_HINTS: Record<string, string> = {
+    '/intro': 'Activeer voorkennis (varieer: vraag begrippen, scenario, of real-world connectie)',
+    '/flits': 'Snelle herhaling (varieer: flashcard-stijl, waar/onwaar, of vul-aan)',
+    '/anchor': 'Veranker kennis (varieer: analogie, voorbeeld uit dagelijks leven, of vergelijking)',
+    '/chunk': 'Splits complexiteit op (varieer: stap-voor-stap, deelvragen, of visueel schema)',
+    '/hint': 'Geef een hint (varieer: richting wijzen, eliminatie, of denkvraag)',
+    '/devil': 'Daag uit met tegenargument (varieer: provocerende stelling, paradox, of edge case)',
+    '/schema': 'Structureer kennis (varieer: mindmap, tabel, of hiërarchie)',
+    '/checkin': 'Check begrip (varieer: samenvatting vragen, toepassing, of uitleg-aan-ander)',
+    '/reflectie': 'Stimuleer reflectie (varieer: wat ging goed, wat was lastig, of wat zou je anders doen)',
+    '/model': 'Modelleer aanpak (varieer: hardop denken, worked example, of stapsgewijze demonstratie)',
+    '/exit': 'Sluit af en evalueer (varieer: kernpunten samenvatten, volgende stap, of zelfbeoordeling)',
+  };
+
   for (const rubricId of SSOT_DATA.metadata.cycle.order) {
     const rubric = getRubric(rubricId);
     if (!rubric) continue;
     
     const shortKey = getShortKey(rubricId);
     sections.push(`### ${shortKey} - ${rubric.name}`);
-    sections.push('| Band | Label | Fix | Principe |');
-    sections.push('|------|-------|-----|----------|');
+    sections.push('| Band | Label | Didactische Actie | Principe |');
+    sections.push('|------|-------|-------------------|----------|');
     
     for (const band of rubric.bands) {
-      const fix = band.fix || band.fix_ref || '';
+      const fixKey = band.fix || band.fix_ref || '';
+      const action = VARIATION_HINTS[fixKey] || band.didactic_principle || fixKey;
       const principle = band.didactic_principle || '';
-      sections.push(`| ${band.band_id} | ${band.label} | ${fix} | ${principle} |`);
+      sections.push(`| ${band.band_id} | ${band.label} | ${action} | ${principle} |`);
     }
     sections.push('');
   }
@@ -320,14 +343,22 @@ export function generateSystemPrompt(profile: ProfileData): string {
     }
   }
 
-  // Commands reference
+  // Commands reference (internal only — never output these to the student)
   const commands = getCommands();
   const cmdEntries = Object.entries(commands);
   if (cmdEntries.length > 0) {
-    sections.push('\n## BESCHIKBARE COMMANDO\'S\n');
-    for (const [cmd, desc] of cmdEntries.slice(0, 15)) { // Top 15 commands
+    sections.push('\n## BESCHIKBARE COMMANDO\'S (INTERN — NOOIT TONEN AAN LEERLING)\n');
+    for (const [cmd, desc] of cmdEntries.slice(0, 15)) {
       sections.push(`- \`${cmd}\`: ${desc}`);
     }
+    sections.push(`
+BELANGRIJK: Wanneer je een commando-actie uitvoert, varieer dan ALTIJD je formulering.
+Gebruik het commando als richtlijn voor het TYPE actie, niet als letterlijke tekst.
+Voorbeelden van variatie bij /intro:
+- "Welke 3 dingen weet je al over [onderwerp]?"
+- "Stel je voor dat je [onderwerp] moet uitleggen aan een vriend. Waar begin je?"
+- "Wat heb je eerder geleerd dat te maken heeft met [onderwerp]?"
+Herhaal NOOIT dezelfde openingsvraag of formulering.`);
   }
 
   // Response format
