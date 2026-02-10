@@ -31,10 +31,38 @@ const sanitizeForPresentation = (text: string): string => {
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isUser = message.role === 'user';
+  const isTeacher = message.role === 'teacher';
   const wasRepaired = message.mechanical?.repairAttempts && message.mechanical.repairAttempts > 0;
   const gFactor = message.mechanical?.semanticValidation?.gFactor;
   const hasWarning = gFactor !== undefined && gFactor < 0.8;
-  const displayText = isUser ? message.text : sanitizeForPresentation(message.text);
+  const displayText = isUser || isTeacher ? message.text : sanitizeForPresentation(message.text);
+
+  // ═══════════════════════════════════════════════════════════
+  // TEACHER MESSAGE — amber accent stripe, read-only notice
+  // ═══════════════════════════════════════════════════════════
+  if (isTeacher) {
+    return (
+      <div className="max-w-2xl mb-4">
+        <div className="border border-amber-500/30 bg-amber-950/20 flex">
+          <div className="w-[3px] bg-amber-500/60 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <div className="h-7 px-3 flex items-center justify-between border-b border-amber-500/20 bg-amber-950/30">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                <span className="text-[10px] font-mono text-amber-400 uppercase tracking-widest">{message.teacherName || 'Docent'}</span>
+              </div>
+              <span className="text-[9px] font-mono text-amber-600">
+                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+            <div className="px-5 py-3 text-amber-100 text-sm leading-relaxed">
+              <p className="whitespace-pre-wrap">{displayText}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // ═══════════════════════════════════════════════════════════
   // SYSTEM MESSAGE — 3px indigo accent stripe
