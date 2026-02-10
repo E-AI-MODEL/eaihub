@@ -35,26 +35,26 @@ const ConceptPage = () => {
     {
       icon: Brain,
       title: 'Cognitieve Belasting',
-      description: 'Micro-interventies: één stap, één vraag, één check.',
-      detail: 'Gebaseerd op Sweller (1988) en Kirschner, Sweller & Clark (2006).',
+      description: 'De AI stelt steeds één gerichte vraag of geeft één hint — nooit te veel tegelijk.',
+      detail: 'Gebaseerd op Cognitive Load Theory (Sweller, 1988; Kirschner et al., 2006).',
     },
     {
       icon: Layers,
-      title: 'SSOT als Policy',
-      description: 'Single Source of Truth definieert rubrics, bands en fixes.',
-      detail: 'De LLM is uitvoerend, niet normerend.',
+      title: 'Eén Bron van Waarheid',
+      description: 'Alle didactische regels staan op één plek. De AI voert uit, maar bepaalt niet wat goed onderwijs is.',
+      detail: 'Technisch: Single Source of Truth (SSOT) definieert rubrics, niveaus en interventies.',
     },
     {
       icon: Shield,
-      title: 'Logic Gates',
-      description: 'Harde regels die taakdichtheid begrenzen.',
-      detail: 'Voorkomt dat de AI te snel oplossingen geeft.',
+      title: 'Harde Grenzen',
+      description: 'Vaste regels voorkomen dat de AI te snel antwoorden geeft wanneer de leerling zelf moet nadenken.',
+      detail: 'Technisch: Logic Gates begrenzen taakdichtheid op basis van kennistype.',
     },
     {
       icon: Sparkles,
-      title: 'Semantische Integriteit',
-      description: 'De leerlingtekst moet doen wat de band-keuze claimt.',
-      detail: 'Semantische guard vóór weergave.',
+      title: 'Kwaliteitscontrole',
+      description: 'Elke AI-reactie wordt gecontroleerd: past het antwoord bij wat de leerling echt nodig heeft?',
+      detail: 'Technisch: Semantische validatie (G-factor) vóór weergave aan de leerling.',
     },
   ];
 
@@ -89,7 +89,10 @@ const ConceptPage = () => {
             EAI Didactisch Model
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
-            Evidence-informed AI in onderwijs. Deterministische didactische policy bovenop probabilistische modellen.
+            AI die écht begeleidt in plaats van antwoorden weggeeft. Gebouwd op bewezen onderwijswetenschap, met vaste regels die de kwaliteit waarborgen.
+          </p>
+          <p className="text-xs text-muted-foreground/60 max-w-2xl mt-1 italic">
+            Technisch: deterministische didactische policy bovenop probabilistische taalmodellen.
           </p>
         </div>
 
@@ -104,12 +107,12 @@ const ConceptPage = () => {
             <div className="text-xs text-muted-foreground">Logic Gates</div>
           </div>
           <div className="p-4 rounded-xl border border-border bg-card/50 text-center">
-            <div className="text-2xl font-bold text-primary">6</div>
-            <div className="text-xs text-muted-foreground">Bands/Dim</div>
+            <div className="text-2xl font-bold text-primary">{Math.round(dimensions.reduce((sum, d) => sum + d.bands.length, 0) / dimensions.length)}</div>
+            <div className="text-xs text-muted-foreground">Gem. niveaus/dim</div>
           </div>
           <div className="p-4 rounded-xl border border-border bg-card/50 text-center">
             <div className="text-2xl font-bold text-primary">4</div>
-            <div className="text-xs text-muted-foreground">SRL States</div>
+            <div className="text-xs text-muted-foreground">Leerstrategieën</div>
           </div>
         </div>
 
@@ -170,8 +173,11 @@ const ConceptPage = () => {
                 Dimensie Cyclus
               </h2>
               <div className="p-4 rounded-xl border border-border bg-card">
-                <p className="text-sm text-muted-foreground mb-4">
-                  Elke interactie doorloopt 10 orthogonale rubrics in vaste volgorde:
+                <p className="text-sm text-muted-foreground mb-1">
+                  Bij elke interactie beoordeelt de AI de leerling op 10 onafhankelijke dimensies — van kennistype tot zelfstandigheid:
+                </p>
+                <p className="text-[10px] text-muted-foreground/50 italic mb-4">
+                  Technisch: 10 orthogonale rubrics in vaste cyclusvolgorde.
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
                   {dimensions.map((dim, idx) => {
@@ -295,10 +301,13 @@ const ConceptPage = () => {
             <div className="mb-6">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-destructive" />
-                Logic Gates: Didactische Hardheid
+                Logic Gates: Vaste Didactische Grenzen
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Harde regels die taakdichtheid (TD) begrenzen afhankelijk van kennistype.
+                Vaste regels die bepalen hoeveel de AI mag voordoen, afhankelijk van wat de leerling al weet.
+              </p>
+              <p className="text-[10px] text-muted-foreground/50 italic mt-0.5">
+                Technisch: taakdichtheid (TD) wordt mechanisch begrensd op basis van kennistype (K-niveau).
               </p>
             </div>
 
@@ -321,8 +330,8 @@ const ConceptPage = () => {
                       {gate.trigger}
                     </div>
                     <div className="flex-1">
-                      <div className="font-medium text-foreground">{gate.condition}</div>
-                      <div className="text-xs text-muted-foreground">Kennistype trigger</div>
+                     <div className="font-medium text-foreground">{gate.condition}</div>
+                      <div className="text-xs text-muted-foreground">Wanneer de leerling op dit niveau zit</div>
                     </div>
                     <span className={`text-xs font-bold uppercase px-3 py-1.5 rounded-full ${
                       gate.priority === 'CRITICAL' 
@@ -351,10 +360,13 @@ const ConceptPage = () => {
                 Waarom Logic Gates?
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                LLM's zijn door alignment getraind om 'behulpzaam' te zijn. In onderwijs ontstaat spanning: 
-                didactiek vraagt soms "geef geen antwoord; stel een vraag", terwijl alignment het model duwt 
-                naar "geef een bruikbaar antwoord". Logic gates borgen didactische hardheid door de 
-                taakdichtheid mechanisch te begrenzen.
+                AI-modellen zijn getraind om zo behulpzaam mogelijk te zijn. In onderwijs is dat soms juist verkeerd: 
+                goed onderwijs vraagt soms "stel een vraag" in plaats van "geef het antwoord". 
+                Logic Gates zorgen ervoor dat de AI zich aan didactische principes houdt, ook als het model 
+                het liefst gewoon het antwoord zou geven.
+              </p>
+              <p className="text-[10px] text-muted-foreground/50 italic mt-2">
+                Technisch: LLM alignment optimaliseert voor helpfulness; Logic Gates overrulen dit met didactische constraints.
               </p>
             </div>
           </TabsContent>
@@ -367,7 +379,10 @@ const ConceptPage = () => {
                 ICAP & Taakdichtheid
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Het ICAP-framework (Chi & Wylie, 2014) koppelt leeractiviteit aan taakdichtheid.
+                Hoe actiever de leerling, hoe dieper het leren. Dit framework bepaalt wanneer de AI moet sturen en wanneer de leerling zelf aan zet is.
+              </p>
+              <p className="text-[10px] text-muted-foreground/50 italic mt-0.5">
+                Gebaseerd op het ICAP-framework (Chi & Wylie, 2014).
               </p>
             </div>
 
@@ -380,9 +395,9 @@ const ConceptPage = () => {
                 
                 {/* Labels */}
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Leerling leidt</span>
-                  <span>Gedeeld</span>
-                  <span>AI leidt</span>
+                  <span>Leerling denkt zelf</span>
+                  <span>Samen werken</span>
+                  <span>AI doet voor</span>
                 </div>
               </div>
             </div>
@@ -396,10 +411,10 @@ const ConceptPage = () => {
                 </div>
                 <h4 className="font-medium text-foreground mb-2">Leerling Actief</h4>
                 <p className="text-sm text-muted-foreground">
-                  Leerling is constructief bezig. AI stelt vragen en scaffoldt, leerling produceert en denkt.
+                  De leerling denkt zelf na, formuleert antwoorden en bouwt kennis op. De AI stelt vragen en geeft hints.
                 </p>
                 <div className="mt-3 pt-3 border-t border-green-500/20">
-                  <span className="text-xs font-medium text-green-600">ICAP: Constructief/Interactief</span>
+                  <span className="text-xs font-medium text-green-600">Constructief & Interactief leren</span>
                 </div>
               </div>
 
@@ -408,12 +423,12 @@ const ConceptPage = () => {
                   <span className="text-lg font-bold text-yellow-500">TD3</span>
                   <span className="text-xs bg-yellow-500/20 text-yellow-600 px-2 py-0.5 rounded-full">Balans</span>
                 </div>
-                <h4 className="font-medium text-foreground mb-2">Co-Constructie</h4>
+                <h4 className="font-medium text-foreground mb-2">Samen Bouwen</h4>
                 <p className="text-sm text-muted-foreground">
-                  Gedeeld werk, mits leerling zichtbaar bijdraagt. AI en leerling bouwen samen.
+                  AI en leerling werken samen. De leerling draagt zichtbaar bij, de AI vult aan en structureert.
                 </p>
                 <div className="mt-3 pt-3 border-t border-yellow-500/20">
-                  <span className="text-xs font-medium text-yellow-600">ICAP: Actief</span>
+                  <span className="text-xs font-medium text-yellow-600">Actief leren</span>
                 </div>
               </div>
 
@@ -422,26 +437,26 @@ const ConceptPage = () => {
                   <span className="text-lg font-bold text-destructive">TD4–TD5</span>
                   <span className="text-xs bg-destructive/20 text-destructive px-2 py-0.5 rounded-full">Risico</span>
                 </div>
-                <h4 className="font-medium text-foreground mb-2">AI Dominant</h4>
+                <h4 className="font-medium text-foreground mb-2">AI Doet Voor</h4>
                 <p className="text-sm text-muted-foreground">
-                  Risico op passiviteit. AI doet het werk, leerling consumeert. Alleen voor modeling.
+                  De AI geeft het antwoord of doet de stap voor. Alleen nuttig als de leerling écht vastloopt en een voorbeeld nodig heeft.
                 </p>
                 <div className="mt-3 pt-3 border-t border-destructive/20">
-                  <span className="text-xs font-medium text-destructive">ICAP: Passief</span>
+                  <span className="text-xs font-medium text-destructive">Passief ontvangen — alleen voor modeling</span>
                 </div>
               </div>
             </div>
 
             {/* ICAP Explanation */}
             <div className="p-5 rounded-xl border border-border bg-card">
-              <h3 className="font-semibold text-foreground mb-3">ICAP Framework</h3>
+              <h3 className="font-semibold text-foreground mb-3">Niveaus van Leeractiviteit</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
-                  { level: 'I', name: 'Interactive', desc: 'Dialoog met anderen' },
-                  { level: 'C', name: 'Constructive', desc: 'Nieuwe output genereren' },
-                  { level: 'A', name: 'Active', desc: 'Gericht manipuleren' },
-                  { level: 'P', name: 'Passive', desc: 'Alleen ontvangen' },
-                ].map((item, idx) => (
+                  { level: 'I', name: 'Interactief', desc: 'In gesprek met anderen leren' },
+                  { level: 'C', name: 'Constructief', desc: 'Zelf nieuwe kennis opbouwen' },
+                  { level: 'A', name: 'Actief', desc: 'Gericht oefenen en toepassen' },
+                  { level: 'P', name: 'Passief', desc: 'Alleen luisteren of lezen' },
+                ].map((item) => (
                   <div key={item.level} className="p-3 rounded-lg bg-secondary/20 text-center">
                     <div className="text-lg font-bold text-primary mb-1">{item.level}</div>
                     <div className="text-xs font-medium text-foreground">{item.name}</div>
@@ -450,7 +465,10 @@ const ConceptPage = () => {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground mt-4 italic">
-                Chi & Wylie (2014): Diep leren ontstaat bij Constructief en Interactief engagement.
+                Hoe hoger het niveau, hoe dieper het leren. EAI stuurt actief naar Constructief en Interactief.
+              </p>
+              <p className="text-[10px] text-muted-foreground/50 mt-1 italic">
+                Bron: ICAP Framework — Chi & Wylie (2014)
               </p>
             </div>
           </TabsContent>
