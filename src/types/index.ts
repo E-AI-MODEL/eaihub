@@ -168,12 +168,13 @@ export enum GeminiModel {
 
 export interface Message {
   id: string;
-  role: 'user' | 'model';
+  role: 'user' | 'model' | 'teacher';
   text: string;
   timestamp: Date;
   isError?: boolean;
   analysis?: EAIAnalysis;
   mechanical?: MechanicalState;
+  teacherName?: string;
 }
 
 export type DidacticTheme = 

@@ -14,7 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      student_sessions: {
+        Row: {
+          analysis: Json | null
+          created_at: string | null
+          current_node_id: string | null
+          eai_state: Json | null
+          id: string
+          last_active_at: string | null
+          last_message_preview: string | null
+          level: string | null
+          mechanical: Json | null
+          messages_count: number | null
+          name: string | null
+          progress: number | null
+          session_id: string
+          status: string | null
+          subject: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          analysis?: Json | null
+          created_at?: string | null
+          current_node_id?: string | null
+          eai_state?: Json | null
+          id?: string
+          last_active_at?: string | null
+          last_message_preview?: string | null
+          level?: string | null
+          mechanical?: Json | null
+          messages_count?: number | null
+          name?: string | null
+          progress?: number | null
+          session_id: string
+          status?: string | null
+          subject?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          analysis?: Json | null
+          created_at?: string | null
+          current_node_id?: string | null
+          eai_state?: Json | null
+          id?: string
+          last_active_at?: string | null
+          last_message_preview?: string | null
+          level?: string | null
+          mechanical?: Json | null
+          messages_count?: number | null
+          name?: string | null
+          progress?: number | null
+          session_id?: string
+          status?: string | null
+          subject?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      teacher_messages: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          read: boolean | null
+          session_id: string
+          teacher_name: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          read?: boolean | null
+          session_id: string
+          teacher_name?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          session_id?: string
+          teacher_name?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

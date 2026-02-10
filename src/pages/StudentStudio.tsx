@@ -12,6 +12,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { fetchProfile, updateProfile } from '@/services/profileService';
 import { getOrCreateUserId } from '@/services/identity';
 import { createInitialEAIState, updateStateFromAnalysis, EAIStateLike } from '@/utils/eaiLearnAdapter';
+import { setSessionOffline } from '@/services/sessionSyncService';
 import { PanelLeftClose, PanelLeftOpen, Settings, BarChart3, Home, GraduationCap, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { LearnerProfile, EAIAnalysis, MechanicalState, Message } from '@/types';
@@ -58,6 +59,11 @@ const StudentStudio: React.FC = () => {
     };
     loadProfile();
   }, []);
+
+  // Mark session offline on unmount
+  useEffect(() => {
+    return () => { setSessionOffline(sessionId); };
+  }, [sessionId]);
 
   const handleBootComplete = () => {
     if (profile && profile.name && profile.subject) {
@@ -144,6 +150,9 @@ const StudentStudio: React.FC = () => {
               sessionId={sessionId}
               pendingCommand={pendingCommand}
               onCommandConsumed={() => setPendingCommand(null)}
+              currentAnalysis={currentAnalysis}
+              currentMechanical={currentMechanical}
+              eaiState={eaiState}
             />
           )}
           {mobileTab === 'analyse' && (
@@ -241,6 +250,9 @@ const StudentStudio: React.FC = () => {
                   sessionId={sessionId}
                   pendingCommand={pendingCommand}
                   onCommandConsumed={() => setPendingCommand(null)}
+                  currentAnalysis={currentAnalysis}
+                  currentMechanical={currentMechanical}
+                  eaiState={eaiState}
                 />
               )}
             </div>

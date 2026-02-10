@@ -7,6 +7,7 @@ import { getOrCreateUserId } from '@/services/identity';
 import { calculateDynamicTTL } from '@/utils/eaiLearnAdapter';
 import { pushTrace } from '@/lib/reliabilityPipeline';
 import { getNodeById } from '@/data/curriculum';
+import { upsertSessionState, subscribeToTeacherMessages, fetchTeacherMessages, markMessageRead } from '@/services/sessionSyncService';
 
 interface ChatInterfaceProps {
   profile: LearnerProfile;
@@ -14,6 +15,9 @@ interface ChatInterfaceProps {
   sessionId?: string;
   pendingCommand?: string | null;
   onCommandConsumed?: () => void;
+  currentAnalysis?: EAIAnalysis | null;
+  currentMechanical?: MechanicalState | null;
+  eaiState?: any;
 }
 
 // Idle nudge messages by escalation level
@@ -41,6 +45,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   sessionId: externalSessionId,
   pendingCommand,
   onCommandConsumed,
+  currentAnalysis,
+  currentMechanical,
+  eaiState,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -68,6 +75,59 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       if (lastModelMsg?.analysis) analysisRef.current = lastModelMsg.analysis;
     }
   }, [messages]);
+
+  // ═══ SESSION SYNC: Push state to DB every 10s ═══
+  useEffect(() => {
+    const userId = getOrCreateUserId();
+    const pushState = () => {
+      upsertSessionState({
+        userId,
+        sessionId,
+        profile,
+        analysis: currentAnalysis || analysisRef.current,
+        mechanical: currentMechanical || null,
+        eaiState: eaiState || null,
+        messagesCount: messages.length,
+        lastMessagePreview: messages.length > 0 ? messages[messages.length - 1].text.slice(0, 100) : null,
+      });
+    };
+    pushState(); // immediate push
+    const interval = setInterval(pushState, 10000);
+    return () => clearInterval(interval);
+  }, [sessionId, profile, currentAnalysis, currentMechanical, eaiState, messages.length]);
+
+  // ═══ TEACHER MESSAGES: Listen for incoming messages ═══
+  useEffect(() => {
+    // Fetch existing messages on mount
+    fetchTeacherMessages(sessionId).then(msgs => {
+      const teacherMsgs: Message[] = msgs.map(m => ({
+        id: m.id,
+        role: 'teacher' as const,
+        text: m.message,
+        timestamp: new Date(m.created_at),
+        teacherName: m.teacher_name,
+      }));
+      if (teacherMsgs.length > 0) {
+        setMessages(prev => [...prev, ...teacherMsgs]);
+        msgs.forEach(m => { if (!m.read) markMessageRead(m.id); });
+      }
+    });
+
+    // Subscribe to new messages
+    const unsub = subscribeToTeacherMessages(sessionId, (msg) => {
+      const teacherMessage: Message = {
+        id: msg.id,
+        role: 'teacher',
+        text: msg.message,
+        timestamp: new Date(msg.created_at),
+        teacherName: msg.teacher_name,
+      };
+      setMessages(prev => [...prev, teacherMessage]);
+      markMessageRead(msg.id);
+    });
+
+    return unsub;
+  }, [sessionId]);
 
   // Handle pending command from LeskaartPanel
   useEffect(() => {
