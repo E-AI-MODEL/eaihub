@@ -127,7 +127,7 @@ const LandingPage = () => {
                     <h3 className="text-2xl font-bold text-foreground">Student Studio</h3>
                   </header>
                   <p className="text-muted-foreground mb-8 max-w-sm leading-relaxed flex-1">
-                    Geen antwoordenmachine, maar een Socratische coach. Start een sessie voor Biologie, Wiskunde of Economie en leer dieper.
+                    AI die je laat nadenken in plaats van antwoorden weggeeft. Start een sessie voor Biologie, Wiskunde of Economie en leer dieper.
                   </p>
                   <div className="inline-flex items-center text-primary font-bold uppercase text-xs tracking-widest group-hover:gap-3 transition-all">
                     Start Sessie <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
