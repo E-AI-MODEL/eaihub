@@ -230,6 +230,7 @@ interface ProfileData {
   name?: string | null;
   subject?: string | null;
   level?: string | null;
+  grade?: string | null;
   goal?: string | null;
   currentNodeId?: string | null;
 }
