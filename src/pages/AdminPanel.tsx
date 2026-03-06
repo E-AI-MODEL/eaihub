@@ -91,7 +91,44 @@ const AdminPanel = () => {
     });
   };
 
-  // Get dimensions from live SSOT_DATA
+  // Database tab loaders
+  const loadDbData = async () => {
+    setDbLoading(true);
+    try {
+      const [sessions, messages] = await Promise.all([
+        fetchAllSessionsAdmin(),
+        fetchChatMessages(dbFilter || undefined),
+      ]);
+      setDbSessions(sessions);
+      setDbMessages(messages);
+    } catch (e) {
+      console.error('DB load error:', e);
+    } finally {
+      setDbLoading(false);
+    }
+  };
+
+  const handleDeleteSession = async (sessionId: string) => {
+    try {
+      await deleteSession(sessionId);
+      toast({ title: 'Sessie verwijderd', description: `Sessie ${sessionId.slice(0, 8)}... en bijbehorende berichten verwijderd.` });
+      loadDbData();
+    } catch { toast({ title: 'Fout', variant: 'destructive' }); }
+  };
+
+  const handleBulkAction = async (action: 'all' | 'offline' | 'messages') => {
+    setIsRunningAction(true);
+    try {
+      if (action === 'all') await deleteAllSessions();
+      else if (action === 'offline') await deleteOfflineSessions();
+      else if (action === 'messages') await deleteAllChatMessages();
+      toast({ title: 'Voltooid', description: `${action} verwijderd.` });
+      loadDbData();
+    } catch { toast({ title: 'Fout', variant: 'destructive' }); }
+    finally { setIsRunningAction(false); }
+  };
+
+
   const ssotDimensions = SSOT_DATA.rubrics.map(rubric => ({
     code: rubric.bands[0]?.band_id?.replace(/\d+/g, '') || rubric.rubric_id.toUpperCase().slice(0, 2),
     name: rubric.name,
