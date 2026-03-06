@@ -160,14 +160,14 @@ const AdminPanel = () => {
 
   return (
     <div className="min-h-screen bg-background pt-14">
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-3 sm:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Admin Panel</h1>
-            <p className="text-sm text-muted-foreground">Systeembeheer, Diagnostics & SSOT Browser</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">Admin Panel</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">Systeembeheer, Diagnostics & SSOT Browser</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Button 
               variant="outline" 
               size="sm" 
@@ -175,22 +175,22 @@ const AdminPanel = () => {
               disabled={isLoading}
             >
               <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
+              <span className="hidden sm:inline">Refresh</span>
             </Button>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30">
+            <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30">
               <Shield className="w-3 h-3 text-green-500" />
-              <span className="text-xs font-mono text-green-500">Admin Access</span>
+              <span className="text-xs font-mono text-green-500 hidden sm:inline">Admin Access</span>
             </div>
           </div>
         </div>
 
-        <Tabs defaultValue="monitoring" className="space-y-6">
-          <TabsList className="bg-secondary border border-border">
-            <TabsTrigger value="monitoring">System Health</TabsTrigger>
-            <TabsTrigger value="database" onClick={loadDbData}>Database</TabsTrigger>
-            <TabsTrigger value="storage">Storage Inspector</TabsTrigger>
-            <TabsTrigger value="actions">Admin Actions</TabsTrigger>
-            <TabsTrigger value="ssot">SSOT Browser</TabsTrigger>
+        <Tabs defaultValue="monitoring" className="space-y-4 sm:space-y-6">
+          <TabsList className="bg-secondary border border-border w-full overflow-x-auto flex justify-start">
+            <TabsTrigger value="monitoring" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">System </span>Health</TabsTrigger>
+            <TabsTrigger value="database" onClick={loadDbData} className="text-xs sm:text-sm whitespace-nowrap">Database</TabsTrigger>
+            <TabsTrigger value="storage" className="text-xs sm:text-sm whitespace-nowrap">Storage<span className="hidden sm:inline"> Inspector</span></TabsTrigger>
+            <TabsTrigger value="actions" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">Admin </span>Actions</TabsTrigger>
+            <TabsTrigger value="ssot" className="text-xs sm:text-sm whitespace-nowrap">SSOT<span className="hidden sm:inline"> Browser</span></TabsTrigger>
           </TabsList>
 
           {/* System Monitoring Tab */}

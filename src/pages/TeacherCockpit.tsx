@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Users, Activity, Clock, RefreshCw, AlertTriangle, Send, X,
-  Brain, Zap, TrendingUp, Cpu, ChevronRight, Home, MessageSquare, Eye
+  Brain, Zap, TrendingUp, Cpu, ChevronRight, Home, MessageSquare, Eye, ArrowLeft
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
