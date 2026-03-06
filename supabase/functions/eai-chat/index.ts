@@ -44,6 +44,7 @@ interface ChatRequest {
     name?: string | null;
     subject?: string | null;
     level?: string | null;
+    grade?: string | null;
     goal?: string | null;
   };
   systemPrompt?: string;

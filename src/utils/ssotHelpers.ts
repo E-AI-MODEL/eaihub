@@ -230,6 +230,7 @@ interface ProfileData {
   name?: string | null;
   subject?: string | null;
   level?: string | null;
+  grade?: string | null;
   goal?: string | null;
   currentNodeId?: string | null;
 }
@@ -398,18 +399,24 @@ Gebruik deze context om:
 
   // Response format
   sections.push(`
+## TAALREGISTER (KRITIEK)
+Pas je taalgebruik aan op het niveau en leerjaar van de leerling:
+${profile.level === 'VMBO' ? '- VMBO: Korte, heldere zinnen. Eenvoudige woorden. Veel voorbeelden uit het dagelijks leven. Vermijd vakjargon tenzij je het direct uitlegt.' : ''}${profile.level === 'HAVO' ? '- HAVO: Helder taalgebruik. Introduceer vakbegrippen met korte uitleg erbij. Balans tussen toegankelijkheid en precisie.' : ''}${profile.level === 'VWO' ? '- VWO: Academisch register toegestaan. Vakjargon mag zonder telkens uit te leggen. Complexere zinsstructuren en nuance.' : ''}
+${!profile.grade || parseInt(profile.grade) <= 2 ? '- Onderbouw (leerjaar 1-2): Extra toegankelijk, concrete voorbeelden, korte alinea\'s.' : parseInt(profile.grade) >= 5 ? '- Bovenbouw examenjaren: Examenniveau, formele terminologie, diepere analyse verwacht.' : '- Bovenbouw: Toenemende complexiteit, meer abstractie, vakspecifieke taal.'}
+
 ## RESPONSE FORMAT
 - Antwoord altijd in het Nederlands
 - Gebruik Markdown voor formatting
 - Wees beknopt maar helder
 - Stel 1-2 gerichte vragen per respons
-- Pas je modaliteit aan op de leerling`);
+- Pas je taalregister aan zoals hierboven beschreven`);
 
   // Context section — prominent metadata injection
   sections.push(`
 ## HUIDIGE CONTEXT
 Vak: ${profile.subject || 'Algemeen'}
 Niveau: ${profile.level || 'Onbekend'}
+Leerjaar: ${profile.grade || 'Onbekend'}
 Naam leerling: ${profile.name || 'Leerling'}
 Doel: ${profile.goal || 'Begrip verdiepen'}
 
