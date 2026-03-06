@@ -340,7 +340,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               onKeyDown={handleKeyDown}
               placeholder="Werk je antwoord hier uit…"
               rows={1}
-              className="w-full bg-slate-900 border border-slate-700 px-3 py-2.5 pr-10 text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 resize-none transition-colors"
+              className="w-full bg-slate-900 border border-slate-700 px-3 py-2.5 pr-10 text-slate-100 text-[16px] sm:text-sm placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 resize-none transition-colors"
               style={{ minHeight: '40px', maxHeight: '120px' }}
               disabled={isLoading}
             />
