@@ -60,16 +60,6 @@ const LandingPage = () => {
           <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-primary/10 blur-[120px] rounded-full pointer-events-none" aria-hidden="true" />
 
           <div className="max-w-7xl mx-auto w-full pt-20 relative z-10">
-            <div 
-              className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-8 backdrop-blur-md" 
-              role="status"
-            >
-              <span className="flex h-2 w-2 relative" aria-hidden="true">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-              </span>
-              Kernel v15.0 Active
-            </div>
             
             <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-[0.95] mb-6 sm:mb-8">
               <span className="block text-muted-foreground">VAN CHATBOT</span>
