@@ -216,6 +216,19 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     // Execute reliability pipeline: SSOT-healing, epistemic guard, semantic validation
     const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
 
+    // Update session context
+    updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
+
+    // Persist messages to DB (fire-and-forget)
+    persistChatMessage({ sessionId: request.sessionId, role: 'user', content: request.message });
+    persistChatMessage({
+      sessionId: request.sessionId,
+      role: 'model',
+      content: fullText,
+      analysis: pipelineResult.analysis,
+      mechanical: pipelineResult.mechanical,
+    });
+
     return {
       sessionId: request.sessionId,
       text: fullText,
