@@ -337,7 +337,7 @@ Gebruik deze context om:
     '/exit': 'Sluit af en evalueer sessie. Varieer: kernpunten samenvatten, volgende stap bepalen, zelfbeoordeling.',
     '/quiz': 'Genereer toetsvragen. Varieer: open vragen, meerkeuzevragen, casussen, waar/onwaar.',
     '/quizgen': 'Genereer een set toetsvragen over het huidige onderwerp. Varieer format en moeilijkheid.',
-    '/beeld': 'Gebruik visuele representatie. Varieer: beschrijf diagram, maak tabel, schets proces.',
+    '/beeld': 'Genereer een educatieve afbeelding die het HUIDIGE onderwerp visueel verduidelijkt. Gebruik door [BEELD: beschrijving] in je antwoord te plaatsen. Alleen bij abstracte concepten waar visuele representatie begrip significant versterkt. De beschrijving moet specifiek verwijzen naar het actieve leerdoel, NIET generiek zijn. Voorbeeld: [BEELD: schematische weergave van DNA replicatie met helicase en polymerase].',
     '/pauze': 'Geef leerling ademruimte. Varieer: samenvatting tot nu toe, bemoedigend woord, context-switch.',
     '/recap': 'Vat samen wat behandeld is. Varieer: bullet-samenvatting, kernbegrippen, wat-weet-je-nu.',
     '/meta': 'Stimuleer denken over het denkproces. Varieer: welke strategie gebruik je, hoe pak je dit aan.',

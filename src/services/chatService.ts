@@ -499,9 +499,12 @@ export const streamChat = async ({
     // Execute reliability pipeline
     const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
 
+    // Post-process [BEELD:] tags in AI output
+    const processedText = await processBeeldTags(fullText, request.sessionId, request.profile);
+
     onDone({
       sessionId: request.sessionId,
-      text: fullText,
+      text: processedText,
       analysis: pipelineResult.analysis,
       mechanical: pipelineResult.mechanical,
       auditId: `audit_${Date.now()}`,

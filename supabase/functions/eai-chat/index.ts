@@ -103,7 +103,26 @@ serve(async (req) => {
     // ═══ IMAGE GENERATION PATH ═══
     if (taskType === "image") {
       const imagePrompt = message.replace(/^\/beeld\s*/i, "").trim();
-      const educationalPrompt = `Maak een helder, educatief diagram of illustratie van: ${imagePrompt}. Context: vak=${profile.subject || "algemeen"}, niveau=${profile.level || "onbekend"}. Stijl: clean, informatief, geschikt voor onderwijs. Gebruik duidelijke labels in het Nederlands waar relevant.`;
+      
+      // Build context-rich educational prompt
+      let educationalPrompt: string;
+      if (curriculumContext?.title) {
+        const misconceptions = curriculumContext.common_misconceptions?.length 
+          ? `\n- Vermijd deze misconcepties visueel: ${curriculumContext.common_misconceptions.join(', ')}`
+          : '';
+        educationalPrompt = `Maak een helder, educatief diagram of illustratie van: ${imagePrompt}.
+
+DIDACTISCHE CONTEXT:
+- Onderwerp: ${curriculumContext.title}
+- Beschrijving: ${curriculumContext.description || ''}
+- Didactische focus: ${curriculumContext.didactic_focus || ''}
+- Beheersingsdoel: ${curriculumContext.mastery_criteria || ''}${misconceptions}
+- Vak: ${profile.subject || "algemeen"}, Niveau: ${profile.level || "onbekend"}
+
+Stijl: helder, informatief, geschikt voor onderwijs. Gebruik duidelijke labels in het Nederlands. Zorg dat het diagram direct bijdraagt aan het beheersingsdoel.`;
+      } else {
+        educationalPrompt = `Maak een helder, educatief diagram of illustratie van: ${imagePrompt}. Context: vak=${profile.subject || "algemeen"}, niveau=${profile.level || "onbekend"}. Stijl: clean, informatief, geschikt voor onderwijs. Gebruik duidelijke labels in het Nederlands waar relevant.`;
+      }
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
