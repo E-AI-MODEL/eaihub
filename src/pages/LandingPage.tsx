@@ -7,7 +7,7 @@ const LandingPage = () => {
       
       {/* NAVIGATION */}
       <nav 
-        className="fixed top-0 left-0 right-0 z-50 px-6 py-6 flex justify-between items-center bg-gradient-to-b from-background via-background/90 to-transparent backdrop-blur-sm border-b border-border/50" 
+        className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center bg-gradient-to-b from-background via-background/90 to-transparent backdrop-blur-sm border-b border-border/50" 
         aria-label="Hoofdnavigatie"
       >
         <div className="flex items-center gap-3">
@@ -53,7 +53,7 @@ const LandingPage = () => {
       <main className="flex-grow">
       
         {/* HERO SECTION */}
-        <header className="relative min-h-screen flex flex-col justify-center px-6 sm:px-12 border-b border-border/50 eai-hero-gradient">
+        <header className="relative min-h-screen flex flex-col justify-center px-4 sm:px-12 border-b border-border/50 eai-hero-gradient">
           
           {/* Background decorations */}
           <div className="absolute inset-0 eai-grid-pattern pointer-events-none" aria-hidden="true" />
@@ -71,7 +71,7 @@ const LandingPage = () => {
               Kernel v15.0 Active
             </div>
             
-            <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tighter leading-[0.95] mb-8">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-[0.95] mb-6 sm:mb-8">
               <span className="block text-muted-foreground">VAN CHATBOT</span>
               <span className="block text-foreground">NAAR</span>
               <span className="block eai-text-gradient">
@@ -79,15 +79,15 @@ const LandingPage = () => {
               </span>
             </h1>
             
-            <div className="max-w-3xl mt-10 border-l-2 border-primary/50 pl-8">
-              <p className="text-xl text-muted-foreground leading-relaxed font-light">
+            <div className="max-w-3xl mt-6 sm:mt-10 border-l-2 border-primary/50 pl-4 sm:pl-8">
+              <p className="text-base sm:text-xl text-muted-foreground leading-relaxed font-light">
                 Standaard AI gokt het volgende woord. <strong className="text-foreground">EAI Studio berekent de volgende leerstap.</strong>
                 <br/><br/>
                 Wij vervangen de 'Black Box' door een transparant didactisch model (SSOT). 
                 Zo krijgt de leerling geen antwoorden, maar inzicht. En de docent geen zorgen, maar controle.
               </p>
               
-              <div className="mt-10 flex flex-col sm:flex-row gap-5">
+              <div className="mt-6 sm:mt-10 flex flex-col sm:flex-row gap-4 sm:gap-5">
                 <Link 
                   to="/student" 
                   className="group bg-foreground text-background hover:bg-foreground/90 px-8 py-4 rounded text-center text-sm font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3"
@@ -108,7 +108,7 @@ const LandingPage = () => {
         </header>
 
         {/* ROLE CARDS SECTION */}
-        <section className="py-24 px-6 bg-background border-t border-border/50" aria-labelledby="access-title">
+        <section className="py-12 sm:py-24 px-4 sm:px-6 bg-background border-t border-border/50" aria-labelledby="access-title">
           <h2 id="access-title" className="sr-only">Kies uw rol</h2>
           <div className="max-w-5xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -118,9 +118,9 @@ const LandingPage = () => {
                 to="/student" 
                 className="group relative block eai-card-gradient border border-border rounded-3xl overflow-hidden hover:border-primary/50 transition-all hover:shadow-2xl hover:shadow-primary/10 focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <article className="p-10 h-full flex flex-col">
-                  <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity" aria-hidden="true">
-                    <BookOpen className="w-32 h-32 text-foreground" strokeWidth={1} />
+                <article className="p-6 sm:p-10 h-full flex flex-col">
+                  <div className="absolute top-0 right-0 p-4 sm:p-6 opacity-10 group-hover:opacity-20 transition-opacity" aria-hidden="true">
+                    <BookOpen className="w-20 sm:w-32 h-20 sm:h-32 text-foreground" strokeWidth={1} />
                   </div>
                   <header className="mb-4">
                     <span className="text-primary font-bold text-xs uppercase tracking-widest block mb-2">Voor Leerlingen</span>
@@ -140,9 +140,9 @@ const LandingPage = () => {
                 to="/teacher" 
                 className="group relative block eai-card-gradient border border-border rounded-3xl overflow-hidden hover:border-eai-purple/50 transition-all hover:shadow-2xl hover:shadow-eai-purple/10 focus:outline-none focus:ring-2 focus:ring-eai-purple"
               >
-                <article className="p-10 h-full flex flex-col">
-                  <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity" aria-hidden="true">
-                    <BarChart3 className="w-32 h-32 text-foreground" strokeWidth={1} />
+                <article className="p-6 sm:p-10 h-full flex flex-col">
+                  <div className="absolute top-0 right-0 p-4 sm:p-6 opacity-10 group-hover:opacity-20 transition-opacity" aria-hidden="true">
+                    <BarChart3 className="w-20 sm:w-32 h-20 sm:h-32 text-foreground" strokeWidth={1} />
                   </div>
                   <header className="mb-4">
                     <span className="text-eai-purple font-bold text-xs uppercase tracking-widest block mb-2">Voor Docenten</span>
