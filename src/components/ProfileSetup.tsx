@@ -37,6 +37,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
   const [subject, setSubject] = useState<string | null>(null);
   const [customSubject, setCustomSubject] = useState('');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [grade, setGrade] = useState<string | null>(null);
   const [isSLO, setIsSLO] = useState(false);
   const [isFading, setIsFading] = useState(false);
 
