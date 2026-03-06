@@ -165,7 +165,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="Typ je naam…"
-                  className="w-full max-w-sm mx-auto block bg-slate-900 border border-slate-700 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-colors text-center"
+                  className="w-full max-w-sm mx-auto block bg-slate-900 border border-slate-700 px-4 py-3 text-[16px] sm:text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-colors text-center"
                 />
                 <div className="mt-8 flex items-center justify-center gap-3">
                   {onCancel && (
