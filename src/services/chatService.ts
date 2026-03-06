@@ -365,9 +365,12 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       mechanical: pipelineResult.mechanical,
     });
 
+    // Post-process [BEELD:] tags in AI output
+    const processedText = await processBeeldTags(fullText, request.sessionId, request.profile);
+
     return {
       sessionId: request.sessionId,
-      text: fullText,
+      text: processedText,
       analysis: pipelineResult.analysis,
       mechanical: pipelineResult.mechanical,
       auditId: `audit_${Date.now()}`,
