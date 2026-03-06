@@ -1,71 +1,81 @@
 
 
-## Plan: Contextrijke Beeld-fix
+# Fix: Command Leaking + Repetitieve Didactische Fixes
 
-### Probleem
+## Twee Problemen
 
-De image prompt in de edge function (regel 97) is nu:
+### 1. `/intro` lekt door in de chat
+De AI schrijft letterlijk `/intro` in het antwoord. De huidige `sanitizeForPresentation` in `MessageBubble.tsx` vangt alleen `/command` aan het begin van een regel (`^\/\w+`), maar de AI schrijft het soms midden in een zin. Bovendien: we moeten de AI ook instrueren om dit nooit te doen.
+
+### 2. Statische fixes zijn repetitief
+In `ssot_v15.json` staat bij `/intro` altijd dezelfde tekst: *"Noem 3 begrippen die je met dit onderwerp associeert."* Elke keer dat de AI `/intro` uitvoert, krijgt de leerling exact dezelfde vraag. Na 3x is dat dodelijk voor de motivatie.
+
+## Oplossing
+
+De beste aanpak is **tweeledig**: de AI instrueren om het nooit te doen, en tegelijk de sanitizer versterken als vangnet.
+
+### A. System Prompt aanscherpen (`ssotHelpers.ts`)
+
+In de `generateSystemPrompt` functie twee dingen toevoegen:
+
+1. **Presentation Guard** instructie:
 ```
-Maak een educatief diagram van: ${imagePrompt}. Context: vak=${subject}, niveau=${level}.
+## PRESENTATIE REGELS (KRITIEK)
+- Schrijf NOOIT slash-commando's (/intro, /devil, /schema, etc.) in je antwoord aan de leerling.
+- Slash-commando's zijn interne instructies. De leerling mag ze nooit zien.
+- Gebruik GEEN meta-taal zoals 'inventarisatie', 'diagnose', 'strategie', 'volgens mijn analyse'.
 ```
-Dat levert een generiek plaatje op. De rijke curriculum-context (leerdoel, didactische focus, misconcepties) die al beschikbaar is in `curriculum.ts` wordt niet meegegeven.
 
-### Oplossing
+2. **Variatie-instructie** bij de commando-sectie:
+```
+## BESCHIKBARE COMMANDO'S
+[bestaande lijst]
 
-De client kent het `currentNodeId` al (zit in `LearnerProfile`). We moeten de curriculum-details meesturen naar de edge function, zodat het image-prompt didactisch verankerd wordt.
+BELANGRIJK: Wanneer je een commando-actie uitvoert, varieer dan ALTIJD je formulering.
+Gebruik het commando als richtlijn voor het TYPE actie, niet als letterlijke tekst.
+Voorbeelden van variatie bij /intro:
+- "Welke 3 dingen weet je al over [onderwerp]?"
+- "Stel je voor dat je [onderwerp] moet uitleggen aan een vriend. Waar begin je?"
+- "Wat heb je eerder geleerd dat te maken heeft met [onderwerp]?"
+```
 
-### Wijzigingen
+### B. Sanitizer versterken (`MessageBubble.tsx`)
 
-**1. `src/services/chatService.ts`** — Curriculum context meesturen bij image requests
+De regex `^\/\w+` matcht alleen regelstart. Aanpassen naar een bredere vanger:
 
-- In `sendChat()` en `streamChat()`: als `taskType === 'image'` en `profile.currentNodeId` beschikbaar is, `getNodeById()` aanroepen en een `curriculumContext` object toevoegen aan de request body:
-  ```typescript
-  curriculumContext: {
-    title: node.title,
-    description: node.description,
-    didactic_focus: node.didactic_focus,
-    mastery_criteria: node.mastery_criteria,
-    common_misconceptions: node.common_misconceptions
-  }
-  ```
+```typescript
+const FORBIDDEN_PATTERNS = [
+  /\/?(?:intro|devil|schema|beeld|flits|chunk|checkin|fase_check|hint|anchor|reflectie|model|exit|quiz|meta|pauze|recap)\b/gi,
+  // ... bestaande patronen
+];
+```
 
-**2. `supabase/functions/eai-chat/index.ts`** — Image prompt verrijken met curriculum
+Dit vangt `/intro`, maar ook als de AI het zonder slash schrijft midden in een zin.
 
-- `ChatRequest` interface uitbreiden met optioneel `curriculumContext`
-- Het image-prompt herschrijven van generiek naar contextrijk:
-  ```
-  Maak een educatief diagram van: ${imagePrompt}.
-  
-  DIDACTISCHE CONTEXT:
-  - Onderwerp: ${curriculum.title}
-  - Focus: ${curriculum.didactic_focus}
-  - Beheersingsdoel: ${curriculum.mastery_criteria}
-  - Vermijd deze misconcepties visueel: ${curriculum.common_misconceptions}
-  - Vak: ${subject}, Niveau: ${level}
-  
-  Stijl: helder, informatief, labels in het Nederlands.
-  ```
-- Fallback naar het huidige generieke prompt als er geen curriculum context is
+### C. Fix-teksten dynamischer maken in prompt (`ssotHelpers.ts`)
 
-**3. `src/utils/ssotHelpers.ts`** — COMMAND_INTENT voor `/beeld` aanpassen
+In de rubric-tabel die naar de AI wordt gestuurd, de statische fix-tekst vervangen door een variatie-instructie. In plaats van:
 
-- De `/beeld` intent wijzigen naar de AI-interne fix-instructie:
-  ```
-  '/beeld': 'Genereer een educatieve afbeelding die het HUIDIGE onderwerp visueel verduidelijkt. 
-  Gebruik door [BEELD: beschrijving] in je antwoord te plaatsen. 
-  Alleen bij abstracte concepten waar visuele representatie begrip versterkt. 
-  De beschrijving moet specifiek verwijzen naar het actieve leerdoel, NIET generiek zijn.'
-  ```
+```
+| P1 | Orientatie | /intro | Activeer voorkennis |
+```
 
-### Resultaat
+Wordt het:
 
-In plaats van "een plaatje van fotosynthese" krijgt de leerling een diagram dat aansluit op het specifieke leerdoel, de juiste didactische focus heeft, en visueel misconcepties adresseert.
+```
+| P1 | Orientatie | Activeer voorkennis (varieer aanpak: vraag begrippen, scenario, of real-world connectie) |
+```
 
-### Bestanden
+Dit betekent dat de commando-kolom in de prompt-tabel de fix-naam weglaat en in plaats daarvan het didactisch principe met variatie-hint toont.
 
-| Bestand | Wijziging |
-|---------|-----------|
-| `src/services/chatService.ts` | Curriculum node ophalen en meesturen bij image requests |
-| `supabase/functions/eai-chat/index.ts` | Image prompt verrijken met curriculum context |
-| `src/utils/ssotHelpers.ts` | `/beeld` COMMAND_INTENT aanpassen naar contextbewuste fix |
+## Bestanden die worden gewijzigd
+
+1. **`src/utils/ssotHelpers.ts`** -- Presentation Guard toevoegen aan system prompt, fix-kolom aanpassen naar variatie-instructies
+2. **`src/components/MessageBubble.tsx`** -- Sanitizer regex verbreden als vangnet
+
+## Wat niet verandert
+
+- `ssot_v15.json` blijft ongewijzigd (dat is de bron van waarheid)
+- De interne analyse in `chatService.ts` blijft `/commands` gebruiken voor detectie
+- De toolbox in `LeskaartPanel` stuurt nog steeds `/commands` naar de AI -- die worden alleen niet getoond
 

@@ -28,6 +28,14 @@ interface ChatMessage {
 
 type TaskType = "chat" | "deep" | "image";
 
+interface CurriculumContext {
+  title?: string;
+  description?: string;
+  didactic_focus?: string;
+  mastery_criteria?: string;
+  common_misconceptions?: string[];
+}
+
 interface ChatRequest {
   sessionId: string;
   userId: string;
@@ -41,6 +49,7 @@ interface ChatRequest {
   systemPrompt?: string;
   history?: ChatMessage[];
   taskType?: TaskType;
+  curriculumContext?: CurriculumContext;
 }
 
 // ═══ MODEL ROUTER ═══
@@ -79,7 +88,7 @@ serve(async (req) => {
   }
 
   try {
-    const { sessionId, userId, message, profile, systemPrompt, history = [], taskType = "chat" }: ChatRequest = await req.json();
+    const { sessionId, userId, message, profile, systemPrompt, history = [], taskType = "chat", curriculumContext }: ChatRequest = await req.json();
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -94,7 +103,26 @@ serve(async (req) => {
     // ═══ IMAGE GENERATION PATH ═══
     if (taskType === "image") {
       const imagePrompt = message.replace(/^\/beeld\s*/i, "").trim();
-      const educationalPrompt = `Maak een helder, educatief diagram of illustratie van: ${imagePrompt}. Context: vak=${profile.subject || "algemeen"}, niveau=${profile.level || "onbekend"}. Stijl: clean, informatief, geschikt voor onderwijs. Gebruik duidelijke labels in het Nederlands waar relevant.`;
+      
+      // Build context-rich educational prompt
+      let educationalPrompt: string;
+      if (curriculumContext?.title) {
+        const misconceptions = curriculumContext.common_misconceptions?.length 
+          ? `\n- Vermijd deze misconcepties visueel: ${curriculumContext.common_misconceptions.join(', ')}`
+          : '';
+        educationalPrompt = `Maak een helder, educatief diagram of illustratie van: ${imagePrompt}.
+
+DIDACTISCHE CONTEXT:
+- Onderwerp: ${curriculumContext.title}
+- Beschrijving: ${curriculumContext.description || ''}
+- Didactische focus: ${curriculumContext.didactic_focus || ''}
+- Beheersingsdoel: ${curriculumContext.mastery_criteria || ''}${misconceptions}
+- Vak: ${profile.subject || "algemeen"}, Niveau: ${profile.level || "onbekend"}
+
+Stijl: helder, informatief, geschikt voor onderwijs. Gebruik duidelijke labels in het Nederlands. Zorg dat het diagram direct bijdraagt aan het beheersingsdoel.`;
+      } else {
+        educationalPrompt = `Maak een helder, educatief diagram of illustratie van: ${imagePrompt}. Context: vak=${profile.subject || "algemeen"}, niveau=${profile.level || "onbekend"}. Stijl: clean, informatief, geschikt voor onderwijs. Gebruik duidelijke labels in het Nederlands waar relevant.`;
+      }
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
