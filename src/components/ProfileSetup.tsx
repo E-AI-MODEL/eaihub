@@ -70,10 +70,15 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
 
   const handleLevelSelect = (lvl: string) => {
     setLevel(lvl);
+    setGrade(null);
     setSubject(null);
     setCustomSubject('');
     setSelectedNodeId(null);
     setIsSLO(false);
+  };
+
+  const handleLevelContinue = () => {
+    if (!level || !grade) return;
     handleStepChange(3);
   };
 
