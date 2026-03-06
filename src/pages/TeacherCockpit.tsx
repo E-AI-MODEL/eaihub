@@ -108,8 +108,8 @@ const TeacherCockpit = () => {
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Student list */}
-        <div className="w-[360px] border-r border-slate-800 flex flex-col shrink-0">
+        {/* Student list - hidden on mobile when session selected */}
+        <div className={`w-full md:w-[360px] border-r border-slate-800 flex flex-col shrink-0 ${selectedSession ? 'hidden md:flex' : 'flex'}`}>
           <div className="h-9 px-3 flex items-center border-b border-slate-800 bg-slate-900/60">
             <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Actieve Sessies ({sessions.length})</span>
           </div>
@@ -184,8 +184,8 @@ const TeacherCockpit = () => {
           </div>
         </div>
 
-        {/* Detail panel */}
-        <div className="flex-1 flex flex-col">
+        {/* Detail panel - full width on mobile when session selected, hidden when not */}
+        <div className={`flex-1 flex flex-col ${selectedSession ? 'flex' : 'hidden md:flex'}`}>
           {!selectedSession ? (
             <div className="flex-1 flex items-center justify-center text-slate-600">
               <div className="text-center">
