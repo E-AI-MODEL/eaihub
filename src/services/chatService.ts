@@ -3,7 +3,7 @@
 // Version 15.0 - Uses authoritative SSOT v15.0.0 JSON with dynamic prompt
 // Includes reliability pipeline: parse/repair, SSOT-healing, epistemic guard
 
-import type { ChatRequest, ChatResponse, EAIAnalysis, MechanicalState, LearnerProfile } from '@/types';
+import type { ChatRequest, ChatResponse, EAIAnalysis, MechanicalState, LearnerProfile, SessionContext } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { 
   getFixForBand, 
@@ -20,6 +20,7 @@ import {
   getTraceEvents,
   type TraceEvent 
 } from '@/lib/reliabilityPipeline';
+import { persistChatMessage } from '@/services/adminDbService';
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-chat`;
 const HISTORY_LIMIT = 10;
@@ -30,6 +31,46 @@ interface ChatMessage {
 }
 
 const sessionHistory: Map<string, ChatMessage[]> = new Map();
+
+// ═══ SESSION CONTEXT TRACKER ═══
+const sessionContexts: Map<string, SessionContext> = new Map();
+
+export function getSessionContext(sessionId: string): SessionContext {
+  if (!sessionContexts.has(sessionId)) {
+    sessionContexts.set(sessionId, {
+      topics_covered: [],
+      fixes_applied: [],
+      last_fix: null,
+      turn_count: 0,
+      current_topic: null,
+      knowledge_trajectory: [],
+    });
+  }
+  return sessionContexts.get(sessionId)!;
+}
+
+function updateSessionContext(sessionId: string, analysis: EAIAnalysis, profile: LearnerProfile) {
+  const ctx = getSessionContext(sessionId);
+  ctx.turn_count += 1;
+
+  // Track knowledge trajectory
+  const kBand = analysis.coregulation_bands?.find(b => b.startsWith('K')) || null;
+  if (kBand && (ctx.knowledge_trajectory.length === 0 || ctx.knowledge_trajectory[ctx.knowledge_trajectory.length - 1] !== kBand)) {
+    ctx.knowledge_trajectory.push(kBand);
+  }
+
+  // Track applied fixes
+  if (analysis.active_fix && !ctx.fixes_applied.includes(analysis.active_fix)) {
+    ctx.fixes_applied.push(analysis.active_fix);
+  }
+  ctx.last_fix = analysis.active_fix;
+
+  // Track current topic from profile
+  if (profile.currentNodeId && !ctx.topics_covered.includes(profile.currentNodeId)) {
+    ctx.topics_covered.push(profile.currentNodeId);
+  }
+  ctx.current_topic = profile.currentNodeId || null;
+}
 
 // Cache learner observation patterns from SSOT v15 for all 10 dimensions
 const kPatterns = getLearnerObsPatterns('K_KennisType');
@@ -57,7 +98,8 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
   
   try {
     // Generate dynamic system prompt from SSOT
-    const systemPrompt = generateSystemPrompt(request.profile);
+    const sessionCtx = getSessionContext(request.sessionId);
+    const systemPrompt = generateSystemPrompt(request.profile, sessionCtx);
     
     const response = await fetch(CHAT_URL, {
       method: 'POST',
@@ -174,6 +216,19 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     // Execute reliability pipeline: SSOT-healing, epistemic guard, semantic validation
     const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
 
+    // Update session context
+    updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
+
+    // Persist messages to DB (fire-and-forget)
+    persistChatMessage({ sessionId: request.sessionId, role: 'user', content: request.message });
+    persistChatMessage({
+      sessionId: request.sessionId,
+      role: 'model',
+      content: fullText,
+      analysis: pipelineResult.analysis,
+      mechanical: pipelineResult.mechanical,
+    });
+
     return {
       sessionId: request.sessionId,
       text: fullText,
@@ -216,7 +271,8 @@ export const streamChat = async ({
 
   try {
     // Generate dynamic system prompt from SSOT
-    const systemPrompt = generateSystemPrompt(request.profile);
+    const sessionCtx = getSessionContext(request.sessionId);
+    const systemPrompt = generateSystemPrompt(request.profile, sessionCtx);
     
     const response = await fetch(CHAT_URL, {
       method: 'POST',

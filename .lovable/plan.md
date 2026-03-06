@@ -1,99 +1,81 @@
 
 
-## Probleemanalyse
+# Fix: Command Leaking + Repetitieve Didactische Fixes
 
-Na inspectie van de volledige codebase zijn er **vijf samenhangende problemen** gevonden:
+## Twee Problemen
 
-### 1. "Concept uitleggen" knop is contextloos
-`ChatInterface.tsx` regel 252: `setInput("Ik begrijp dit concept niet: ")` — zet een halve zin in het invoerveld. De `currentNodeId` en bijbehorende metadata (vak, niveau, onderwerp) zijn beschikbaar in de `profile` prop maar worden niet gebruikt. De AI krijgt geen context en vraagt dus "waarover?".
+### 1. `/intro` lekt door in de chat
+De AI schrijft letterlijk `/intro` in het antwoord. De huidige `sanitizeForPresentation` in `MessageBubble.tsx` vangt alleen `/command` aan het begin van een regel (`^\/\w+`), maar de AI schrijft het soms midden in een zin. Bovendien: we moeten de AI ook instrueren om dit nooit te doen.
 
-### 2. Chatgeschiedenis wordt niet opgeslagen in de database
-De `sessionHistory` in `chatService.ts` is een **in-memory Map** (regel 32). Berichten bestaan alleen in het geheugen van de browser. De `student_sessions` tabel slaat alleen metadata op (analysis, mechanical, message count, last preview) maar **niet de berichten zelf**. Gevolg: het Teacher Dashboard en Admin Panel kunnen geen gesprekken inzien.
+### 2. Statische fixes zijn repetitief
+In `ssot_v15.json` staat bij `/intro` altijd dezelfde tekst: *"Noem 3 begrippen die je met dit onderwerp associeert."* Elke keer dat de AI `/intro` uitvoert, krijgt de leerling exact dezelfde vraag. Na 3x is dat dodelijk voor de motivatie.
 
-### 3. Teacher Dashboard toont beperkte data
-`TeacherCockpit.tsx` toont alleen: fase-stepper, 4 metrics, agency sparkline, en laatste bericht-preview (100 chars). Er is geen mogelijkheid om de volledige gesprekshistorie van een leerling te bekijken, en geen inzicht in de 10D-analyse over tijd.
+## Oplossing
 
-### 4. Admin Panel heeft geen database-beheer
-`AdminPanel.tsx` beheert alleen **localStorage** (client-side). Er zijn geen tools om de Supabase tabellen (`student_sessions`, `teacher_messages`) te inspecteren, berichten te verwijderen, of sessies te beheren.
+De beste aanpak is **tweeledig**: de AI instrueren om het nooit te doen, en tegelijk de sanitizer versterken als vangnet.
 
-### 5. Fix-herhaling (eerder besproken)
-De `VARIATION_HINTS` in `ssotHelpers.ts` dekken slechts 11 van ~50 commands. Er is geen `SessionContext` die bijhoudt welke fixes al zijn uitgevoerd.
+### A. System Prompt aanscherpen (`ssotHelpers.ts`)
 
----
+In de `generateSystemPrompt` functie twee dingen toevoegen:
 
-## Plan
-
-### A. Database: Chatberichten opslaan (nieuwe tabel)
-
-Nieuwe migratie: `chat_messages` tabel
-
-```text
-chat_messages
-├── id (uuid, PK)
-├── session_id (text, NOT NULL)
-├── role (text: 'user' | 'model' | 'teacher')  
-├── content (text, NOT NULL)
-├── analysis (jsonb, nullable)
-├── mechanical (jsonb, nullable)
-├── created_at (timestamptz)
+1. **Presentation Guard** instructie:
+```
+## PRESENTATIE REGELS (KRITIEK)
+- Schrijf NOOIT slash-commando's (/intro, /devil, /schema, etc.) in je antwoord aan de leerling.
+- Slash-commando's zijn interne instructies. De leerling mag ze nooit zien.
+- Gebruik GEEN meta-taal zoals 'inventarisatie', 'diagnose', 'strategie', 'volgens mijn analyse'.
 ```
 
-RLS: open (demo mode, geen auth). Realtime enabled.
+2. **Variatie-instructie** bij de commando-sectie:
+```
+## BESCHIKBARE COMMANDO'S
+[bestaande lijst]
 
-### B. chatService.ts: Berichten naar DB schrijven
+BELANGRIJK: Wanneer je een commando-actie uitvoert, varieer dan ALTIJD je formulering.
+Gebruik het commando als richtlijn voor het TYPE actie, niet als letterlijke tekst.
+Voorbeelden van variatie bij /intro:
+- "Welke 3 dingen weet je al over [onderwerp]?"
+- "Stel je voor dat je [onderwerp] moet uitleggen aan een vriend. Waar begin je?"
+- "Wat heb je eerder geleerd dat te maken heeft met [onderwerp]?"
+```
 
-Na elke succesvolle chat-response, beide berichten (user + model) inserten in `chat_messages`. De bestaande in-memory `sessionHistory` Map blijft intact voor de prompt-history.
+### B. Sanitizer versterken (`MessageBubble.tsx`)
 
-### C. ChatInterface.tsx: Starter-knoppen contextbewust
+De regex `^\/\w+` matcht alleen regelstart. Aanpassen naar een bredere vanger:
 
-- "Concept uitleggen": als `profile.currentNodeId` gezet is, direct `handleSend("Leg het concept '${node.title}' uit")` aanroepen i.p.v. halve zin in input
-- "Test mijn kennis": als `currentNodeId` gezet is, stuur `"/quizgen ${node.title}"`
-- Alle knoppen: voeg vak/niveau context toe wanneer `currentNodeId` ontbreekt maar `profile.subject` wel beschikbaar is
+```typescript
+const FORBIDDEN_PATTERNS = [
+  /\/?(?:intro|devil|schema|beeld|flits|chunk|checkin|fase_check|hint|anchor|reflectie|model|exit|quiz|meta|pauze|recap)\b/gi,
+  // ... bestaande patronen
+];
+```
 
-### D. TeacherCockpit.tsx: Uitbreiden met gespreksgeschiedenis + 10D-inzicht
+Dit vangt `/intro`, maar ook als de AI het zonder slash schrijft midden in een zin.
 
-- **Chatlog tab**: Volledige gesprekshistorie ophalen uit `chat_messages` voor geselecteerde sessie. Read-only weergave met kleurcodes per rol.
-- **10D Analyse tab**: Alle 10 dimensies tonen (niet alleen 4 metrics). Data uit `student_sessions.analysis`.
-- **Sessie-acties**: Mogelijkheid om sessie als "bekeken" te markeren.
+### C. Fix-teksten dynamischer maken in prompt (`ssotHelpers.ts`)
 
-### E. AdminPanel.tsx: Database-beheer toevoegen
+In de rubric-tabel die naar de AI wordt gestuurd, de statische fix-tekst vervangen door een variatie-instructie. In plaats van:
 
-Nieuwe tab "Database" in Admin Panel:
-- **Sessies tabel**: Alle `student_sessions` ophalen en tonen. Per sessie: verwijder-knop, status toggle (ONLINE/OFFLINE).
-- **Berichten tabel**: Alle `chat_messages` en `teacher_messages` ophalen. Filter op session_id. Verwijder individuele berichten of alle berichten van een sessie.
-- **Bulk acties**: "Wis alle sessies", "Wis alle berichten", "Wis offline sessies".
+```
+| P1 | Orientatie | /intro | Activeer voorkennis |
+```
 
-Nieuwe service `src/services/adminDbService.ts`:
-- `fetchAllSessionsAdmin()` — alle sessies ophalen
-- `deleteSession(sessionId)` — sessie + bijbehorende berichten verwijderen
-- `fetchChatMessages(sessionId?)` — berichten ophalen (optioneel per sessie)
-- `deleteChatMessage(id)` — enkel bericht verwijderen
-- `deleteAllSessionData()` — alles wissen
-- `deleteTeacherMessage(id)` — docent-bericht verwijderen
+Wordt het:
 
-### F. ssotHelpers.ts + chatService.ts: Fix-variatie + SessionContext
+```
+| P1 | Orientatie | Activeer voorkennis (varieer aanpak: vraag begrippen, scenario, of real-world connectie) |
+```
 
-- **COMMAND_INTENTS map** uitbreiden naar alle ~50 commands (niet alleen 11)
-- **SessionContext tracker** in chatService: bijhouden van `topics_covered`, `fixes_applied`, `turn_count`, `current_topic`
-- **SessionContext als JSON-blok** meegeven in system prompt
-- **Herhaling Guard** instructie toevoegen aan prompt
-- **Metadata-injectie**: vak, niveau, huidig onderwerp prominent in prompt + bij elke user message als context wanneer relevant
+Dit betekent dat de commando-kolom in de prompt-tabel de fix-naam weglaat en in plaats daarvan het didactisch principe met variatie-hint toont.
 
-### Bestanden
+## Bestanden die worden gewijzigd
 
-| Bestand | Wijziging |
-|---------|-----------|
-| `supabase/migrations/` | Nieuwe migratie: `chat_messages` tabel + RLS + realtime |
-| `src/services/adminDbService.ts` | **Nieuw**: CRUD operaties op Supabase tabellen voor admin |
-| `src/services/chatService.ts` | Berichten naar DB schrijven; SessionContext tracker |
-| `src/utils/ssotHelpers.ts` | COMMAND_INTENTS uitbreiden; SessionContext blok; Herhaling Guard |
-| `src/components/ChatInterface.tsx` | Starter-knoppen contextbewust maken |
-| `src/pages/TeacherCockpit.tsx` | Chatlog tab; 10D analyse tab; uitgebreider detail panel |
-| `src/pages/AdminPanel.tsx` | Nieuwe "Database" tab met sessie/berichten-beheer |
-| `src/types/index.ts` | SessionContext interface |
+1. **`src/utils/ssotHelpers.ts`** -- Presentation Guard toevoegen aan system prompt, fix-kolom aanpassen naar variatie-instructies
+2. **`src/components/MessageBubble.tsx`** -- Sanitizer regex verbreden als vangnet
 
-### Wat NIET verandert
-- `ssot_v15.json` — bron van waarheid blijft intact
-- `supabase/functions/eai-chat/index.ts` — edge function ontvangt gewoon de verrijkte prompt
-- Bestaande tabellen `student_sessions` en `teacher_messages` — schema blijft, alleen nieuwe tabel erbij
+## Wat niet verandert
+
+- `ssot_v15.json` blijft ongewijzigd (dat is de bron van waarheid)
+- De interne analyse in `chatService.ts` blijft `/commands` gebruiken voor detectie
+- De toolbox in `LeskaartPanel` stuurt nog steeds `/commands` naar de AI -- die worden alleen niet getoond
 

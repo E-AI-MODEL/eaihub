@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle } from 'lucide-react';
+import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle, MessageSquare, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,11 @@ import {
   type SystemHealth,
   type StorageItem
 } from '@/services/adminService';
+import {
+  fetchAllSessionsAdmin, deleteSession, deleteAllSessions, deleteOfflineSessions,
+  fetchChatMessages, deleteChatMessage, deleteAllChatMessages,
+  deleteTeacherMessage,
+} from '@/services/adminDbService';
 import { toast } from '@/hooks/use-toast';
 
 const AdminPanel = () => {
@@ -22,6 +27,11 @@ const AdminPanel = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRunningAction, setIsRunningAction] = useState(false);
   const [selectedStorageItem, setSelectedStorageItem] = useState<StorageItem | null>(null);
+  // Database tab state
+  const [dbSessions, setDbSessions] = useState<any[]>([]);
+  const [dbMessages, setDbMessages] = useState<any[]>([]);
+  const [dbFilter, setDbFilter] = useState('');
+  const [dbLoading, setDbLoading] = useState(false);
 
   // Load system data on mount
   useEffect(() => {
@@ -81,7 +91,44 @@ const AdminPanel = () => {
     });
   };
 
-  // Get dimensions from live SSOT_DATA
+  // Database tab loaders
+  const loadDbData = async () => {
+    setDbLoading(true);
+    try {
+      const [sessions, messages] = await Promise.all([
+        fetchAllSessionsAdmin(),
+        fetchChatMessages(dbFilter || undefined),
+      ]);
+      setDbSessions(sessions);
+      setDbMessages(messages);
+    } catch (e) {
+      console.error('DB load error:', e);
+    } finally {
+      setDbLoading(false);
+    }
+  };
+
+  const handleDeleteSession = async (sessionId: string) => {
+    try {
+      await deleteSession(sessionId);
+      toast({ title: 'Sessie verwijderd', description: `Sessie ${sessionId.slice(0, 8)}... en bijbehorende berichten verwijderd.` });
+      loadDbData();
+    } catch { toast({ title: 'Fout', variant: 'destructive' }); }
+  };
+
+  const handleBulkAction = async (action: 'all' | 'offline' | 'messages') => {
+    setIsRunningAction(true);
+    try {
+      if (action === 'all') await deleteAllSessions();
+      else if (action === 'offline') await deleteOfflineSessions();
+      else if (action === 'messages') await deleteAllChatMessages();
+      toast({ title: 'Voltooid', description: `${action} verwijderd.` });
+      loadDbData();
+    } catch { toast({ title: 'Fout', variant: 'destructive' }); }
+    finally { setIsRunningAction(false); }
+  };
+
+
   const ssotDimensions = SSOT_DATA.rubrics.map(rubric => ({
     code: rubric.bands[0]?.band_id?.replace(/\d+/g, '') || rubric.rubric_id.toUpperCase().slice(0, 2),
     name: rubric.name,
@@ -140,6 +187,7 @@ const AdminPanel = () => {
         <Tabs defaultValue="monitoring" className="space-y-6">
           <TabsList className="bg-secondary border border-border">
             <TabsTrigger value="monitoring">System Health</TabsTrigger>
+            <TabsTrigger value="database" onClick={loadDbData}>Database</TabsTrigger>
             <TabsTrigger value="storage">Storage Inspector</TabsTrigger>
             <TabsTrigger value="actions">Admin Actions</TabsTrigger>
             <TabsTrigger value="ssot">SSOT Browser</TabsTrigger>
@@ -320,6 +368,112 @@ const AdminPanel = () => {
                 </Card>
               </div>
             ) : null}
+          </TabsContent>
+
+          {/* Database Tab */}
+          <TabsContent value="database">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
+                    <Database className="w-4 h-4 text-primary" />
+                    Database Beheer
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-3 mb-4">
+                    <Button variant="outline" size="sm" onClick={loadDbData} disabled={dbLoading}>
+                      <RefreshCw className={`w-3 h-3 mr-1 ${dbLoading ? 'animate-spin' : ''}`} /> Vernieuw
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => handleBulkAction('all')} disabled={isRunningAction}>
+                      <Trash2 className="w-3 h-3 mr-1" /> Wis alle sessies
+                    </Button>
+                    <Button variant="outline" size="sm" className="border-destructive/50 text-destructive" onClick={() => handleBulkAction('offline')} disabled={isRunningAction}>
+                      <Trash2 className="w-3 h-3 mr-1" /> Wis offline sessies
+                    </Button>
+                    <Button variant="outline" size="sm" className="border-destructive/50 text-destructive" onClick={() => handleBulkAction('messages')} disabled={isRunningAction}>
+                      <MessageSquare className="w-3 h-3 mr-1" /> Wis alle chatberichten
+                    </Button>
+                  </div>
+                  <h3 className="text-xs font-bold text-foreground mb-2 flex items-center gap-2">
+                    <Users className="w-3 h-3" /> Sessies ({dbSessions.length})
+                  </h3>
+                  <div className="max-h-[300px] overflow-y-auto border border-border rounded mb-6">
+                    <table className="w-full text-[10px]">
+                      <thead className="bg-secondary/50 sticky top-0">
+                        <tr>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Naam</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Vak</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Status</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Berichten</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Laatst actief</th>
+                          <th className="px-2 py-1"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dbSessions.map((s: any) => (
+                          <tr key={s.id} className="border-t border-border hover:bg-secondary/30">
+                            <td className="px-2 py-1.5 text-foreground">{s.name || 'Anoniem'}</td>
+                            <td className="px-2 py-1.5 text-muted-foreground">{s.subject || '—'} {s.level || ''}</td>
+                            <td className="px-2 py-1.5">
+                              <Badge className={`text-[8px] ${s.status === 'ONLINE' ? 'bg-green-500/20 text-green-400' : 'bg-muted text-muted-foreground'}`}>{s.status}</Badge>
+                            </td>
+                            <td className="px-2 py-1.5 text-muted-foreground">{s.messages_count}</td>
+                            <td className="px-2 py-1.5 text-muted-foreground">
+                              {s.last_active_at ? new Date(s.last_active_at).toLocaleString('nl-NL', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : '—'}
+                            </td>
+                            <td className="px-2 py-1.5">
+                              <Button variant="ghost" size="sm" className="h-5 w-5 p-0 hover:bg-destructive/20 hover:text-destructive" onClick={() => handleDeleteSession(s.session_id)}>
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                        {dbSessions.length === 0 && (
+                          <tr><td colSpan={6} className="px-2 py-4 text-center text-muted-foreground">Geen sessies</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  <h3 className="text-xs font-bold text-foreground mb-2 flex items-center gap-2">
+                    <MessageSquare className="w-3 h-3" /> Chatberichten ({dbMessages.length})
+                  </h3>
+                  <div className="max-h-[300px] overflow-y-auto border border-border rounded">
+                    <table className="w-full text-[10px]">
+                      <thead className="bg-secondary/50 sticky top-0">
+                        <tr>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Rol</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Inhoud</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Tijd</th>
+                          <th className="px-2 py-1"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dbMessages.slice(0, 100).map((m: any) => (
+                          <tr key={m.id} className="border-t border-border hover:bg-secondary/30">
+                            <td className="px-2 py-1.5">
+                              <Badge className={`text-[8px] ${m.role === 'user' ? 'bg-blue-500/20 text-blue-400' : m.role === 'model' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-amber-500/20 text-amber-400'}`}>{m.role}</Badge>
+                            </td>
+                            <td className="px-2 py-1.5 text-foreground max-w-[400px] truncate">{m.content}</td>
+                            <td className="px-2 py-1.5 text-muted-foreground whitespace-nowrap">
+                              {new Date(m.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
+                            </td>
+                            <td className="px-2 py-1.5">
+                              <Button variant="ghost" size="sm" className="h-5 w-5 p-0 hover:bg-destructive/20 hover:text-destructive" onClick={async () => { await deleteChatMessage(m.id); loadDbData(); }}>
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                        {dbMessages.length === 0 && (
+                          <tr><td colSpan={4} className="px-2 py-4 text-center text-muted-foreground">Geen berichten</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Storage Inspector Tab */}

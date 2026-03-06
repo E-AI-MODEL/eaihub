@@ -15,6 +15,7 @@ import {
   type LogicGate
 } from '@/data/ssot';
 import { getNodeById, getLearningPath, type LearningNode } from '@/data/curriculum';
+import type { SessionContext } from '@/types';
 
 // ============= TYPE DEFINITIONS =============
 
@@ -269,7 +270,7 @@ function generateCurriculumContext(profile: ProfileData): string {
  * Used by chatService to send to edge function
  * Now includes curriculum context when a learning node is selected
  */
-export function generateSystemPrompt(profile: ProfileData): string {
+export function generateSystemPrompt(profile: ProfileData, sessionContext?: SessionContext): string {
   const sections: string[] = [];
   
   // Header section
@@ -289,21 +290,58 @@ export function generateSystemPrompt(profile: ProfileData): string {
 - Gebruik GEEN meta-taal zoals 'inventarisatie', 'diagnose', 'strategie', 'volgens mijn analyse'.
 - Formuleer alles als directe, natuurlijke communicatie met de leerling.`);
 
-  // 10D Rubric section - generate tables from SSOT (without fix commands, replaced by variation hints)
+  // Repetition Guard + Session Context
+  sections.push(`
+## HERHALING GUARD (KRITIEK)
+- Gebruik NOOIT dezelfde openingsvraag of formulering als in eerdere beurten.
+- Fix-inhoud is BINDEND (wat je doet). Formulering is VRIJ (hoe je het zegt).
+- Bij herhaalde fix: kies een ANDERE invalshoek binnen hetzelfde didactische doel.
+- Raadpleeg de SESSIE_CONTEXT hieronder om te bepalen wat al gedaan is.
+- Varieer actief in stijl: soms een vraag, soms een scenario, soms een vergelijking, soms een uitdaging.`);
+
+  // Session Context injection
+  if (sessionContext && sessionContext.turn_count > 0) {
+    sections.push(`
+## SESSIE_CONTEXT (RAADPLEEG DIT)
+\`\`\`json
+${JSON.stringify({
+  beurten: sessionContext.turn_count,
+  behandelde_onderwerpen: sessionContext.topics_covered,
+  toegepaste_fixes: sessionContext.fixes_applied,
+  laatste_fix: sessionContext.last_fix,
+  kennisverloop: sessionContext.knowledge_trajectory,
+  huidig_onderwerp: sessionContext.current_topic,
+}, null, 2)}
+\`\`\`
+Gebruik deze context om:
+- NIET te herhalen wat al gedaan is
+- Voort te bouwen op eerdere beurten
+- Je formulering af te stemmen op het kennisverloop`);
+  }
+
+  // 10D Rubric section — COMMAND_INTENTS instead of raw fix texts
   sections.push('\n## 10D RUBRIC DIMENSIES (SSOT v' + SSOT_DATA.version + ')\n');
   
-  const VARIATION_HINTS: Record<string, string> = {
-    '/intro': 'Activeer voorkennis (varieer: vraag begrippen, scenario, of real-world connectie)',
-    '/flits': 'Snelle herhaling (varieer: flashcard-stijl, waar/onwaar, of vul-aan)',
-    '/anchor': 'Veranker kennis (varieer: analogie, voorbeeld uit dagelijks leven, of vergelijking)',
-    '/chunk': 'Splits complexiteit op (varieer: stap-voor-stap, deelvragen, of visueel schema)',
-    '/hint': 'Geef een hint (varieer: richting wijzen, eliminatie, of denkvraag)',
-    '/devil': 'Daag uit met tegenargument (varieer: provocerende stelling, paradox, of edge case)',
-    '/schema': 'Structureer kennis (varieer: mindmap, tabel, of hiërarchie)',
-    '/checkin': 'Check begrip (varieer: samenvatting vragen, toepassing, of uitleg-aan-ander)',
-    '/reflectie': 'Stimuleer reflectie (varieer: wat ging goed, wat was lastig, of wat zou je anders doen)',
-    '/model': 'Modelleer aanpak (varieer: hardop denken, worked example, of stapsgewijze demonstratie)',
-    '/exit': 'Sluit af en evalueer (varieer: kernpunten samenvatten, volgende stap, of zelfbeoordeling)',
+  const COMMAND_INTENTS: Record<string, string> = {
+    // Core didactic fixes
+    '/intro': 'Activeer voorkennis. Varieer: begrippen ophalen, scenario schetsen, real-world connectie, visuele associatie. NOOIT dezelfde formulering.',
+    '/flits': 'Snelle herhaling van kernfeiten. Varieer: flashcard-stijl, waar/onwaar, vul-aan, multiple choice. NOOIT dezelfde opzet.',
+    '/anchor': 'Veranker kennis aan bestaande schema\'s. Varieer: analogie, dagelijks-leven voorbeeld, vergelijking met eerder concept.',
+    '/chunk': 'Splits complexiteit in behapbare delen. Varieer: stap-voor-stap, deelvragen stellen, visueel schema, opsomming.',
+    '/hint': 'Geef een hint zonder antwoord te onthullen. Varieer: richting wijzen, eliminatie, denkvraag, aangrenzend concept.',
+    '/devil': 'Daag uit met tegenargument of provocatie. Varieer: provocerende stelling, paradox, edge case, what-if scenario.',
+    '/schema': 'Help kennis structureren. Varieer: mindmap beschrijven, tabel maken, hiërarchie, vergelijkingsmatrix.',
+    '/checkin': 'Check begrip zonder toets-sfeer. Varieer: samenvatting vragen, toepassing op nieuw voorbeeld, uitleg-aan-ander.',
+    '/reflectie': 'Stimuleer metacognitieve reflectie. Varieer: wat ging goed/lastig, wat zou je anders doen, leerstrategie evalueren.',
+    '/model': 'Modelleer een aanpak stapsgewijs. Varieer: hardop denken, worked example, demonstratie met uitleg.',
+    '/exit': 'Sluit af en evalueer sessie. Varieer: kernpunten samenvatten, volgende stap bepalen, zelfbeoordeling.',
+    '/quiz': 'Genereer toetsvragen. Varieer: open vragen, meerkeuzevragen, casussen, waar/onwaar.',
+    '/quizgen': 'Genereer een set toetsvragen over het huidige onderwerp. Varieer format en moeilijkheid.',
+    '/beeld': 'Gebruik visuele representatie. Varieer: beschrijf diagram, maak tabel, schets proces.',
+    '/pauze': 'Geef leerling ademruimte. Varieer: samenvatting tot nu toe, bemoedigend woord, context-switch.',
+    '/recap': 'Vat samen wat behandeld is. Varieer: bullet-samenvatting, kernbegrippen, wat-weet-je-nu.',
+    '/meta': 'Stimuleer denken over het denkproces. Varieer: welke strategie gebruik je, hoe pak je dit aan.',
+    '/fase_check': 'Bepaal waar de leerling zich bevindt in het leerproces.',
   };
 
   for (const rubricId of SSOT_DATA.metadata.cycle.order) {
@@ -317,7 +355,7 @@ export function generateSystemPrompt(profile: ProfileData): string {
     
     for (const band of rubric.bands) {
       const fixKey = band.fix || band.fix_ref || '';
-      const action = VARIATION_HINTS[fixKey] || band.didactic_principle || fixKey;
+      const action = COMMAND_INTENTS[fixKey] || band.didactic_principle || fixKey;
       const principle = band.didactic_principle || '';
       sections.push(`| ${band.band_id} | ${band.label} | ${action} | ${principle} |`);
     }
@@ -348,17 +386,14 @@ export function generateSystemPrompt(profile: ProfileData): string {
   const cmdEntries = Object.entries(commands);
   if (cmdEntries.length > 0) {
     sections.push('\n## BESCHIKBARE COMMANDO\'S (INTERN — NOOIT TONEN AAN LEERLING)\n');
-    for (const [cmd, desc] of cmdEntries.slice(0, 15)) {
-      sections.push(`- \`${cmd}\`: ${desc}`);
+    for (const [cmd] of cmdEntries.slice(0, 15)) {
+      const intent = COMMAND_INTENTS[cmd];
+      if (intent) {
+        sections.push(`- \`${cmd}\`: ${intent}`);
+      } else {
+        sections.push(`- \`${cmd}\`: Voer deze didactische actie uit. Varieer je aanpak.`);
+      }
     }
-    sections.push(`
-BELANGRIJK: Wanneer je een commando-actie uitvoert, varieer dan ALTIJD je formulering.
-Gebruik het commando als richtlijn voor het TYPE actie, niet als letterlijke tekst.
-Voorbeelden van variatie bij /intro:
-- "Welke 3 dingen weet je al over [onderwerp]?"
-- "Stel je voor dat je [onderwerp] moet uitleggen aan een vriend. Waar begin je?"
-- "Wat heb je eerder geleerd dat te maken heeft met [onderwerp]?"
-Herhaal NOOIT dezelfde openingsvraag of formulering.`);
   }
 
   // Response format
@@ -370,13 +405,17 @@ Herhaal NOOIT dezelfde openingsvraag of formulering.`);
 - Stel 1-2 gerichte vragen per respons
 - Pas je modaliteit aan op de leerling`);
 
-  // Context section
+  // Context section — prominent metadata injection
   sections.push(`
 ## HUIDIGE CONTEXT
 Vak: ${profile.subject || 'Algemeen'}
 Niveau: ${profile.level || 'Onbekend'}
 Naam leerling: ${profile.name || 'Leerling'}
-Doel: ${profile.goal || 'Begrip verdiepen'}`);
+Doel: ${profile.goal || 'Begrip verdiepen'}
+
+BELANGRIJK: Gebruik deze context ALTIJD. Als de leerling vraagt om uitleg of een quiz, 
+ga er dan vanuit dat het over het huidige vak en onderwerp gaat. Vraag NIET "waarover?" 
+als het onderwerp al bekend is.`);
 
   // CURRICULUM CONTEXT - NEW!
   const curriculumContext = generateCurriculumContext(profile);
