@@ -13,7 +13,7 @@ const LandingPage = () => {
         <div className="flex items-center gap-3">
           <div className="w-3 h-3 bg-primary rounded-full animate-pulse eai-glow-teal" aria-hidden="true" />
           <span className="text-xs font-bold tracking-[0.2em] uppercase text-foreground">
-            EAI Hub <span className="text-muted-foreground">v15.0</span>
+            EAI Hub
           </span>
         </div>
         <ul className="flex gap-3 sm:gap-6 text-xs font-bold tracking-widest uppercase items-center list-none m-0 p-0">
