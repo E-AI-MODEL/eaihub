@@ -16,7 +16,7 @@ const LandingPage = () => {
             EAI Hub <span className="text-muted-foreground">v15.0</span>
           </span>
         </div>
-        <ul className="flex gap-6 text-xs font-bold tracking-widest uppercase items-center list-none m-0 p-0">
+        <ul className="flex gap-3 sm:gap-6 text-xs font-bold tracking-widest uppercase items-center list-none m-0 p-0">
           <li className="hidden sm:block">
             <Link 
               to="/concept" 
