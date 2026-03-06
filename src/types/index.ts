@@ -1,5 +1,15 @@
 // EAI Hub Type Definitions v15.0
 
+// --- SESSION CONTEXT (for AI prompt injection) ---
+export interface SessionContext {
+  topics_covered: string[];
+  fixes_applied: string[];
+  last_fix: string | null;
+  turn_count: number;
+  current_topic: string | null;
+  knowledge_trajectory: string[];
+}
+
 // --- USER & AUTH ---
 export type Role = 'STUDENT' | 'TEACHER' | 'ADMIN';
 
