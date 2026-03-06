@@ -338,9 +338,9 @@ export const streamChat = async ({
   let history = sessionHistory.get(request.sessionId) || [];
 
   try {
-    // Generate dynamic system prompt from SSOT
     const sessionCtx = getSessionContext(request.sessionId);
     const systemPrompt = generateSystemPrompt(request.profile, sessionCtx);
+    const taskType = determineTaskType(request.message, sessionCtx);
     
     const response = await fetch(CHAT_URL, {
       method: 'POST',
@@ -353,8 +353,9 @@ export const streamChat = async ({
         userId: request.userId,
         message: request.message,
         profile: request.profile,
-        systemPrompt, // Send dynamic prompt
+        systemPrompt,
         history: history.map(m => ({ role: m.role, content: m.content })),
+        taskType,
       }),
     });
 
