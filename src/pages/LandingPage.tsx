@@ -41,7 +41,7 @@ const LandingPage = () => {
           <li>
             <Link 
               to="/student" 
-              className="bg-primary text-primary-foreground border border-primary px-5 py-2 rounded hover:bg-primary/90 transition-all eai-glow-teal"
+              className="bg-primary text-primary-foreground border border-primary px-3 py-1.5 sm:px-5 sm:py-2 rounded hover:bg-primary/90 transition-all sm:eai-glow-teal"
             >
               Start Demo
             </Link>
