@@ -258,19 +258,23 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
   return (
     <div className="flex-1 flex flex-col">
       {/* Detail header */}
-      <div className="h-10 px-4 flex items-center justify-between border-b border-slate-700 bg-slate-900/60 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className={`w-1.5 h-1.5 rounded-full ${session.status === 'ONLINE' ? 'bg-emerald-500' : 'bg-slate-600'}`} />
-          <span className="text-[11px] font-medium text-slate-200">{session.name || 'Anoniem'}</span>
-          <span className="text-[9px] text-slate-500 font-mono">{session.subject} {session.level}</span>
+      <div className="h-10 px-3 sm:px-4 flex items-center justify-between border-b border-slate-700 bg-slate-900/60 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          {/* Mobile back button */}
+          <button onClick={onClose} className="md:hidden p-1 text-slate-400 hover:text-slate-200 shrink-0">
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${session.status === 'ONLINE' ? 'bg-emerald-500' : 'bg-slate-600'}`} />
+          <span className="text-[11px] font-medium text-slate-200 truncate">{session.name || 'Anoniem'}</span>
+          <span className="text-[9px] text-slate-500 font-mono shrink-0 hidden sm:inline">{session.subject} {session.level}</span>
           {node && (
             <>
-              <ChevronRight className="w-3 h-3 text-slate-700" />
-              <span className="text-[9px] text-slate-400">{node.title}</span>
+              <ChevronRight className="w-3 h-3 text-slate-700 shrink-0 hidden sm:block" />
+              <span className="text-[9px] text-slate-400 truncate hidden sm:inline">{node.title}</span>
             </>
           )}
         </div>
-        <button onClick={onClose} className="p-1 text-slate-600 hover:text-slate-400">
+        <button onClick={onClose} className="p-1 text-slate-600 hover:text-slate-400 hidden md:block">
           <X className="w-3.5 h-3.5" />
         </button>
       </div>
