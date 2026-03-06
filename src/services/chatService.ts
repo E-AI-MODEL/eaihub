@@ -98,7 +98,8 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
   
   try {
     // Generate dynamic system prompt from SSOT
-    const systemPrompt = generateSystemPrompt(request.profile);
+    const sessionCtx = getSessionContext(request.sessionId);
+    const systemPrompt = generateSystemPrompt(request.profile, sessionCtx);
     
     const response = await fetch(CHAT_URL, {
       method: 'POST',
