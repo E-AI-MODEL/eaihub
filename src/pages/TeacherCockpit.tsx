@@ -407,7 +407,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                     onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSendMessage(); } }}
                     placeholder="Bericht aan leerling (read-only in chat)..."
                     rows={2}
-                    className="flex-1 bg-slate-900 border border-slate-700 px-2.5 py-2 text-slate-200 text-[11px] placeholder:text-slate-600 focus:outline-none focus:border-amber-500/50 resize-none"
+                    className="flex-1 bg-slate-900 border border-slate-700 px-2.5 py-2 text-slate-200 text-[16px] sm:text-[11px] placeholder:text-slate-600 focus:outline-none focus:border-amber-500/50 resize-none"
                   />
                   <button
                     onClick={onSendMessage}
