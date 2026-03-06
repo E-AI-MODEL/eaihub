@@ -7,7 +7,7 @@ const LandingPage = () => {
       
       {/* NAVIGATION */}
       <nav 
-        className="fixed top-0 left-0 right-0 z-50 px-6 py-6 flex justify-between items-center bg-gradient-to-b from-background via-background/90 to-transparent backdrop-blur-sm border-b border-border/50" 
+        className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center bg-gradient-to-b from-background via-background/90 to-transparent backdrop-blur-sm border-b border-border/50" 
         aria-label="Hoofdnavigatie"
       >
         <div className="flex items-center gap-3">
