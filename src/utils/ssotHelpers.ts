@@ -15,6 +15,7 @@ import {
   type LogicGate
 } from '@/data/ssot';
 import { getNodeById, getLearningPath, type LearningNode } from '@/data/curriculum';
+import type { SessionContext } from '@/types';
 
 // ============= TYPE DEFINITIONS =============
 
