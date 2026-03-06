@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle } from 'lucide-react';
+import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle, MessageSquare, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,11 @@ import {
   type SystemHealth,
   type StorageItem
 } from '@/services/adminService';
+import {
+  fetchAllSessionsAdmin, deleteSession, deleteAllSessions, deleteOfflineSessions,
+  fetchChatMessages, deleteChatMessage, deleteAllChatMessages,
+  deleteTeacherMessage,
+} from '@/services/adminDbService';
 import { toast } from '@/hooks/use-toast';
 
 const AdminPanel = () => {
