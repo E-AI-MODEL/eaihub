@@ -249,7 +249,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               {/* Starter cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <button
-                  onClick={() => setInput("Ik begrijp dit concept niet: ")}
+                  onClick={() => {
+                    if (profile.currentNodeId) {
+                      const node = getNodeById(profile.currentNodeId);
+                      handleSend(`Leg het concept '${node?.title || profile.subject}' uit`);
+                    } else if (profile.subject) {
+                      handleSend(`Leg uit waar we mee bezig zijn bij ${profile.subject}`);
+                    } else {
+                      setInput("Ik begrijp dit concept niet: ");
+                    }
+                  }}
                   className="p-3 border border-slate-800 bg-slate-900/60 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-left group"
                 >
                   <span className="text-sm mb-1 block">📐</span>
@@ -257,7 +266,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   <span className="text-[10px] text-slate-600 block">Leg een begrip stap voor stap uit</span>
                 </button>
                 <button
-                  onClick={() => handleSend("/checkin")}
+                  onClick={() => {
+                    if (profile.currentNodeId) {
+                      const node = getNodeById(profile.currentNodeId);
+                      handleSend(`/checkin ${node?.title || ''}`);
+                    } else {
+                      handleSend("/checkin");
+                    }
+                  }}
                   className="p-3 border border-slate-800 bg-slate-900/60 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-left group"
                 >
                   <span className="text-sm mb-1 block">📍</span>
@@ -265,7 +281,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   <span className="text-[10px] text-slate-600 block">Bepaal samen je leerdoel</span>
                 </button>
                 <button
-                  onClick={() => handleSend("/quizgen")}
+                  onClick={() => {
+                    if (profile.currentNodeId) {
+                      const node = getNodeById(profile.currentNodeId);
+                      handleSend(`/quizgen ${node?.title || ''}`);
+                    } else {
+                      handleSend("/quizgen");
+                    }
+                  }}
                   className="p-3 border border-slate-800 bg-slate-900/60 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-left group"
                 >
                   <span className="text-sm mb-1 block">📝</span>
