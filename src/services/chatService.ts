@@ -83,6 +83,31 @@ const sPatterns = getLearnerObsPatterns('S_SocialeInteractie');
 const lPatterns = getLearnerObsPatterns('L_LeercontinuiteitTransfer');
 const bPatterns = getLearnerObsPatterns('B_BiasCorrectie');
 
+// ═══ DIDACTISCH-GEDREVEN MODEL ROUTER ═══
+// Bepaalt taskType op basis van pedagogische condities
+type TaskType = 'chat' | 'deep' | 'image';
+
+function determineTaskType(message: string, sessionContext: SessionContext): TaskType {
+  // /beeld commando → image generatie
+  if (/^\/beeld\s/i.test(message)) return 'image';
+  
+  // K3 metacognitie + voldoende conversatie-diepte → deep model
+  const lastK = sessionContext.knowledge_trajectory.length > 0
+    ? sessionContext.knowledge_trajectory[sessionContext.knowledge_trajectory.length - 1]
+    : null;
+  if (lastK === 'K3' && sessionContext.turn_count > 3) return 'deep';
+  
+  // Default: snelle flash voor standaard didactiek
+  return 'chat';
+}
+
+// Model names for mechanical state reporting
+const MODEL_NAMES: Record<TaskType, string> = {
+  chat: 'gemini-3-flash-preview',
+  deep: 'gemini-2.5-pro',
+  image: 'gemini-2.5-flash-image',
+};
+
 export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
   const startTime = Date.now();
   let history = sessionHistory.get(request.sessionId) || [];
@@ -101,6 +126,9 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     const sessionCtx = getSessionContext(request.sessionId);
     const systemPrompt = generateSystemPrompt(request.profile, sessionCtx);
     
+    // Determine model based on didactic conditions
+    const taskType = determineTaskType(request.message, sessionCtx);
+    
     const response = await fetch(CHAT_URL, {
       method: 'POST',
       headers: {
@@ -112,8 +140,9 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
         userId: request.userId,
         message: request.message,
         profile: request.profile,
-        systemPrompt, // Send dynamic prompt
+        systemPrompt,
         history: history.map(m => ({ role: m.role, content: m.content })),
+        taskType,
       }),
     });
 
@@ -138,6 +167,47 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       throw new Error(errorMsg);
     }
 
+    // ═══ IMAGE RESPONSE (non-streaming JSON) ═══
+    if (taskType === 'image') {
+      const data = await response.json();
+      const fullText = data.text || 'Afbeelding kon niet worden gegenereerd.';
+      const latencyMs = Date.now() - startTime;
+
+      history = [
+        ...history,
+        { role: 'user' as const, content: request.message },
+        { role: 'assistant' as const, content: fullText },
+      ].slice(-HISTORY_LIMIT);
+      sessionHistory.set(request.sessionId, history);
+
+      const rawAnalysis = generateAnalysis(request.message, fullText, request.profile);
+      const rawMechanical: MechanicalState = {
+        latencyMs,
+        inputTokens: request.message.length * 2,
+        outputTokens: fullText.length,
+        model: MODEL_NAMES.image,
+        temperature: 0.8,
+        timestamp: new Date().toISOString(),
+      };
+      const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
+      updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
+
+      persistChatMessage({ sessionId: request.sessionId, role: 'user', content: request.message });
+      persistChatMessage({
+        sessionId: request.sessionId, role: 'model', content: fullText,
+        analysis: pipelineResult.analysis, mechanical: pipelineResult.mechanical,
+      });
+
+      return {
+        sessionId: request.sessionId,
+        text: fullText,
+        analysis: pipelineResult.analysis,
+        mechanical: pipelineResult.mechanical,
+        auditId: `audit_${Date.now()}`,
+      };
+    }
+
+    // ═══ STREAMING RESPONSE (chat / deep) ═══
     if (!response.body) {
       throw new Error('No response body');
     }
@@ -208,15 +278,13 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       latencyMs,
       inputTokens: request.message.length * 2,
       outputTokens: fullText.length,
-      model: 'gemini-3-flash-preview',
-      temperature: 0.7,
+      model: MODEL_NAMES[taskType],
+      temperature: taskType === 'deep' ? 0.5 : 0.7,
       timestamp: new Date().toISOString(),
     };
 
-    // Execute reliability pipeline: SSOT-healing, epistemic guard, semantic validation
+    // Execute reliability pipeline
     const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
-
-    // Update session context
     updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
 
     // Persist messages to DB (fire-and-forget)
@@ -270,9 +338,9 @@ export const streamChat = async ({
   let history = sessionHistory.get(request.sessionId) || [];
 
   try {
-    // Generate dynamic system prompt from SSOT
     const sessionCtx = getSessionContext(request.sessionId);
     const systemPrompt = generateSystemPrompt(request.profile, sessionCtx);
+    const taskType = determineTaskType(request.message, sessionCtx);
     
     const response = await fetch(CHAT_URL, {
       method: 'POST',
@@ -285,8 +353,9 @@ export const streamChat = async ({
         userId: request.userId,
         message: request.message,
         profile: request.profile,
-        systemPrompt, // Send dynamic prompt
+        systemPrompt,
         history: history.map(m => ({ role: m.role, content: m.content })),
+        taskType,
       }),
     });
 
@@ -351,8 +420,8 @@ export const streamChat = async ({
       latencyMs,
       inputTokens: request.message.length * 2,
       outputTokens: fullText.length,
-      model: 'gemini-3-flash-preview',
-      temperature: 0.7,
+      model: MODEL_NAMES[taskType],
+      temperature: taskType === 'deep' ? 0.5 : 0.7,
       timestamp: new Date().toISOString(),
     };
     

@@ -1,65 +1,81 @@
 
 
-## Plan: Didactisch-gedreven Model Router
+# Fix: Command Leaking + Repetitieve Didactische Fixes
 
-### Kern-idee
+## Twee Problemen
 
-De router zit **in de edge function** en wordt aangestuurd door een `taskType` die de **client bepaalt op basis van didactische condities**. Geen aparte edge functions, geen verstoring van de bestaande flow. De client stuurt al een `systemPrompt` en `history` — er komt simpelweg een `taskType` veld bij.
+### 1. `/intro` lekt door in de chat
+De AI schrijft letterlijk `/intro` in het antwoord. De huidige `sanitizeForPresentation` in `MessageBubble.tsx` vangt alleen `/command` aan het begin van een regel (`^\/\w+`), maar de AI schrijft het soms midden in een zin. Bovendien: we moeten de AI ook instrueren om dit nooit te doen.
 
-### Routing-regels (didactisch gemotiveerd)
+### 2. Statische fixes zijn repetitief
+In `ssot_v15.json` staat bij `/intro` altijd dezelfde tekst: *"Noem 3 begrippen die je met dit onderwerp associeert."* Elke keer dat de AI `/intro` uitvoert, krijgt de leerling exact dezelfde vraag. Na 3x is dat dodelijk voor de motivatie.
 
-| Conditie | taskType | Model | Waarom |
-|----------|----------|-------|--------|
-| Default (95% van berichten) | `chat` | `gemini-3-flash-preview` | Snel, goedkoop, goed genoeg voor standaard didactiek |
-| K3 metacognitie + turn_count > 3 | `deep` | `gemini-2.5-pro` | Metacognitieve begeleiding vereist genuanceerd redeneren |
-| Bericht bevat `/beeld` | `image` | `gemini-2.5-flash-image` | Beeldgeneratie |
-| Geen wijziging aan streaming, error handling, of prompt-logica | — | — | Alles blijft hetzelfde behalve model-selectie |
+## Oplossing
 
-### Wijzigingen
+De beste aanpak is **tweeledig**: de AI instrueren om het nooit te doen, en tegelijk de sanitizer versterken als vangnet.
 
-**1. `supabase/functions/eai-chat/index.ts`** — Model-router toevoegen
+### A. System Prompt aanscherpen (`ssotHelpers.ts`)
 
-- `ChatRequest` interface krijgt optioneel veld `taskType?: 'chat' | 'deep' | 'image'`
-- Router-map bepaalt model + parameters:
-  - `chat` → `gemini-3-flash-preview`, stream=true, temp=0.7, max_tokens=1024
-  - `deep` → `gemini-2.5-pro`, stream=true, temp=0.5, max_tokens=2048 (lager temp voor preciezer redeneren)
-  - `image` → `gemini-2.5-flash-image`, stream=false, modalities=["image","text"], temp=0.8
-- Voor `image`: base64 response opslaan in Supabase Storage bucket, publieke URL teruggeven als JSON (niet als SSE stream)
-- Logging: `[EAI Chat] Model: ${selectedModel}, TaskType: ${taskType}`
+In de `generateSystemPrompt` functie twee dingen toevoegen:
 
-**2. `src/services/chatService.ts`** — TaskType bepalen op basis van analyse
+1. **Presentation Guard** instructie:
+```
+## PRESENTATIE REGELS (KRITIEK)
+- Schrijf NOOIT slash-commando's (/intro, /devil, /schema, etc.) in je antwoord aan de leerling.
+- Slash-commando's zijn interne instructies. De leerling mag ze nooit zien.
+- Gebruik GEEN meta-taal zoals 'inventarisatie', 'diagnose', 'strategie', 'volgens mijn analyse'.
+```
 
-- Nieuwe functie `determineTaskType(message, sessionContext)`:
-  - Als bericht start met `/beeld` → `'image'`
-  - Als `sessionContext.knowledge_trajectory` bevat K3 **en** `turn_count > 3` → `'deep'`
-  - Anders → `'chat'`
-- `taskType` meesturen in de request body naar de edge function
-- `MechanicalState.model` updaten met het daadwerkelijk gebruikte model (komt terug van edge function of wordt lokaal gezet)
+2. **Variatie-instructie** bij de commando-sectie:
+```
+## BESCHIKBARE COMMANDO'S
+[bestaande lijst]
 
-**3. Database migratie** — Storage bucket voor gegenereerde afbeeldingen
+BELANGRIJK: Wanneer je een commando-actie uitvoert, varieer dan ALTIJD je formulering.
+Gebruik het commando als richtlijn voor het TYPE actie, niet als letterlijke tekst.
+Voorbeelden van variatie bij /intro:
+- "Welke 3 dingen weet je al over [onderwerp]?"
+- "Stel je voor dat je [onderwerp] moet uitleggen aan een vriend. Waar begin je?"
+- "Wat heb je eerder geleerd dat te maken heeft met [onderwerp]?"
+```
 
-- Bucket `eai-images` aanmaken, publiek leesbaar
-- Geen nieuwe tabel nodig; de image URL wordt opgeslagen als gewoon bericht in `chat_messages`
+### B. Sanitizer versterken (`MessageBubble.tsx`)
 
-**4. `src/components/MessageBubble.tsx`** — Afbeeldingen in chat renderen
+De regex `^\/\w+` matcht alleen regelstart. Aanpassen naar een bredere vanger:
 
-- ReactMarkdown `img` component toevoegen met styling (max-width, rounded corners, loading state)
-- Detectie van `![...](...eai-images...)` in model-berichten
+```typescript
+const FORBIDDEN_PATTERNS = [
+  /\/?(?:intro|devil|schema|beeld|flits|chunk|checkin|fase_check|hint|anchor|reflectie|model|exit|quiz|meta|pauze|recap)\b/gi,
+  // ... bestaande patronen
+];
+```
 
-### Wat NIET verandert
+Dit vangt `/intro`, maar ook als de AI het zonder slash schrijft midden in een zin.
 
-- De system prompt generatie (`ssotHelpers.ts`) — ongewijzigd
-- De streaming logica voor `chat` en `deep` — identiek pad
-- De reliability pipeline — draait na ontvangst, onafhankelijk van model
-- De `SessionContext` tracker — levert input voor routing maar wordt zelf niet aangepast
-- Bestaande tabellen en RLS policies
+### C. Fix-teksten dynamischer maken in prompt (`ssotHelpers.ts`)
 
-### Bestanden
+In de rubric-tabel die naar de AI wordt gestuurd, de statische fix-tekst vervangen door een variatie-instructie. In plaats van:
 
-| Bestand | Wijziging |
-|---------|-----------|
-| `supabase/functions/eai-chat/index.ts` | Router-map, taskType parameter, image-handling met storage upload |
-| `src/services/chatService.ts` | `determineTaskType()` functie, taskType meesturen |
-| `supabase/migrations/` | Storage bucket `eai-images` |
-| `src/components/MessageBubble.tsx` | Custom `img` renderer in ReactMarkdown |
+```
+| P1 | Orientatie | /intro | Activeer voorkennis |
+```
+
+Wordt het:
+
+```
+| P1 | Orientatie | Activeer voorkennis (varieer aanpak: vraag begrippen, scenario, of real-world connectie) |
+```
+
+Dit betekent dat de commando-kolom in de prompt-tabel de fix-naam weglaat en in plaats daarvan het didactisch principe met variatie-hint toont.
+
+## Bestanden die worden gewijzigd
+
+1. **`src/utils/ssotHelpers.ts`** -- Presentation Guard toevoegen aan system prompt, fix-kolom aanpassen naar variatie-instructies
+2. **`src/components/MessageBubble.tsx`** -- Sanitizer regex verbreden als vangnet
+
+## Wat niet verandert
+
+- `ssot_v15.json` blijft ongewijzigd (dat is de bron van waarheid)
+- De interne analyse in `chatService.ts` blijft `/commands` gebruiken voor detectie
+- De toolbox in `LeskaartPanel` stuurt nog steeds `/commands` naar de AI -- die worden alleen niet getoond
 
