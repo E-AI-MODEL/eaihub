@@ -198,7 +198,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
                   <button
                     key={lvl}
                     onClick={() => handleLevelSelect(lvl)}
-                    className={`w-28 py-4 border transition-all text-center group ${
+                    className={`w-24 sm:w-28 py-3 sm:py-4 border transition-all text-center group ${
                       level === lvl
                         ? 'border-indigo-500/50 bg-indigo-500/10'
                         : 'border-slate-800 bg-slate-900/60 hover:border-indigo-500/40 hover:bg-slate-900'
