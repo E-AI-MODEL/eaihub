@@ -420,8 +420,8 @@ export const streamChat = async ({
       latencyMs,
       inputTokens: request.message.length * 2,
       outputTokens: fullText.length,
-      model: 'gemini-3-flash-preview',
-      temperature: 0.7,
+      model: MODEL_NAMES[taskType],
+      temperature: taskType === 'deep' ? 0.5 : 0.7,
       timestamp: new Date().toISOString(),
     };
     
