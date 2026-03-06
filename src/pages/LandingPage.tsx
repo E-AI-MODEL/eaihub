@@ -87,7 +87,7 @@ const LandingPage = () => {
                 Zo krijgt de leerling geen antwoorden, maar inzicht. En de docent geen zorgen, maar controle.
               </p>
               
-              <div className="mt-10 flex flex-col sm:flex-row gap-5">
+              <div className="mt-6 sm:mt-10 flex flex-col sm:flex-row gap-4 sm:gap-5">
                 <Link 
                   to="/student" 
                   className="group bg-foreground text-background hover:bg-foreground/90 px-8 py-4 rounded text-center text-sm font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3"
