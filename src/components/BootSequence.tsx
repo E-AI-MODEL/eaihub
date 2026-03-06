@@ -98,7 +98,7 @@ const BootSequence: React.FC<BootSequenceProps> = ({ onComplete }) => {
         {/* EAI STUDIO Label with dynamic version */}
         <div className="absolute bottom-8 flex flex-col items-center">
             <div className="text-[9px] text-slate-600 tracking-[0.2em] uppercase mb-1">
-                EAI STUDIO
+                EAI HUB
             </div>
             <div className="bg-green-900/30 border border-green-500/30 px-2 py-0.5 rounded text-[10px] font-bold text-green-400 tracking-wider shadow-[0_0_10px_rgba(34,197,94,0.2)]">
                 v{SSOT_DATA.version}

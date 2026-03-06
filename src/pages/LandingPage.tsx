@@ -13,10 +13,10 @@ const LandingPage = () => {
         <div className="flex items-center gap-3">
           <div className="w-3 h-3 bg-primary rounded-full animate-pulse eai-glow-teal" aria-hidden="true" />
           <span className="text-xs font-bold tracking-[0.2em] uppercase text-foreground">
-            EAI Studio <span className="text-muted-foreground">v15.0</span>
+            EAI Hub <span className="text-muted-foreground">v15.0</span>
           </span>
         </div>
-        <ul className="flex gap-6 text-xs font-bold tracking-widest uppercase items-center list-none m-0 p-0">
+        <ul className="flex gap-3 sm:gap-6 text-xs font-bold tracking-widest uppercase items-center list-none m-0 p-0">
           <li className="hidden sm:block">
             <Link 
               to="/concept" 
@@ -41,7 +41,7 @@ const LandingPage = () => {
           <li>
             <Link 
               to="/student" 
-              className="bg-primary text-primary-foreground border border-primary px-5 py-2 rounded hover:bg-primary/90 transition-all eai-glow-teal"
+              className="bg-primary text-primary-foreground border border-primary px-3 py-1.5 sm:px-5 sm:py-2 rounded hover:bg-primary/90 transition-all sm:eai-glow-teal"
             >
               Start Demo
             </Link>
@@ -81,7 +81,7 @@ const LandingPage = () => {
             
             <div className="max-w-3xl mt-6 sm:mt-10 border-l-2 border-primary/50 pl-4 sm:pl-8">
               <p className="text-base sm:text-xl text-muted-foreground leading-relaxed font-light">
-                Standaard AI gokt het volgende woord. <strong className="text-foreground">EAI Studio berekent de volgende leerstap.</strong>
+                Standaard AI gokt het volgende woord. <strong className="text-foreground">EAI Hub berekent de volgende leerstap.</strong>
                 <br/><br/>
                 Wij vervangen de 'Black Box' door een transparant didactisch model (SSOT). 
                 Zo krijgt de leerling geen antwoorden, maar inzicht. En de docent geen zorgen, maar controle.
@@ -93,7 +93,7 @@ const LandingPage = () => {
                   className="group bg-foreground text-background hover:bg-foreground/90 px-8 py-4 rounded text-center text-sm font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3"
                   aria-label="Start Student Studio"
                 >
-                  Start Student Studio 
+                  Start Student Hub 
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
                 </Link>
                 <Link 
@@ -166,7 +166,7 @@ const LandingPage = () => {
       <footer className="border-t border-border/50 py-12 px-6 bg-card">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="text-center md:text-left">
-            <div className="text-lg font-bold tracking-tight text-foreground mb-1">EAI STUDIO 15.0</div>
+            <div className="text-lg font-bold tracking-tight text-foreground mb-1">EAI HUB 15.0</div>
             <p className="text-xs text-muted-foreground">© 2025 Educational Artificial Intelligence Engineering.</p>
           </div>
           
