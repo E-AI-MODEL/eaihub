@@ -27,6 +27,11 @@ const AdminPanel = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRunningAction, setIsRunningAction] = useState(false);
   const [selectedStorageItem, setSelectedStorageItem] = useState<StorageItem | null>(null);
+  // Database tab state
+  const [dbSessions, setDbSessions] = useState<any[]>([]);
+  const [dbMessages, setDbMessages] = useState<any[]>([]);
+  const [dbFilter, setDbFilter] = useState('');
+  const [dbLoading, setDbLoading] = useState(false);
 
   // Load system data on mount
   useEffect(() => {
