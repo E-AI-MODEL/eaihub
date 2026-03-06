@@ -79,8 +79,8 @@ const LandingPage = () => {
               </span>
             </h1>
             
-            <div className="max-w-3xl mt-10 border-l-2 border-primary/50 pl-8">
-              <p className="text-xl text-muted-foreground leading-relaxed font-light">
+            <div className="max-w-3xl mt-6 sm:mt-10 border-l-2 border-primary/50 pl-4 sm:pl-8">
+              <p className="text-base sm:text-xl text-muted-foreground leading-relaxed font-light">
                 Standaard AI gokt het volgende woord. <strong className="text-foreground">EAI Studio berekent de volgende leerstap.</strong>
                 <br/><br/>
                 Wij vervangen de 'Black Box' door een transparant didactisch model (SSOT). 
