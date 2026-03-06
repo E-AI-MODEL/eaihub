@@ -89,8 +89,7 @@ const bPatterns = getLearnerObsPatterns('B_BiasCorrectie');
 type TaskType = 'chat' | 'deep' | 'image';
 
 function determineTaskType(message: string, sessionContext: SessionContext): TaskType {
-  // /beeld commando → image generatie
-  if (/^\/beeld\s/i.test(message)) return 'image';
+  // Image wordt NIET door de leerling getriggerd — alleen via [BEELD:] tag in AI-output
   
   // K3 metacognitie + voldoende conversatie-diepte → deep model
   const lastK = sessionContext.knowledge_trajectory.length > 0
@@ -100,6 +99,74 @@ function determineTaskType(message: string, sessionContext: SessionContext): Tas
   
   // Default: snelle flash voor standaard didactiek
   return 'chat';
+}
+
+// ═══ [BEELD:] TAG POST-PROCESSING ═══
+// Scant AI-output op [BEELD: beschrijving] tags en vervangt ze door gegenereerde afbeeldingen
+const BEELD_TAG_REGEX = /\[BEELD:\s*(.+?)\]/g;
+
+function buildCurriculumContext(profile: LearnerProfile) {
+  if (!profile.currentNodeId) return undefined;
+  const node = getNodeById(profile.currentNodeId);
+  if (!node) return undefined;
+  return {
+    title: node.title,
+    description: node.description,
+    didactic_focus: node.didactic_focus,
+    mastery_criteria: node.mastery_criteria,
+    common_misconceptions: node.common_misconceptions,
+  };
+}
+
+async function processBeeldTags(
+  text: string, 
+  sessionId: string, 
+  profile: LearnerProfile
+): Promise<string> {
+  const matches = [...text.matchAll(BEELD_TAG_REGEX)];
+  if (matches.length === 0) return text;
+
+  let result = text;
+  for (const match of matches) {
+    const fullTag = match[0];
+    const beschrijving = match[1].trim();
+    
+    try {
+      const response = await fetch(CHAT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          sessionId,
+          userId: 'system',
+          message: beschrijving,
+          profile,
+          taskType: 'image',
+          curriculumContext: buildCurriculumContext(profile),
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const imageUrl = data.imageUrl || '';
+        if (imageUrl) {
+          result = result.replace(fullTag, `![${beschrijving}](${imageUrl})`);
+        } else {
+          // No image generated, remove the tag cleanly
+          result = result.replace(fullTag, '');
+        }
+      } else {
+        console.warn('[ChatService] Image generation failed for tag:', beschrijving);
+        result = result.replace(fullTag, '');
+      }
+    } catch (err) {
+      console.error('[ChatService] Error processing [BEELD:] tag:', err);
+      result = result.replace(fullTag, '');
+    }
+  }
+  return result;
 }
 
 // Model names for mechanical state reporting
