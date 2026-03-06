@@ -71,7 +71,7 @@ const LandingPage = () => {
               Kernel v15.0 Active
             </div>
             
-            <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tighter leading-[0.95] mb-8">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-[0.95] mb-6 sm:mb-8">
               <span className="block text-muted-foreground">VAN CHATBOT</span>
               <span className="block text-foreground">NAAR</span>
               <span className="block eai-text-gradient">
