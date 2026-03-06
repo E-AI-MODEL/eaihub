@@ -155,7 +155,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
               <div className="w-12 h-12 border border-slate-700 bg-slate-800/40 flex items-center justify-center mb-6 mx-auto">
                 <span className="text-indigo-400 text-sm font-mono font-bold tracking-tighter">EAI</span>
               </div>
-              <h2 className="text-sm text-slate-200 font-medium mb-1">Welkom bij EAI Studio</h2>
+              <h2 className="text-sm text-slate-200 font-medium mb-1">Welkom bij EAI Hub</h2>
               <p className="text-[11px] text-slate-500 mb-8">Laten we je werkplek inrichten. Hoe heet je?</p>
 
               <form onSubmit={(e) => { e.preventDefault(); if (name.trim()) handleStepChange(2); }}>
