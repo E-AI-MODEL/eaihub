@@ -108,7 +108,7 @@ const LandingPage = () => {
         </header>
 
         {/* ROLE CARDS SECTION */}
-        <section className="py-24 px-6 bg-background border-t border-border/50" aria-labelledby="access-title">
+        <section className="py-12 sm:py-24 px-4 sm:px-6 bg-background border-t border-border/50" aria-labelledby="access-title">
           <h2 id="access-title" className="sr-only">Kies uw rol</h2>
           <div className="max-w-5xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
