@@ -167,6 +167,47 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       throw new Error(errorMsg);
     }
 
+    // ═══ IMAGE RESPONSE (non-streaming JSON) ═══
+    if (taskType === 'image') {
+      const data = await response.json();
+      const fullText = data.text || 'Afbeelding kon niet worden gegenereerd.';
+      const latencyMs = Date.now() - startTime;
+
+      history = [
+        ...history,
+        { role: 'user' as const, content: request.message },
+        { role: 'assistant' as const, content: fullText },
+      ].slice(-HISTORY_LIMIT);
+      sessionHistory.set(request.sessionId, history);
+
+      const rawAnalysis = generateAnalysis(request.message, fullText, request.profile);
+      const rawMechanical: MechanicalState = {
+        latencyMs,
+        inputTokens: request.message.length * 2,
+        outputTokens: fullText.length,
+        model: MODEL_NAMES.image,
+        temperature: 0.8,
+        timestamp: new Date().toISOString(),
+      };
+      const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
+      updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
+
+      persistChatMessage({ sessionId: request.sessionId, role: 'user', content: request.message });
+      persistChatMessage({
+        sessionId: request.sessionId, role: 'model', content: fullText,
+        analysis: pipelineResult.analysis, mechanical: pipelineResult.mechanical,
+      });
+
+      return {
+        sessionId: request.sessionId,
+        text: fullText,
+        analysis: pipelineResult.analysis,
+        mechanical: pipelineResult.mechanical,
+        auditId: `audit_${Date.now()}`,
+      };
+    }
+
+    // ═══ STREAMING RESPONSE (chat / deep) ═══
     if (!response.body) {
       throw new Error('No response body');
     }
@@ -237,15 +278,13 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       latencyMs,
       inputTokens: request.message.length * 2,
       outputTokens: fullText.length,
-      model: 'gemini-3-flash-preview',
-      temperature: 0.7,
+      model: MODEL_NAMES[taskType],
+      temperature: taskType === 'deep' ? 0.5 : 0.7,
       timestamp: new Date().toISOString(),
     };
 
-    // Execute reliability pipeline: SSOT-healing, epistemic guard, semantic validation
+    // Execute reliability pipeline
     const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
-
-    // Update session context
     updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
 
     // Persist messages to DB (fire-and-forget)
