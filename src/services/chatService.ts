@@ -83,6 +83,31 @@ const sPatterns = getLearnerObsPatterns('S_SocialeInteractie');
 const lPatterns = getLearnerObsPatterns('L_LeercontinuiteitTransfer');
 const bPatterns = getLearnerObsPatterns('B_BiasCorrectie');
 
+// ═══ DIDACTISCH-GEDREVEN MODEL ROUTER ═══
+// Bepaalt taskType op basis van pedagogische condities
+type TaskType = 'chat' | 'deep' | 'image';
+
+function determineTaskType(message: string, sessionContext: SessionContext): TaskType {
+  // /beeld commando → image generatie
+  if (/^\/beeld\s/i.test(message)) return 'image';
+  
+  // K3 metacognitie + voldoende conversatie-diepte → deep model
+  const lastK = sessionContext.knowledge_trajectory.length > 0
+    ? sessionContext.knowledge_trajectory[sessionContext.knowledge_trajectory.length - 1]
+    : null;
+  if (lastK === 'K3' && sessionContext.turn_count > 3) return 'deep';
+  
+  // Default: snelle flash voor standaard didactiek
+  return 'chat';
+}
+
+// Model names for mechanical state reporting
+const MODEL_NAMES: Record<TaskType, string> = {
+  chat: 'gemini-3-flash-preview',
+  deep: 'gemini-2.5-pro',
+  image: 'gemini-2.5-flash-image',
+};
+
 export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
   const startTime = Date.now();
   let history = sessionHistory.get(request.sessionId) || [];
@@ -101,6 +126,9 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     const sessionCtx = getSessionContext(request.sessionId);
     const systemPrompt = generateSystemPrompt(request.profile, sessionCtx);
     
+    // Determine model based on didactic conditions
+    const taskType = determineTaskType(request.message, sessionCtx);
+    
     const response = await fetch(CHAT_URL, {
       method: 'POST',
       headers: {
@@ -112,8 +140,9 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
         userId: request.userId,
         message: request.message,
         profile: request.profile,
-        systemPrompt, // Send dynamic prompt
+        systemPrompt,
         history: history.map(m => ({ role: m.role, content: m.content })),
+        taskType,
       }),
     });
 

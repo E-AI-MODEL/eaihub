@@ -129,6 +129,18 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                     blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-indigo-500/60 pl-3 italic text-slate-400 my-3 bg-slate-900/30 py-2" {...props} />,
                     a: ({node, ...props}) => <a className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2" {...props} />,
                     hr: ({node, ...props}) => <hr className="border-slate-700 my-4" {...props} />,
+                    img: ({node, src, alt, ...props}) => (
+                      <div className="my-3 border border-slate-700 bg-slate-900/60 p-2">
+                        <img
+                          src={src}
+                          alt={alt || 'Educatieve afbeelding'}
+                          className="max-w-full h-auto rounded"
+                          loading="lazy"
+                          {...props}
+                        />
+                        {alt && <p className="text-[10px] font-mono text-slate-500 mt-1.5 px-1">{alt}</p>}
+                      </div>
+                    ),
                   }}
                 >
                   {displayText}
