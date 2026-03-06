@@ -53,7 +53,7 @@ const LandingPage = () => {
       <main className="flex-grow">
       
         {/* HERO SECTION */}
-        <header className="relative min-h-screen flex flex-col justify-center px-6 sm:px-12 border-b border-border/50 eai-hero-gradient">
+        <header className="relative min-h-screen flex flex-col justify-center px-4 sm:px-12 border-b border-border/50 eai-hero-gradient">
           
           {/* Background decorations */}
           <div className="absolute inset-0 eai-grid-pattern pointer-events-none" aria-hidden="true" />
