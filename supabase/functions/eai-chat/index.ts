@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,17 +15,6 @@ const FALLBACK_SYSTEM_PROMPT = `Je bent EAI, een Educatieve AI-coach die werkt v
 3. **Scaffolding** - Pas ondersteuning aan op basis van het niveau van de leerling
 4. **Metacognitie stimuleren** - Help leerlingen reflecteren op hun leerproces
 
-## LOGIC GATES (KRITIEK)
-- K1 (Feitenkennis): MAX_TD = TD2. Alleen bevragen, corrigeren, herhalen.
-- K2 (Procedureel): ALLOW_TD = TD4. Modeling toegestaan.
-- K3 (Metacognitie): MAX_TD = TD2. Reflectie centraal, geen oplossing geven.
-
-## SRL MODEL
-- PLAN: Doel verduidelijken
-- MONITOR: Check voortgang
-- REFLECT: Evaluatie aanpak
-- ADJUST: Aanpassing strategie
-
 ## RESPONSE FORMAT
 - Antwoord altijd in het Nederlands
 - Gebruik Markdown voor formatting
@@ -36,6 +26,8 @@ interface ChatMessage {
   content: string;
 }
 
+type TaskType = "chat" | "deep" | "image";
+
 interface ChatRequest {
   sessionId: string;
   userId: string;
@@ -46,9 +38,40 @@ interface ChatRequest {
     level?: string | null;
     goal?: string | null;
   };
-  systemPrompt?: string; // Dynamic prompt from client (SSOT-generated)
+  systemPrompt?: string;
   history?: ChatMessage[];
+  taskType?: TaskType;
 }
+
+// ═══ MODEL ROUTER ═══
+// Didactisch-gedreven: model keuze volgt uit pedagogische context
+const MODEL_CONFIG: Record<TaskType, {
+  model: string;
+  temperature: number;
+  max_tokens: number;
+  stream: boolean;
+  modalities?: string[];
+}> = {
+  chat: {
+    model: "google/gemini-3-flash-preview",
+    temperature: 0.7,
+    max_tokens: 1024,
+    stream: true,
+  },
+  deep: {
+    model: "google/gemini-2.5-pro",
+    temperature: 0.5,
+    max_tokens: 2048,
+    stream: true,
+  },
+  image: {
+    model: "google/gemini-2.5-flash-image",
+    temperature: 0.8,
+    max_tokens: 1024,
+    stream: false,
+    modalities: ["image", "text"],
+  },
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -56,23 +79,107 @@ serve(async (req) => {
   }
 
   try {
-    const { sessionId, userId, message, profile, systemPrompt, history = [] }: ChatRequest = await req.json();
+    const { sessionId, userId, message, profile, systemPrompt, history = [], taskType = "chat" }: ChatRequest = await req.json();
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Use client-provided dynamic prompt or fallback
+    const config = MODEL_CONFIG[taskType] || MODEL_CONFIG.chat;
     const finalSystemPrompt = systemPrompt || FALLBACK_SYSTEM_PROMPT;
 
+    console.log(`[EAI Chat] Session: ${sessionId}, TaskType: ${taskType}, Model: ${config.model}, Prompt: ${systemPrompt ? 'dynamic' : 'fallback'}`);
+
+    // ═══ IMAGE GENERATION PATH ═══
+    if (taskType === "image") {
+      const imagePrompt = message.replace(/^\/beeld\s*/i, "").trim();
+      const educationalPrompt = `Maak een helder, educatief diagram of illustratie van: ${imagePrompt}. Context: vak=${profile.subject || "algemeen"}, niveau=${profile.level || "onbekend"}. Stijl: clean, informatief, geschikt voor onderwijs. Gebruik duidelijke labels in het Nederlands waar relevant.`;
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: config.model,
+          messages: [
+            { role: "user", content: educationalPrompt },
+          ],
+          modalities: config.modalities,
+          temperature: config.temperature,
+          max_tokens: config.max_tokens,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("[EAI Chat] Image generation error:", response.status, errorText);
+        return new Response(
+          JSON.stringify({ error: "Afbeelding genereren mislukt", taskType: "image" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const data = await response.json();
+      const imageData = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+      const textContent = data.choices?.[0]?.message?.content || "";
+
+      if (!imageData) {
+        return new Response(
+          JSON.stringify({ 
+            text: textContent || "Ik kon geen afbeelding genereren. Probeer een andere beschrijving.",
+            taskType: "image",
+            model: config.model,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Upload to Supabase Storage
+      let publicUrl = imageData; // fallback: return base64 directly
+      try {
+        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+        const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        // Decode base64 to bytes
+        const base64Data = imageData.replace(/^data:image\/\w+;base64,/, "");
+        const bytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+        const fileName = `${sessionId}/${Date.now()}.png`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("eai-images")
+          .upload(fileName, bytes, { contentType: "image/png", upsert: true });
+
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage.from("eai-images").getPublicUrl(fileName);
+          publicUrl = urlData.publicUrl;
+        } else {
+          console.error("[EAI Chat] Storage upload error:", uploadError);
+        }
+      } catch (storageErr) {
+        console.error("[EAI Chat] Storage error, returning base64:", storageErr);
+      }
+
+      return new Response(
+        JSON.stringify({
+          text: `${textContent}\n\n![${imagePrompt}](${publicUrl})`,
+          imageUrl: publicUrl,
+          taskType: "image",
+          model: config.model,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ═══ CHAT / DEEP PATH (streaming) ═══
     const messages: ChatMessage[] = [
       { role: "system", content: finalSystemPrompt },
       ...history.slice(-10),
       { role: "user", content: message },
     ];
-
-    console.log(`[EAI Chat] Session: ${sessionId}, User: ${userId}, Prompt: ${systemPrompt ? 'dynamic' : 'fallback'}, Message length: ${message.length}`);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -81,11 +188,11 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: config.model,
         messages,
-        stream: true,
-        temperature: 0.7,
-        max_tokens: 1024,
+        stream: config.stream,
+        temperature: config.temperature,
+        max_tokens: config.max_tokens,
       }),
     });
 
