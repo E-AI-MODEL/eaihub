@@ -88,7 +88,7 @@ serve(async (req) => {
   }
 
   try {
-    const { sessionId, userId, message, profile, systemPrompt, history = [], taskType = "chat" }: ChatRequest = await req.json();
+    const { sessionId, userId, message, profile, systemPrompt, history = [], taskType = "chat", curriculumContext }: ChatRequest = await req.json();
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
