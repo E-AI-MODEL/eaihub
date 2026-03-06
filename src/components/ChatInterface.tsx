@@ -344,7 +344,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               style={{ minHeight: '40px', maxHeight: '120px' }}
               disabled={isLoading}
             />
-            <span className="absolute right-10 bottom-3 text-[9px] text-slate-700 font-mono pointer-events-none">
+            <span className="absolute right-10 bottom-3 text-[9px] text-slate-700 font-mono pointer-events-none hidden sm:inline">
               Enter
             </span>
           </div>

@@ -287,7 +287,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
                     value={customSubject}
                     onChange={e => setCustomSubject(e.target.value)}
                     placeholder="Bijv. Nederlands, Scheikunde, Geschiedenis…"
-                    className="w-full max-w-sm mx-auto block bg-slate-900 border border-slate-700 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-colors text-center"
+                    className="w-full max-w-sm mx-auto block bg-slate-900 border border-slate-700 px-4 py-3 text-[16px] sm:text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-colors text-center"
                   />
                   <div className="mt-6 flex items-center justify-center gap-3">
                     <button type="button" onClick={goBack} className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors">

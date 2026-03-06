@@ -140,9 +140,9 @@ const LandingPage = () => {
                 to="/teacher" 
                 className="group relative block eai-card-gradient border border-border rounded-3xl overflow-hidden hover:border-eai-purple/50 transition-all hover:shadow-2xl hover:shadow-eai-purple/10 focus:outline-none focus:ring-2 focus:ring-eai-purple"
               >
-                <article className="p-10 h-full flex flex-col">
-                  <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity" aria-hidden="true">
-                    <BarChart3 className="w-32 h-32 text-foreground" strokeWidth={1} />
+                <article className="p-6 sm:p-10 h-full flex flex-col">
+                  <div className="absolute top-0 right-0 p-4 sm:p-6 opacity-10 group-hover:opacity-20 transition-opacity" aria-hidden="true">
+                    <BarChart3 className="w-20 sm:w-32 h-20 sm:h-32 text-foreground" strokeWidth={1} />
                   </div>
                   <header className="mb-4">
                     <span className="text-eai-purple font-bold text-xs uppercase tracking-widest block mb-2">Voor Docenten</span>
