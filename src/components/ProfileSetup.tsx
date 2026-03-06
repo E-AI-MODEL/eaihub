@@ -185,29 +185,61 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
             </div>
           )}
 
-          {/* STEP 2 — Niveau kiezen */}
+          {/* STEP 2 — Niveau + Leerjaar kiezen */}
           {step === 2 && (
             <div className="text-center">
-              <h2 className="text-sm text-slate-200 font-medium mb-1">Kies je niveau</h2>
+              <h2 className="text-sm text-slate-200 font-medium mb-1">Kies je niveau en leerjaar</h2>
               <p className="text-[11px] text-slate-500 mb-8">
-                Hoi <span className="text-slate-300">{name}</span>, op welk niveau werk je?
+                Hoi <span className="text-slate-300">{name}</span>, op welk niveau en in welk leerjaar zit je?
               </p>
 
-              <div className="flex justify-center gap-3">
+              <div className="flex justify-center gap-3 mb-6">
                 {LEVELS.map(lvl => (
                   <button
                     key={lvl}
                     onClick={() => handleLevelSelect(lvl)}
-                    className="w-28 py-4 border border-slate-800 bg-slate-900/60 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-center group"
+                    className={`w-28 py-4 border transition-all text-center group ${
+                      level === lvl
+                        ? 'border-indigo-500/50 bg-indigo-500/10'
+                        : 'border-slate-800 bg-slate-900/60 hover:border-indigo-500/40 hover:bg-slate-900'
+                    }`}
                   >
-                    <span className="text-xs text-slate-300 group-hover:text-slate-100 font-medium block">{lvl}</span>
+                    <span className={`text-xs font-medium block ${level === lvl ? 'text-indigo-200' : 'text-slate-300 group-hover:text-slate-100'}`}>{lvl}</span>
                   </button>
                 ))}
               </div>
 
-              <div className="mt-8 flex justify-center">
+              {level && (
+                <div className="mb-6">
+                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-2 block">Leerjaar</span>
+                  <div className="flex justify-center gap-2">
+                    {GRADE_OPTIONS[level]?.map(g => (
+                      <button
+                        key={g}
+                        onClick={() => setGrade(g)}
+                        className={`w-10 h-10 border transition-all text-center ${
+                          grade === g
+                            ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-200'
+                            : 'border-slate-800 bg-slate-900/60 hover:border-indigo-500/40 text-slate-400 hover:text-slate-200'
+                        } text-xs font-medium`}
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-8 flex items-center justify-center gap-3">
                 <button onClick={goBack} className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors">
                   <ArrowLeft className="w-3 h-3" /> Terug
+                </button>
+                <button
+                  onClick={handleLevelContinue}
+                  disabled={!level || !grade}
+                  className="flex items-center gap-1.5 px-5 py-2 border border-indigo-500/40 bg-indigo-500/15 text-indigo-300 text-[10px] font-mono uppercase tracking-wider hover:bg-indigo-500/25 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  Volgende <ChevronRight className="w-3 h-3" />
                 </button>
               </div>
             </div>

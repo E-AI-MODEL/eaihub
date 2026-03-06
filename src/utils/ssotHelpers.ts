@@ -416,6 +416,7 @@ ${!profile.grade || parseInt(profile.grade) <= 2 ? '- Onderbouw (leerjaar 1-2): 
 ## HUIDIGE CONTEXT
 Vak: ${profile.subject || 'Algemeen'}
 Niveau: ${profile.level || 'Onbekend'}
+Leerjaar: ${profile.grade || 'Onbekend'}
 Naam leerling: ${profile.name || 'Leerling'}
 Doel: ${profile.goal || 'Begrip verdiepen'}
 
