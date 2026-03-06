@@ -187,6 +187,7 @@ const AdminPanel = () => {
         <Tabs defaultValue="monitoring" className="space-y-6">
           <TabsList className="bg-secondary border border-border">
             <TabsTrigger value="monitoring">System Health</TabsTrigger>
+            <TabsTrigger value="database" onClick={loadDbData}>Database</TabsTrigger>
             <TabsTrigger value="storage">Storage Inspector</TabsTrigger>
             <TabsTrigger value="actions">Admin Actions</TabsTrigger>
             <TabsTrigger value="ssot">SSOT Browser</TabsTrigger>
