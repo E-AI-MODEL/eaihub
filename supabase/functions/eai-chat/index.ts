@@ -28,6 +28,14 @@ interface ChatMessage {
 
 type TaskType = "chat" | "deep" | "image";
 
+interface CurriculumContext {
+  title?: string;
+  description?: string;
+  didactic_focus?: string;
+  mastery_criteria?: string;
+  common_misconceptions?: string[];
+}
+
 interface ChatRequest {
   sessionId: string;
   userId: string;
@@ -41,6 +49,7 @@ interface ChatRequest {
   systemPrompt?: string;
   history?: ChatMessage[];
   taskType?: TaskType;
+  curriculumContext?: CurriculumContext;
 }
 
 // ═══ MODEL ROUTER ═══
