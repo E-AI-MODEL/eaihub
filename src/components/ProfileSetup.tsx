@@ -22,7 +22,13 @@ const SLO_MODULES: Record<string, { subject: string; desc: string; icon: string 
 };
 
 const LEVELS = ['VMBO', 'HAVO', 'VWO'] as const;
-const STEP_LABELS = ['Naam', 'Niveau', 'Vak', 'Leerdoel'];
+const STEP_LABELS = ['Naam', 'Niveau & Leerjaar', 'Vak', 'Leerdoel'];
+
+const GRADE_OPTIONS: Record<string, string[]> = {
+  VMBO: ['1', '2', '3', '4'],
+  HAVO: ['1', '2', '3', '4', '5'],
+  VWO: ['1', '2', '3', '4', '5', '6'],
+};
 
 const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile, onCancel }) => {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
