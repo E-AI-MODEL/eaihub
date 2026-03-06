@@ -106,7 +106,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
       name,
       subject,
       level,
-      grade: null,
+      grade,
       currentNodeId: selectedNodeId,
     });
   };
