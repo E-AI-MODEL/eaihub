@@ -548,8 +548,8 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     ].slice(-HISTORY_LIMIT);
     sessionHistory.set(request.sessionId, history);
 
-    // Generate initial analysis
-    const rawAnalysis = generateAnalysis(request.message, fullText, request.profile);
+    // Generate analysis via LLM classification (fallback: regex)
+    const rawAnalysis = await classifyWithLLM(request.message, fullText, request.profile);
     const rawMechanical: MechanicalState = {
       latencyMs,
       inputTokens: request.message.length * 2,
