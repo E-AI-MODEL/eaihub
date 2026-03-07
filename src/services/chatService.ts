@@ -580,6 +580,7 @@ export const streamChat = async ({
       model: MODEL_NAMES[taskType],
       temperature: taskType === 'deep' ? 0.5 : 0.7,
       timestamp: new Date().toISOString(),
+      routerDecision: streamRouterDecision,
     };
     
     // Execute reliability pipeline
