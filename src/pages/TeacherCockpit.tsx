@@ -533,11 +533,23 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
               })}
             </div>
 
-            {/* Reasoning */}
-            {analysis?.reasoning && (
+            {/* Confidence + Reasoning */}
+            {(analysis?.confidence != null || analysis?.reasoning) && (
               <div className="mt-4 p-3 border border-slate-800 bg-slate-900/40">
-                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Analyse Reasoning</span>
-                <p className="text-[10px] text-slate-400 mt-1 font-mono">{analysis.reasoning}</p>
+                {analysis?.confidence != null && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Confidence</span>
+                    <span className={`text-[10px] font-mono ${analysis.confidence >= 0.7 ? 'text-emerald-400' : analysis.confidence >= 0.4 ? 'text-slate-300' : 'text-amber-400'}`}>
+                      {Math.round(analysis.confidence * 100)}%
+                    </span>
+                  </div>
+                )}
+                {analysis?.reasoning && (
+                  <>
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Analyse Reasoning</span>
+                    <p className="text-[10px] text-slate-400 mt-1 font-mono">{analysis.reasoning}</p>
+                  </>
+                )}
               </div>
             )}
           </div>
