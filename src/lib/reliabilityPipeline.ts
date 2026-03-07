@@ -650,11 +650,15 @@ export function executePipeline(
   // Step 3: Consolidated G-Factor (cross-dimensional + structural)
   const semanticValidation = calculateGFactor(guarded, sessionId);
 
+  // Step 4: Logic gate breach (authoritative, post-healing)
+  const logicGateBreach = checkLogicGatesAnalysis(guarded);
+
   // Update mechanical state with pipeline results
   const enhancedMechanical: MechanicalState = {
     ...mechanical,
     repairAttempts: healingEvents.length > 0 ? 1 : 0,
     semanticValidation,
+    logicGateBreach: logicGateBreach || undefined,
     epistemicGuardResult: {
       label: epistemicResult.label,
       notes: epistemicResult.notes,
