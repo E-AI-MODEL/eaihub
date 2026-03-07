@@ -710,7 +710,7 @@ const AdminPanel = () => {
                           );
                         })}
                         {dbMessages.filter((m: any) => m.role === 'model').length === 0 && (
-                          <tr><td colSpan={9} className="px-2 py-4 text-center text-muted-foreground">Geen model berichten gevonden</td></tr>
+                          <tr><td colSpan={11} className="px-2 py-4 text-center text-muted-foreground">Geen model berichten gevonden</td></tr>
                         )}
                       </tbody>
                     </table>
