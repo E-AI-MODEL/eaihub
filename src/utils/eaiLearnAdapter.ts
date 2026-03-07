@@ -42,22 +42,7 @@ export interface EAIStateLike {
 const CONTENT_DIMENSIONS = ['K', 'V', 'E', 'B', 'T'] as const;
 const SKILL_DIMENSIONS = ['P', 'C', 'TD', 'S', 'L'] as const;
 
-const COMMAND_FUZZY_MAP: Record<string, string> = {
-  '/proces_evaluatie': '/proces_eval',
-  '/fasecheck': '/fase_check',
-  'fasecheck': '/fase_check',
-  '/reflectie': '/meta',
-  '/samenvatting': '/beurtvraag',
-  '/quiz': '/quizgen',
-  '/toets': '/quizgen',
-  '/uitleg': '/beeld',
-  '/voorbeelden': '/beeld',
-  '/strategie': '/meta',
-  'checkin': '/checkin',
-  'devil': '/devil',
-  'twist': '/twist',
-  'vocab': '/vocab'
-};
+// COMMAND_FUZZY_MAP moved to reliabilityPipeline.ts (step 2 roadmap)
 
 function extractDimensionFromBandId(bandId: string | null | undefined): string | null {
   if (!bandId) return null;
