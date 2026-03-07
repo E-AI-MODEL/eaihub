@@ -389,7 +389,7 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
 
     // Update mastery state based on analysis
-    triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId);
+    triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId, request.userId);
 
     // Persist messages to DB (fire-and-forget)
 
