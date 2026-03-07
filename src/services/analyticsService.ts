@@ -5,6 +5,8 @@ import { CURRICULUM_PATHS } from '../data/curriculum';
 import { fetchProfile } from './profileService';
 import { getOrCreateUserId } from './identity';
 import { fetchMastery } from './masteryService';
+import { fetchAllSessions, type StudentSessionRow } from './sessionSyncService';
+import type { EAIAnalysis } from '../types';
 
 export type StudentEvent = {
   timestamp: number;
@@ -84,10 +86,69 @@ const MOCK_PEERS: StudentSession[] = [
   },
 ];
 
+// Helper: map student_sessions row to StudentSession format
+function mapSessionRowToStudent(row: StudentSessionRow): StudentSession {
+  const analysis = row.analysis as EAIAnalysis | null;
+  const secondsAgo = row.last_active_at 
+    ? Math.round((Date.now() - new Date(row.last_active_at).getTime()) / 1000) 
+    : 9999;
+
+  const status: StudentSession['status'] = 
+    row.status === 'ONLINE' && secondsAgo < 300 ? 'ONLINE' :
+    row.status === 'ONLINE' && secondsAgo < 900 ? 'IDLE' : 'OFFLINE';
+
+  // Derive pedagogical status from real analysis or fallback
+  const phase = analysis?.process_phases?.[0] || '-';
+  const kLevel = analysis?.coregulation_bands?.find(b => b.startsWith('K')) || '-';
+  const agency = analysis?.task_densities?.[0] || '-';
+  const agencyScore = analysis?.scaffolding?.agency_score ?? 0.5;
+  
+  const sentiment: StudentSession['lastAnalysis']['sentiment'] = 
+    agencyScore < 0.3 ? 'STRUGGLE' :
+    agencyScore > 0.7 ? 'FLOW' :
+    analysis?.srl_state === 'REFLECT' ? 'NEUTRAL' : 'NEUTRAL';
+
+  return {
+    id: row.session_id,
+    isRealUser: false,
+    name: row.name || 'Onbekend',
+    avatar: (row.name || '??').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+    status,
+    currentModule: row.subject || 'Onbekend',
+    progress: row.progress ?? 0,
+    currentNodeId: row.current_node_id || '-',
+    stats: {
+      exercisesDone: row.messages_count ?? 0,
+      correctCount: Math.floor((row.messages_count ?? 0) * (agencyScore)),
+      accuracy: Math.round(agencyScore * 100),
+      streak: 0,
+      lastActiveSecondsAgo: secondsAgo,
+    },
+    lastAnalysis: {
+      phase,
+      kLevel,
+      agency,
+      sentiment,
+      summary: analysis?.reasoning || 'Geen analyse beschikbaar.',
+    },
+    recentEvents: [],
+    alerts: agencyScore < 0.3 ? ['Low Agency'] : [],
+  };
+}
+
 export const fetchAnalytics = async (): Promise<AnalyticsSnapshot> => {
   const userId = getOrCreateUserId();
   const { profile } = await fetchProfile(userId);
   
+  // Fetch real sessions from database
+  let dbSessions: StudentSessionRow[] = [];
+  try {
+    dbSessions = await fetchAllSessions();
+  } catch (err) {
+    console.warn('[Analytics] Could not fetch sessions from DB, using local only:', err);
+  }
+
+  // Build real user session
   let realUserSession: StudentSession;
 
   if (profile && profile.name) {
@@ -98,6 +159,10 @@ export const fetchAnalytics = async (): Promise<AnalyticsSnapshot> => {
     let correctCount = 0;
     let history: { createdAt: number; nodeId: string }[] = [];
     
+    // Try to get real analysis from DB session
+    const myDbSession = dbSessions.find(s => s.user_id === userId);
+    const myAnalysis = myDbSession?.analysis as EAIAnalysis | null;
+
     if (path) {
       const pathId = `${path.subject}_${path.level}`.toUpperCase().replace(/\s/g, '');
       const mastery = await fetchMastery(userId, pathId);
@@ -110,6 +175,15 @@ export const fetchAnalytics = async (): Promise<AnalyticsSnapshot> => {
         correctCount = Math.floor(exercisesDone * 0.9);
       }
     }
+
+    // Derive lastAnalysis from real data, fallback to defaults
+    const phase = myAnalysis?.process_phases?.[0] || 'P0';
+    const kLevel = myAnalysis?.coregulation_bands?.find(b => b.startsWith('K')) || 'K0';
+    const agency = myAnalysis?.task_densities?.[0] || 'TD0';
+    const agencyScore = myAnalysis?.scaffolding?.agency_score ?? 0.5;
+    const sentiment: StudentSession['lastAnalysis']['sentiment'] = 
+      agencyScore < 0.3 ? 'STRUGGLE' :
+      agencyScore > 0.7 ? 'FLOW' : 'NEUTRAL';
 
     realUserSession = {
       id: userId,
@@ -124,15 +198,15 @@ export const fetchAnalytics = async (): Promise<AnalyticsSnapshot> => {
         exercisesDone,
         correctCount,
         accuracy: exercisesDone > 0 ? Math.round((correctCount / exercisesDone) * 100) : 100,
-        streak: 3,
+        streak: 0,
         lastActiveSecondsAgo: 2
       },
       lastAnalysis: {
-        phase: "P3", 
-        kLevel: "K2", 
-        agency: "TD3", 
-        sentiment: "FLOW",
-        summary: "Actieve sessie. Systeem monitort input."
+        phase,
+        kLevel,
+        agency,
+        sentiment,
+        summary: myAnalysis?.reasoning || 'Actieve sessie. Wacht op analyse-data.'
       },
       recentEvents: [
         { timestamp: Date.now() - 5000, type: 'NAVIGATION', desc: 'Dashboard geopend' },
@@ -157,7 +231,13 @@ export const fetchAnalytics = async (): Promise<AnalyticsSnapshot> => {
     };
   }
 
-  const students = [realUserSession, ...MOCK_PEERS];
+  // Map DB sessions (excluding current user) to StudentSession format
+  const otherStudents = dbSessions
+    .filter(s => s.user_id !== userId)
+    .map(mapSessionRowToStudent);
+
+  // Combine: real user first, then other DB sessions, then mock peers as fallback
+  const students = [realUserSession, ...otherStudents, ...(otherStudents.length === 0 ? MOCK_PEERS : [])];
   const activeStudents = students.filter(s => s.status === 'ONLINE').length;
   const avgMastery = Math.round(students.reduce((acc, s) => acc + s.progress, 0) / students.length);
   const interventionNeeded = students.filter(s => s.lastAnalysis.sentiment === 'STRUGGLE' || s.alerts.length > 0).length;

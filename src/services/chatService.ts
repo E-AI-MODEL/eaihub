@@ -21,7 +21,8 @@ import {
   type TraceEvent 
 } from '@/lib/reliabilityPipeline';
 import { persistChatMessage } from '@/services/adminDbService';
-import { getNodeById } from '@/data/curriculum';
+import { getNodeById, CURRICULUM_PATHS } from '@/data/curriculum';
+import { updateMastery } from '@/services/masteryService';
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-chat`;
 const HISTORY_LIMIT = 10;
@@ -71,6 +72,40 @@ function updateSessionContext(sessionId: string, analysis: EAIAnalysis, profile:
     ctx.topics_covered.push(profile.currentNodeId);
   }
   ctx.current_topic = profile.currentNodeId || null;
+}
+
+// ═══ MASTERY STATE-MACHINE UPDATE ═══
+// Veilige fase 1: INTRO → WORKING → CHECKING (geen auto-MASTERED)
+function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, sessionId: string) {
+  if (!profile.currentNodeId || !profile.subject || !profile.level) return;
+
+  const pathId = `${profile.subject}_${profile.level}`.toUpperCase().replace(/\s/g, '');
+  const userId = profile.name || 'anonymous'; // identity comes from caller context
+  const ctx = getSessionContext(sessionId);
+  const turnCount = ctx.turn_count;
+
+  // Determine status based on conversation depth and analysis signals
+  let status: 'INTRO' | 'WORKING' | 'CHECKING' | 'MASTERED';
+  if (analysis.mastery_check === true) {
+    status = 'CHECKING';
+  } else if (turnCount <= 1) {
+    status = 'INTRO';
+  } else {
+    status = 'WORKING';
+  }
+
+  // Fire-and-forget mastery update
+  updateMastery({
+    userId,
+    pathId,
+    currentNodeId: profile.currentNodeId,
+    status,
+    evidence: {
+      nodeId: profile.currentNodeId,
+      evidence: analysis.reasoning,
+      score: analysis.scaffolding?.agency_score ?? undefined,
+    },
+  }).catch(err => console.error('[Mastery] Update failed:', err));
 }
 
 // Cache learner observation patterns from SSOT v15 for all 10 dimensions
@@ -351,9 +386,13 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       timestamp: new Date().toISOString(),
     };
 
-    // Execute reliability pipeline
     const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
     updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
+
+    // Update mastery state based on analysis
+    triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId);
+
+    // Persist messages to DB (fire-and-forget)
 
     // Persist messages to DB (fire-and-forget)
     persistChatMessage({ sessionId: request.sessionId, role: 'user', content: request.message });
@@ -498,6 +537,9 @@ export const streamChat = async ({
     
     // Execute reliability pipeline
     const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
+
+    // Update mastery state based on analysis
+    triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId);
 
     // Post-process [BEELD:] tags in AI output
     const processedText = await processBeeldTags(fullText, request.sessionId, request.profile);
