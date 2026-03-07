@@ -3,7 +3,7 @@
 // Version 15.0 - Uses authoritative SSOT v15.0.0 JSON with dynamic prompt
 // Includes reliability pipeline: parse/repair, SSOT-healing, epistemic guard
 
-import type { ChatRequest, ChatResponse, EAIAnalysis, MechanicalState, LearnerProfile, SessionContext } from '@/types';
+import type { ChatRequest, ChatResponse, EAIAnalysis, MechanicalState, LearnerProfile, SessionContext, RouterDecision } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { 
   getFixForBand, 
