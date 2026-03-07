@@ -11,6 +11,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/componen
 import { useIsMobile } from '@/hooks/use-mobile';
 import { fetchProfile, updateProfile } from '@/services/profileService';
 import { getOrCreateUserId } from '@/services/identity';
+import { useAuth } from '@/hooks/useAuth';
 import { createInitialEAIState, updateStateFromAnalysis, EAIStateLike } from '@/utils/eaiLearnAdapter';
 import { setSessionOffline } from '@/services/sessionSyncService';
 import { PanelLeftClose, PanelLeftOpen, Settings, BarChart3, Home, GraduationCap, Shield } from 'lucide-react';

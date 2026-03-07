@@ -190,7 +190,7 @@ const TeacherCockpit = () => {
             <div className="flex-1 flex items-center justify-center text-slate-600">
               <div className="text-center">
                 <Eye className="w-10 h-10 mx-auto mb-3 text-slate-700" />
-                <p className="text-sm">Selecteer een leerling om details te bekijken</p>
+              <p className="text-sm">Selecteer een leerling om details te bekijken</p>
                 <p className="text-[10px] text-slate-700 mt-1">Je kunt berichten sturen en de sessie live volgen</p>
               </div>
             </div>
