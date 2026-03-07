@@ -449,7 +449,7 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       ].slice(-HISTORY_LIMIT);
       sessionHistory.set(request.sessionId, history);
 
-      const rawAnalysis = generateAnalysis(request.message, fullText, request.profile);
+      const rawAnalysis = await classifyWithLLM(request.message, fullText, request.profile);
       const imageRouterDecision: RouterDecision = {
         target_model: MODEL_NAMES.image,
         thinking_budget: 0,
