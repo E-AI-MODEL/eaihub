@@ -3,7 +3,8 @@
 // Version 15.0.0
 
 import { SSOT_DATA, getRubric, getBand, getCommandDescription } from '@/data/ssot';
-import type { EAIAnalysis, MechanicalState, SemanticValidation } from '@/types';
+import { getEAICore } from '@/utils/ssotHelpers';
+import type { EAIAnalysis, MechanicalState, SemanticValidation, LogicGateBreach } from '@/types';
 
 // ============= TRACE EVENT SYSTEM =============
 
