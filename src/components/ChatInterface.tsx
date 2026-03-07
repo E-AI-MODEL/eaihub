@@ -62,6 +62,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const analysisRef = useRef<EAIAnalysis | null>(null);
   const messageCounterRef = useRef(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const progressRef = useRef<number>(0);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
