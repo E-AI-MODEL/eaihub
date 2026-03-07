@@ -124,7 +124,9 @@ function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, se
     const mastery = JSON.parse(stored);
     const completedNodes = new Set<string>();
     for (const entry of mastery.history || []) {
-      if (entry.nodeId) completedNodes.add(entry.nodeId);
+      if (entry.nodeId && entry.score != null && entry.score >= 0.6) {
+        completedNodes.add(entry.nodeId);
+      }
     }
     return Math.round((completedNodes.size / path.nodes.length) * 100);
   } catch {
