@@ -523,6 +523,168 @@ const AdminPanel = () => {
             </div>
           </TabsContent>
 
+          {/* Pipeline / Reliability Tab */}
+          <TabsContent value="pipeline">
+            <div className="space-y-6">
+              {/* Aggregated Metrics */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {(() => {
+                  const modelMsgs = dbMessages.filter((m: any) => m.role === 'model');
+                  const withMech = modelMsgs.filter((m: any) => m.mechanical);
+                  const withAnalysis = modelMsgs.filter((m: any) => m.analysis);
+
+                  const repairCount = withMech.filter((m: any) => (m.mechanical?.repairAttempts ?? 0) > 0).length;
+                  const gFactors = withMech.map((m: any) => m.mechanical?.semanticValidation?.gFactor).filter((g: any) => g != null) as number[];
+                  const avgGFactor = gFactors.length > 0 ? gFactors.reduce((a: number, b: number) => a + b, 0) / gFactors.length : null;
+
+                  const alignments = withMech.map((m: any) => m.mechanical?.semanticValidation?.alignment_status).filter(Boolean);
+                  const optimalCount = alignments.filter((a: string) => a === 'OPTIMAL').length;
+                  const driftCount = alignments.filter((a: string) => a === 'DRIFT').length;
+                  const criticalCount = alignments.filter((a: string) => a === 'CRITICAL').length;
+
+                  const epistemics = withAnalysis.map((m: any) => m.analysis?.epistemic_status).filter(Boolean);
+                  const feitCount = epistemics.filter((e: string) => e === 'FEIT').length;
+                  const interpCount = epistemics.filter((e: string) => e === 'INTERPRETATIE').length;
+                  const specCount = epistemics.filter((e: string) => e === 'SPECULATIE').length;
+                  const onbekendCount = epistemics.filter((e: string) => e === 'ONBEKEND').length;
+
+                  const guardLabels = withMech.map((m: any) => m.mechanical?.epistemicGuardResult?.label).filter(Boolean);
+                  const guardOk = guardLabels.filter((l: string) => l === 'OK').length;
+                  const guardCaution = guardLabels.filter((l: string) => l === 'CAUTION').length;
+                  const guardVerify = guardLabels.filter((l: string) => l === 'VERIFY').length;
+
+                  return (
+                    <>
+                      <Card>
+                        <CardContent className="pt-6 text-center">
+                          <p className="text-3xl font-bold text-foreground">{modelMsgs.length}</p>
+                          <p className="text-[10px] text-muted-foreground">Model berichten</p>
+                          <p className="text-xs text-muted-foreground mt-1">{withMech.length} met mechanical data</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="pt-6 text-center">
+                          <p className={`text-3xl font-bold ${repairCount === 0 ? 'text-green-500' : 'text-yellow-500'}`}>{repairCount}</p>
+                          <p className="text-[10px] text-muted-foreground">Repairs</p>
+                          <p className="text-xs text-muted-foreground mt-1">van {withMech.length} berichten</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="pt-6 text-center">
+                          <p className={`text-3xl font-bold ${avgGFactor === null ? 'text-muted-foreground' : avgGFactor >= 0.8 ? 'text-green-500' : avgGFactor >= 0.5 ? 'text-yellow-500' : 'text-red-500'}`}>
+                            {avgGFactor !== null ? `${(avgGFactor * 100).toFixed(0)}%` : '—'}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">Gem. gFactor</p>
+                          <p className="text-xs text-muted-foreground mt-1">{gFactors.length} metingen</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="pt-6 text-center">
+                          <div className="flex justify-center gap-2">
+                            <Badge className="text-[8px] bg-green-500/20 text-green-400">{optimalCount} OPT</Badge>
+                            <Badge className="text-[8px] bg-yellow-500/20 text-yellow-400">{driftCount} DRF</Badge>
+                            <Badge className="text-[8px] bg-red-500/20 text-red-400">{criticalCount} CRT</Badge>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-2">Alignment</p>
+                        </CardContent>
+                      </Card>
+
+                      {/* Second row: epistemic breakdown */}
+                      <Card className="col-span-2">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-xs uppercase tracking-wider">Epistemic Status (analysis)</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="outline" className="text-[9px]">FEIT: {feitCount}</Badge>
+                            <Badge variant="outline" className="text-[9px]">INTERPRETATIE: {interpCount}</Badge>
+                            <Badge variant="outline" className="text-[9px]">SPECULATIE: {specCount}</Badge>
+                            <Badge variant="outline" className="text-[9px]">ONBEKEND: {onbekendCount}</Badge>
+                          </div>
+                          {epistemics.length === 0 && <p className="text-xs text-muted-foreground mt-2">Geen epistemic data beschikbaar</p>}
+                        </CardContent>
+                      </Card>
+                      <Card className="col-span-2">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-xs uppercase tracking-wider">Epistemic Guard (mechanical)</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge className="text-[9px] bg-green-500/20 text-green-400">OK: {guardOk}</Badge>
+                            <Badge className="text-[9px] bg-yellow-500/20 text-yellow-400">CAUTION: {guardCaution}</Badge>
+                            <Badge className="text-[9px] bg-red-500/20 text-red-400">VERIFY: {guardVerify}</Badge>
+                          </div>
+                          {guardLabels.length === 0 && <p className="text-xs text-muted-foreground mt-2">Geen guard data (pas beschikbaar na patch 2 deploy)</p>}
+                        </CardContent>
+                      </Card>
+                    </>
+                  );
+                })()}
+              </div>
+
+              {/* Per-message detail table */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4 text-primary" />
+                    Pipeline Detail per Bericht
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="max-h-[400px] overflow-y-auto border border-border rounded">
+                    <table className="w-full text-[10px]">
+                      <thead className="bg-secondary/50 sticky top-0">
+                        <tr>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Tijd</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Model</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Latency</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">gFactor</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Alignment</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Repairs</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Healing</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Epist. Status</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Guard</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dbMessages.filter((m: any) => m.role === 'model').slice(0, 100).map((m: any) => {
+                          const mech = m.mechanical as any;
+                          const anal = m.analysis as any;
+                          return (
+                            <tr key={m.id} className="border-t border-border hover:bg-secondary/30">
+                              <td className="px-2 py-1.5 text-muted-foreground whitespace-nowrap">
+                                {new Date(m.created_at).toLocaleString('nl-NL', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+                              </td>
+                              <td className="px-2 py-1.5 text-foreground font-mono">{mech?.model ?? '—'}</td>
+                              <td className="px-2 py-1.5 text-muted-foreground">{mech?.latencyMs != null ? `${mech.latencyMs}ms` : '—'}</td>
+                              <td className="px-2 py-1.5">
+                                {mech?.semanticValidation?.gFactor != null
+                                  ? <span className={`font-mono ${mech.semanticValidation.gFactor >= 0.8 ? 'text-green-500' : mech.semanticValidation.gFactor >= 0.5 ? 'text-yellow-500' : 'text-red-500'}`}>{(mech.semanticValidation.gFactor * 100).toFixed(0)}%</span>
+                                  : <span className="text-muted-foreground">—</span>}
+                              </td>
+                              <td className="px-2 py-1.5">
+                                {mech?.semanticValidation?.alignment_status
+                                  ? <Badge variant="outline" className={`text-[8px] ${mech.semanticValidation.alignment_status === 'OPTIMAL' ? 'border-green-500/50 text-green-400' : mech.semanticValidation.alignment_status === 'DRIFT' ? 'border-yellow-500/50 text-yellow-400' : 'border-red-500/50 text-red-400'}`}>{mech.semanticValidation.alignment_status}</Badge>
+                                  : <span className="text-muted-foreground">—</span>}
+                              </td>
+                              <td className="px-2 py-1.5">{(mech?.repairAttempts ?? 0) > 0 ? <Badge className="text-[8px] bg-yellow-500/20 text-yellow-400">{mech.repairAttempts}</Badge> : '0'}</td>
+                              <td className="px-2 py-1.5">{(mech?.healingEventCount ?? 0) > 0 ? <Badge className="text-[8px] bg-orange-500/20 text-orange-400">{mech.healingEventCount}</Badge> : '0'}</td>
+                              <td className="px-2 py-1.5">{anal?.epistemic_status ? <Badge variant="outline" className="text-[8px]">{anal.epistemic_status}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{mech?.epistemicGuardResult?.label ? <Badge variant="outline" className={`text-[8px] ${mech.epistemicGuardResult.label === 'OK' ? 'border-green-500/50 text-green-400' : mech.epistemicGuardResult.label === 'CAUTION' ? 'border-yellow-500/50 text-yellow-400' : 'border-red-500/50 text-red-400'}`}>{mech.epistemicGuardResult.label}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                            </tr>
+                          );
+                        })}
+                        {dbMessages.filter((m: any) => m.role === 'model').length === 0 && (
+                          <tr><td colSpan={9} className="px-2 py-4 text-center text-muted-foreground">Geen model berichten gevonden</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           {/* Storage Inspector Tab */}
           <TabsContent value="storage">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
