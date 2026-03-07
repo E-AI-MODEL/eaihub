@@ -425,6 +425,9 @@ export function executePipeline(
       confidence: epistemicResult.confidence,
     },
     healingEventCount: healingEvents.length,
+    ssotHealingCount,
+    commandNullCount,
+    parseRepairCount: 0,
   };
 
   const pipelineDuration = Date.now() - startTime;
