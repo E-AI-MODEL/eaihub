@@ -118,7 +118,7 @@ const TeacherCockpit = () => {
               <div className="flex flex-col items-center justify-center h-full text-slate-600">
                 <Users className="w-8 h-8 mb-2" />
                 <span className="text-[10px] font-mono">Geen actieve sessies</span>
-                <span className="text-[9px] text-slate-700 mt-1">Studenten verschijnen hier zodra ze starten</span>
+                <span className="text-[9px] text-slate-700 mt-1">Leerlingen verschijnen hier zodra ze starten</span>
               </div>
             ) : (
               sessions.map(session => {
