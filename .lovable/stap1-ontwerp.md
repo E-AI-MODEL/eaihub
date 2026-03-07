@@ -3,132 +3,151 @@
 
 ## Doel
 
-De `eai-chat` edge function retourneert naast streaming tekst ook een gestructureerde 10D-analyse, zodat de client niet langer afhankelijk is van client-side regex/heuristiek.
+Een apart edge endpoint dat gestructureerde 10D-analyse retourneert op basis van user input + AI response, zodat de client niet langer afhankelijk is van client-side regex/heuristiek.
 
 ---
 
 ## Huidige situatie
 
-- `eai-chat` edge function streamt tekst via SSE (chat/deep) of retourneert JSON (image)
-- Client-side `generateAnalysis()` in `chatService.ts` doet daarna losse `detect*()` calls op de tekst
+- `eai-chat` streamt tekst via SSE (chat/deep) of retourneert JSON (image)
+- Client-side `generateAnalysis()` in `chatService.ts` doet daarna losse `detect*()` calls op de response-tekst
 - Resultaat: single-label classificatie per dimensie, geen confidence of nuance
 
 ---
 
-## Gewenst resultaat
+## Gekozen mechanisme: apart endpoint
 
-Na stap 1 levert de edge function:
+### Waarom apart endpoint (niet inline na stream)
 
-1. **Streaming tekst** — ongewijzigd, zoals nu
-2. **Gestructureerd analyse-blok** — als apart JSON-object na de stream
+| Criterium | Apart endpoint | Inline na `[DONE]` |
+|---|---|---|
+| Regressierisico chatflow | Geen — chatflow ongewijzigd | Wijziging in stream-parsing |
+| Testbaarheid | Los testbaar | Alleen via volledige chatflow |
+| Fallback bij falen | Chat werkt gewoon door | Stream-parsing complexer |
+| Latency | Extra call, maar non-blocking | Iets sneller (één flow) |
 
----
-
-## Voorgesteld mechanisme
-
-### Optie A: JSON-blok na `[DONE]` marker (aanbevolen)
-
-Na de SSE-stream stuurt de edge function een extra `data:` event met een `analysis` payload:
-
-```
-data: {"choices":[{"delta":{"content":"..."}}]}
-data: {"choices":[{"delta":{"content":"..."}}]}
-data: [DONE]
-data: {"eai_analysis": { ... }}
-```
-
-**Voordelen:**
-- Geen apart endpoint nodig
-- Client kan bestaande stream-parsing behouden
-- Analyse komt pas als de volledige tekst beschikbaar is voor het LLM
-
-**Nadelen:**
-- Client moet `[DONE]` event opvangen en daarna nog één event lezen
-
-### Optie B: Apart endpoint (`eai-classify`)
-
-Een tweede edge function die alleen analyse retourneert.
-
-**Voordelen:**
-- Schone scheiding
-- Kan los getest worden
-
-**Nadelen:**
-- Dubbele LLM-call (of caching nodig)
-- Meer latency
-- Extra infrastructuur
-
-**Keuze: Optie A** — minimale wijziging, geen dubbele calls.
+**Keuze: apart endpoint `eai-classify`**
 
 ---
 
-## Analyse-payload (minimaal)
+## Endpoint: `eai-classify`
 
-Het LLM krijgt via tool calling een gestructureerd antwoord terug. Minimale velden voor stap 1:
+### Input
 
 ```typescript
-interface EdgeAnalysis {
-  process_phases: string[];        // bestaand
-  coregulation_bands: string[];    // bestaand
-  task_densities: string[];        // bestaand
-  cognitive_mode: string;          // bestaand
-  srl_state: string;               // bestaand
-  epistemic_status: string;        // bestaand
-  active_fix: string | null;       // bestaand
-  reasoning: string;               // korte onderbouwing van het LLM
+interface ClassifyRequest {
+  userMessage: string;       // wat de leerling zei
+  aiResponse: string;        // wat het LLM antwoordde
+  profile: {
+    name?: string | null;
+    subject?: string | null;
+    level?: string | null;
+    grade?: string | null;
+    goal?: string | null;
+  };
+  sessionContext?: {
+    topics_covered: string[];
+    turn_count: number;
+    current_topic: string | null;
+  };
+}
+```
+
+### Output
+
+```typescript
+interface ClassifyResponse {
+  analysis: {
+    process_phases: string[];
+    coregulation_bands: string[];
+    task_densities: string[];
+    cognitive_mode: string;
+    srl_state: string;
+    epistemic_status: string;
+    active_fix: string | null;
+    active_flags: string[];
+    reasoning: string;
+  };
+  model: string;
+  source: 'edge';
 }
 ```
 
 **Expliciet NIET in stap 1:**
-- `confidence`
-- `secondaryBand`
-- `borderline`
-- `gateReadiness`
+- `confidence`, `secondaryBand`, `borderline`, `gateReadiness`
 - scaffolding-logica
+- wijzigingen aan `EAIAnalysis` type
 
-Die komen pas in stap 3.
+De output-velden zijn een subset van het bestaande `EAIAnalysis` type. Geen nieuwe velden.
+
+### Implementatie
+
+- Gebruikt tool calling om gestructureerde output af te dwingen
+- Model: `google/gemini-2.5-flash` (snel, goedkoop, voldoende voor classificatie)
+- Geen streaming nodig — standaard JSON response
+- `verify_jwt = false` in config.toml
 
 ---
 
 ## Fallback
 
-- Als de edge function geen `eai_analysis` event stuurt (timeout, fout), valt de client terug op de bestaande `generateAnalysis()` in `chatService.ts`
-- `generateAnalysis()` wordt NIET verwijderd in stap 1
-- Client krijgt een `analysisSource: 'edge' | 'client'` indicator
+```
+Client flow:
+1. Chat via eai-chat (streaming, ongewijzigd)
+2. Na ontvangst AI response → call eai-classify
+3. Als eai-classify slaagt → gebruik backend-analyse
+4. Als eai-classify faalt → val terug op generateAnalysis()
+5. Pipeline (reliabilityPipeline.ts) draait daarna gewoon
+```
+
+- `generateAnalysis()` wordt NIET verwijderd
+- Client krijgt `analysisSource: 'edge' | 'client'` indicator
+- Dit wordt gelogd voor observability
 
 ---
 
-## Bestanden die geraakt worden in stap 1
+## Validatiegrens
+
+- `eai-classify` levert **ruwe analyse**
+- Bestaande `reliabilityPipeline.ts` valideert/healt daarna
+- `eaiLearnAdapter.ts` bouwt state/viewmodel daarna
+- Geen wijzigingen aan validatielagen in stap 1
+
+---
+
+## Bestanden die geraakt worden
 
 | Bestand | Wijziging |
 |---|---|
-| `supabase/functions/eai-chat/index.ts` | Tool calling toevoegen voor analyse na streaming |
-| `src/services/chatService.ts` | Parse `eai_analysis` event na `[DONE]`, fallback behouden |
+| `supabase/functions/eai-classify/index.ts` | **Nieuw** — classificatie endpoint |
+| `supabase/config.toml` | Entry voor `eai-classify` |
+| `src/services/chatService.ts` | Na chat-response → call `eai-classify`, fallback behouden |
 
-**Bestanden die NIET geraakt worden:**
+## Bestanden die NIET geraakt worden
+
 - `src/types/index.ts` — geen typewijzigingen
 - `src/lib/reliabilityPipeline.ts` — geen wijzigingen
 - `src/utils/eaiLearnAdapter.ts` — geen wijzigingen
 - `src/pages/AdminPanel.tsx` — geen UI-wijzigingen
 - `src/pages/TeacherCockpit.tsx` — geen UI-wijzigingen
+- `supabase/functions/eai-chat/index.ts` — geen wijzigingen
 
 ---
 
-## Implementatiestappen (bij goedkeuring)
+## Observability
 
-1. Tool-calling schema toevoegen aan `eai-chat` edge function
-2. Na streaming response, tweede (non-streaming) call doen voor analyse
-3. Analyse meesturen als extra SSE event na `[DONE]`
-4. `chatService.ts` aanpassen om `eai_analysis` event te parsen
-5. Fallback op `generateAnalysis()` behouden
-6. Testen: edge function retourneert geldige analyse + chat blijft werken
+- `analysisSource` ('edge' | 'client') wordt meegestuurd in `MechanicalState`
+- Logline in edge function: model, latency, success/fail
+- Hiermee kan later kwaliteit backend vs client vergeleken worden
 
 ---
 
 ## Acceptatiecriteria
 
-- [ ] Edge function retourneert `eai_analysis` na stream
-- [ ] Bestaande chatflow werkt ongewijzigd
-- [ ] Bij falen van analyse werkt fallback naar client-side
+- [ ] `eai-classify` retourneert geldige analyse bij geldige input
+- [ ] Chatflow via `eai-chat` werkt ongewijzigd
+- [ ] Bij falen van `eai-classify` werkt fallback naar `generateAnalysis()`
+- [ ] `analysisSource` wordt gelogd
+- [ ] Pipeline draait ongewijzigd na analyse
 - [ ] Build blijft groen
 - [ ] Geen wijzigingen aan types, UI, of validatielagen
