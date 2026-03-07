@@ -647,8 +647,8 @@ export function executePipeline(
   // Step 2: Epistemic Guard
   const { guarded, result: epistemicResult } = epistemicGuard(healed, sessionId);
 
-  // Step 3: Semantic Validation
-  const semanticValidation = calculateSemanticValidation(guarded, sessionId);
+  // Step 3: Consolidated G-Factor (cross-dimensional + structural)
+  const semanticValidation = calculateGFactor(guarded, sessionId);
 
   // Update mechanical state with pipeline results
   const enhancedMechanical: MechanicalState = {

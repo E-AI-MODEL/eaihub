@@ -2,7 +2,7 @@
 // Performs real-time introspection of the application state, SSOT integrity, and Local Storage.
 
 import { getEAICore } from '../utils/ssotHelpers';
-import { validateAnalysisAgainstSSOT } from '../utils/eaiLearnAdapter';
+import { validateAnalysisAgainstSSOT } from '../lib/reliabilityPipeline';
 import { CURRICULUM_PATHS } from '../data/curriculum';
 import { getOrCreateUserId } from './identity';
 
