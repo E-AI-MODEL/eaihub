@@ -591,8 +591,8 @@ export const streamChat = async ({
     // Execute reliability pipeline
     const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
 
-    // Update mastery state based on analysis
-    triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId, request.userId);
+    // Update mastery state based on analysis — returns progress for session sync
+    const masteryProgress = triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId, request.userId);
 
     // Post-process [BEELD:] tags in AI output
     const processedText = await processBeeldTags(fullText, request.sessionId, request.profile);
@@ -603,6 +603,7 @@ export const streamChat = async ({
       analysis: pipelineResult.analysis,
       mechanical: pipelineResult.mechanical,
       auditId: `audit_${Date.now()}`,
+      progress: masteryProgress,
     });
 
   } catch (error) {
