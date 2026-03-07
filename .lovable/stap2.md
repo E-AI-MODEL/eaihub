@@ -1,6 +1,6 @@
 # Stap 2 — Dubbele validatie opruimen en edge-classificatie positioneren
 
-## Status
+**Status: UITGEVOERD**
 
 Stap 1 is correct uitgevoerd: er is een aparte edge-classificatie toegevoegd, de bestaande chatflow is intact gebleven, fallback op de client-side analyse is verplicht behouden, en er zijn geen premature UI- of brede type-uitbreidingen doorgevoerd.
 

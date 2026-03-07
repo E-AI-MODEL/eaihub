@@ -3,7 +3,8 @@
 // Version 15.0.0
 
 import { SSOT_DATA, getRubric, getBand, getCommandDescription } from '@/data/ssot';
-import type { EAIAnalysis, MechanicalState, SemanticValidation } from '@/types';
+import { getEAICore } from '@/utils/ssotHelpers';
+import type { EAIAnalysis, MechanicalState, SemanticValidation, LogicGateBreach } from '@/types';
 
 // ============= TRACE EVENT SYSTEM =============
 
@@ -377,6 +378,241 @@ export function calculateSemanticValidation(
   };
 }
 
+// ============= COMMAND FUZZY MAP =============
+
+const COMMAND_FUZZY_MAP: Record<string, string> = {
+  '/proces_evaluatie': '/proces_eval',
+  '/fasecheck': '/fase_check',
+  'fasecheck': '/fase_check',
+  '/reflectie': '/meta',
+  '/samenvatting': '/beurtvraag',
+  '/quiz': '/quizgen',
+  '/toets': '/quizgen',
+  '/uitleg': '/beeld',
+  '/voorbeelden': '/beeld',
+  '/strategie': '/meta',
+  'checkin': '/checkin',
+  'devil': '/devil',
+  'twist': '/twist',
+  'vocab': '/vocab'
+};
+
+// ============= LOGIC GATE CHECK (ANALYSIS-LEVEL) =============
+
+/**
+ * Check logic gates against a full EAIAnalysis object.
+ * This is the authoritative gate check used by the pipeline.
+ */
+export function checkLogicGatesAnalysis(analysis: EAIAnalysis): LogicGateBreach | undefined {
+  const core = getEAICore();
+  const gates = core.interaction_protocol?.logic_gates || [];
+  const currentBands = new Set([
+    ...(analysis.process_phases || []),
+    ...(analysis.coregulation_bands || []),
+    ...(analysis.task_densities || []),
+    ...(analysis.secondary_dimensions || [])
+  ]);
+  const activeTDBand = Array.from(currentBands).find(b => b.startsWith('TD'));
+  if (!activeTDBand) return undefined;
+  const tdLevel = parseInt(activeTDBand.replace('TD', ''), 10);
+  if (isNaN(tdLevel)) return undefined;
+
+  for (const gate of gates) {
+    if (currentBands.has(gate.trigger_band)) {
+      let limit = 5;
+      let operator: 'MAX' | 'ALLOW' = 'MAX';
+      if (gate.enforcement.includes('MAX_TD = TD')) {
+        const match = gate.enforcement.match(/MAX_TD\s*=\s*TD(\d)/);
+        if (match) { limit = parseInt(match[1], 10); operator = 'MAX'; }
+      } else if (gate.enforcement.includes('ALLOW_TD = TD')) {
+        const match = gate.enforcement.match(/ALLOW_TD\s*=\s*TD(\d)/);
+        if (match) { limit = parseInt(match[1], 10); operator = 'ALLOW'; }
+      }
+      if (operator === 'MAX' || operator === 'ALLOW') {
+        if (tdLevel > limit) {
+          return {
+            trigger_band: gate.trigger_band,
+            rule_description: gate.enforcement,
+            detected_value: activeTDBand,
+            priority: gate.priority
+          };
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
+// ============= G-FACTOR (CROSS-DIMENSIONAL) =============
+
+/**
+ * Calculate G-Factor with cross-dimensional penalty logic.
+ * Consolidates the adapter's calculateGFactor and the pipeline's calculateSemanticValidation.
+ */
+export function calculateGFactor(
+  analysis: EAIAnalysis,
+  sessionId: string
+): SemanticValidation {
+  const penalties: string[] = [];
+  let gFactor = 1.0;
+
+  // --- Logic gate breach penalty ---
+  const breach = checkLogicGatesAnalysis(analysis);
+  if (breach) {
+    if (breach.priority === 'CRITICAL') {
+      gFactor -= 1.0;
+      penalties.push(`CRITICAL: Logic Gate Breach (${breach.trigger_band} violates ${breach.rule_description})`);
+    } else {
+      gFactor -= 0.4;
+      penalties.push(`HIGH: Logic Gate Breach (${breach.trigger_band})`);
+    }
+  }
+
+  // --- Cross-dimensional alignment penalties ---
+  const allBands = [
+    ...(analysis.process_phases || []),
+    ...(analysis.coregulation_bands || []),
+    ...(analysis.task_densities || []),
+    ...(analysis.secondary_dimensions || [])
+  ];
+  const kBand = allBands.find(b => b.startsWith('K'));
+  const eBand = allBands.find(b => b.startsWith('E'));
+  const pBand = allBands.find(b => b.startsWith('P'));
+  const tdBand = allBands.find(b => b.startsWith('TD'));
+
+  if (kBand === 'K1' && (eBand === 'E4' || eBand === 'E5')) {
+    gFactor -= 0.2;
+    penalties.push(`ALIGNMENT: Fact Retrieval (K1) mismatch with Critical Epistemics (${eBand})`);
+  }
+  if (analysis.epistemic_status === 'FEIT' && (!eBand || eBand === 'E0' || eBand === 'E1')) {
+    gFactor -= 0.3;
+    penalties.push(`HALLUCINATION RISK: Claimed 'FEIT' without Verified Epistemic Band`);
+  }
+  if (pBand === 'P3' && (tdBand === 'TD1' || tdBand === 'TD2')) {
+    gFactor -= 0.2;
+    penalties.push(`DRIFT: Instruction Phase (P3) implies Teacher-Led, but Agency is High (${tdBand})`);
+  }
+
+  // --- Structural completeness penalties ---
+  if (!analysis.coregulation_bands?.length) {
+    penalties.push('MISSING_COREG_BANDS');
+    gFactor -= 0.15;
+  }
+  if (!analysis.process_phases?.length) {
+    penalties.push('MISSING_PROCESS_PHASES');
+    gFactor -= 0.15;
+  }
+  if (!analysis.task_densities?.length) {
+    penalties.push('MISSING_TASK_DENSITIES');
+    gFactor -= 0.15;
+  }
+  if (!analysis.scaffolding) {
+    penalties.push('MISSING_SCAFFOLDING');
+    gFactor -= 0.1;
+  }
+  if (analysis.epistemic_status === 'ONBEKEND') {
+    penalties.push('UNKNOWN_EPISTEMIC');
+    gFactor -= 0.1;
+  }
+
+  const tdLevel = analysis.task_densities?.[0]
+    ? parseInt(analysis.task_densities[0].replace('TD', ''))
+    : 0;
+  if (tdLevel >= 4 && !analysis.active_fix) {
+    penalties.push('HIGH_TD_NO_FIX');
+    gFactor -= 0.1;
+  }
+
+  const finalScore = Math.max(0, Math.min(1, gFactor));
+  const alignment_status: 'OPTIMAL' | 'DRIFT' | 'CRITICAL' =
+    finalScore >= 0.8 ? 'OPTIMAL' :
+    finalScore >= 0.5 ? 'DRIFT' : 'CRITICAL';
+
+  pushTrace(sessionId, {
+    severity: alignment_status === 'OPTIMAL' ? 'INFO' :
+              alignment_status === 'DRIFT' ? 'WARNING' : 'ERROR',
+    source: 'VALIDATOR',
+    step: 'LOGIC_GATE_CHECK',
+    message: `G-Factor: ${(finalScore * 100).toFixed(0)}% (${alignment_status})`,
+    data: { gFactor: finalScore, penalties, alignment_status, logicGateBreach: breach || null },
+  });
+
+  return { gFactor: finalScore, penalties, alignment_status };
+}
+
+// ============= SSOT VALIDATION (CONSOLIDATED) =============
+
+export interface SSOTValidationResult {
+  ok: boolean;
+  warnings: string[];
+  healedAnalysis: EAIAnalysis;
+  logicGateBreach?: LogicGateBreach;
+}
+
+/**
+ * Validate and heal an EAIAnalysis against SSOT.
+ * Consolidated from eaiLearnAdapter — this is now the single authoritative validator.
+ */
+export function validateAnalysisAgainstSSOT(analysis: EAIAnalysis, _language: 'nl' | 'en' = 'nl'): SSOTValidationResult {
+  const core = getEAICore();
+  const knownBandIds = new Set<string>();
+  const knownCommands = new Set<string>();
+  const warnings: string[] = [];
+  const healed = JSON.parse(JSON.stringify(analysis));
+
+  core.rubrics.forEach((rubric: any) => {
+    (rubric.bands ?? []).forEach((band: any) => {
+      if (band.band_id) knownBandIds.add(band.band_id);
+    });
+  });
+  core.commands.forEach((cmd: any) => knownCommands.add(cmd.command));
+
+  const cleanBandList = (list: string[], fieldName: string) => {
+    const clean: string[] = [];
+    list.forEach(bandId => {
+      if (knownBandIds.has(bandId)) {
+        clean.push(bandId);
+      } else if (bandId && bandId.length > 1) {
+        warnings.push(`Pruned unknown band ID: ${bandId} in ${fieldName}`);
+      }
+    });
+    return clean;
+  };
+
+  healed.process_phases = cleanBandList(healed.process_phases || [], 'process_phases');
+  healed.coregulation_bands = cleanBandList(healed.coregulation_bands || [], 'coregulation_bands');
+  healed.task_densities = cleanBandList(healed.task_densities || [], 'task_densities');
+  healed.secondary_dimensions = cleanBandList(healed.secondary_dimensions || [], 'secondary_dimensions');
+
+  if (healed.active_fix && healed.active_fix !== 'NONE' && healed.active_fix !== 'null') {
+    const fix = healed.active_fix.trim();
+    if (!knownCommands.has(fix)) {
+      if (COMMAND_FUZZY_MAP[fix]) {
+        healed.active_fix = COMMAND_FUZZY_MAP[fix];
+        warnings.push(`Healed command: '${fix}' -> '${healed.active_fix}'`);
+      } else if (!fix.startsWith('/') && knownCommands.has(`/${fix}`)) {
+        healed.active_fix = `/${fix}`;
+        warnings.push(`Added missing prefix: '${fix}' -> '${healed.active_fix}'`);
+      } else {
+        warnings.push(`Nullified unknown command: '${fix}'`);
+        healed.active_fix = null;
+      }
+    }
+  } else {
+    healed.active_fix = null;
+  }
+
+  const validSrl = ['PLAN', 'MONITOR', 'REFLECT', 'ADJUST', 'UNKNOWN'];
+  if (healed.srl_state && !validSrl.includes(healed.srl_state)) {
+    warnings.push(`Invalid SRL state: ${healed.srl_state}. Resetting to UNKNOWN.`);
+    healed.srl_state = 'UNKNOWN';
+  }
+
+  const gateBreach = checkLogicGatesAnalysis(healed);
+
+  return { ok: true, warnings, healedAnalysis: healed, logicGateBreach: gateBreach };
+}
+
 // ============= FULL PIPELINE EXECUTION =============
 
 export interface PipelineResult {
@@ -411,14 +647,18 @@ export function executePipeline(
   // Step 2: Epistemic Guard
   const { guarded, result: epistemicResult } = epistemicGuard(healed, sessionId);
 
-  // Step 3: Semantic Validation
-  const semanticValidation = calculateSemanticValidation(guarded, sessionId);
+  // Step 3: Consolidated G-Factor (cross-dimensional + structural)
+  const semanticValidation = calculateGFactor(guarded, sessionId);
+
+  // Step 4: Logic gate breach (authoritative, post-healing)
+  const logicGateBreach = checkLogicGatesAnalysis(guarded);
 
   // Update mechanical state with pipeline results
   const enhancedMechanical: MechanicalState = {
     ...mechanical,
     repairAttempts: healingEvents.length > 0 ? 1 : 0,
     semanticValidation,
+    logicGateBreach: logicGateBreach || undefined,
     epistemicGuardResult: {
       label: epistemicResult.label,
       notes: epistemicResult.notes,

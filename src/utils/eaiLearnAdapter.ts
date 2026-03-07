@@ -1,5 +1,9 @@
-import { getEAICore } from './ssotHelpers';
-import type { EAIAnalysis, MechanicalState, LogicGateBreach, ScaffoldingState, SemanticValidation } from '../types';
+// ============= EAI LEARN ADAPTER =============
+// State / viewmodel layer — derives UI-facing state from analysis.
+// All inhoudelijke validatie (SSOT healing, G-factor, logic gates)
+// is consolidated in reliabilityPipeline.ts (Stap 2).
+
+import type { EAIAnalysis, MechanicalState, ScaffoldingState } from '../types';
 
 export interface EAIBands {
   K?: string | null;
@@ -41,23 +45,6 @@ export interface EAIStateLike {
 
 const CONTENT_DIMENSIONS = ['K', 'V', 'E', 'B', 'T'] as const;
 const SKILL_DIMENSIONS = ['P', 'C', 'TD', 'S', 'L'] as const;
-
-const COMMAND_FUZZY_MAP: Record<string, string> = {
-  '/proces_evaluatie': '/proces_eval',
-  '/fasecheck': '/fase_check',
-  'fasecheck': '/fase_check',
-  '/reflectie': '/meta',
-  '/samenvatting': '/beurtvraag',
-  '/quiz': '/quizgen',
-  '/toets': '/quizgen',
-  '/uitleg': '/beeld',
-  '/voorbeelden': '/beeld',
-  '/strategie': '/meta',
-  'checkin': '/checkin',
-  'devil': '/devil',
-  'twist': '/twist',
-  'vocab': '/vocab'
-};
 
 function extractDimensionFromBandId(bandId: string | null | undefined): string | null {
   if (!bandId) return null;
@@ -113,48 +100,6 @@ export function calculateDynamicTTL(analysis: EAIAnalysis | null): number {
   if (tdBand === 'TD4' || tdBand === 'TD5') ttl -= 20000;
   if (kBand === 'K1') ttl -= 15000;
   return Math.max(30000, Math.min(180000, ttl));
-}
-
-export function calculateGFactor(analysis: EAIAnalysis): SemanticValidation {
-  let score = 1.0;
-  const penalties: string[] = [];
-  const breach = checkLogicGates(analysis);
-  if (breach) {
-    if (breach.priority === 'CRITICAL') {
-      score -= 1.0;
-      penalties.push(`CRITICAL: Logic Gate Breach (${breach.trigger_band} violates ${breach.rule_description})`);
-    } else {
-      score -= 0.4;
-      penalties.push(`HIGH: Logic Gate Breach (${breach.trigger_band})`);
-    }
-  }
-  const allBands = [
-    ...(analysis.process_phases || []),
-    ...(analysis.coregulation_bands || []),
-    ...(analysis.task_densities || []),
-    ...(analysis.secondary_dimensions || [])
-  ];
-  const kBand = allBands.find(b => b.startsWith('K'));
-  const eBand = allBands.find(b => b.startsWith('E'));
-  if (kBand === 'K1' && (eBand === 'E4' || eBand === 'E5')) {
-    score -= 0.2;
-    penalties.push(`ALIGNMENT: Fact Retrieval (K1) mismatch with Critical Epistemics (${eBand})`);
-  }
-  if (analysis.epistemic_status === 'FEIT' && (!eBand || eBand === 'E0' || eBand === 'E1')) {
-    score -= 0.3;
-    penalties.push(`HALLUCINATION RISK: Claimed 'FEIT' without Verified Epistemic Band`);
-  }
-  const pBand = allBands.find(b => b.startsWith('P'));
-  const tdBand = allBands.find(b => b.startsWith('TD'));
-  if (pBand === 'P3' && (tdBand === 'TD1' || tdBand === 'TD2')) {
-    score -= 0.2;
-    penalties.push(`DRIFT: Instruction Phase (P3) implies Teacher-Led, but Agency is High (${tdBand})`);
-  }
-  const finalScore = Math.max(0, Math.min(1, score));
-  let status: 'OPTIMAL' | 'DRIFT' | 'CRITICAL' = 'OPTIMAL';
-  if (finalScore < 0.5) status = 'CRITICAL';
-  else if (finalScore < 0.9) status = 'DRIFT';
-  return { gFactor: finalScore, penalties, alignment_status: status };
 }
 
 export function createInitialEAIState(): EAIStateLike {
@@ -221,111 +166,4 @@ export function updateStateFromAnalysis(prev: EAIStateLike, analysis: EAIAnalysi
     mechanical: mechanical ?? prev.mechanical ?? null,
     scaffolding: scaffolding
   };
-}
-
-export interface SSOTValidationResult {
-  ok: boolean;
-  warnings: string[];
-  healedAnalysis: EAIAnalysis;
-  logicGateBreach?: LogicGateBreach;
-}
-
-export function checkLogicGates(analysis: EAIAnalysis): LogicGateBreach | undefined {
-  const core = getEAICore();
-  const gates = core.interaction_protocol?.logic_gates || [];
-  const currentBands = new Set([
-    ...(analysis.process_phases || []),
-    ...(analysis.coregulation_bands || []),
-    ...(analysis.task_densities || []),
-    ...(analysis.secondary_dimensions || [])
-  ]);
-  const activeTDBand = Array.from(currentBands).find(b => b.startsWith('TD'));
-  if (!activeTDBand) return undefined;
-  const tdLevel = parseInt(activeTDBand.replace('TD', ''), 10);
-  if (isNaN(tdLevel)) return undefined;
-
-  for (const gate of gates) {
-    if (currentBands.has(gate.trigger_band)) {
-      let limit = 5;
-      let operator: 'MAX' | 'ALLOW' = 'MAX';
-      if (gate.enforcement.includes('MAX_TD = TD')) {
-        const match = gate.enforcement.match(/MAX_TD\s*=\s*TD(\d)/);
-        if (match) { limit = parseInt(match[1], 10); operator = 'MAX'; }
-      } else if (gate.enforcement.includes('ALLOW_TD = TD')) {
-        const match = gate.enforcement.match(/ALLOW_TD\s*=\s*TD(\d)/);
-        if (match) { limit = parseInt(match[1], 10); operator = 'ALLOW'; }
-      }
-      if (operator === 'MAX' || operator === 'ALLOW') {
-        if (tdLevel > limit) {
-          return {
-            trigger_band: gate.trigger_band,
-            rule_description: gate.enforcement,
-            detected_value: activeTDBand,
-            priority: gate.priority
-          };
-        }
-      }
-    }
-  }
-  return undefined;
-}
-
-export function validateAnalysisAgainstSSOT(analysis: EAIAnalysis, _language: 'nl' | 'en' = 'nl'): SSOTValidationResult {
-  const core = getEAICore();
-  const knownBandIds = new Set<string>();
-  const knownCommands = new Set<string>();
-  const warnings: string[] = [];
-  const healed = JSON.parse(JSON.stringify(analysis));
-
-  core.rubrics.forEach((rubric) => {
-    (rubric.bands ?? []).forEach((band) => {
-      if (band.band_id) knownBandIds.add(band.band_id);
-    });
-  });
-  core.commands.forEach(cmd => knownCommands.add(cmd.command));
-
-  const cleanBandList = (list: string[], fieldName: string) => {
-    const clean: string[] = [];
-    list.forEach(bandId => {
-      if (knownBandIds.has(bandId)) {
-        clean.push(bandId);
-      } else if (bandId && bandId.length > 1) {
-        warnings.push(`Pruned unknown band ID: ${bandId} in ${fieldName}`);
-      }
-    });
-    return clean;
-  };
-
-  healed.process_phases = cleanBandList(healed.process_phases || [], 'process_phases');
-  healed.coregulation_bands = cleanBandList(healed.coregulation_bands || [], 'coregulation_bands');
-  healed.task_densities = cleanBandList(healed.task_densities || [], 'task_densities');
-  healed.secondary_dimensions = cleanBandList(healed.secondary_dimensions || [], 'secondary_dimensions');
-
-  if (healed.active_fix && healed.active_fix !== 'NONE' && healed.active_fix !== 'null') {
-    const fix = healed.active_fix.trim();
-    if (!knownCommands.has(fix)) {
-      if (COMMAND_FUZZY_MAP[fix]) {
-        healed.active_fix = COMMAND_FUZZY_MAP[fix];
-        warnings.push(`Healed command: '${fix}' -> '${healed.active_fix}'`);
-      } else if (!fix.startsWith('/') && knownCommands.has(`/${fix}`)) {
-        healed.active_fix = `/${fix}`;
-        warnings.push(`Added missing prefix: '${fix}' -> '${healed.active_fix}'`);
-      } else {
-        warnings.push(`Nullified unknown command: '${fix}'`);
-        healed.active_fix = null;
-      }
-    }
-  } else {
-    healed.active_fix = null;
-  }
-
-  const validSrl = ['PLAN', 'MONITOR', 'REFLECT', 'ADJUST', 'UNKNOWN'];
-  if (healed.srl_state && !validSrl.includes(healed.srl_state)) {
-    warnings.push(`Invalid SRL state: ${healed.srl_state}. Resetting to UNKNOWN.`);
-    healed.srl_state = 'UNKNOWN';
-  }
-
-  const gateBreach = checkLogicGates(healed);
-
-  return { ok: true, warnings, healedAnalysis: healed, logicGateBreach: gateBreach };
 }
