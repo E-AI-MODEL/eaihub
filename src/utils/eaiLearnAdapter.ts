@@ -1,5 +1,5 @@
-import { getEAICore } from './ssotHelpers';
-import type { EAIAnalysis, MechanicalState, LogicGateBreach, ScaffoldingState, SemanticValidation } from '../types';
+// eaiLearnAdapter — State management layer (step 2 roadmap: validation moved to reliabilityPipeline)
+import type { EAIAnalysis, MechanicalState, ScaffoldingState } from '../types';
 
 export interface EAIBands {
   K?: string | null;
