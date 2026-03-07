@@ -352,9 +352,13 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       timestamp: new Date().toISOString(),
     };
 
-    // Execute reliability pipeline
     const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
     updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
+
+    // Update mastery state based on analysis
+    triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId);
+
+    // Persist messages to DB (fire-and-forget)
 
     // Persist messages to DB (fire-and-forget)
     persistChatMessage({ sessionId: request.sessionId, role: 'user', content: request.message });
