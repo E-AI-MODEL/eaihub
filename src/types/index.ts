@@ -157,6 +157,11 @@ export interface EAIAnalysis {
   srl_state: SRLState;
   scaffolding?: ScaffoldingState;
   mastery_check?: boolean;
+  // Nuance fields (populated by LLM classification, step 3 roadmap)
+  confidence?: number;
+  secondary_bands?: Record<string, string>;
+  borderline_dimensions?: string[];
+  gate_readiness?: Record<string, boolean>;
 }
 
 // --- CHAT & UI ---

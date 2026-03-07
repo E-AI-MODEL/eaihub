@@ -391,6 +391,33 @@ export function calculateSemanticValidation(
     gFactor -= 0.1;
   }
 
+  // Cross-dimensional alignment checks (consolidated from eaiLearnAdapter — step 2 roadmap)
+  const allBands = [
+    ...(analysis.process_phases || []),
+    ...(analysis.coregulation_bands || []),
+    ...(analysis.task_densities || []),
+    ...(analysis.secondary_dimensions || [])
+  ];
+  const kBand = allBands.find(b => b.startsWith('K'));
+  const eBand = allBands.find(b => b.startsWith('E'));
+  const pBand = allBands.find(b => b.startsWith('P'));
+  const tdBandCross = allBands.find(b => b.startsWith('TD'));
+
+  if (kBand === 'K1' && (eBand === 'E4' || eBand === 'E5')) {
+    penalties.push('ALIGNMENT: K1 (Feitenkennis) mismatch met hoge epistemiek (' + eBand + ')');
+    gFactor -= 0.2;
+  }
+
+  if (analysis.epistemic_status === 'FEIT' && (!eBand || eBand === 'E0' || eBand === 'E1')) {
+    penalties.push('HALLUCINATION_RISK: FEIT geclaimd zonder geverifieerde epistemische band');
+    gFactor -= 0.3;
+  }
+
+  if (pBand === 'P3' && (tdBandCross === 'TD1' || tdBandCross === 'TD2')) {
+    penalties.push('DRIFT: Instructiefase (P3) maar hoge agency (' + tdBandCross + ')');
+    gFactor -= 0.2;
+  }
+
   // Determine alignment status
   const alignment_status: 'OPTIMAL' | 'DRIFT' | 'CRITICAL' = 
     gFactor >= 0.8 ? 'OPTIMAL' :
