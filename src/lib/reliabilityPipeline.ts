@@ -209,17 +209,34 @@ export function healAnalysisToSSOT(
     healed.secondary_dimensions = validSecondary;
   }
 
-  // Validate active_fix command
+  // Validate active_fix command (with fuzzy matching from adapter)
   if (healed.active_fix && !ssotHasCommand(healed.active_fix)) {
-    events.push(`NULL_UNKNOWN_COMMAND:${healed.active_fix}`);
-    pushTrace(sessionId, {
-      severity: 'REPAIR',
-      source: 'SSOT',
-      step: 'SSOT_HEAL',
-      message: `Nulled unknown command: ${healed.active_fix}`,
-      data: { nulledCommand: healed.active_fix },
-    });
-    healed.active_fix = null;
+    const fix = healed.active_fix.trim();
+    if (COMMAND_FUZZY_MAP[fix]) {
+      const healedCmd = COMMAND_FUZZY_MAP[fix];
+      events.push(`FUZZY_HEAL_COMMAND:${fix}->${healedCmd}`);
+      pushTrace(sessionId, {
+        severity: 'REPAIR', source: 'SSOT', step: 'SSOT_HEAL',
+        message: `Fuzzy healed command: ${fix} → ${healedCmd}`,
+        data: { original: fix, healed: healedCmd },
+      });
+      healed.active_fix = healedCmd;
+    } else if (!fix.startsWith('/') && ssotHasCommand(`/${fix}`)) {
+      healed.active_fix = `/${fix}`;
+      events.push(`PREFIX_HEAL_COMMAND:${fix}->${healed.active_fix}`);
+      pushTrace(sessionId, {
+        severity: 'REPAIR', source: 'SSOT', step: 'SSOT_HEAL',
+        message: `Added prefix: ${fix} → ${healed.active_fix}`,
+      });
+    } else {
+      events.push(`NULL_UNKNOWN_COMMAND:${healed.active_fix}`);
+      pushTrace(sessionId, {
+        severity: 'REPAIR', source: 'SSOT', step: 'SSOT_HEAL',
+        message: `Nulled unknown command: ${healed.active_fix}`,
+        data: { nulledCommand: healed.active_fix },
+      });
+      healed.active_fix = null;
+    }
   }
 
   // Log summary if any healing occurred
