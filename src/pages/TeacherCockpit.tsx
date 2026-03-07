@@ -327,7 +327,9 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 <MetricCell label="Alignment" value={mechanical?.semanticValidation?.alignment_status || '—'} icon={<Activity className="w-3 h-3 text-cyan-400" />} accent={mechanical?.semanticValidation?.alignment_status === 'CRITICAL' ? 'red' : undefined} />
                 <MetricCell label="Epistemic Guard" value={mechanical?.epistemicGuardResult?.label || '—'} icon={<AlertTriangle className="w-3 h-3 text-amber-400" />} accent={mechanical?.epistemicGuardResult?.label === 'VERIFY' ? 'red' : undefined} />
                 <MetricCell label="Repairs" value={mechanical?.repairAttempts != null ? String(mechanical.repairAttempts) : '—'} icon={<RefreshCw className="w-3 h-3 text-slate-400" />} accent={mechanical?.repairAttempts && mechanical.repairAttempts > 0 ? 'red' : undefined} />
-                <MetricCell label="Trend" value={eai?.scaffolding?.trend || '—'} icon={<TrendingUp className="w-3 h-3 text-slate-400" />} accent={eai?.scaffolding?.trend === 'FALLING' ? 'red' : undefined} />
+              <MetricCell label="Trend" value={eai?.scaffolding?.trend || '—'} icon={<TrendingUp className="w-3 h-3 text-slate-400" />} accent={eai?.scaffolding?.trend === 'FALLING' ? 'red' : undefined} />
+              <MetricCell label="Confidence" value={analysis?.confidence != null ? `${Math.round(analysis.confidence * 100)}%` : '—'} icon={<Eye className="w-3 h-3 text-slate-400" />} accent={analysis?.confidence != null && analysis.confidence < 0.4 ? 'red' : undefined} />
+              <MetricCell label="Borderline" value={analysis?.borderline_dimensions?.length ? analysis.borderline_dimensions.join(', ') : '—'} icon={<AlertTriangle className="w-3 h-3 text-slate-400" />} accent={analysis?.borderline_dimensions?.length ? 'indigo' : undefined} />
               </div>
 
               {/* Scaffolding sparkline */}
@@ -470,6 +472,16 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                           {(msg.analysis as EAIAnalysis).active_fix}
                         </span>
                       )}
+                      {(msg.analysis as EAIAnalysis).confidence != null && (
+                        <span className="text-[7px] font-mono px-1 py-0.5 bg-slate-800 text-slate-400 border border-slate-700">
+                          Conf: {Math.round(((msg.analysis as EAIAnalysis).confidence!) * 100)}%
+                        </span>
+                      )}
+                      {(msg.analysis as EAIAnalysis).borderline_dimensions?.map((dim: string) => (
+                        <span key={dim} className="text-[7px] font-mono px-1 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                          {dim} ↔
+                        </span>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -493,11 +505,24 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 const currentBand = allBands.find(b => b.startsWith(shortKey)) || `${shortKey}0`;
                 const bandData = rubric.bands.find(b => b.band_id === currentBand);
 
+                const isBorderline = analysis?.borderline_dimensions?.includes(shortKey);
+                const secondaryBand = analysis?.secondary_bands?.[shortKey];
+
                 return (
-                  <div key={rubricId} className={`p-3 border ${colors.border} ${colors.bg}`}>
+                  <div key={rubricId} className={`p-3 border ${colors.border} ${colors.bg} ${isBorderline ? 'ring-1 ring-amber-500/30' : ''}`}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className={`text-[10px] font-mono font-bold ${colors.text}`}>{shortKey}</span>
-                      <span className={`text-[9px] font-mono ${colors.text}`}>{currentBand}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[10px] font-mono font-bold ${colors.text}`}>{shortKey}</span>
+                        {isBorderline && (
+                          <span className="text-[7px] font-mono px-1 py-0.5 bg-amber-500/15 text-amber-400 border border-amber-500/25 uppercase">Borderline</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[9px] font-mono ${colors.text}`}>{currentBand}</span>
+                        {secondaryBand && (
+                          <span className="text-[8px] font-mono text-slate-500" title="Secondary band">↔ {secondaryBand}</span>
+                        )}
+                      </div>
                     </div>
                     <p className="text-[9px] text-slate-400 mb-1">{rubric.name}</p>
                     {bandData && (
@@ -508,7 +533,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                       {rubric.bands.map(band => (
                         <div
                           key={band.band_id}
-                          className={`flex-1 h-1 ${band.band_id === currentBand ? (colors.text.replace('text-', 'bg-')) : 'bg-slate-800'}`}
+                          className={`flex-1 h-1 ${band.band_id === currentBand ? (colors.text.replace('text-', 'bg-')) : band.band_id === secondaryBand ? 'bg-slate-600' : 'bg-slate-800'}`}
                           title={band.label}
                         />
                       ))}
@@ -518,11 +543,23 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
               })}
             </div>
 
-            {/* Reasoning */}
-            {analysis?.reasoning && (
+            {/* Confidence + Reasoning */}
+            {(analysis?.confidence != null || analysis?.reasoning) && (
               <div className="mt-4 p-3 border border-slate-800 bg-slate-900/40">
-                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Analyse Reasoning</span>
-                <p className="text-[10px] text-slate-400 mt-1 font-mono">{analysis.reasoning}</p>
+                {analysis?.confidence != null && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Confidence</span>
+                    <span className={`text-[10px] font-mono ${analysis.confidence >= 0.7 ? 'text-emerald-400' : analysis.confidence >= 0.4 ? 'text-slate-300' : 'text-amber-400'}`}>
+                      {Math.round(analysis.confidence * 100)}%
+                    </span>
+                  </div>
+                )}
+                {analysis?.reasoning && (
+                  <>
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Analyse Reasoning</span>
+                    <p className="text-[10px] text-slate-400 mt-1 font-mono">{analysis.reasoning}</p>
+                  </>
+                )}
               </div>
             )}
           </div>

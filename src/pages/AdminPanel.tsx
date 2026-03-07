@@ -548,6 +548,12 @@ const AdminPanel = () => {
                   const specCount = epistemics.filter((e: string) => e === 'SPECULATIE').length;
                   const onbekendCount = epistemics.filter((e: string) => e === 'ONBEKEND').length;
 
+                  // Nuance field aggregates
+                  const withConfidence = withAnalysis.filter((m: any) => m.analysis?.confidence != null);
+                  const avgConfidence = withConfidence.length > 0 ? withConfidence.reduce((sum: number, m: any) => sum + m.analysis.confidence, 0) / withConfidence.length : null;
+                  const withBorderline = withAnalysis.filter((m: any) => (m.analysis?.borderline_dimensions?.length ?? 0) > 0);
+                  const withSecondary = withAnalysis.filter((m: any) => m.analysis?.secondary_bands && Object.keys(m.analysis.secondary_bands).length > 0);
+
                   const guardLabels = withMech.map((m: any) => m.mechanical?.epistemicGuardResult?.label).filter(Boolean);
                   const guardOk = guardLabels.filter((l: string) => l === 'OK').length;
                   const guardCaution = guardLabels.filter((l: string) => l === 'CAUTION').length;
@@ -617,6 +623,31 @@ const AdminPanel = () => {
                           {guardLabels.length === 0 && <p className="text-xs text-muted-foreground mt-2">Geen guard data (pas beschikbaar na patch 2 deploy)</p>}
                         </CardContent>
                       </Card>
+
+                      {/* Nuance fields aggregate row */}
+                      <Card>
+                        <CardContent className="pt-6 text-center">
+                          <p className={`text-3xl font-bold ${avgConfidence === null ? 'text-muted-foreground' : avgConfidence >= 0.7 ? 'text-green-500' : avgConfidence >= 0.4 ? 'text-yellow-500' : 'text-red-500'}`}>
+                            {avgConfidence !== null ? `${(avgConfidence * 100).toFixed(0)}%` : '—'}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">Gem. Confidence</p>
+                          <p className="text-xs text-muted-foreground mt-1">{withConfidence.length} van {withAnalysis.length} analyses</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="pt-6 text-center">
+                          <p className="text-3xl font-bold text-foreground">{withBorderline.length}</p>
+                          <p className="text-[10px] text-muted-foreground">Met Borderline</p>
+                          <p className="text-xs text-muted-foreground mt-1">van {withAnalysis.length} analyses</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="pt-6 text-center">
+                          <p className="text-3xl font-bold text-foreground">{withSecondary.length}</p>
+                          <p className="text-[10px] text-muted-foreground">Met Secondary Bands</p>
+                          <p className="text-xs text-muted-foreground mt-1">van {withAnalysis.length} analyses</p>
+                        </CardContent>
+                      </Card>
                     </>
                   );
                 })()}
@@ -644,6 +675,8 @@ const AdminPanel = () => {
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Healing</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Epist. Status</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Guard</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Conf.</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Border.</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -671,11 +704,13 @@ const AdminPanel = () => {
                               <td className="px-2 py-1.5">{(mech?.healingEventCount ?? 0) > 0 ? <Badge className="text-[8px] bg-orange-500/20 text-orange-400">{mech.healingEventCount}</Badge> : '0'}</td>
                               <td className="px-2 py-1.5">{anal?.epistemic_status ? <Badge variant="outline" className="text-[8px]">{anal.epistemic_status}</Badge> : <span className="text-muted-foreground">—</span>}</td>
                               <td className="px-2 py-1.5">{mech?.epistemicGuardResult?.label ? <Badge variant="outline" className={`text-[8px] ${mech.epistemicGuardResult.label === 'OK' ? 'border-green-500/50 text-green-400' : mech.epistemicGuardResult.label === 'CAUTION' ? 'border-yellow-500/50 text-yellow-400' : 'border-red-500/50 text-red-400'}`}>{mech.epistemicGuardResult.label}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{anal?.confidence != null ? <span className={`text-[9px] font-mono ${anal.confidence >= 0.7 ? 'text-green-500' : anal.confidence >= 0.4 ? 'text-yellow-500' : 'text-red-500'}`}>{(anal.confidence * 100).toFixed(0)}%</span> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{anal?.borderline_dimensions?.length > 0 ? <Badge variant="outline" className="text-[8px] border-amber-500/40 text-amber-400">{anal.borderline_dimensions.join(', ')}</Badge> : <span className="text-muted-foreground">—</span>}</td>
                             </tr>
                           );
                         })}
                         {dbMessages.filter((m: any) => m.role === 'model').length === 0 && (
-                          <tr><td colSpan={9} className="px-2 py-4 text-center text-muted-foreground">Geen model berichten gevonden</td></tr>
+                          <tr><td colSpan={11} className="px-2 py-4 text-center text-muted-foreground">Geen model berichten gevonden</td></tr>
                         )}
                       </tbody>
                     </table>
