@@ -76,8 +76,9 @@ function updateSessionContext(sessionId: string, analysis: EAIAnalysis, profile:
 
 // ═══ MASTERY STATE-MACHINE UPDATE ═══
 // Veilige fase 1: INTRO → WORKING → CHECKING (geen auto-MASTERED)
-function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, sessionId: string, userId: string) {
-  if (!profile.currentNodeId || !profile.subject || !profile.level) return;
+// Returns progress percentage (0-100) for session sync
+function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, sessionId: string, userId: string): number {
+  if (!profile.currentNodeId || !profile.subject || !profile.level) return 0;
 
   const pathId = `${profile.subject}_${profile.level}`.toUpperCase().replace(/\s/g, '');
   const ctx = getSessionContext(sessionId);
@@ -105,6 +106,26 @@ function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, se
       score: analysis.scaffolding?.agency_score ?? undefined,
     },
   }).catch(err => console.error('[Mastery] Update failed:', err));
+
+  // Calculate progress: count nodes with CHECKING or MASTERED status from localStorage
+  const path = CURRICULUM_PATHS.find(p => p.id === pathId);
+  if (!path) return 0;
+  
+  const masteryKey = `eai_mastery_local_${userId}_${pathId}`;
+  const stored = localStorage.getItem(masteryKey);
+  if (!stored) return 0;
+  
+  try {
+    const mastery = JSON.parse(stored);
+    const completedNodes = new Set<string>();
+    for (const entry of mastery.history || []) {
+      if (entry.nodeId) completedNodes.add(entry.nodeId);
+    }
+    // Progress = unique nodes with evidence / total nodes in path
+    return Math.round((completedNodes.size / path.nodes.length) * 100);
+  } catch {
+    return 0;
+  }
 }
 
 // Cache learner observation patterns from SSOT v15 for all 10 dimensions
