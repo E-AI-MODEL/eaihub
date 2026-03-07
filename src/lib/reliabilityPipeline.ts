@@ -76,116 +76,6 @@ export function downloadTraceJSON(sessionId: string): void {
   URL.revokeObjectURL(url);
 }
 
-// ============= JSON PARSE & REPAIR =============
-
-/**
- * Strip code fences from LLM output
- */
-function stripCodeFences(s: string): string {
-  return s.replace(/^```(?:json)?\s*/i, '').replace(/```$/i, '').trim();
-}
-
-/**
- * Attempt to repair common JSON issues
- */
-export function repairJson(raw: string): { repaired: string; notes: string[] } {
-  const notes: string[] = [];
-  let s = raw;
-
-  // Strip code fences
-  const stripped = stripCodeFences(s);
-  if (stripped !== s) {
-    notes.push('STRIP_CODEFENCES');
-    s = stripped;
-  }
-
-  // Normalize smart quotes
-  const smartQuotes = s.replace(/[""]/g, '"').replace(/['']/g, "'");
-  if (smartQuotes !== s) {
-    notes.push('NORMALIZE_QUOTES');
-    s = smartQuotes;
-  }
-
-  // Remove trailing commas (naive but often works)
-  const trailingCommas = s.replace(/,\s*([}\]])/g, '$1');
-  if (trailingCommas !== s) {
-    notes.push('REMOVE_TRAILING_COMMAS');
-    s = trailingCommas;
-  }
-
-  // Fix unquoted keys (very basic)
-  const unquotedKeys = s.replace(/(\{|,)\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
-  if (unquotedKeys !== s) {
-    notes.push('QUOTE_KEYS');
-    s = unquotedKeys;
-  }
-
-  return { repaired: s, notes };
-}
-
-/**
- * Try to parse JSON, with repair attempt if initial parse fails
- */
-export function tryParseWithRepair(
-  raw: string,
-  sessionId: string
-): { ok: true; value: unknown; repaired: boolean } | { ok: false; error: string; repairLog: RepairLog } {
-  // First attempt: direct parse
-  try {
-    const value = JSON.parse(raw);
-    pushTrace(sessionId, {
-      severity: 'INFO',
-      source: 'PIPELINE',
-      step: 'PARSE',
-      message: 'JSON parsed successfully on first attempt',
-    });
-    return { ok: true, value, repaired: false };
-  } catch (firstError) {
-    // Second attempt: repair and retry
-    pushTrace(sessionId, {
-      severity: 'WARNING',
-      source: 'PIPELINE',
-      step: 'PARSE',
-      message: 'Initial JSON parse failed, attempting repair',
-      data: { error: (firstError as Error).message },
-    });
-
-    const { repaired, notes } = repairJson(raw);
-    
-    try {
-      const value = JSON.parse(repaired);
-      pushTrace(sessionId, {
-        severity: 'REPAIR',
-        source: 'PIPELINE',
-        step: 'REPAIR',
-        message: `JSON repaired successfully: ${notes.join(', ')}`,
-        data: { repairs: notes },
-      });
-      return { ok: true, value, repaired: true };
-    } catch (secondError) {
-      const repairLog: RepairLog = {
-        timestamp: Date.now(),
-        error: (secondError as Error).message,
-        brokenPayload: raw.slice(0, 500), // Truncate for storage
-      };
-      
-      pushTrace(sessionId, {
-        severity: 'ERROR',
-        source: 'PIPELINE',
-        step: 'REPAIR',
-        message: 'JSON repair failed',
-        data: { 
-          originalError: (firstError as Error).message,
-          repairError: (secondError as Error).message,
-          repairAttempts: notes,
-        },
-      });
-      
-      return { ok: false, error: (secondError as Error).message, repairLog };
-    }
-  }
-}
-
 // ============= SSOT HEALING =============
 
 /**
@@ -526,6 +416,12 @@ export function executePipeline(
     ...mechanical,
     repairAttempts: healingEvents.length > 0 ? 1 : 0,
     semanticValidation,
+    epistemicGuardResult: {
+      label: epistemicResult.label,
+      notes: epistemicResult.notes,
+      confidence: epistemicResult.confidence,
+    },
+    healingEventCount: healingEvents.length,
   };
 
   const pipelineDuration = Date.now() - startTime;

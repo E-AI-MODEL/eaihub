@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle, MessageSquare, Users } from 'lucide-react';
+import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle, MessageSquare, Users, BarChart3, ChevronDown, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -32,6 +32,7 @@ const AdminPanel = () => {
   const [dbMessages, setDbMessages] = useState<any[]>([]);
   const [dbFilter, setDbFilter] = useState('');
   const [dbLoading, setDbLoading] = useState(false);
+  const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
 
   // Load system data on mount
   useEffect(() => {
@@ -188,6 +189,7 @@ const AdminPanel = () => {
           <TabsList className="bg-secondary border border-border w-full overflow-x-auto flex justify-start">
             <TabsTrigger value="monitoring" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">System </span>Health</TabsTrigger>
             <TabsTrigger value="database" onClick={loadDbData} className="text-xs sm:text-sm whitespace-nowrap">Database</TabsTrigger>
+            <TabsTrigger value="pipeline" onClick={loadDbData} className="text-xs sm:text-sm whitespace-nowrap">Pipeline</TabsTrigger>
             <TabsTrigger value="storage" className="text-xs sm:text-sm whitespace-nowrap">Storage<span className="hidden sm:inline"> Inspector</span></TabsTrigger>
             <TabsTrigger value="actions" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">Admin </span>Actions</TabsTrigger>
             <TabsTrigger value="ssot" className="text-xs sm:text-sm whitespace-nowrap">SSOT<span className="hidden sm:inline"> Browser</span></TabsTrigger>
@@ -266,10 +268,10 @@ const AdminPanel = () => {
                       <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
                         <div className="flex items-center gap-3">
                           <Terminal className="w-4 h-4 text-primary" />
-                          <span className="text-sm text-foreground">API Key</span>
+                          <span className="text-sm text-foreground">Gateway bereikbaar</span>
                         </div>
-                        <span className={`text-xs font-mono ${systemHealth.telemetry.apiKeyConfigured ? 'text-green-500' : 'text-red-500'}`}>
-                          {systemHealth.telemetry.apiKeyConfigured ? 'CONFIGURED' : 'MISSING'}
+                        <span className={`text-xs font-mono ${systemHealth.telemetry.edgeFunctionReachable ? 'text-green-500' : 'text-yellow-500'}`}>
+                          {systemHealth.telemetry.edgeFunctionReachable ? 'REACHABLE' : 'UNREACHABLE'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
@@ -439,34 +441,241 @@ const AdminPanel = () => {
                     <MessageSquare className="w-3 h-3" /> Chatberichten ({dbMessages.length})
                   </h3>
                   <div className="max-h-[300px] overflow-y-auto border border-border rounded">
-                    <table className="w-full text-[10px]">
+                     <table className="w-full text-[10px]">
                       <thead className="bg-secondary/50 sticky top-0">
                         <tr>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Rol</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Inhoud</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Phase</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">TD</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">K</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">gF</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Epist.</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Rep.</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Tijd</th>
                           <th className="px-2 py-1"></th>
                         </tr>
                       </thead>
                       <tbody>
-                        {dbMessages.slice(0, 100).map((m: any) => (
-                          <tr key={m.id} className="border-t border-border hover:bg-secondary/30">
-                            <td className="px-2 py-1.5">
-                              <Badge className={`text-[8px] ${m.role === 'user' ? 'bg-blue-500/20 text-blue-400' : m.role === 'model' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-amber-500/20 text-amber-400'}`}>{m.role}</Badge>
-                            </td>
-                            <td className="px-2 py-1.5 text-foreground max-w-[400px] truncate">{m.content}</td>
-                            <td className="px-2 py-1.5 text-muted-foreground whitespace-nowrap">
-                              {new Date(m.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
-                            </td>
-                            <td className="px-2 py-1.5">
-                              <Button variant="ghost" size="sm" className="h-5 w-5 p-0 hover:bg-destructive/20 hover:text-destructive" onClick={async () => { await deleteChatMessage(m.id); loadDbData(); }}>
-                                <Trash2 className="w-3 h-3" />
-                              </Button>
+                        {dbMessages.slice(0, 100).map((m: any) => {
+                          const analysis = m.analysis as any;
+                          const mechanical = m.mechanical as any;
+                          const phase = analysis?.process_phases?.[0] ?? null;
+                          const td = analysis?.task_densities?.[0] ?? null;
+                          const kLevel = analysis?.coregulation_bands?.find((b: string) => b?.startsWith('K')) ?? null;
+                          const gFactor = mechanical?.semanticValidation?.gFactor ?? null;
+                          const epistemic = analysis?.epistemic_status ?? null;
+                          const repairs = mechanical?.repairAttempts ?? null;
+                          const isExpanded = expandedMessageId === m.id;
+                          return (
+                            <tr key={m.id} className="border-t border-border hover:bg-secondary/30 cursor-pointer" onClick={() => setExpandedMessageId(isExpanded ? null : m.id)}>
+                              <td className="px-2 py-1.5">
+                                <Badge className={`text-[8px] ${m.role === 'user' ? 'bg-blue-500/20 text-blue-400' : m.role === 'model' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-amber-500/20 text-amber-400'}`}>{m.role}</Badge>
+                              </td>
+                              <td className="px-2 py-1.5 text-foreground max-w-[200px] truncate">{m.content}</td>
+                              <td className="px-2 py-1.5">{phase ? <Badge variant="outline" className="text-[8px]">{phase}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{td ? <Badge variant="outline" className="text-[8px]">{td}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{kLevel ? <Badge variant="outline" className="text-[8px]">{kLevel}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{gFactor !== null ? <span className={`text-[9px] font-mono ${gFactor >= 0.8 ? 'text-green-500' : gFactor >= 0.5 ? 'text-yellow-500' : 'text-red-500'}`}>{(gFactor * 100).toFixed(0)}%</span> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{epistemic ? <Badge variant="outline" className="text-[8px]">{epistemic}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{repairs !== null && repairs > 0 ? <Badge className="text-[8px] bg-yellow-500/20 text-yellow-400">{repairs}</Badge> : <span className="text-muted-foreground">0</span>}</td>
+                              <td className="px-2 py-1.5 text-muted-foreground whitespace-nowrap">
+                                {new Date(m.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
+                              </td>
+                              <td className="px-2 py-1.5 flex items-center gap-1">
+                                {(analysis || mechanical) && (isExpanded ? <ChevronDown className="w-3 h-3 text-muted-foreground" /> : <ChevronRight className="w-3 h-3 text-muted-foreground" />)}
+                                <Button variant="ghost" size="sm" className="h-5 w-5 p-0 hover:bg-destructive/20 hover:text-destructive" onClick={async (e) => { e.stopPropagation(); await deleteChatMessage(m.id); loadDbData(); }}>
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                        {/* Expanded JSON preview row */}
+                        {dbMessages.slice(0, 100).map((m: any) => expandedMessageId === m.id && (m.analysis || m.mechanical) ? (
+                          <tr key={`${m.id}-expand`} className="border-t border-border bg-secondary/20">
+                            <td colSpan={10} className="px-2 py-2">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {m.analysis && (
+                                  <div>
+                                    <p className="text-[9px] font-bold text-muted-foreground mb-1">Analysis</p>
+                                    <pre className="text-[9px] font-mono text-muted-foreground bg-background p-2 rounded max-h-40 overflow-auto">{JSON.stringify(m.analysis, null, 2)}</pre>
+                                  </div>
+                                )}
+                                {m.mechanical && (
+                                  <div>
+                                    <p className="text-[9px] font-bold text-muted-foreground mb-1">Mechanical</p>
+                                    <pre className="text-[9px] font-mono text-muted-foreground bg-background p-2 rounded max-h-40 overflow-auto">{JSON.stringify(m.mechanical, null, 2)}</pre>
+                                  </div>
+                                )}
+                              </div>
                             </td>
                           </tr>
-                        ))}
+                        ) : null)}
                         {dbMessages.length === 0 && (
-                          <tr><td colSpan={4} className="px-2 py-4 text-center text-muted-foreground">Geen berichten</td></tr>
+                          <tr><td colSpan={10} className="px-2 py-4 text-center text-muted-foreground">Geen berichten</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Pipeline / Reliability Tab */}
+          <TabsContent value="pipeline">
+            <div className="space-y-6">
+              {/* Aggregated Metrics */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {(() => {
+                  const modelMsgs = dbMessages.filter((m: any) => m.role === 'model');
+                  const withMech = modelMsgs.filter((m: any) => m.mechanical);
+                  const withAnalysis = modelMsgs.filter((m: any) => m.analysis);
+
+                  const repairCount = withMech.filter((m: any) => (m.mechanical?.repairAttempts ?? 0) > 0).length;
+                  const gFactors = withMech.map((m: any) => m.mechanical?.semanticValidation?.gFactor).filter((g: any) => g != null) as number[];
+                  const avgGFactor = gFactors.length > 0 ? gFactors.reduce((a: number, b: number) => a + b, 0) / gFactors.length : null;
+
+                  const alignments = withMech.map((m: any) => m.mechanical?.semanticValidation?.alignment_status).filter(Boolean);
+                  const optimalCount = alignments.filter((a: string) => a === 'OPTIMAL').length;
+                  const driftCount = alignments.filter((a: string) => a === 'DRIFT').length;
+                  const criticalCount = alignments.filter((a: string) => a === 'CRITICAL').length;
+
+                  const epistemics = withAnalysis.map((m: any) => m.analysis?.epistemic_status).filter(Boolean);
+                  const feitCount = epistemics.filter((e: string) => e === 'FEIT').length;
+                  const interpCount = epistemics.filter((e: string) => e === 'INTERPRETATIE').length;
+                  const specCount = epistemics.filter((e: string) => e === 'SPECULATIE').length;
+                  const onbekendCount = epistemics.filter((e: string) => e === 'ONBEKEND').length;
+
+                  const guardLabels = withMech.map((m: any) => m.mechanical?.epistemicGuardResult?.label).filter(Boolean);
+                  const guardOk = guardLabels.filter((l: string) => l === 'OK').length;
+                  const guardCaution = guardLabels.filter((l: string) => l === 'CAUTION').length;
+                  const guardVerify = guardLabels.filter((l: string) => l === 'VERIFY').length;
+
+                  return (
+                    <>
+                      <Card>
+                        <CardContent className="pt-6 text-center">
+                          <p className="text-3xl font-bold text-foreground">{modelMsgs.length}</p>
+                          <p className="text-[10px] text-muted-foreground">Model berichten</p>
+                          <p className="text-xs text-muted-foreground mt-1">{withMech.length} met mechanical data</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="pt-6 text-center">
+                          <p className={`text-3xl font-bold ${repairCount === 0 ? 'text-green-500' : 'text-yellow-500'}`}>{repairCount}</p>
+                          <p className="text-[10px] text-muted-foreground">Repairs</p>
+                          <p className="text-xs text-muted-foreground mt-1">van {withMech.length} berichten</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="pt-6 text-center">
+                          <p className={`text-3xl font-bold ${avgGFactor === null ? 'text-muted-foreground' : avgGFactor >= 0.8 ? 'text-green-500' : avgGFactor >= 0.5 ? 'text-yellow-500' : 'text-red-500'}`}>
+                            {avgGFactor !== null ? `${(avgGFactor * 100).toFixed(0)}%` : '—'}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">Gem. gFactor</p>
+                          <p className="text-xs text-muted-foreground mt-1">{gFactors.length} metingen</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="pt-6 text-center">
+                          <div className="flex justify-center gap-2">
+                            <Badge className="text-[8px] bg-green-500/20 text-green-400">{optimalCount} OPT</Badge>
+                            <Badge className="text-[8px] bg-yellow-500/20 text-yellow-400">{driftCount} DRF</Badge>
+                            <Badge className="text-[8px] bg-red-500/20 text-red-400">{criticalCount} CRT</Badge>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-2">Alignment</p>
+                        </CardContent>
+                      </Card>
+
+                      {/* Second row: epistemic breakdown */}
+                      <Card className="col-span-2">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-xs uppercase tracking-wider">Epistemic Status (analysis)</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="outline" className="text-[9px]">FEIT: {feitCount}</Badge>
+                            <Badge variant="outline" className="text-[9px]">INTERPRETATIE: {interpCount}</Badge>
+                            <Badge variant="outline" className="text-[9px]">SPECULATIE: {specCount}</Badge>
+                            <Badge variant="outline" className="text-[9px]">ONBEKEND: {onbekendCount}</Badge>
+                          </div>
+                          {epistemics.length === 0 && <p className="text-xs text-muted-foreground mt-2">Geen epistemic data beschikbaar</p>}
+                        </CardContent>
+                      </Card>
+                      <Card className="col-span-2">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-xs uppercase tracking-wider">Epistemic Guard (mechanical)</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge className="text-[9px] bg-green-500/20 text-green-400">OK: {guardOk}</Badge>
+                            <Badge className="text-[9px] bg-yellow-500/20 text-yellow-400">CAUTION: {guardCaution}</Badge>
+                            <Badge className="text-[9px] bg-red-500/20 text-red-400">VERIFY: {guardVerify}</Badge>
+                          </div>
+                          {guardLabels.length === 0 && <p className="text-xs text-muted-foreground mt-2">Geen guard data (pas beschikbaar na patch 2 deploy)</p>}
+                        </CardContent>
+                      </Card>
+                    </>
+                  );
+                })()}
+              </div>
+
+              {/* Per-message detail table */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4 text-primary" />
+                    Pipeline Detail per Bericht
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="max-h-[400px] overflow-y-auto border border-border rounded">
+                    <table className="w-full text-[10px]">
+                      <thead className="bg-secondary/50 sticky top-0">
+                        <tr>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Tijd</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Model</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Latency</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">gFactor</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Alignment</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Repairs</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Healing</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Epist. Status</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Guard</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dbMessages.filter((m: any) => m.role === 'model').slice(0, 100).map((m: any) => {
+                          const mech = m.mechanical as any;
+                          const anal = m.analysis as any;
+                          return (
+                            <tr key={m.id} className="border-t border-border hover:bg-secondary/30">
+                              <td className="px-2 py-1.5 text-muted-foreground whitespace-nowrap">
+                                {new Date(m.created_at).toLocaleString('nl-NL', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+                              </td>
+                              <td className="px-2 py-1.5 text-foreground font-mono">{mech?.model ?? '—'}</td>
+                              <td className="px-2 py-1.5 text-muted-foreground">{mech?.latencyMs != null ? `${mech.latencyMs}ms` : '—'}</td>
+                              <td className="px-2 py-1.5">
+                                {mech?.semanticValidation?.gFactor != null
+                                  ? <span className={`font-mono ${mech.semanticValidation.gFactor >= 0.8 ? 'text-green-500' : mech.semanticValidation.gFactor >= 0.5 ? 'text-yellow-500' : 'text-red-500'}`}>{(mech.semanticValidation.gFactor * 100).toFixed(0)}%</span>
+                                  : <span className="text-muted-foreground">—</span>}
+                              </td>
+                              <td className="px-2 py-1.5">
+                                {mech?.semanticValidation?.alignment_status
+                                  ? <Badge variant="outline" className={`text-[8px] ${mech.semanticValidation.alignment_status === 'OPTIMAL' ? 'border-green-500/50 text-green-400' : mech.semanticValidation.alignment_status === 'DRIFT' ? 'border-yellow-500/50 text-yellow-400' : 'border-red-500/50 text-red-400'}`}>{mech.semanticValidation.alignment_status}</Badge>
+                                  : <span className="text-muted-foreground">—</span>}
+                              </td>
+                              <td className="px-2 py-1.5">{(mech?.repairAttempts ?? 0) > 0 ? <Badge className="text-[8px] bg-yellow-500/20 text-yellow-400">{mech.repairAttempts}</Badge> : '0'}</td>
+                              <td className="px-2 py-1.5">{(mech?.healingEventCount ?? 0) > 0 ? <Badge className="text-[8px] bg-orange-500/20 text-orange-400">{mech.healingEventCount}</Badge> : '0'}</td>
+                              <td className="px-2 py-1.5">{anal?.epistemic_status ? <Badge variant="outline" className="text-[8px]">{anal.epistemic_status}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{mech?.epistemicGuardResult?.label ? <Badge variant="outline" className={`text-[8px] ${mech.epistemicGuardResult.label === 'OK' ? 'border-green-500/50 text-green-400' : mech.epistemicGuardResult.label === 'CAUTION' ? 'border-yellow-500/50 text-yellow-400' : 'border-red-500/50 text-red-400'}`}>{mech.epistemicGuardResult.label}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                            </tr>
+                          );
+                        })}
+                        {dbMessages.filter((m: any) => m.role === 'model').length === 0 && (
+                          <tr><td colSpan={9} className="px-2 py-4 text-center text-muted-foreground">Geen model berichten gevonden</td></tr>
                         )}
                       </tbody>
                     </table>

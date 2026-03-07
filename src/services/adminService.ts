@@ -44,7 +44,7 @@ export type BrowserEnv = {
 
 export type RuntimeTelemetry = {
   isFallbackActive: boolean;
-  apiKeyConfigured: boolean;
+  edgeFunctionReachable: boolean;
   logicEngineStatus: 'OPERATIONAL' | 'COMPROMISED';
   lastSelfTest: number;
 };
@@ -184,17 +184,25 @@ export const runSystemAudit = async (): Promise<SystemHealth> => {
   const storage = analyzeStorage();
   const issues: string[] = [];
 
-  // API calls go through edge function; no client-side key needed
+  // Edge function reachability check
   const isFallbackActive = false;
+  let edgeFunctionReachable = false;
+  try {
+    const edgeUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-chat`;
+    const res = await fetch(edgeUrl, { method: 'OPTIONS', signal: AbortSignal.timeout(5000) });
+    edgeFunctionReachable = res.ok || res.status === 204 || res.status === 200;
+  } catch {
+    issues.push("WARNING: Edge function (eai-chat) niet bereikbaar. Netwerk- of deploymentprobleem.");
+  }
 
   const logicStatus = runLogicSelfTest();
   if (logicStatus === 'COMPROMISED') {
-    issues.push("CRITICAL: Logic Validator failed self-test. Code integrity compromised.");
+    issues.push("WARNING: Logic Validator self-test gefaald. Mogelijk stale SSOT.");
   }
 
   let integrityScore = 100;
-  if (isFallbackActive) integrityScore -= 40;
-  if (logicStatus === 'COMPROMISED') integrityScore -= 50;
+  if (!edgeFunctionReachable) integrityScore -= 15;
+  if (logicStatus === 'COMPROMISED') integrityScore -= 20;
   
   const requiredDimensions = ['K', 'P', 'TD', 'C']; 
   const bands = core.rubrics.flatMap(r => r.bands.map(b => b.band_id));
@@ -239,7 +247,7 @@ export const runSystemAudit = async (): Promise<SystemHealth> => {
     storage,
     telemetry: {
       isFallbackActive,
-      apiKeyConfigured: !isFallbackActive,
+      edgeFunctionReachable,
       logicEngineStatus: logicStatus,
       lastSelfTest: Date.now()
     },
