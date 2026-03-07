@@ -675,6 +675,8 @@ const AdminPanel = () => {
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Healing</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Epist. Status</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Guard</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Conf.</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Border.</th>
                         </tr>
                       </thead>
                       <tbody>
