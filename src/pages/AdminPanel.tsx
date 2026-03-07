@@ -688,6 +688,10 @@ const AdminPanel = () => {
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Alignment</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Repairs</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Healing</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">SSOT</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Cmd∅</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Parse</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Conf.</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Epist. Status</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Guard</th>
                         </tr>
