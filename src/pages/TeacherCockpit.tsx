@@ -327,7 +327,9 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 <MetricCell label="Alignment" value={mechanical?.semanticValidation?.alignment_status || '—'} icon={<Activity className="w-3 h-3 text-cyan-400" />} accent={mechanical?.semanticValidation?.alignment_status === 'CRITICAL' ? 'red' : undefined} />
                 <MetricCell label="Epistemic Guard" value={mechanical?.epistemicGuardResult?.label || '—'} icon={<AlertTriangle className="w-3 h-3 text-amber-400" />} accent={mechanical?.epistemicGuardResult?.label === 'VERIFY' ? 'red' : undefined} />
                 <MetricCell label="Repairs" value={mechanical?.repairAttempts != null ? String(mechanical.repairAttempts) : '—'} icon={<RefreshCw className="w-3 h-3 text-slate-400" />} accent={mechanical?.repairAttempts && mechanical.repairAttempts > 0 ? 'red' : undefined} />
-                <MetricCell label="Trend" value={eai?.scaffolding?.trend || '—'} icon={<TrendingUp className="w-3 h-3 text-slate-400" />} accent={eai?.scaffolding?.trend === 'FALLING' ? 'red' : undefined} />
+              <MetricCell label="Trend" value={eai?.scaffolding?.trend || '—'} icon={<TrendingUp className="w-3 h-3 text-slate-400" />} accent={eai?.scaffolding?.trend === 'FALLING' ? 'red' : undefined} />
+              <MetricCell label="Confidence" value={analysis?.confidence != null ? `${Math.round(analysis.confidence * 100)}%` : '—'} icon={<Eye className="w-3 h-3 text-slate-400" />} accent={analysis?.confidence != null && analysis.confidence < 0.4 ? 'red' : undefined} />
+              <MetricCell label="Borderline" value={analysis?.borderline_dimensions?.length ? analysis.borderline_dimensions.join(', ') : '—'} icon={<AlertTriangle className="w-3 h-3 text-slate-400" />} accent={analysis?.borderline_dimensions?.length ? 'indigo' : undefined} />
               </div>
 
               {/* Scaffolding sparkline */}
