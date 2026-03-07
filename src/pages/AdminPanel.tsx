@@ -441,34 +441,79 @@ const AdminPanel = () => {
                     <MessageSquare className="w-3 h-3" /> Chatberichten ({dbMessages.length})
                   </h3>
                   <div className="max-h-[300px] overflow-y-auto border border-border rounded">
-                    <table className="w-full text-[10px]">
+                     <table className="w-full text-[10px]">
                       <thead className="bg-secondary/50 sticky top-0">
                         <tr>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Rol</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Inhoud</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Phase</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">TD</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">K</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">gF</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Epist.</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Rep.</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Tijd</th>
                           <th className="px-2 py-1"></th>
                         </tr>
                       </thead>
                       <tbody>
-                        {dbMessages.slice(0, 100).map((m: any) => (
-                          <tr key={m.id} className="border-t border-border hover:bg-secondary/30">
-                            <td className="px-2 py-1.5">
-                              <Badge className={`text-[8px] ${m.role === 'user' ? 'bg-blue-500/20 text-blue-400' : m.role === 'model' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-amber-500/20 text-amber-400'}`}>{m.role}</Badge>
-                            </td>
-                            <td className="px-2 py-1.5 text-foreground max-w-[400px] truncate">{m.content}</td>
-                            <td className="px-2 py-1.5 text-muted-foreground whitespace-nowrap">
-                              {new Date(m.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
-                            </td>
-                            <td className="px-2 py-1.5">
-                              <Button variant="ghost" size="sm" className="h-5 w-5 p-0 hover:bg-destructive/20 hover:text-destructive" onClick={async () => { await deleteChatMessage(m.id); loadDbData(); }}>
-                                <Trash2 className="w-3 h-3" />
-                              </Button>
+                        {dbMessages.slice(0, 100).map((m: any) => {
+                          const analysis = m.analysis as any;
+                          const mechanical = m.mechanical as any;
+                          const phase = analysis?.process_phases?.[0] ?? null;
+                          const td = analysis?.task_densities?.[0] ?? null;
+                          const kLevel = analysis?.coregulation_bands?.find((b: string) => b?.startsWith('K')) ?? null;
+                          const gFactor = mechanical?.semanticValidation?.gFactor ?? null;
+                          const epistemic = analysis?.epistemic_status ?? null;
+                          const repairs = mechanical?.repairAttempts ?? null;
+                          const isExpanded = expandedMessageId === m.id;
+                          return (
+                            <tr key={m.id} className="border-t border-border hover:bg-secondary/30 cursor-pointer" onClick={() => setExpandedMessageId(isExpanded ? null : m.id)}>
+                              <td className="px-2 py-1.5">
+                                <Badge className={`text-[8px] ${m.role === 'user' ? 'bg-blue-500/20 text-blue-400' : m.role === 'model' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-amber-500/20 text-amber-400'}`}>{m.role}</Badge>
+                              </td>
+                              <td className="px-2 py-1.5 text-foreground max-w-[200px] truncate">{m.content}</td>
+                              <td className="px-2 py-1.5">{phase ? <Badge variant="outline" className="text-[8px]">{phase}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{td ? <Badge variant="outline" className="text-[8px]">{td}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{kLevel ? <Badge variant="outline" className="text-[8px]">{kLevel}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{gFactor !== null ? <span className={`text-[9px] font-mono ${gFactor >= 0.8 ? 'text-green-500' : gFactor >= 0.5 ? 'text-yellow-500' : 'text-red-500'}`}>{(gFactor * 100).toFixed(0)}%</span> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{epistemic ? <Badge variant="outline" className="text-[8px]">{epistemic}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{repairs !== null && repairs > 0 ? <Badge className="text-[8px] bg-yellow-500/20 text-yellow-400">{repairs}</Badge> : <span className="text-muted-foreground">0</span>}</td>
+                              <td className="px-2 py-1.5 text-muted-foreground whitespace-nowrap">
+                                {new Date(m.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
+                              </td>
+                              <td className="px-2 py-1.5 flex items-center gap-1">
+                                {(analysis || mechanical) && (isExpanded ? <ChevronDown className="w-3 h-3 text-muted-foreground" /> : <ChevronRight className="w-3 h-3 text-muted-foreground" />)}
+                                <Button variant="ghost" size="sm" className="h-5 w-5 p-0 hover:bg-destructive/20 hover:text-destructive" onClick={async (e) => { e.stopPropagation(); await deleteChatMessage(m.id); loadDbData(); }}>
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                        {/* Expanded JSON preview row */}
+                        {dbMessages.slice(0, 100).map((m: any) => expandedMessageId === m.id && (m.analysis || m.mechanical) ? (
+                          <tr key={`${m.id}-expand`} className="border-t border-border bg-secondary/20">
+                            <td colSpan={10} className="px-2 py-2">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {m.analysis && (
+                                  <div>
+                                    <p className="text-[9px] font-bold text-muted-foreground mb-1">Analysis</p>
+                                    <pre className="text-[9px] font-mono text-muted-foreground bg-background p-2 rounded max-h-40 overflow-auto">{JSON.stringify(m.analysis, null, 2)}</pre>
+                                  </div>
+                                )}
+                                {m.mechanical && (
+                                  <div>
+                                    <p className="text-[9px] font-bold text-muted-foreground mb-1">Mechanical</p>
+                                    <pre className="text-[9px] font-mono text-muted-foreground bg-background p-2 rounded max-h-40 overflow-auto">{JSON.stringify(m.mechanical, null, 2)}</pre>
+                                  </div>
+                                )}
+                              </div>
                             </td>
                           </tr>
-                        ))}
+                        ) : null)}
                         {dbMessages.length === 0 && (
-                          <tr><td colSpan={4} className="px-2 py-4 text-center text-muted-foreground">Geen berichten</td></tr>
+                          <tr><td colSpan={10} className="px-2 py-4 text-center text-muted-foreground">Geen berichten</td></tr>
                         )}
                       </tbody>
                     </table>
