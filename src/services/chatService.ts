@@ -496,7 +496,8 @@ export const streamChat = async ({
   try {
     const sessionCtx = getSessionContext(request.sessionId);
     const systemPrompt = generateSystemPrompt(request.profile, sessionCtx);
-    const taskType = determineTaskType(request.message, sessionCtx);
+    const streamRouterDecision = buildRouterDecision(request.message, sessionCtx);
+    const taskType: TaskType = streamRouterDecision.intent_category === 'SLOW' ? 'deep' : 'chat';
     
     const response = await fetch(CHAT_URL, {
       method: 'POST',
