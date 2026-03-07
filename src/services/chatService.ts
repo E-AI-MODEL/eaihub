@@ -246,7 +246,8 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     const systemPrompt = generateSystemPrompt(request.profile, sessionCtx);
     
     // Determine model based on didactic conditions
-    const taskType = determineTaskType(request.message, sessionCtx);
+    const routerDecision = buildRouterDecision(request.message, sessionCtx);
+    const taskType = routerDecision.intent_category === 'SLOW' ? 'deep' as TaskType : 'chat' as TaskType;
     
     const response = await fetch(CHAT_URL, {
       method: 'POST',
