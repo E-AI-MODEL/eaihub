@@ -189,6 +189,7 @@ const AdminPanel = () => {
           <TabsList className="bg-secondary border border-border w-full overflow-x-auto flex justify-start">
             <TabsTrigger value="monitoring" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">System </span>Health</TabsTrigger>
             <TabsTrigger value="database" onClick={loadDbData} className="text-xs sm:text-sm whitespace-nowrap">Database</TabsTrigger>
+            <TabsTrigger value="pipeline" onClick={loadDbData} className="text-xs sm:text-sm whitespace-nowrap">Pipeline</TabsTrigger>
             <TabsTrigger value="storage" className="text-xs sm:text-sm whitespace-nowrap">Storage<span className="hidden sm:inline"> Inspector</span></TabsTrigger>
             <TabsTrigger value="actions" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">Admin </span>Actions</TabsTrigger>
             <TabsTrigger value="ssot" className="text-xs sm:text-sm whitespace-nowrap">SSOT<span className="hidden sm:inline"> Browser</span></TabsTrigger>
