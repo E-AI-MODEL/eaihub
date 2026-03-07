@@ -128,9 +128,6 @@ export interface MechanicalState {
   temperature: number;
   timestamp: string;
   repairAttempts?: number;
-  repairLog?: RepairLog;
-  supervisorLog?: SupervisorLog;
-  softValidationLog?: string[];
   logicGateBreach?: LogicGateBreach;
   routerDecision?: RouterDecision;
   semanticValidation?: SemanticValidation;
