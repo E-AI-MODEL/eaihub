@@ -107,7 +107,7 @@ function ssotHasCommand(commandId: string): boolean {
 export function healAnalysisToSSOT(
   analysis: EAIAnalysis,
   sessionId: string
-): { healed: EAIAnalysis; events: string[] } {
+): { healed: EAIAnalysis; events: string[]; ssotHealingCount: number; commandNullCount: number } {
   const events: string[] = [];
   const healed: EAIAnalysis = structuredClone(analysis);
 
