@@ -32,6 +32,7 @@ const AdminPanel = () => {
   const [dbMessages, setDbMessages] = useState<any[]>([]);
   const [dbFilter, setDbFilter] = useState('');
   const [dbLoading, setDbLoading] = useState(false);
+  const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
 
   // Load system data on mount
   useEffect(() => {
