@@ -140,7 +140,8 @@ Classificeer deze interactie. Let op:
 - Taakdichtheid (TD0-TD5): hoeveel doet de AI vs de leerling?
 - Cognitieve modus: hoe denkt de leerling?
 - SRL-fase: zelfregulerend leren status
-- Epistemische status: hoe betrouwbaar is de AI-output?`;
+- Epistemische status: hoe betrouwbaar is de AI-output?
+- Als een dimensie duidelijk op of nabij een grens ligt, geef dat aan via borderline_dimensions en vul secondary_bands waar relevant. Geef confidence alleen als globale schatting.`;
 
     console.log(`[eai-classify] Starting classification, profile: ${profile.subject}/${profile.level}`);
 
