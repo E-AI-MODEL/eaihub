@@ -200,7 +200,9 @@ export function getBand(bandId: string): RubricBand | undefined {
  */
 export function getFixForBand(bandId: string): string | null {
   const band = getBand(bandId);
-  return band?.fix || band?.fix_ref || null;
+  // fix_ref is the command reference (e.g. "/flits"), fix is descriptive text.
+  // Prefer fix_ref because healers and UI expect a command ID.
+  return band?.fix_ref || null;
 }
 
 /**

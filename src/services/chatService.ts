@@ -80,7 +80,13 @@ function updateSessionContext(sessionId: string, analysis: EAIAnalysis, profile:
 function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, sessionId: string, userId: string): number {
   if (!profile.currentNodeId || !profile.subject || !profile.level) return 0;
 
-  const pathId = `${profile.subject}_${profile.level}`.toUpperCase().replace(/\s/g, '');
+  // Look up curriculum path by subject+level instead of string construction
+  const path = CURRICULUM_PATHS.find(
+    p => p.subject.toLowerCase() === profile.subject!.toLowerCase() &&
+         p.level.toLowerCase() === profile.level!.toLowerCase()
+  );
+  const pathId = path?.id || `${profile.subject}_${profile.level}`.toUpperCase().replace(/\s/g, '');
+  
   const ctx = getSessionContext(sessionId);
   const turnCount = ctx.turn_count;
 
@@ -107,8 +113,7 @@ function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, se
     },
   }).catch(err => console.error('[Mastery] Update failed:', err));
 
-  // Calculate progress: count nodes with CHECKING or MASTERED status from localStorage
-  const path = CURRICULUM_PATHS.find(p => p.id === pathId);
+  // Calculate progress from localStorage mastery data
   if (!path) return 0;
   
   const masteryKey = `eai_mastery_local_${userId}_${pathId}`;
@@ -121,7 +126,6 @@ function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, se
     for (const entry of mastery.history || []) {
       if (entry.nodeId) completedNodes.add(entry.nodeId);
     }
-    // Progress = unique nodes with evidence / total nodes in path
     return Math.round((completedNodes.size / path.nodes.length) * 100);
   } catch {
     return 0;
