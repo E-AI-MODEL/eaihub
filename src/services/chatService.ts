@@ -993,6 +993,9 @@ function mergeEdgeAnalysis(
     active_fix: edgeAnalysis.active_fix !== undefined ? edgeAnalysis.active_fix : clientAnalysis.active_fix,
     active_flags: edgeAnalysis.active_flags || clientAnalysis.active_flags,
     reasoning: edgeAnalysis.reasoning || clientAnalysis.reasoning,
+    confidence: edgeAnalysis.confidence ?? clientAnalysis.confidence,
+    secondary_bands: edgeAnalysis.secondary_bands ?? clientAnalysis.secondary_bands,
+    borderline_dimensions: edgeAnalysis.borderline_dimensions ?? clientAnalysis.borderline_dimensions,
   };
 }
 
