@@ -307,76 +307,7 @@ export function epistemicGuard(
   };
 }
 
-// ============= SEMANTIC VALIDATION (G-FACTOR) =============
 
-/**
- * Calculate G-Factor (Semantic Integrity score)
- * Based on alignment between detected bands and expected SSOT patterns
- */
-export function calculateSemanticValidation(
-  analysis: EAIAnalysis,
-  sessionId: string
-): SemanticValidation {
-  const penalties: string[] = [];
-  let gFactor = 1.0;
-
-  // Check for missing primary dimensions
-  if (!analysis.coregulation_bands?.length) {
-    penalties.push('MISSING_COREG_BANDS');
-    gFactor -= 0.15;
-  }
-
-  if (!analysis.process_phases?.length) {
-    penalties.push('MISSING_PROCESS_PHASES');
-    gFactor -= 0.15;
-  }
-
-  if (!analysis.task_densities?.length) {
-    penalties.push('MISSING_TASK_DENSITIES');
-    gFactor -= 0.15;
-  }
-
-  // Check for missing scaffolding
-  if (!analysis.scaffolding) {
-    penalties.push('MISSING_SCAFFOLDING');
-    gFactor -= 0.1;
-  }
-
-  // Check for unknown epistemic status
-  if (analysis.epistemic_status === 'ONBEKEND') {
-    penalties.push('UNKNOWN_EPISTEMIC');
-    gFactor -= 0.1;
-  }
-
-  // Check for missing active fix when needed
-  const tdLevel = analysis.task_densities?.[0] 
-    ? parseInt(analysis.task_densities[0].replace('TD', '')) 
-    : 0;
-  if (tdLevel >= 4 && !analysis.active_fix) {
-    penalties.push('HIGH_TD_NO_FIX');
-    gFactor -= 0.1;
-  }
-
-  // Determine alignment status
-  const alignment_status: 'OPTIMAL' | 'DRIFT' | 'CRITICAL' = 
-    gFactor >= 0.8 ? 'OPTIMAL' :
-    gFactor >= 0.5 ? 'DRIFT' : 'CRITICAL';
-
-  pushTrace(sessionId, {
-    severity: alignment_status === 'OPTIMAL' ? 'INFO' : 
-              alignment_status === 'DRIFT' ? 'WARNING' : 'ERROR',
-    source: 'VALIDATOR',
-    step: 'SCHEMA_VALIDATE',
-    message: `G-Factor: ${(gFactor * 100).toFixed(0)}% (${alignment_status})`,
-    data: { gFactor, penalties, alignment_status },
-  });
-
-  return {
-    gFactor: Math.max(0, Math.min(1, gFactor)),
-    penalties,
-    alignment_status,
-  };
-}
 
 // ============= COMMAND FUZZY MAP =============
 
