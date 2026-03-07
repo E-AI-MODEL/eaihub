@@ -548,6 +548,12 @@ const AdminPanel = () => {
                   const specCount = epistemics.filter((e: string) => e === 'SPECULATIE').length;
                   const onbekendCount = epistemics.filter((e: string) => e === 'ONBEKEND').length;
 
+                  // Nuance field aggregates
+                  const withConfidence = withAnalysis.filter((m: any) => m.analysis?.confidence != null);
+                  const avgConfidence = withConfidence.length > 0 ? withConfidence.reduce((sum: number, m: any) => sum + m.analysis.confidence, 0) / withConfidence.length : null;
+                  const withBorderline = withAnalysis.filter((m: any) => (m.analysis?.borderline_dimensions?.length ?? 0) > 0);
+                  const withSecondary = withAnalysis.filter((m: any) => m.analysis?.secondary_bands && Object.keys(m.analysis.secondary_bands).length > 0);
+
                   const guardLabels = withMech.map((m: any) => m.mechanical?.epistemicGuardResult?.label).filter(Boolean);
                   const guardOk = guardLabels.filter((l: string) => l === 'OK').length;
                   const guardCaution = guardLabels.filter((l: string) => l === 'CAUTION').length;
