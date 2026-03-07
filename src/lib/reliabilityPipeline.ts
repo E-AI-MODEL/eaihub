@@ -406,7 +406,7 @@ export function executePipeline(
   });
 
   // Step 1: SSOT Healing
-  const { healed, events: healingEvents } = healAnalysisToSSOT(analysis, sessionId);
+  const { healed, events: healingEvents, ssotHealingCount, commandNullCount } = healAnalysisToSSOT(analysis, sessionId);
 
   // Step 2: Epistemic Guard
   const { guarded, result: epistemicResult } = epistemicGuard(healed, sessionId);
