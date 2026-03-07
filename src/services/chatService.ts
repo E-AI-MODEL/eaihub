@@ -119,20 +119,37 @@ const lPatterns = getLearnerObsPatterns('L_LeercontinuiteitTransfer');
 const bPatterns = getLearnerObsPatterns('B_BiasCorrectie');
 
 // ═══ DIDACTISCH-GEDREVEN MODEL ROUTER ═══
-// Bepaalt taskType op basis van pedagogische condities
 type TaskType = 'chat' | 'deep' | 'image';
 
-function determineTaskType(message: string, sessionContext: SessionContext): TaskType {
-  // Image wordt NIET door de leerling getriggerd — alleen via [BEELD:] tag in AI-output
-  
-  // K3 metacognitie + voldoende conversatie-diepte → deep model
+import type { RouterDecision } from '@/types';
+
+function buildRouterDecision(message: string, sessionContext: SessionContext): RouterDecision {
   const lastK = sessionContext.knowledge_trajectory.length > 0
     ? sessionContext.knowledge_trajectory[sessionContext.knowledge_trajectory.length - 1]
     : null;
-  if (lastK === 'K3' && sessionContext.turn_count > 3) return 'deep';
-  
+
+  // K3 metacognitie + voldoende conversatie-diepte → deep model
+  if (lastK === 'K3' && sessionContext.turn_count > 3) {
+    return {
+      target_model: 'gemini-2.5-pro',
+      thinking_budget: 8192,
+      intent_category: 'SLOW',
+      reasoning: `K3 metacognitie + turn_count=${sessionContext.turn_count} > 3 → deep model voor complexe redenering`,
+    };
+  }
+
   // Default: snelle flash voor standaard didactiek
-  return 'chat';
+  return {
+    target_model: 'gemini-3-flash-preview',
+    thinking_budget: 1024,
+    intent_category: 'FAST',
+    reasoning: `${lastK || 'K0'} kennistype, turn_count=${sessionContext.turn_count} → flash voor standaard didactiek`,
+  };
+}
+
+function determineTaskType(message: string, sessionContext: SessionContext): TaskType {
+  const decision = buildRouterDecision(message, sessionContext);
+  return decision.intent_category === 'SLOW' ? 'deep' : 'chat';
 }
 
 // ═══ [BEELD:] TAG POST-PROCESSING ═══
