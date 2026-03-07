@@ -1,81 +1,82 @@
 
 
-# Fix: Command Leaking + Repetitieve Didactische Fixes
+## Onderzoeksresultaten
 
-## Twee Problemen
+### Wat betekent "repair" nu precies?
 
-### 1. `/intro` lekt door in de chat
-De AI schrijft letterlijk `/intro` in het antwoord. De huidige `sanitizeForPresentation` in `MessageBubble.tsx` vangt alleen `/command` aan het begin van een regel (`^\/\w+`), maar de AI schrijft het soms midden in een zin. Bovendien: we moeten de AI ook instrueren om dit nooit te doen.
+**Bron:** `healAnalysisToSSOT()` in `reliabilityPipeline.ts:107-225`. Dit is de enige plek waar healing-events ontstaan.
 
-### 2. Statische fixes zijn repetitief
-In `ssot_v15.json` staat bij `/intro` altijd dezelfde tekst: *"Noem 3 begrippen die je met dit onderwerp associeert."* Elke keer dat de AI `/intro` uitvoert, krijgt de leerling exact dezelfde vraag. Na 3x is dat dodelijk voor de motivatie.
+**5 event-prefixes bestaan al:**
+| Prefix | Wat het doet | Categorie |
+|---|---|---|
+| `PRUNE_UNKNOWN_BAND:*` | Onbekende coregulation_band verwijderd | SSOT healing |
+| `PRUNE_UNKNOWN_PHASE:*` | Onbekende process_phase verwijderd | SSOT healing |
+| `PRUNE_UNKNOWN_TD:*` | Onbekende task_density verwijderd | SSOT healing |
+| `PRUNE_UNKNOWN_SECONDARY:*` | Onbekende secondary_dimension verwijderd | SSOT healing |
+| `NULL_UNKNOWN_COMMAND:*` | Ongeldige active_fix genulled | Command null |
 
-## Oplossing
+Er is **geen** parse-repair in deze functie — dat zou elders zitten (edge function JSON parse). `parseRepairCount` is dus een reserved slot voor later.
 
-De beste aanpak is **tweeledig**: de AI instrueren om het nooit te doen, en tegelijk de sanitizer versterken als vangnet.
+### Wat wordt nu opgeslagen?
 
-### A. System Prompt aanscherpen (`ssotHelpers.ts`)
+In `MechanicalState` (types/index.ts:123-140):
+- `repairAttempts` — binary (0 of 1), niet het echte aantal
+- `healingEventCount` — totaal aantal events, zonder categorisatie
 
-In de `generateSystemPrompt` functie twee dingen toevoegen:
+### Welke consumers lezen dit?
 
-1. **Presentation Guard** instructie:
-```
-## PRESENTATIE REGELS (KRITIEK)
-- Schrijf NOOIT slash-commando's (/intro, /devil, /schema, etc.) in je antwoord aan de leerling.
-- Slash-commando's zijn interne instructies. De leerling mag ze nooit zien.
-- Gebruik GEEN meta-taal zoals 'inventarisatie', 'diagnose', 'strategie', 'volgens mijn analyse'.
-```
+| Bestand | Veld | Wat het toont |
+|---|---|---|
+| `MessageBubble.tsx:35,160` | `repairAttempts` | "X repair(s)" badge |
+| `TechReport.tsx:51,369` | `repairAttempts` | "HEALED" status + count |
+| `TeacherCockpit.tsx:329` | `repairAttempts` | "Repairs" metric cell |
+| `AdminPanel.tsx:468,536,670` | `repairAttempts` + `healingEventCount` | Tabel + aggregatie |
 
-2. **Variatie-instructie** bij de commando-sectie:
-```
-## BESCHIKBARE COMMANDO'S
-[bestaande lijst]
+**Conclusie:** Alle consumers lezen `repairAttempts` als primair veld. Alleen AdminPanel leest ook `healingEventCount`. Nieuwe velden toevoegen breekt niets.
 
-BELANGRIJK: Wanneer je een commando-actie uitvoert, varieer dan ALTIJD je formulering.
-Gebruik het commando als richtlijn voor het TYPE actie, niet als letterlijke tekst.
-Voorbeelden van variatie bij /intro:
-- "Welke 3 dingen weet je al over [onderwerp]?"
-- "Stel je voor dat je [onderwerp] moet uitleggen aan een vriend. Waar begin je?"
-- "Wat heb je eerder geleerd dat te maken heeft met [onderwerp]?"
-```
+---
 
-### B. Sanitizer versterken (`MessageBubble.tsx`)
+## Patchvoorstel
 
-De regex `^\/\w+` matcht alleen regelstart. Aanpassen naar een bredere vanger:
+**Doel:** Repair van grove ja/nee-indicatie naar bruikbare observability, zonder bestaande UI te breken.
+
+### Bestand 1: `src/types/index.ts`
+
+3 optionele velden toevoegen aan `MechanicalState` (na regel 139):
 
 ```typescript
-const FORBIDDEN_PATTERNS = [
-  /\/?(?:intro|devil|schema|beeld|flits|chunk|checkin|fase_check|hint|anchor|reflectie|model|exit|quiz|meta|pauze|recap)\b/gi,
-  // ... bestaande patronen
-];
+ssotHealingCount?: number;
+commandNullCount?: number;
+parseRepairCount?: number;
 ```
 
-Dit vangt `/intro`, maar ook als de AI het zonder slash schrijft midden in een zin.
+`repairAttempts` en `healingEventCount` blijven als backwards-compatible aggregaat.
 
-### C. Fix-teksten dynamischer maken in prompt (`ssotHelpers.ts`)
+### Bestand 2: `src/lib/reliabilityPipeline.ts`
 
-In de rubric-tabel die naar de AI wordt gestuurd, de statische fix-tekst vervangen door een variatie-instructie. In plaats van:
-
-```
-| P1 | Orientatie | /intro | Activeer voorkennis |
-```
-
-Wordt het:
-
-```
-| P1 | Orientatie | Activeer voorkennis (varieer aanpak: vraag begrippen, scenario, of real-world connectie) |
+**A.** Return type van `healAnalysisToSSOT()` uitbreiden:
+```typescript
+): { healed: EAIAnalysis; events: string[]; ssotHealingCount: number; commandNullCount: number }
 ```
 
-Dit betekent dat de commando-kolom in de prompt-tabel de fix-naam weglaat en in plaats daarvan het didactisch principe met variatie-hint toont.
+Na de bestaande event-logica, events categoriseren op prefix:
+```typescript
+const ssotHealingCount = events.filter(e => e.startsWith('PRUNE_UNKNOWN_')).length;
+const commandNullCount = events.filter(e => e.startsWith('NULL_UNKNOWN_COMMAND')).length;
+```
 
-## Bestanden die worden gewijzigd
+**B.** In `executePipeline()` (regel 406): destructure de nieuwe tellers en schrijf ze naar `enhancedMechanical`:
+```typescript
+const { healed, events: healingEvents, ssotHealingCount, commandNullCount } = healAnalysisToSSOT(analysis, sessionId);
 
-1. **`src/utils/ssotHelpers.ts`** -- Presentation Guard toevoegen aan system prompt, fix-kolom aanpassen naar variatie-instructies
-2. **`src/components/MessageBubble.tsx`** -- Sanitizer regex verbreden als vangnet
+// In enhancedMechanical:
+ssotHealingCount,
+commandNullCount,
+parseRepairCount: 0,
+```
 
-## Wat niet verandert
-
-- `ssot_v15.json` blijft ongewijzigd (dat is de bron van waarheid)
-- De interne analyse in `chatService.ts` blijft `/commands` gebruiken voor detectie
-- De toolbox in `LeskaartPanel` stuurt nog steeds `/commands` naar de AI -- die worden alleen niet getoond
+### Omvang
+- 2 bestanden, geen migraties, geen UI-wijzigingen
+- Bestaande `repairAttempts` en `healingEventCount` blijven ongewijzigd
+- Nieuwe velden zijn direct beschikbaar voor toekomstige Admin/Teacher UI
 
