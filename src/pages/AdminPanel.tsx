@@ -266,10 +266,10 @@ const AdminPanel = () => {
                       <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
                         <div className="flex items-center gap-3">
                           <Terminal className="w-4 h-4 text-primary" />
-                          <span className="text-sm text-foreground">API Key</span>
+                          <span className="text-sm text-foreground">Gateway bereikbaar</span>
                         </div>
-                        <span className={`text-xs font-mono ${systemHealth.telemetry.apiKeyConfigured ? 'text-green-500' : 'text-red-500'}`}>
-                          {systemHealth.telemetry.apiKeyConfigured ? 'CONFIGURED' : 'MISSING'}
+                        <span className={`text-xs font-mono ${systemHealth.telemetry.edgeFunctionReachable ? 'text-green-500' : 'text-yellow-500'}`}>
+                          {systemHealth.telemetry.edgeFunctionReachable ? 'REACHABLE' : 'UNREACHABLE'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
