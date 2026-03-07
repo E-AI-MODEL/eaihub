@@ -25,6 +25,7 @@ import { getNodeById, CURRICULUM_PATHS } from '@/data/curriculum';
 import { updateMastery } from '@/services/masteryService';
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-chat`;
+const CLASSIFY_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-classify`;
 const HISTORY_LIMIT = 10;
 
 interface ChatMessage {
