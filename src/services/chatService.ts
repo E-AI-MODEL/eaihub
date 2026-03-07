@@ -301,6 +301,12 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       sessionHistory.set(request.sessionId, history);
 
       const rawAnalysis = generateAnalysis(request.message, fullText, request.profile);
+      const imageRouterDecision: RouterDecision = {
+        target_model: MODEL_NAMES.image,
+        thinking_budget: 0,
+        intent_category: 'FAST',
+        reasoning: 'Image generation via [BEELD:] tag',
+      };
       const rawMechanical: MechanicalState = {
         latencyMs,
         inputTokens: request.message.length * 2,
@@ -308,6 +314,7 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
         model: MODEL_NAMES.image,
         temperature: 0.8,
         timestamp: new Date().toISOString(),
+        routerDecision: imageRouterDecision,
       };
       const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
       updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
