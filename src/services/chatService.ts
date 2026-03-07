@@ -426,8 +426,22 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     ].slice(-HISTORY_LIMIT);
     sessionHistory.set(request.sessionId, history);
 
-    // Generate initial analysis
-    const rawAnalysis = generateAnalysis(request.message, fullText, request.profile);
+    // Generate client-side analysis as baseline/fallback
+    const clientAnalysis = generateAnalysis(request.message, fullText, request.profile);
+    
+    // Attempt edge classification (non-blocking upgrade)
+    let analysisSource: 'edge' | 'client' = 'client';
+    let finalAnalysis = clientAnalysis;
+    
+    const edgeResult = await attemptEdgeClassification(
+      request.message, fullText, request.profile, request.sessionId
+    );
+    
+    if (edgeResult) {
+      finalAnalysis = mergeEdgeAnalysis(edgeResult.analysis, clientAnalysis);
+      analysisSource = 'edge';
+    }
+    
     const rawMechanical: MechanicalState = {
       latencyMs,
       inputTokens: request.message.length * 2,
@@ -436,9 +450,10 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       temperature: taskType === 'deep' ? 0.5 : 0.7,
       timestamp: new Date().toISOString(),
       routerDecision,
+      analysisSource,
     };
 
-    const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
+    const pipelineResult = executePipeline(finalAnalysis, rawMechanical, request.sessionId);
     updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
 
     // Update mastery state based on analysis — returns progress for session sync
