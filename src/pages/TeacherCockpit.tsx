@@ -87,7 +87,7 @@ const TeacherCockpit = () => {
           <button onClick={() => navigate('/')} className="p-1.5 text-slate-500 hover:text-slate-300 transition-colors">
             <Home className="w-4 h-4" />
           </button>
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Teacher Cockpit</span>
+          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Docentencockpit</span>
           <div className="flex items-center gap-1.5 ml-2">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-[10px] font-mono text-emerald-400">{onlineSessions.length} online</span>
