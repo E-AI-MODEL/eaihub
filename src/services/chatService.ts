@@ -25,6 +25,7 @@ import { getNodeById, CURRICULUM_PATHS } from '@/data/curriculum';
 import { updateMastery } from '@/services/masteryService';
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-chat`;
+const CLASSIFY_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-classify`;
 const HISTORY_LIMIT = 10;
 
 interface ChatMessage {
@@ -425,8 +426,22 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     ].slice(-HISTORY_LIMIT);
     sessionHistory.set(request.sessionId, history);
 
-    // Generate initial analysis
-    const rawAnalysis = generateAnalysis(request.message, fullText, request.profile);
+    // Generate client-side analysis as baseline/fallback
+    const clientAnalysis = generateAnalysis(request.message, fullText, request.profile);
+    
+    // Attempt edge classification (non-blocking upgrade)
+    let analysisSource: 'edge' | 'client' = 'client';
+    let finalAnalysis = clientAnalysis;
+    
+    const edgeResult = await attemptEdgeClassification(
+      request.message, fullText, request.profile, request.sessionId
+    );
+    
+    if (edgeResult) {
+      finalAnalysis = mergeEdgeAnalysis(edgeResult.analysis, clientAnalysis);
+      analysisSource = 'edge';
+    }
+    
     const rawMechanical: MechanicalState = {
       latencyMs,
       inputTokens: request.message.length * 2,
@@ -435,9 +450,10 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       temperature: taskType === 'deep' ? 0.5 : 0.7,
       timestamp: new Date().toISOString(),
       routerDecision,
+      analysisSource,
     };
 
-    const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
+    const pipelineResult = executePipeline(finalAnalysis, rawMechanical, request.sessionId);
     updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
 
     // Update mastery state based on analysis — returns progress for session sync
@@ -575,8 +591,22 @@ export const streamChat = async ({
     ].slice(-HISTORY_LIMIT);
     sessionHistory.set(request.sessionId, history);
 
-    // Generate initial analysis and run pipeline
-    const rawAnalysis = generateAnalysis(request.message, fullText, request.profile);
+    // Generate client-side analysis as baseline/fallback
+    const clientAnalysis = generateAnalysis(request.message, fullText, request.profile);
+    
+    // Attempt edge classification (non-blocking upgrade)
+    let streamAnalysisSource: 'edge' | 'client' = 'client';
+    let streamFinalAnalysis = clientAnalysis;
+    
+    const streamEdgeResult = await attemptEdgeClassification(
+      request.message, fullText, request.profile, request.sessionId
+    );
+    
+    if (streamEdgeResult) {
+      streamFinalAnalysis = mergeEdgeAnalysis(streamEdgeResult.analysis, clientAnalysis);
+      streamAnalysisSource = 'edge';
+    }
+    
     const rawMechanical: MechanicalState = {
       latencyMs,
       inputTokens: request.message.length * 2,
@@ -585,10 +615,11 @@ export const streamChat = async ({
       temperature: taskType === 'deep' ? 0.5 : 0.7,
       timestamp: new Date().toISOString(),
       routerDecision: streamRouterDecision,
+      analysisSource: streamAnalysisSource,
     };
     
     // Execute reliability pipeline
-    const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
+    const pipelineResult = executePipeline(streamFinalAnalysis, rawMechanical, request.sessionId);
 
     // Update mastery state based on analysis — returns progress for session sync
     const masteryProgress = triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId, request.userId);
@@ -883,6 +914,86 @@ function checkLogicGates(knowledgeType: string): { maxTD: string | null; enforce
   }
   
   return { maxTD: null, enforcement: null };
+}
+
+// ============= EDGE CLASSIFICATION (STAP 1) =============
+
+interface EdgeClassifyResult {
+  analysis: Partial<EAIAnalysis>;
+  source: 'edge';
+  latencyMs: number;
+}
+
+async function attemptEdgeClassification(
+  userMessage: string,
+  aiResponse: string,
+  profile: LearnerProfile,
+  sessionId: string
+): Promise<EdgeClassifyResult | null> {
+  try {
+    const ctx = getSessionContext(sessionId);
+    const response = await fetch(CLASSIFY_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({
+        userMessage,
+        aiResponse,
+        profile,
+        sessionContext: {
+          topics_covered: ctx.topics_covered,
+          turn_count: ctx.turn_count,
+          current_topic: ctx.current_topic,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      console.warn(`[ChatService] Edge classify failed: HTTP ${response.status}`);
+      await response.text(); // consume body
+      return null;
+    }
+
+    const data = await response.json();
+    if (!data.analysis) {
+      console.warn('[ChatService] Edge classify returned no analysis');
+      return null;
+    }
+
+    console.log(`[ChatService] Edge classify success in ${data.latencyMs}ms, source: edge`);
+    return {
+      analysis: data.analysis,
+      source: 'edge',
+      latencyMs: data.latencyMs,
+    };
+  } catch (err) {
+    console.warn('[ChatService] Edge classify error, falling back to client:', err);
+    return null;
+  }
+}
+
+/**
+ * Merge edge analysis into full EAIAnalysis, using client-side as base
+ * Edge provides core classifications; client fills remaining fields (scaffolding, profile, etc.)
+ */
+function mergeEdgeAnalysis(
+  edgeAnalysis: Partial<EAIAnalysis>,
+  clientAnalysis: EAIAnalysis
+): EAIAnalysis {
+  return {
+    ...clientAnalysis,
+    process_phases: edgeAnalysis.process_phases || clientAnalysis.process_phases,
+    coregulation_bands: edgeAnalysis.coregulation_bands || clientAnalysis.coregulation_bands,
+    task_densities: edgeAnalysis.task_densities || clientAnalysis.task_densities,
+    cognitive_mode: (edgeAnalysis.cognitive_mode as any) || clientAnalysis.cognitive_mode,
+    srl_state: (edgeAnalysis.srl_state as any) || clientAnalysis.srl_state,
+    epistemic_status: (edgeAnalysis.epistemic_status as any) || clientAnalysis.epistemic_status,
+    active_fix: edgeAnalysis.active_fix !== undefined ? edgeAnalysis.active_fix : clientAnalysis.active_fix,
+    active_flags: edgeAnalysis.active_flags || clientAnalysis.active_flags,
+    reasoning: edgeAnalysis.reasoning || clientAnalysis.reasoning,
+  };
 }
 
 // ============= MAIN ANALYSIS FUNCTION =============

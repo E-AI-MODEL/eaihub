@@ -140,6 +140,7 @@ export interface MechanicalState {
   ssotHealingCount?: number;
   commandNullCount?: number;
   parseRepairCount?: number;
+  analysisSource?: 'edge' | 'client';
 }
 
 export interface EAIAnalysis {
