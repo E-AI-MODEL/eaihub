@@ -614,7 +614,53 @@ const AdminPanel = () => {
                             <Badge className="text-[9px] bg-yellow-500/20 text-yellow-400">CAUTION: {guardCaution}</Badge>
                             <Badge className="text-[9px] bg-red-500/20 text-red-400">VERIFY: {guardVerify}</Badge>
                           </div>
-                          {guardLabels.length === 0 && <p className="text-xs text-muted-foreground mt-2">Geen guard data (pas beschikbaar na patch 2 deploy)</p>}
+                          {guardLabels.length === 0 && <p className="text-xs text-muted-foreground mt-2">Geen guard data</p>}
+                        </CardContent>
+                      </Card>
+
+                      {/* Granulaire repair tellers (step 2 roadmap) */}
+                      <Card className="col-span-2">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-xs uppercase tracking-wider">Granulaire Repair Tellers</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="outline" className="text-[9px]">SSOT Heals: {withMech.reduce((s: number, m: any) => s + (m.mechanical?.ssotHealingCount ?? 0), 0)}</Badge>
+                            <Badge variant="outline" className="text-[9px]">Cmd Nulls: {withMech.reduce((s: number, m: any) => s + (m.mechanical?.commandNullCount ?? 0), 0)}</Badge>
+                            <Badge variant="outline" className="text-[9px]">Parse Repairs: {withMech.reduce((s: number, m: any) => s + (m.mechanical?.parseRepairCount ?? 0), 0)}</Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Classificatie nuance (step 3-4 roadmap) */}
+                      <Card className="col-span-2">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-xs uppercase tracking-wider">Classificatie Nuance (LLM)</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {(() => {
+                            const withConf = withAnalysis.filter((m: any) => m.analysis?.confidence != null);
+                            const avgConf = withConf.length > 0
+                              ? withConf.reduce((s: number, m: any) => s + (m.analysis?.confidence ?? 0), 0) / withConf.length
+                              : null;
+                            const borderlineCount = withAnalysis.filter((m: any) => (m.analysis?.borderline_dimensions?.length ?? 0) > 0).length;
+                            return (
+                              <div className="flex flex-wrap gap-2">
+                                <Badge variant="outline" className="text-[9px]">
+                                  Gem. Confidence: {avgConf !== null ? `${(avgConf * 100).toFixed(0)}%` : '—'}
+                                </Badge>
+                                <Badge variant="outline" className="text-[9px]">
+                                  Borderline: {borderlineCount} van {withAnalysis.length}
+                                </Badge>
+                                <Badge variant="outline" className="text-[9px]">
+                                  LLM Classified: {withConf.length}
+                                </Badge>
+                              </div>
+                            );
+                          })()}
+                          {withAnalysis.filter((m: any) => m.analysis?.confidence != null).length === 0 && (
+                            <p className="text-xs text-muted-foreground mt-2">Geen LLM classificatie data (verschijnt na eerste gesprek)</p>
+                          )}
                         </CardContent>
                       </Card>
                     </>
