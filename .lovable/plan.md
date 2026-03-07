@@ -45,10 +45,10 @@ Alle inhoudelijke validatie (SSOT healing, G-factor, logic gates, command fuzzy-
 
 ### Stap 3 — EAIAnalysis uitbreiden met nuancevelden
 
-Velden als `confidence`, `secondaryBand`, `borderline`, `gateReadiness`.
-Pas zinvol nu de producer rijker is en validatie opgeschoond.
+Optionele velden: `confidence`, `secondary_bands`, `borderline_dimensions`.
+Ontwerp uitgewerkt in `.lovable/stap3.md`.
 
-**Status: klaar om te ontwerpen — eerst ontwerpvoorstel uitwerken**
+**Status: ontwerp goedgekeurd — klaar voor implementatie**
 
 ### Stap 4 — UI aanpassen
 
