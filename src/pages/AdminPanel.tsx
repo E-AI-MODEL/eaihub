@@ -704,6 +704,8 @@ const AdminPanel = () => {
                               <td className="px-2 py-1.5">{(mech?.healingEventCount ?? 0) > 0 ? <Badge className="text-[8px] bg-orange-500/20 text-orange-400">{mech.healingEventCount}</Badge> : '0'}</td>
                               <td className="px-2 py-1.5">{anal?.epistemic_status ? <Badge variant="outline" className="text-[8px]">{anal.epistemic_status}</Badge> : <span className="text-muted-foreground">—</span>}</td>
                               <td className="px-2 py-1.5">{mech?.epistemicGuardResult?.label ? <Badge variant="outline" className={`text-[8px] ${mech.epistemicGuardResult.label === 'OK' ? 'border-green-500/50 text-green-400' : mech.epistemicGuardResult.label === 'CAUTION' ? 'border-yellow-500/50 text-yellow-400' : 'border-red-500/50 text-red-400'}`}>{mech.epistemicGuardResult.label}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{anal?.confidence != null ? <span className={`text-[9px] font-mono ${anal.confidence >= 0.7 ? 'text-green-500' : anal.confidence >= 0.4 ? 'text-yellow-500' : 'text-red-500'}`}>{(anal.confidence * 100).toFixed(0)}%</span> : <span className="text-muted-foreground">—</span>}</td>
+                              <td className="px-2 py-1.5">{anal?.borderline_dimensions?.length > 0 ? <Badge variant="outline" className="text-[8px] border-amber-500/40 text-amber-400">{anal.borderline_dimensions.join(', ')}</Badge> : <span className="text-muted-foreground">—</span>}</td>
                             </tr>
                           );
                         })}
