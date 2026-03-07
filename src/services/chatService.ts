@@ -443,8 +443,6 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     const masteryProgress = triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId, request.userId);
 
     // Persist messages to DB (fire-and-forget)
-
-    // Persist messages to DB (fire-and-forget)
     persistChatMessage({ sessionId: request.sessionId, role: 'user', content: request.message });
     persistChatMessage({
       sessionId: request.sessionId,
