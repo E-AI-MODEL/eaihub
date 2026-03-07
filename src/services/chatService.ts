@@ -504,6 +504,9 @@ export const streamChat = async ({
     // Execute reliability pipeline
     const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
 
+    // Update mastery state based on analysis
+    triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId);
+
     // Post-process [BEELD:] tags in AI output
     const processedText = await processBeeldTags(fullText, request.sessionId, request.profile);
 
