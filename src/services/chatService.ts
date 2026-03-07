@@ -76,8 +76,9 @@ function updateSessionContext(sessionId: string, analysis: EAIAnalysis, profile:
 
 // ═══ MASTERY STATE-MACHINE UPDATE ═══
 // Veilige fase 1: INTRO → WORKING → CHECKING (geen auto-MASTERED)
-function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, sessionId: string, userId: string) {
-  if (!profile.currentNodeId || !profile.subject || !profile.level) return;
+// Returns progress percentage (0-100) for session sync
+function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, sessionId: string, userId: string): number {
+  if (!profile.currentNodeId || !profile.subject || !profile.level) return 0;
 
   const pathId = `${profile.subject}_${profile.level}`.toUpperCase().replace(/\s/g, '');
   const ctx = getSessionContext(sessionId);
@@ -105,6 +106,26 @@ function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, se
       score: analysis.scaffolding?.agency_score ?? undefined,
     },
   }).catch(err => console.error('[Mastery] Update failed:', err));
+
+  // Calculate progress: count nodes with CHECKING or MASTERED status from localStorage
+  const path = CURRICULUM_PATHS.find(p => p.id === pathId);
+  if (!path) return 0;
+  
+  const masteryKey = `eai_mastery_local_${userId}_${pathId}`;
+  const stored = localStorage.getItem(masteryKey);
+  if (!stored) return 0;
+  
+  try {
+    const mastery = JSON.parse(stored);
+    const completedNodes = new Set<string>();
+    for (const entry of mastery.history || []) {
+      if (entry.nodeId) completedNodes.add(entry.nodeId);
+    }
+    // Progress = unique nodes with evidence / total nodes in path
+    return Math.round((completedNodes.size / path.nodes.length) * 100);
+  } catch {
+    return 0;
+  }
 }
 
 // Cache learner observation patterns from SSOT v15 for all 10 dimensions
@@ -119,20 +140,37 @@ const lPatterns = getLearnerObsPatterns('L_LeercontinuiteitTransfer');
 const bPatterns = getLearnerObsPatterns('B_BiasCorrectie');
 
 // ═══ DIDACTISCH-GEDREVEN MODEL ROUTER ═══
-// Bepaalt taskType op basis van pedagogische condities
 type TaskType = 'chat' | 'deep' | 'image';
 
-function determineTaskType(message: string, sessionContext: SessionContext): TaskType {
-  // Image wordt NIET door de leerling getriggerd — alleen via [BEELD:] tag in AI-output
-  
-  // K3 metacognitie + voldoende conversatie-diepte → deep model
+import type { RouterDecision } from '@/types';
+
+function buildRouterDecision(message: string, sessionContext: SessionContext): RouterDecision {
   const lastK = sessionContext.knowledge_trajectory.length > 0
     ? sessionContext.knowledge_trajectory[sessionContext.knowledge_trajectory.length - 1]
     : null;
-  if (lastK === 'K3' && sessionContext.turn_count > 3) return 'deep';
-  
+
+  // K3 metacognitie + voldoende conversatie-diepte → deep model
+  if (lastK === 'K3' && sessionContext.turn_count > 3) {
+    return {
+      target_model: 'gemini-2.5-pro',
+      thinking_budget: 8192,
+      intent_category: 'SLOW',
+      reasoning: `K3 metacognitie + turn_count=${sessionContext.turn_count} > 3 → deep model voor complexe redenering`,
+    };
+  }
+
   // Default: snelle flash voor standaard didactiek
-  return 'chat';
+  return {
+    target_model: 'gemini-3-flash-preview',
+    thinking_budget: 1024,
+    intent_category: 'FAST',
+    reasoning: `${lastK || 'K0'} kennistype, turn_count=${sessionContext.turn_count} → flash voor standaard didactiek`,
+  };
+}
+
+function determineTaskType(message: string, sessionContext: SessionContext): TaskType {
+  const decision = buildRouterDecision(message, sessionContext);
+  return decision.intent_category === 'SLOW' ? 'deep' : 'chat';
 }
 
 // ═══ [BEELD:] TAG POST-PROCESSING ═══
@@ -229,7 +267,8 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     const systemPrompt = generateSystemPrompt(request.profile, sessionCtx);
     
     // Determine model based on didactic conditions
-    const taskType = determineTaskType(request.message, sessionCtx);
+    const routerDecision = buildRouterDecision(request.message, sessionCtx);
+    const taskType = routerDecision.intent_category === 'SLOW' ? 'deep' as TaskType : 'chat' as TaskType;
     
     const response = await fetch(CHAT_URL, {
       method: 'POST',
@@ -283,6 +322,12 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       sessionHistory.set(request.sessionId, history);
 
       const rawAnalysis = generateAnalysis(request.message, fullText, request.profile);
+      const imageRouterDecision: RouterDecision = {
+        target_model: MODEL_NAMES.image,
+        thinking_budget: 0,
+        intent_category: 'FAST',
+        reasoning: 'Image generation via [BEELD:] tag',
+      };
       const rawMechanical: MechanicalState = {
         latencyMs,
         inputTokens: request.message.length * 2,
@@ -290,6 +335,7 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
         model: MODEL_NAMES.image,
         temperature: 0.8,
         timestamp: new Date().toISOString(),
+        routerDecision: imageRouterDecision,
       };
       const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
       updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
@@ -383,13 +429,14 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       model: MODEL_NAMES[taskType],
       temperature: taskType === 'deep' ? 0.5 : 0.7,
       timestamp: new Date().toISOString(),
+      routerDecision,
     };
 
     const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
     updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
 
-    // Update mastery state based on analysis
-    triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId, request.userId);
+    // Update mastery state based on analysis — returns progress for session sync
+    const masteryProgress = triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId, request.userId);
 
     // Persist messages to DB (fire-and-forget)
 
@@ -412,6 +459,7 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       analysis: pipelineResult.analysis,
       mechanical: pipelineResult.mechanical,
       auditId: `audit_${Date.now()}`,
+      progress: masteryProgress,
     };
 
   } catch (error) {
@@ -449,7 +497,8 @@ export const streamChat = async ({
   try {
     const sessionCtx = getSessionContext(request.sessionId);
     const systemPrompt = generateSystemPrompt(request.profile, sessionCtx);
-    const taskType = determineTaskType(request.message, sessionCtx);
+    const streamRouterDecision = buildRouterDecision(request.message, sessionCtx);
+    const taskType: TaskType = streamRouterDecision.intent_category === 'SLOW' ? 'deep' : 'chat';
     
     const response = await fetch(CHAT_URL, {
       method: 'POST',
@@ -532,6 +581,7 @@ export const streamChat = async ({
       model: MODEL_NAMES[taskType],
       temperature: taskType === 'deep' ? 0.5 : 0.7,
       timestamp: new Date().toISOString(),
+      routerDecision: streamRouterDecision,
     };
     
     // Execute reliability pipeline

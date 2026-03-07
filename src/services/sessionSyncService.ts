@@ -27,6 +27,7 @@ export async function upsertSessionState(params: {
   eaiState: EAIStateLike | null;
   messagesCount: number;
   lastMessagePreview: string | null;
+  progress?: number;
 }) {
   const { error } = await supabase
     .from('student_sessions')
@@ -43,6 +44,7 @@ export async function upsertSessionState(params: {
       eai_state: params.eaiState as any,
       messages_count: params.messagesCount,
       last_message_preview: params.lastMessagePreview,
+      progress: params.progress ?? 0,
       last_active_at: new Date().toISOString(),
     }, { onConflict: 'session_id' });
 

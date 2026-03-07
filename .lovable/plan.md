@@ -1,63 +1,81 @@
 
 
-## Plan: 3 patches — progress vullen, routerDecision vastleggen, dode types opruimen
+# Fix: Command Leaking + Repetitieve Didactische Fixes
 
-### Patch 1 — `progress` vullen vanuit mastery (event-driven, niet polling)
+## Twee Problemen
 
-**Probleem:** `upsertSessionState()` schrijft nooit `progress`. De kolom is altijd `0`.
+### 1. `/intro` lekt door in de chat
+De AI schrijft letterlijk `/intro` in het antwoord. De huidige `sanitizeForPresentation` in `MessageBubble.tsx` vangt alleen `/command` aan het begin van een regel (`^\/\w+`), maar de AI schrijft het soms midden in een zin. Bovendien: we moeten de AI ook instrueren om dit nooit te doen.
 
-**Aanpak:**
-- In `sessionSyncService.ts`: voeg `progress` parameter toe aan `upsertSessionState()` en schrijf mee naar de upsert
-- In `chatService.ts` (bij `triggerMasteryUpdate`): na mastery-update, bereken progress als `(MASTERED + CHECKING nodes) / totaal nodes` uit het lokale mastery-object en het curriculum pad
-- Geef progress terug aan de caller zodat `ChatInterface` het kan doorgeven aan `upsertSessionState()` via `onAnalysisUpdate` callback — of simpeler: sla progress op in een ref die bij de volgende sync-interval wordt meegestuurd
-- **Geen extra fetchMastery() per 10s.** Progress wordt alleen herberekend wanneer mastery daadwerkelijk wijzigt (na een chat-response), en dan lokaal gecached voor de sync
+### 2. Statische fixes zijn repetitief
+In `ssot_v15.json` staat bij `/intro` altijd dezelfde tekst: *"Noem 3 begrippen die je met dit onderwerp associeert."* Elke keer dat de AI `/intro` uitvoert, krijgt de leerling exact dezelfde vraag. Na 3x is dat dodelijk voor de motivatie.
 
-**Bestanden:**
-- `src/services/sessionSyncService.ts` — progress parameter toevoegen aan upsert
-- `src/components/ChatInterface.tsx` — progress ref bijhouden, meesturen in pushState
-- `src/services/chatService.ts` — progress berekenen na triggerMasteryUpdate, meegeven in response of via callback
+## Oplossing
 
-### Patch 2 — `routerDecision` vastleggen als diagnostisch object
+De beste aanpak is **tweeledig**: de AI instrueren om het nooit te doen, en tegelijk de sanitizer versterken als vangnet.
 
-**Probleem:** `determineTaskType()` retourneert alleen een string (`'chat' | 'deep' | 'image'`). De beslisreden wordt niet opgeslagen.
+### A. System Prompt aanscherpen (`ssotHelpers.ts`)
 
-**Aanpak:**
-- Maak een `buildRouterDecision()` functie die een `RouterDecision` object retourneert:
-  ```
-  { target_model, thinking_budget, intent_category, reasoning }
-  ```
-- `determineTaskType()` blijft bestaan maar wordt intern gevoed door `buildRouterDecision()`
-- Het decision-object wordt toegevoegd aan `rawMechanical.routerDecision` voordat het de pipeline in gaat
-- Zo wordt het automatisch mee-gepersist in `chat_messages.mechanical` en via session sync in `student_sessions.mechanical`
+In de `generateSystemPrompt` functie twee dingen toevoegen:
 
-**Bestand:** `src/services/chatService.ts` — op 3 plekken (sendChat, streamChat, image-path) het decision-object meegeven aan rawMechanical
+1. **Presentation Guard** instructie:
+```
+## PRESENTATIE REGELS (KRITIEK)
+- Schrijf NOOIT slash-commando's (/intro, /devil, /schema, etc.) in je antwoord aan de leerling.
+- Slash-commando's zijn interne instructies. De leerling mag ze nooit zien.
+- Gebruik GEEN meta-taal zoals 'inventarisatie', 'diagnose', 'strategie', 'volgens mijn analyse'.
+```
 
-### Patch 3 — Dode MechanicalState velden opruimen (conservatief)
+2. **Variatie-instructie** bij de commando-sectie:
+```
+## BESCHIKBARE COMMANDO'S
+[bestaande lijst]
 
-**Verwijderen:**
-- `SupervisorLog` interface + `supervisorLog` veld — nergens runtime gevuld
-- `softValidationLog` veld — nergens runtime gevuld
-- `RepairLog` interface + `repairLog` veld — nergens runtime gevuld
-- Legacy velden `timescale`, `fast`, `mid`, `slow` — nergens runtime gevuld
+BELANGRIJK: Wanneer je een commando-actie uitvoert, varieer dan ALTIJD je formulering.
+Gebruik het commando als richtlijn voor het TYPE actie, niet als letterlijke tekst.
+Voorbeelden van variatie bij /intro:
+- "Welke 3 dingen weet je al over [onderwerp]?"
+- "Stel je voor dat je [onderwerp] moet uitleggen aan een vriend. Waar begin je?"
+- "Wat heb je eerder geleerd dat te maken heeft met [onderwerp]?"
+```
 
-**Laten staan:**
-- `routerDecision` — wordt nu gevuld (patch 2)
-- `logicGateBreach` — wordt al berekend in `checkLogicGates()`, toekomstige observability-patch
-- `semanticValidation` — wordt gevuld door reliabilityPipeline
-- `epistemicGuardResult` — wordt gevuld door reliabilityPipeline
-- `healingEventCount` — wordt gevuld door reliabilityPipeline
-- `repairAttempts` — wordt gevuld door reliabilityPipeline
+### B. Sanitizer versterken (`MessageBubble.tsx`)
 
-**Bestand:** `src/types/index.ts`
+De regex `^\/\w+` matcht alleen regelstart. Aanpassen naar een bredere vanger:
 
-### Samenvatting wijzigingen
+```typescript
+const FORBIDDEN_PATTERNS = [
+  /\/?(?:intro|devil|schema|beeld|flits|chunk|checkin|fase_check|hint|anchor|reflectie|model|exit|quiz|meta|pauze|recap)\b/gi,
+  // ... bestaande patronen
+];
+```
 
-| Bestand | Wijziging |
-|---|---|
-| `src/services/sessionSyncService.ts` | `progress` parameter toevoegen |
-| `src/components/ChatInterface.tsx` | progress ref + meesturen in sync |
-| `src/services/chatService.ts` | `buildRouterDecision()` + progress berekening |
-| `src/types/index.ts` | 4 dode velden/interfaces verwijderen |
+Dit vangt `/intro`, maar ook als de AI het zonder slash schrijft midden in een zin.
 
-Geen database-migraties nodig. `progress` kolom bestaat al, `mechanical` is JSONB.
+### C. Fix-teksten dynamischer maken in prompt (`ssotHelpers.ts`)
+
+In de rubric-tabel die naar de AI wordt gestuurd, de statische fix-tekst vervangen door een variatie-instructie. In plaats van:
+
+```
+| P1 | Orientatie | /intro | Activeer voorkennis |
+```
+
+Wordt het:
+
+```
+| P1 | Orientatie | Activeer voorkennis (varieer aanpak: vraag begrippen, scenario, of real-world connectie) |
+```
+
+Dit betekent dat de commando-kolom in de prompt-tabel de fix-naam weglaat en in plaats daarvan het didactisch principe met variatie-hint toont.
+
+## Bestanden die worden gewijzigd
+
+1. **`src/utils/ssotHelpers.ts`** -- Presentation Guard toevoegen aan system prompt, fix-kolom aanpassen naar variatie-instructies
+2. **`src/components/MessageBubble.tsx`** -- Sanitizer regex verbreden als vangnet
+
+## Wat niet verandert
+
+- `ssot_v15.json` blijft ongewijzigd (dat is de bron van waarheid)
+- De interne analyse in `chatService.ts` blijft `/commands` gebruiken voor detectie
+- De toolbox in `LeskaartPanel` stuurt nog steeds `/commands` naar de AI -- die worden alleen niet getoond
 

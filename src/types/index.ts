@@ -112,18 +112,6 @@ export interface SemanticValidation {
   alignment_status: 'OPTIMAL' | 'DRIFT' | 'CRITICAL';
 }
 
-export interface RepairLog {
-  timestamp: number;
-  error: string;
-  brokenPayload: string;
-}
-
-export interface SupervisorLog {
-  timestamp: number;
-  breach: LogicGateBreach;
-  original_reasoning: string;
-  correction_prompt: string;
-}
 
 export interface RouterDecision {
   target_model: string;
@@ -140,9 +128,6 @@ export interface MechanicalState {
   temperature: number;
   timestamp: string;
   repairAttempts?: number;
-  repairLog?: RepairLog;
-  supervisorLog?: SupervisorLog;
-  softValidationLog?: string[];
   logicGateBreach?: LogicGateBreach;
   routerDecision?: RouterDecision;
   semanticValidation?: SemanticValidation;
@@ -152,11 +137,6 @@ export interface MechanicalState {
     confidence: number;
   };
   healingEventCount?: number;
-  // Legacy fields
-  timescale?: string;
-  fast?: number;
-  mid?: number;
-  slow?: number;
 }
 
 export interface EAIAnalysis {
@@ -246,6 +226,7 @@ export interface ChatResponse {
   analysis: EAIAnalysis;
   mechanical: MechanicalState;
   auditId?: string | null;
+  progress?: number;
 }
 
 export interface NudgeRequest {
