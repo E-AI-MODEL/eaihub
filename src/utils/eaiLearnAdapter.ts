@@ -100,47 +100,7 @@ export function calculateDynamicTTL(analysis: EAIAnalysis | null): number {
   return Math.max(30000, Math.min(180000, ttl));
 }
 
-export function calculateGFactor(analysis: EAIAnalysis): SemanticValidation {
-  let score = 1.0;
-  const penalties: string[] = [];
-  const breach = checkLogicGates(analysis);
-  if (breach) {
-    if (breach.priority === 'CRITICAL') {
-      score -= 1.0;
-      penalties.push(`CRITICAL: Logic Gate Breach (${breach.trigger_band} violates ${breach.rule_description})`);
-    } else {
-      score -= 0.4;
-      penalties.push(`HIGH: Logic Gate Breach (${breach.trigger_band})`);
-    }
-  }
-  const allBands = [
-    ...(analysis.process_phases || []),
-    ...(analysis.coregulation_bands || []),
-    ...(analysis.task_densities || []),
-    ...(analysis.secondary_dimensions || [])
-  ];
-  const kBand = allBands.find(b => b.startsWith('K'));
-  const eBand = allBands.find(b => b.startsWith('E'));
-  if (kBand === 'K1' && (eBand === 'E4' || eBand === 'E5')) {
-    score -= 0.2;
-    penalties.push(`ALIGNMENT: Fact Retrieval (K1) mismatch with Critical Epistemics (${eBand})`);
-  }
-  if (analysis.epistemic_status === 'FEIT' && (!eBand || eBand === 'E0' || eBand === 'E1')) {
-    score -= 0.3;
-    penalties.push(`HALLUCINATION RISK: Claimed 'FEIT' without Verified Epistemic Band`);
-  }
-  const pBand = allBands.find(b => b.startsWith('P'));
-  const tdBand = allBands.find(b => b.startsWith('TD'));
-  if (pBand === 'P3' && (tdBand === 'TD1' || tdBand === 'TD2')) {
-    score -= 0.2;
-    penalties.push(`DRIFT: Instruction Phase (P3) implies Teacher-Led, but Agency is High (${tdBand})`);
-  }
-  const finalScore = Math.max(0, Math.min(1, score));
-  let status: 'OPTIMAL' | 'DRIFT' | 'CRITICAL' = 'OPTIMAL';
-  if (finalScore < 0.5) status = 'CRITICAL';
-  else if (finalScore < 0.9) status = 'DRIFT';
-  return { gFactor: finalScore, penalties, alignment_status: status };
-}
+// calculateGFactor moved to reliabilityPipeline.ts calculateSemanticValidation (step 2 roadmap)
 
 export function createInitialEAIState(): EAIStateLike {
   return {
