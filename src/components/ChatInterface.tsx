@@ -191,6 +191,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       const userId = getOrCreateUserId();
       const response = await sendChat({ sessionId, userId, message: textToSend, profile });
       messageCounterRef.current += 1;
+      if (response.progress !== undefined) progressRef.current = response.progress;
       const modelMessage: Message = { id: `msg_${crypto.randomUUID()}`, role: 'model', text: response.text, timestamp: new Date(), analysis: response.analysis, mechanical: response.mechanical };
       setMessages(prev => [...prev, modelMessage]);
       if (response.analysis && onAnalysisUpdate) onAnalysisUpdate(response.analysis, response.mechanical);

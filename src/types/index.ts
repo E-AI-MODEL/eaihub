@@ -226,6 +226,7 @@ export interface ChatResponse {
   analysis: EAIAnalysis;
   mechanical: MechanicalState;
   auditId?: string | null;
+  progress?: number;
 }
 
 export interface NudgeRequest {

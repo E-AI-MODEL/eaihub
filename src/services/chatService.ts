@@ -459,6 +459,7 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       analysis: pipelineResult.analysis,
       mechanical: pipelineResult.mechanical,
       auditId: `audit_${Date.now()}`,
+      progress: masteryProgress,
     };
 
   } catch (error) {
