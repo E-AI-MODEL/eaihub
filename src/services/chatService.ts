@@ -538,7 +538,7 @@ export const streamChat = async ({
     const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
 
     // Update mastery state based on analysis
-    triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId);
+    triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId, request.userId);
 
     // Post-process [BEELD:] tags in AI output
     const processedText = await processBeeldTags(fullText, request.sessionId, request.profile);
