@@ -87,7 +87,7 @@ const TeacherCockpit = () => {
           <button onClick={() => navigate('/')} className="p-1.5 text-slate-500 hover:text-slate-300 transition-colors">
             <Home className="w-4 h-4" />
           </button>
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Teacher Cockpit</span>
+          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Docentencockpit</span>
           <div className="flex items-center gap-1.5 ml-2">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-[10px] font-mono text-emerald-400">{onlineSessions.length} online</span>
@@ -118,7 +118,7 @@ const TeacherCockpit = () => {
               <div className="flex flex-col items-center justify-center h-full text-slate-600">
                 <Users className="w-8 h-8 mb-2" />
                 <span className="text-[10px] font-mono">Geen actieve sessies</span>
-                <span className="text-[9px] text-slate-700 mt-1">Studenten verschijnen hier zodra ze starten</span>
+                <span className="text-[9px] text-slate-700 mt-1">Leerlingen verschijnen hier zodra ze starten</span>
               </div>
             ) : (
               sessions.map(session => {
@@ -190,7 +190,7 @@ const TeacherCockpit = () => {
             <div className="flex-1 flex items-center justify-center text-slate-600">
               <div className="text-center">
                 <Eye className="w-10 h-10 mx-auto mb-3 text-slate-700" />
-                <p className="text-sm">Selecteer een leerling om details te bekijken</p>
+              <p className="text-sm">Selecteer een leerling om details te bekijken</p>
                 <p className="text-[10px] text-slate-700 mt-1">Je kunt berichten sturen en de sessie live volgen</p>
               </div>
             </div>
