@@ -3,52 +3,52 @@
 
 ## Status
 
-Analyse en roadmap. Geen directe codewijziging.
-Codebase is schoon en conform scope.
+Stap 1 en 2 zijn afgerond. Codebase is schoon en conform scope.
 
 ---
 
 ## Huidige architectuur
 
-1. `generateAnalysis()` in `chatService.ts` — client-side analyse via losse `detect*()` functies
-2. `reliabilityPipeline.ts` — SSOT-healing, epistemic guard, semantic validation
-3. `eaiLearnAdapter.ts` — interpretatie-/toestandlaag
-4. UI toont afgeleide labels en validaties
+1. `generateAnalysis()` in `chatService.ts` — client-side analyse via losse `detect*()` functies (fallback)
+2. `eai-classify` edge function — backend-classificatie via Gemini 2.5 Flash (primaire producer)
+3. `reliabilityPipeline.ts` — enige bron voor SSOT-healing, G-factor, logic gates, epistemic guard
+4. `eaiLearnAdapter.ts` — state-/viewmodel-laag (scaffolding, TTL, history)
+5. UI toont afgeleide labels en validaties
 
 ---
 
-## Diagnose
+## Diagnose (oorspronkelijk)
 
-1. **Geen centrale formule** — losse detectie per dimensie, daarna constraints, validatie, UI-afleiding
-2. **Analyse is client-side en single-label** — geen confidence, geen secondary band, geen overgangsstatus
-3. **Dubbele validatie** — overlap tussen `reliabilityPipeline.ts` en `eaiLearnAdapter.ts` (technische schuld)
-4. **UI toont alleen afgeleide labels** — geen rijke bronconstatering of nuance
-5. **Onderwijs zit tussen descriptoren** — single-label is onvoldoende als volledige representatie
+1. ~~**Analyse is client-side en single-label**~~ → opgelost in stap 1 (edge-classificatie)
+2. ~~**Dubbele validatie**~~ → opgelost in stap 2 (pipeline = enige inhoudelijke waarheid)
+3. **UI toont alleen afgeleide labels** — geen rijke bronconstatering of nuance
+4. **Onderwijs zit tussen descriptoren** — single-label is onvoldoende als volledige representatie
 
 ---
 
 ## Afgesproken volgorde
 
-### Stap 1 — Analyse naar edge function verplaatsen
+### Stap 1 — Analyse naar edge function verplaatsen ✅
 
-De edge function moet naast tekst ook gestructureerde analyse retourneren.
-Pas dan ontstaat een rijke bronlaag.
+Aparte `eai-classify` edge function levert gestructureerde 10D-analyse.
+Client-side `generateAnalysis()` blijft als verplichte fallback.
+Observability via `analysisSource` in `MechanicalState`.
 
-**Status: nog niet gestart — eerst ontwerp uitwerken**
+**Status: afgerond**
 
-### Stap 2 — Dubbele validatie opschonen
+### Stap 2 — Dubbele validatie opschonen ✅
 
-Overlap tussen `reliabilityPipeline.ts` en `eaiLearnAdapter.ts` terugbrengen.
-Één hoofdpad voor validatie; tweede laag alleen als state-/viewmodel.
+Alle inhoudelijke validatie (SSOT healing, G-factor, logic gates, command fuzzy-map) geconsolideerd in `reliabilityPipeline.ts`.
+`eaiLearnAdapter.ts` teruggebracht tot state/viewmodel-laag.
 
-**Status: nog niet gestart — wacht op stap 1**
+**Status: afgerond**
 
 ### Stap 3 — EAIAnalysis uitbreiden met nuancevelden
 
 Velden als `confidence`, `secondaryBand`, `borderline`, `gateReadiness`.
-Pas zinvol als de producer rijker is en validatie opgeschoond.
+Pas zinvol nu de producer rijker is en validatie opgeschoond.
 
-**Status: nog niet gestart — wacht op stap 2**
+**Status: klaar om te ontwerpen — eerst ontwerpvoorstel uitwerken**
 
 ### Stap 4 — UI aanpassen
 
