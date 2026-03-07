@@ -3,7 +3,7 @@
 // Version 15.0.0
 
 import { SSOT_DATA, getRubric, getBand, getCommandDescription } from '@/data/ssot';
-import type { EAIAnalysis, MechanicalState, SemanticValidation, RepairLog } from '@/types';
+import type { EAIAnalysis, MechanicalState, SemanticValidation } from '@/types';
 
 // ============= TRACE EVENT SYSTEM =============
 
