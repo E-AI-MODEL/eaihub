@@ -2,6 +2,3 @@ project_id = "fmgrjsjsrbtmybdiywxf"
 
 [functions.eai-chat]
 verify_jwt = false
-
-[functions.eai-classify]
-verify_jwt = false
