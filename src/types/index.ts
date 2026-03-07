@@ -137,6 +137,9 @@ export interface MechanicalState {
     confidence: number;
   };
   healingEventCount?: number;
+  ssotHealingCount?: number;
+  commandNullCount?: number;
+  parseRepairCount?: number;
 }
 
 export interface EAIAnalysis {

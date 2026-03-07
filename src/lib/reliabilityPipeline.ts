@@ -107,7 +107,7 @@ function ssotHasCommand(commandId: string): boolean {
 export function healAnalysisToSSOT(
   analysis: EAIAnalysis,
   sessionId: string
-): { healed: EAIAnalysis; events: string[] } {
+): { healed: EAIAnalysis; events: string[]; ssotHealingCount: number; commandNullCount: number } {
   const events: string[] = [];
   const healed: EAIAnalysis = structuredClone(analysis);
 
@@ -222,7 +222,10 @@ export function healAnalysisToSSOT(
     });
   }
 
-  return { healed, events };
+  const ssotHealingCount = events.filter(e => e.startsWith('PRUNE_UNKNOWN_')).length;
+  const commandNullCount = events.filter(e => e.startsWith('NULL_UNKNOWN_COMMAND')).length;
+
+  return { healed, events, ssotHealingCount, commandNullCount };
 }
 
 // ============= EPISTEMIC GUARD =============
@@ -403,7 +406,7 @@ export function executePipeline(
   });
 
   // Step 1: SSOT Healing
-  const { healed, events: healingEvents } = healAnalysisToSSOT(analysis, sessionId);
+  const { healed, events: healingEvents, ssotHealingCount, commandNullCount } = healAnalysisToSSOT(analysis, sessionId);
 
   // Step 2: Epistemic Guard
   const { guarded, result: epistemicResult } = epistemicGuard(healed, sessionId);
@@ -422,6 +425,9 @@ export function executePipeline(
       confidence: epistemicResult.confidence,
     },
     healingEventCount: healingEvents.length,
+    ssotHealingCount,
+    commandNullCount,
+    parseRepairCount: 0,
   };
 
   const pipelineDuration = Date.now() - startTime;
