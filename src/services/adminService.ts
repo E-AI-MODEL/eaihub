@@ -44,7 +44,7 @@ export type BrowserEnv = {
 
 export type RuntimeTelemetry = {
   isFallbackActive: boolean;
-  apiKeyConfigured: boolean;
+  edgeFunctionReachable: boolean;
   logicEngineStatus: 'OPERATIONAL' | 'COMPROMISED';
   lastSelfTest: number;
 };
