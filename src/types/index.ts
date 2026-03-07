@@ -158,6 +158,9 @@ export interface EAIAnalysis {
   srl_state: SRLState;
   scaffolding?: ScaffoldingState;
   mastery_check?: boolean;
+  confidence?: number;
+  secondary_bands?: Record<string, string>;
+  borderline_dimensions?: string[];
 }
 
 // --- CHAT & UI ---

@@ -58,6 +58,20 @@ const CLASSIFY_TOOL = {
           type: "string",
           description: "Korte onderbouwing van de classificatie in 1-2 zinnen",
         },
+        confidence: {
+          type: "number",
+          description: "Globale zekerheid van de classificatie tussen 0 en 1",
+        },
+        secondary_bands: {
+          type: "object",
+          additionalProperties: { type: "string" },
+          description: "Tweede kandidaat-band per dimensie, bv. { K: 'K3', P: 'P2' }",
+        },
+        borderline_dimensions: {
+          type: "array",
+          items: { type: "string" },
+          description: "Dimensies die op of nabij een grens liggen, bv. ['K', 'P', 'TD']",
+        },
       },
       required: ["process_phases", "coregulation_bands", "task_densities", "cognitive_mode", "srl_state", "epistemic_status", "active_flags", "reasoning"],
       additionalProperties: false,
