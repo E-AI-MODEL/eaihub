@@ -5,6 +5,24 @@
 import { SSOT_DATA, getRubric, getBand, getCommandDescription } from '@/data/ssot';
 import type { EAIAnalysis, MechanicalState, SemanticValidation } from '@/types';
 
+// Command fuzzy map (consolidated from eaiLearnAdapter — step 2 roadmap)
+const COMMAND_FUZZY_MAP: Record<string, string> = {
+  '/proces_evaluatie': '/proces_eval',
+  '/fasecheck': '/fase_check',
+  'fasecheck': '/fase_check',
+  '/reflectie': '/meta',
+  '/samenvatting': '/beurtvraag',
+  '/quiz': '/quizgen',
+  '/toets': '/quizgen',
+  '/uitleg': '/beeld',
+  '/voorbeelden': '/beeld',
+  '/strategie': '/meta',
+  'checkin': '/checkin',
+  'devil': '/devil',
+  'twist': '/twist',
+  'vocab': '/vocab',
+};
+
 // ============= TRACE EVENT SYSTEM =============
 
 export type TraceSeverity = 'INFO' | 'WARNING' | 'REPAIR' | 'GATE' | 'ERROR';
@@ -191,17 +209,34 @@ export function healAnalysisToSSOT(
     healed.secondary_dimensions = validSecondary;
   }
 
-  // Validate active_fix command
+  // Validate active_fix command (with fuzzy matching from adapter)
   if (healed.active_fix && !ssotHasCommand(healed.active_fix)) {
-    events.push(`NULL_UNKNOWN_COMMAND:${healed.active_fix}`);
-    pushTrace(sessionId, {
-      severity: 'REPAIR',
-      source: 'SSOT',
-      step: 'SSOT_HEAL',
-      message: `Nulled unknown command: ${healed.active_fix}`,
-      data: { nulledCommand: healed.active_fix },
-    });
-    healed.active_fix = null;
+    const fix = healed.active_fix.trim();
+    if (COMMAND_FUZZY_MAP[fix]) {
+      const healedCmd = COMMAND_FUZZY_MAP[fix];
+      events.push(`FUZZY_HEAL_COMMAND:${fix}->${healedCmd}`);
+      pushTrace(sessionId, {
+        severity: 'REPAIR', source: 'SSOT', step: 'SSOT_HEAL',
+        message: `Fuzzy healed command: ${fix} → ${healedCmd}`,
+        data: { original: fix, healed: healedCmd },
+      });
+      healed.active_fix = healedCmd;
+    } else if (!fix.startsWith('/') && ssotHasCommand(`/${fix}`)) {
+      healed.active_fix = `/${fix}`;
+      events.push(`PREFIX_HEAL_COMMAND:${fix}->${healed.active_fix}`);
+      pushTrace(sessionId, {
+        severity: 'REPAIR', source: 'SSOT', step: 'SSOT_HEAL',
+        message: `Added prefix: ${fix} → ${healed.active_fix}`,
+      });
+    } else {
+      events.push(`NULL_UNKNOWN_COMMAND:${healed.active_fix}`);
+      pushTrace(sessionId, {
+        severity: 'REPAIR', source: 'SSOT', step: 'SSOT_HEAL',
+        message: `Nulled unknown command: ${healed.active_fix}`,
+        data: { nulledCommand: healed.active_fix },
+      });
+      healed.active_fix = null;
+    }
   }
 
   // Log summary if any healing occurred
@@ -354,6 +389,33 @@ export function calculateSemanticValidation(
   if (tdLevel >= 4 && !analysis.active_fix) {
     penalties.push('HIGH_TD_NO_FIX');
     gFactor -= 0.1;
+  }
+
+  // Cross-dimensional alignment checks (consolidated from eaiLearnAdapter — step 2 roadmap)
+  const allBands = [
+    ...(analysis.process_phases || []),
+    ...(analysis.coregulation_bands || []),
+    ...(analysis.task_densities || []),
+    ...(analysis.secondary_dimensions || [])
+  ];
+  const kBand = allBands.find(b => b.startsWith('K'));
+  const eBand = allBands.find(b => b.startsWith('E'));
+  const pBand = allBands.find(b => b.startsWith('P'));
+  const tdBandCross = allBands.find(b => b.startsWith('TD'));
+
+  if (kBand === 'K1' && (eBand === 'E4' || eBand === 'E5')) {
+    penalties.push('ALIGNMENT: K1 (Feitenkennis) mismatch met hoge epistemiek (' + eBand + ')');
+    gFactor -= 0.2;
+  }
+
+  if (analysis.epistemic_status === 'FEIT' && (!eBand || eBand === 'E0' || eBand === 'E1')) {
+    penalties.push('HALLUCINATION_RISK: FEIT geclaimd zonder geverifieerde epistemische band');
+    gFactor -= 0.3;
+  }
+
+  if (pBand === 'P3' && (tdBandCross === 'TD1' || tdBandCross === 'TD2')) {
+    penalties.push('DRIFT: Instructiefase (P3) maar hoge agency (' + tdBandCross + ')');
+    gFactor -= 0.2;
   }
 
   // Determine alignment status

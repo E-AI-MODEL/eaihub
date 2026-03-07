@@ -614,7 +614,53 @@ const AdminPanel = () => {
                             <Badge className="text-[9px] bg-yellow-500/20 text-yellow-400">CAUTION: {guardCaution}</Badge>
                             <Badge className="text-[9px] bg-red-500/20 text-red-400">VERIFY: {guardVerify}</Badge>
                           </div>
-                          {guardLabels.length === 0 && <p className="text-xs text-muted-foreground mt-2">Geen guard data (pas beschikbaar na patch 2 deploy)</p>}
+                          {guardLabels.length === 0 && <p className="text-xs text-muted-foreground mt-2">Geen guard data</p>}
+                        </CardContent>
+                      </Card>
+
+                      {/* Granulaire repair tellers (step 2 roadmap) */}
+                      <Card className="col-span-2">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-xs uppercase tracking-wider">Granulaire Repair Tellers</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="outline" className="text-[9px]">SSOT Heals: {withMech.reduce((s: number, m: any) => s + (m.mechanical?.ssotHealingCount ?? 0), 0)}</Badge>
+                            <Badge variant="outline" className="text-[9px]">Cmd Nulls: {withMech.reduce((s: number, m: any) => s + (m.mechanical?.commandNullCount ?? 0), 0)}</Badge>
+                            <Badge variant="outline" className="text-[9px]">Parse Repairs: {withMech.reduce((s: number, m: any) => s + (m.mechanical?.parseRepairCount ?? 0), 0)}</Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Classificatie nuance (step 3-4 roadmap) */}
+                      <Card className="col-span-2">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-xs uppercase tracking-wider">Classificatie Nuance (LLM)</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {(() => {
+                            const withConf = withAnalysis.filter((m: any) => m.analysis?.confidence != null);
+                            const avgConf = withConf.length > 0
+                              ? withConf.reduce((s: number, m: any) => s + (m.analysis?.confidence ?? 0), 0) / withConf.length
+                              : null;
+                            const borderlineCount = withAnalysis.filter((m: any) => (m.analysis?.borderline_dimensions?.length ?? 0) > 0).length;
+                            return (
+                              <div className="flex flex-wrap gap-2">
+                                <Badge variant="outline" className="text-[9px]">
+                                  Gem. Confidence: {avgConf !== null ? `${(avgConf * 100).toFixed(0)}%` : '—'}
+                                </Badge>
+                                <Badge variant="outline" className="text-[9px]">
+                                  Borderline: {borderlineCount} van {withAnalysis.length}
+                                </Badge>
+                                <Badge variant="outline" className="text-[9px]">
+                                  LLM Classified: {withConf.length}
+                                </Badge>
+                              </div>
+                            );
+                          })()}
+                          {withAnalysis.filter((m: any) => m.analysis?.confidence != null).length === 0 && (
+                            <p className="text-xs text-muted-foreground mt-2">Geen LLM classificatie data (verschijnt na eerste gesprek)</p>
+                          )}
                         </CardContent>
                       </Card>
                     </>
@@ -642,6 +688,10 @@ const AdminPanel = () => {
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Alignment</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Repairs</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Healing</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">SSOT</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Cmd∅</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Parse</th>
+                          <th className="text-left px-2 py-1 text-muted-foreground font-mono">Conf.</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Epist. Status</th>
                           <th className="text-left px-2 py-1 text-muted-foreground font-mono">Guard</th>
                         </tr>
@@ -669,13 +719,17 @@ const AdminPanel = () => {
                               </td>
                               <td className="px-2 py-1.5">{(mech?.repairAttempts ?? 0) > 0 ? <Badge className="text-[8px] bg-yellow-500/20 text-yellow-400">{mech.repairAttempts}</Badge> : '0'}</td>
                               <td className="px-2 py-1.5">{(mech?.healingEventCount ?? 0) > 0 ? <Badge className="text-[8px] bg-orange-500/20 text-orange-400">{mech.healingEventCount}</Badge> : '0'}</td>
+                              <td className="px-2 py-1.5">{(mech?.ssotHealingCount ?? 0) > 0 ? <Badge className="text-[8px] bg-orange-500/20 text-orange-400">{mech.ssotHealingCount}</Badge> : '0'}</td>
+                              <td className="px-2 py-1.5">{(mech?.commandNullCount ?? 0) > 0 ? <Badge className="text-[8px] bg-amber-500/20 text-amber-400">{mech.commandNullCount}</Badge> : '0'}</td>
+                              <td className="px-2 py-1.5">{(mech?.parseRepairCount ?? 0) > 0 ? <Badge className="text-[8px] bg-amber-500/20 text-amber-400">{mech.parseRepairCount}</Badge> : '0'}</td>
+                              <td className="px-2 py-1.5">{anal?.confidence != null ? <span className={`text-[9px] font-mono ${anal.confidence >= 0.7 ? 'text-green-500' : anal.confidence >= 0.4 ? 'text-yellow-500' : 'text-red-500'}`}>{(anal.confidence * 100).toFixed(0)}%</span> : <span className="text-muted-foreground">—</span>}</td>
                               <td className="px-2 py-1.5">{anal?.epistemic_status ? <Badge variant="outline" className="text-[8px]">{anal.epistemic_status}</Badge> : <span className="text-muted-foreground">—</span>}</td>
                               <td className="px-2 py-1.5">{mech?.epistemicGuardResult?.label ? <Badge variant="outline" className={`text-[8px] ${mech.epistemicGuardResult.label === 'OK' ? 'border-green-500/50 text-green-400' : mech.epistemicGuardResult.label === 'CAUTION' ? 'border-yellow-500/50 text-yellow-400' : 'border-red-500/50 text-red-400'}`}>{mech.epistemicGuardResult.label}</Badge> : <span className="text-muted-foreground">—</span>}</td>
                             </tr>
                           );
                         })}
                         {dbMessages.filter((m: any) => m.role === 'model').length === 0 && (
-                          <tr><td colSpan={9} className="px-2 py-4 text-center text-muted-foreground">Geen model berichten gevonden</td></tr>
+                          <tr><td colSpan={13} className="px-2 py-4 text-center text-muted-foreground">Geen model berichten gevonden</td></tr>
                         )}
                       </tbody>
                     </table>

@@ -253,6 +253,129 @@ const MODEL_NAMES: Record<TaskType, string> = {
   image: 'gemini-2.5-flash-image',
 };
 
+// ═══ LLM-BASED 10D CLASSIFICATION (Step 1 roadmap) ═══
+const CLASSIFY_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-classify`;
+
+function generateRubricContext(): string {
+  const lines: string[] = [];
+  for (const rubric of SSOT_DATA.rubrics) {
+    const shortKey = rubric.rubric_id.split('_')[0];
+    const bandSummary = rubric.bands.map(b => `${b.band_id}=${b.label}`).join(', ');
+    lines.push(`${shortKey} (${rubric.name}): ${bandSummary}`);
+  }
+  return lines.join('\n');
+}
+
+// Cache rubric context (static per session)
+let _rubricContextCache: string | null = null;
+function getRubricContext(): string {
+  if (!_rubricContextCache) _rubricContextCache = generateRubricContext();
+  return _rubricContextCache;
+}
+
+function mapClassificationToAnalysis(data: Record<string, unknown>, input: string, profile: LearnerProfile): EAIAnalysis {
+  const K = (data.K as string) || 'K0';
+  const P = (data.P as string) || 'P0';
+  const C = (data.C as string) || 'C2';
+  const TD = (data.TD as string) || 'TD2';
+  const V = (data.V as string) || 'V0';
+  const E = (data.E as string) || 'E0';
+  const T = (data.T as string) || 'T2';
+  const S = (data.S as string) || 'S1';
+  const L = (data.L as string) || 'L1';
+  const B = (data.B as string) || 'B1';
+
+  const allBands = [K, P, C, TD, V, E, T, S, L, B];
+  const activeFlags = getFlagsForBands(allBands);
+
+  let activeFix: string | null = null;
+  if (input.startsWith('/')) {
+    activeFix = input.split(' ')[0];
+  } else {
+    activeFix = getFixForBand(K) || getFixForBand(C) || getFixForBand(TD);
+  }
+
+  const tdLevel = parseInt(TD.replace('TD', ''));
+  const agencyScore = tdLevel === 1 ? 0.85 : tdLevel === 2 ? 0.65 : tdLevel === 3 ? 0.5 : tdLevel === 4 ? 0.35 : 0.15;
+
+  const epistemicLevel = parseInt(E.replace('E', ''));
+  const epistemicStatus: 'FEIT' | 'INTERPRETATIE' | 'SPECULATIE' | 'ONBEKEND' =
+    epistemicLevel >= 4 ? 'FEIT' :
+    epistemicLevel === 3 ? 'INTERPRETATIE' :
+    epistemicLevel === 2 ? 'SPECULATIE' : 'ONBEKEND';
+
+  const hasQuestion = input.includes('?');
+  const cognitiveMode = hasQuestion ? 'REFLECTIEF' :
+                        K === 'K3' ? 'SYSTEMISCH' : 'ANALYTISCH';
+
+  return {
+    process_phases: [P],
+    coregulation_bands: [K, C, P],
+    task_densities: [TD],
+    secondary_dimensions: [V, E, T, S, L, B],
+    active_fix: activeFix,
+    active_flags: activeFlags,
+    reasoning: (data.reasoning as string) || `LLM: ${K}, ${P}, ${TD}`,
+    current_profile: profile,
+    task_density_balance: agencyScore - 0.5,
+    epistemic_status: (data.epistemic_status as 'FEIT' | 'INTERPRETATIE' | 'SPECULATIE' | 'ONBEKEND') || epistemicStatus,
+    cognitive_mode: (data.cognitive_mode as any) || cognitiveMode,
+    srl_state: (data.srl_state as any) || 'MONITOR',
+    mastery_check: (data.mastery_check as boolean) || false,
+    scaffolding: {
+      agency_score: agencyScore,
+      trend: agencyScore > 0.5 ? 'RISING' : agencyScore < 0.4 ? 'FALLING' : 'STABLE',
+      advice: null,
+      history_window: [agencyScore],
+    },
+    // Nuance fields from LLM
+    confidence: data.confidence as number | undefined,
+    secondary_bands: data.secondary_bands as Record<string, string> | undefined,
+    borderline_dimensions: data.borderline_dimensions as string[] | undefined,
+  };
+}
+
+async function classifyWithLLM(input: string, output: string, profile: LearnerProfile): Promise<EAIAnalysis> {
+  try {
+    const response = await fetch(CLASSIFY_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({
+        userMessage: input,
+        aiResponse: output,
+        profile: { name: profile.name, subject: profile.subject, level: profile.level, grade: profile.grade },
+        rubricContext: getRubricContext(),
+      }),
+    });
+
+    if (!response.ok) throw new Error(`Classify HTTP ${response.status}`);
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    pushTrace('global', {
+      severity: 'INFO',
+      source: 'PIPELINE',
+      step: 'SCHEMA_VALIDATE',
+      message: `LLM classification OK (confidence: ${data.confidence})`,
+      data: { confidence: data.confidence, borderline: data.borderline_dimensions },
+    });
+
+    return mapClassificationToAnalysis(data, input, profile);
+  } catch (err) {
+    console.warn('[ChatService] LLM classification failed, using regex fallback:', err);
+    pushTrace('global', {
+      severity: 'WARNING',
+      source: 'PIPELINE',
+      step: 'SCHEMA_VALIDATE',
+      message: `LLM classification failed, falling back to regex: ${err instanceof Error ? err.message : 'unknown'}`,
+    });
+    return generateAnalysis(input, output, profile);
+  }
+}
+
 export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
   const startTime = Date.now();
   let history = sessionHistory.get(request.sessionId) || [];
@@ -326,7 +449,7 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       ].slice(-HISTORY_LIMIT);
       sessionHistory.set(request.sessionId, history);
 
-      const rawAnalysis = generateAnalysis(request.message, fullText, request.profile);
+      const rawAnalysis = await classifyWithLLM(request.message, fullText, request.profile);
       const imageRouterDecision: RouterDecision = {
         target_model: MODEL_NAMES.image,
         thinking_budget: 0,
@@ -425,8 +548,8 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     ].slice(-HISTORY_LIMIT);
     sessionHistory.set(request.sessionId, history);
 
-    // Generate initial analysis
-    const rawAnalysis = generateAnalysis(request.message, fullText, request.profile);
+    // Generate analysis via LLM classification (fallback: regex)
+    const rawAnalysis = await classifyWithLLM(request.message, fullText, request.profile);
     const rawMechanical: MechanicalState = {
       latencyMs,
       inputTokens: request.message.length * 2,
@@ -575,8 +698,8 @@ export const streamChat = async ({
     ].slice(-HISTORY_LIMIT);
     sessionHistory.set(request.sessionId, history);
 
-    // Generate initial analysis and run pipeline
-    const rawAnalysis = generateAnalysis(request.message, fullText, request.profile);
+    // Generate analysis via LLM classification (fallback: regex)
+    const rawAnalysis = await classifyWithLLM(request.message, fullText, request.profile);
     const rawMechanical: MechanicalState = {
       latencyMs,
       inputTokens: request.message.length * 2,
