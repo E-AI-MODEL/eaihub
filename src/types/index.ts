@@ -146,6 +146,12 @@ export interface MechanicalState {
   logicGateBreach?: LogicGateBreach;
   routerDecision?: RouterDecision;
   semanticValidation?: SemanticValidation;
+  epistemicGuardResult?: {
+    label: 'OK' | 'CAUTION' | 'VERIFY';
+    notes: string;
+    confidence: number;
+  };
+  healingEventCount?: number;
   // Legacy fields
   timescale?: string;
   fast?: number;

@@ -416,6 +416,12 @@ export function executePipeline(
     ...mechanical,
     repairAttempts: healingEvents.length > 0 ? 1 : 0,
     semanticValidation,
+    epistemicGuardResult: {
+      label: epistemicResult.label,
+      notes: epistemicResult.notes,
+      confidence: epistemicResult.confidence,
+    },
+    healingEventCount: healingEvents.length,
   };
 
   const pipelineDuration = Date.now() - startTime;

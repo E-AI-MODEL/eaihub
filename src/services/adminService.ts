@@ -247,7 +247,7 @@ export const runSystemAudit = async (): Promise<SystemHealth> => {
     storage,
     telemetry: {
       isFallbackActive,
-      apiKeyConfigured: !isFallbackActive,
+      edgeFunctionReachable,
       logicEngineStatus: logicStatus,
       lastSelfTest: Date.now()
     },
