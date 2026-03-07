@@ -472,6 +472,16 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                           {(msg.analysis as EAIAnalysis).active_fix}
                         </span>
                       )}
+                      {(msg.analysis as EAIAnalysis).confidence != null && (
+                        <span className="text-[7px] font-mono px-1 py-0.5 bg-slate-800 text-slate-400 border border-slate-700">
+                          Conf: {Math.round(((msg.analysis as EAIAnalysis).confidence!) * 100)}%
+                        </span>
+                      )}
+                      {(msg.analysis as EAIAnalysis).borderline_dimensions?.map((dim: string) => (
+                        <span key={dim} className="text-[7px] font-mono px-1 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                          {dim} ↔
+                        </span>
+                      ))}
                     </div>
                   )}
                 </div>
