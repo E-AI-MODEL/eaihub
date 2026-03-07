@@ -623,6 +623,31 @@ const AdminPanel = () => {
                           {guardLabels.length === 0 && <p className="text-xs text-muted-foreground mt-2">Geen guard data (pas beschikbaar na patch 2 deploy)</p>}
                         </CardContent>
                       </Card>
+
+                      {/* Nuance fields aggregate row */}
+                      <Card>
+                        <CardContent className="pt-6 text-center">
+                          <p className={`text-3xl font-bold ${avgConfidence === null ? 'text-muted-foreground' : avgConfidence >= 0.7 ? 'text-green-500' : avgConfidence >= 0.4 ? 'text-yellow-500' : 'text-red-500'}`}>
+                            {avgConfidence !== null ? `${(avgConfidence * 100).toFixed(0)}%` : '—'}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">Gem. Confidence</p>
+                          <p className="text-xs text-muted-foreground mt-1">{withConfidence.length} van {withAnalysis.length} analyses</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="pt-6 text-center">
+                          <p className="text-3xl font-bold text-foreground">{withBorderline.length}</p>
+                          <p className="text-[10px] text-muted-foreground">Met Borderline</p>
+                          <p className="text-xs text-muted-foreground mt-1">van {withAnalysis.length} analyses</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="pt-6 text-center">
+                          <p className="text-3xl font-bold text-foreground">{withSecondary.length}</p>
+                          <p className="text-[10px] text-muted-foreground">Met Secondary Bands</p>
+                          <p className="text-xs text-muted-foreground mt-1">van {withAnalysis.length} analyses</p>
+                        </CardContent>
+                      </Card>
                     </>
                   );
                 })()}
