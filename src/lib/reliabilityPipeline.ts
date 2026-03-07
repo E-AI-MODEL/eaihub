@@ -5,6 +5,24 @@
 import { SSOT_DATA, getRubric, getBand, getCommandDescription } from '@/data/ssot';
 import type { EAIAnalysis, MechanicalState, SemanticValidation } from '@/types';
 
+// Command fuzzy map (consolidated from eaiLearnAdapter — step 2 roadmap)
+const COMMAND_FUZZY_MAP: Record<string, string> = {
+  '/proces_evaluatie': '/proces_eval',
+  '/fasecheck': '/fase_check',
+  'fasecheck': '/fase_check',
+  '/reflectie': '/meta',
+  '/samenvatting': '/beurtvraag',
+  '/quiz': '/quizgen',
+  '/toets': '/quizgen',
+  '/uitleg': '/beeld',
+  '/voorbeelden': '/beeld',
+  '/strategie': '/meta',
+  'checkin': '/checkin',
+  'devil': '/devil',
+  'twist': '/twist',
+  'vocab': '/vocab',
+};
+
 // ============= TRACE EVENT SYSTEM =============
 
 export type TraceSeverity = 'INFO' | 'WARNING' | 'REPAIR' | 'GATE' | 'ERROR';
