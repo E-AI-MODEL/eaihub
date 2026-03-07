@@ -112,18 +112,6 @@ export interface SemanticValidation {
   alignment_status: 'OPTIMAL' | 'DRIFT' | 'CRITICAL';
 }
 
-export interface RepairLog {
-  timestamp: number;
-  error: string;
-  brokenPayload: string;
-}
-
-export interface SupervisorLog {
-  timestamp: number;
-  breach: LogicGateBreach;
-  original_reasoning: string;
-  correction_prompt: string;
-}
 
 export interface RouterDecision {
   target_model: string;
