@@ -495,11 +495,24 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 const currentBand = allBands.find(b => b.startsWith(shortKey)) || `${shortKey}0`;
                 const bandData = rubric.bands.find(b => b.band_id === currentBand);
 
+                const isBorderline = analysis?.borderline_dimensions?.includes(shortKey);
+                const secondaryBand = analysis?.secondary_bands?.[shortKey];
+
                 return (
-                  <div key={rubricId} className={`p-3 border ${colors.border} ${colors.bg}`}>
+                  <div key={rubricId} className={`p-3 border ${colors.border} ${colors.bg} ${isBorderline ? 'ring-1 ring-amber-500/30' : ''}`}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className={`text-[10px] font-mono font-bold ${colors.text}`}>{shortKey}</span>
-                      <span className={`text-[9px] font-mono ${colors.text}`}>{currentBand}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[10px] font-mono font-bold ${colors.text}`}>{shortKey}</span>
+                        {isBorderline && (
+                          <span className="text-[7px] font-mono px-1 py-0.5 bg-amber-500/15 text-amber-400 border border-amber-500/25 uppercase">Borderline</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[9px] font-mono ${colors.text}`}>{currentBand}</span>
+                        {secondaryBand && (
+                          <span className="text-[8px] font-mono text-slate-500" title="Secondary band">↔ {secondaryBand}</span>
+                        )}
+                      </div>
                     </div>
                     <p className="text-[9px] text-slate-400 mb-1">{rubric.name}</p>
                     {bandData && (
@@ -510,7 +523,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                       {rubric.bands.map(band => (
                         <div
                           key={band.band_id}
-                          className={`flex-1 h-1 ${band.band_id === currentBand ? (colors.text.replace('text-', 'bg-')) : 'bg-slate-800'}`}
+                          className={`flex-1 h-1 ${band.band_id === currentBand ? (colors.text.replace('text-', 'bg-')) : band.band_id === secondaryBand ? 'bg-slate-600' : 'bg-slate-800'}`}
                           title={band.label}
                         />
                       ))}
