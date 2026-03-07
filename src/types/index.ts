@@ -137,11 +137,6 @@ export interface MechanicalState {
     confidence: number;
   };
   healingEventCount?: number;
-  // Legacy fields
-  timescale?: string;
-  fast?: number;
-  mid?: number;
-  slow?: number;
 }
 
 export interface EAIAnalysis {

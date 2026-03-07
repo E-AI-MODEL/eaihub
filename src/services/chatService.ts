@@ -408,13 +408,14 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
       model: MODEL_NAMES[taskType],
       temperature: taskType === 'deep' ? 0.5 : 0.7,
       timestamp: new Date().toISOString(),
+      routerDecision,
     };
 
     const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
     updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
 
-    // Update mastery state based on analysis
-    triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId, request.userId);
+    // Update mastery state based on analysis — returns progress for session sync
+    const masteryProgress = triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId, request.userId);
 
     // Persist messages to DB (fire-and-forget)
 
