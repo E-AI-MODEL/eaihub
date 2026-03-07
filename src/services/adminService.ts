@@ -184,12 +184,8 @@ export const runSystemAudit = async (): Promise<SystemHealth> => {
   const storage = analyzeStorage();
   const issues: string[] = [];
 
-  const apiKeyEnv = import.meta.env?.VITE_GEMINI_API_KEY || '';
-  const isFallbackActive = !apiKeyEnv || apiKeyEnv.length < 10 || apiKeyEnv.includes('YOUR_API_KEY');
-  
-  if (isFallbackActive) {
-    issues.push("CRITICAL: API Key missing. System using MOCK inferencing.");
-  }
+  // API calls go through edge function; no client-side key needed
+  const isFallbackActive = false;
 
   const logicStatus = runLogicSelfTest();
   if (logicStatus === 'COMPROMISED') {

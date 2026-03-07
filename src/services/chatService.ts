@@ -21,7 +21,8 @@ import {
   type TraceEvent 
 } from '@/lib/reliabilityPipeline';
 import { persistChatMessage } from '@/services/adminDbService';
-import { getNodeById } from '@/data/curriculum';
+import { getNodeById, CURRICULUM_PATHS } from '@/data/curriculum';
+import { updateMastery } from '@/services/masteryService';
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-chat`;
 const HISTORY_LIMIT = 10;

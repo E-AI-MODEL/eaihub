@@ -5,6 +5,8 @@ import { CURRICULUM_PATHS } from '../data/curriculum';
 import { fetchProfile } from './profileService';
 import { getOrCreateUserId } from './identity';
 import { fetchMastery } from './masteryService';
+import { fetchAllSessions, type StudentSessionRow } from './sessionSyncService';
+import type { EAIAnalysis } from '../types';
 
 export type StudentEvent = {
   timestamp: number;
