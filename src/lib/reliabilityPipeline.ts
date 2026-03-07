@@ -222,7 +222,10 @@ export function healAnalysisToSSOT(
     });
   }
 
-  return { healed, events };
+  const ssotHealingCount = events.filter(e => e.startsWith('PRUNE_UNKNOWN_')).length;
+  const commandNullCount = events.filter(e => e.startsWith('NULL_UNKNOWN_COMMAND')).length;
+
+  return { healed, events, ssotHealingCount, commandNullCount };
 }
 
 // ============= EPISTEMIC GUARD =============
