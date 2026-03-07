@@ -44,6 +44,39 @@ export type Database = {
         }
         Relationships: []
       }
+      mastery: {
+        Row: {
+          created_at: string
+          current_node_id: string | null
+          history: Json
+          id: string
+          path_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_node_id?: string | null
+          history?: Json
+          id?: string
+          path_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_node_id?: string | null
+          history?: Json
+          id?: string
+          path_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       student_sessions: {
         Row: {
           analysis: Json | null
