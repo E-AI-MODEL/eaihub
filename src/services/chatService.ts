@@ -76,11 +76,10 @@ function updateSessionContext(sessionId: string, analysis: EAIAnalysis, profile:
 
 // ═══ MASTERY STATE-MACHINE UPDATE ═══
 // Veilige fase 1: INTRO → WORKING → CHECKING (geen auto-MASTERED)
-function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, sessionId: string) {
+function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, sessionId: string, userId: string) {
   if (!profile.currentNodeId || !profile.subject || !profile.level) return;
 
   const pathId = `${profile.subject}_${profile.level}`.toUpperCase().replace(/\s/g, '');
-  const userId = profile.name || 'anonymous'; // identity comes from caller context
   const ctx = getSessionContext(sessionId);
   const turnCount = ctx.turn_count;
 
