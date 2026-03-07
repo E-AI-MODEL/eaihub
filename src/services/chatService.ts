@@ -76,11 +76,10 @@ function updateSessionContext(sessionId: string, analysis: EAIAnalysis, profile:
 
 // ═══ MASTERY STATE-MACHINE UPDATE ═══
 // Veilige fase 1: INTRO → WORKING → CHECKING (geen auto-MASTERED)
-function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, sessionId: string) {
+function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, sessionId: string, userId: string) {
   if (!profile.currentNodeId || !profile.subject || !profile.level) return;
 
   const pathId = `${profile.subject}_${profile.level}`.toUpperCase().replace(/\s/g, '');
-  const userId = profile.name || 'anonymous'; // identity comes from caller context
   const ctx = getSessionContext(sessionId);
   const turnCount = ctx.turn_count;
 
@@ -390,7 +389,7 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
 
     // Update mastery state based on analysis
-    triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId);
+    triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId, request.userId);
 
     // Persist messages to DB (fire-and-forget)
 
@@ -539,7 +538,7 @@ export const streamChat = async ({
     const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
 
     // Update mastery state based on analysis
-    triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId);
+    triggerMasteryUpdate(request.profile, pipelineResult.analysis, request.sessionId, request.userId);
 
     // Post-process [BEELD:] tags in AI output
     const processedText = await processBeeldTags(fullText, request.sessionId, request.profile);
