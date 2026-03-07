@@ -886,6 +886,86 @@ function checkLogicGates(knowledgeType: string): { maxTD: string | null; enforce
   return { maxTD: null, enforcement: null };
 }
 
+// ============= EDGE CLASSIFICATION (STAP 1) =============
+
+interface EdgeClassifyResult {
+  analysis: Partial<EAIAnalysis>;
+  source: 'edge';
+  latencyMs: number;
+}
+
+async function attemptEdgeClassification(
+  userMessage: string,
+  aiResponse: string,
+  profile: LearnerProfile,
+  sessionId: string
+): Promise<EdgeClassifyResult | null> {
+  try {
+    const ctx = getSessionContext(sessionId);
+    const response = await fetch(CLASSIFY_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({
+        userMessage,
+        aiResponse,
+        profile,
+        sessionContext: {
+          topics_covered: ctx.topics_covered,
+          turn_count: ctx.turn_count,
+          current_topic: ctx.current_topic,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      console.warn(`[ChatService] Edge classify failed: HTTP ${response.status}`);
+      await response.text(); // consume body
+      return null;
+    }
+
+    const data = await response.json();
+    if (!data.analysis) {
+      console.warn('[ChatService] Edge classify returned no analysis');
+      return null;
+    }
+
+    console.log(`[ChatService] Edge classify success in ${data.latencyMs}ms, source: edge`);
+    return {
+      analysis: data.analysis,
+      source: 'edge',
+      latencyMs: data.latencyMs,
+    };
+  } catch (err) {
+    console.warn('[ChatService] Edge classify error, falling back to client:', err);
+    return null;
+  }
+}
+
+/**
+ * Merge edge analysis into full EAIAnalysis, using client-side as base
+ * Edge provides core classifications; client fills remaining fields (scaffolding, profile, etc.)
+ */
+function mergeEdgeAnalysis(
+  edgeAnalysis: Partial<EAIAnalysis>,
+  clientAnalysis: EAIAnalysis
+): EAIAnalysis {
+  return {
+    ...clientAnalysis,
+    process_phases: edgeAnalysis.process_phases || clientAnalysis.process_phases,
+    coregulation_bands: edgeAnalysis.coregulation_bands || clientAnalysis.coregulation_bands,
+    task_densities: edgeAnalysis.task_densities || clientAnalysis.task_densities,
+    cognitive_mode: (edgeAnalysis.cognitive_mode as any) || clientAnalysis.cognitive_mode,
+    srl_state: (edgeAnalysis.srl_state as any) || clientAnalysis.srl_state,
+    epistemic_status: (edgeAnalysis.epistemic_status as any) || clientAnalysis.epistemic_status,
+    active_fix: edgeAnalysis.active_fix !== undefined ? edgeAnalysis.active_fix : clientAnalysis.active_fix,
+    active_flags: edgeAnalysis.active_flags || clientAnalysis.active_flags,
+    reasoning: edgeAnalysis.reasoning || clientAnalysis.reasoning,
+  };
+}
+
 // ============= MAIN ANALYSIS FUNCTION =============
 
 function generateAnalysis(input: string, output: string, profile: LearnerProfile): EAIAnalysis {
