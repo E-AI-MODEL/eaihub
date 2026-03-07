@@ -148,7 +148,6 @@ const bPatterns = getLearnerObsPatterns('B_BiasCorrectie');
 // ═══ DIDACTISCH-GEDREVEN MODEL ROUTER ═══
 type TaskType = 'chat' | 'deep' | 'image';
 
-import type { RouterDecision } from '@/types';
 
 function buildRouterDecision(message: string, sessionContext: SessionContext): RouterDecision {
   const lastK = sessionContext.knowledge_trajectory.length > 0
