@@ -3,7 +3,7 @@
 // Version 15.0 - Uses authoritative SSOT v15.0.0 JSON with dynamic prompt
 // Includes reliability pipeline: parse/repair, SSOT-healing, epistemic guard
 
-import type { ChatRequest, ChatResponse, EAIAnalysis, MechanicalState, LearnerProfile, SessionContext } from '@/types';
+import type { ChatRequest, ChatResponse, EAIAnalysis, MechanicalState, LearnerProfile, SessionContext, RouterDecision } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { 
   getFixForBand, 
@@ -124,7 +124,9 @@ function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, se
     const mastery = JSON.parse(stored);
     const completedNodes = new Set<string>();
     for (const entry of mastery.history || []) {
-      if (entry.nodeId) completedNodes.add(entry.nodeId);
+      if (entry.nodeId && entry.score != null && entry.score >= 0.6) {
+        completedNodes.add(entry.nodeId);
+      }
     }
     return Math.round((completedNodes.size / path.nodes.length) * 100);
   } catch {
@@ -146,7 +148,6 @@ const bPatterns = getLearnerObsPatterns('B_BiasCorrectie');
 // ═══ DIDACTISCH-GEDREVEN MODEL ROUTER ═══
 type TaskType = 'chat' | 'deep' | 'image';
 
-import type { RouterDecision } from '@/types';
 
 function buildRouterDecision(message: string, sessionContext: SessionContext): RouterDecision {
   const lastK = sessionContext.knowledge_trajectory.length > 0
