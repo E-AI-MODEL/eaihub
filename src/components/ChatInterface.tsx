@@ -90,6 +90,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         eaiState: eaiState || null,
         messagesCount: messages.length,
         lastMessagePreview: messages.length > 0 ? messages[messages.length - 1].text.slice(0, 100) : null,
+        progress: progressRef.current,
       });
     };
     pushState(); // immediate push
