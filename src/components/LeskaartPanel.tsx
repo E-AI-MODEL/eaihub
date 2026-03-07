@@ -1,9 +1,18 @@
 import React, { useMemo, useState } from 'react';
-import { BookOpen, Target, AlertTriangle, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getLearningPath, type LearningNode } from '@/data/curriculum';
+import { BookOpen, Target, AlertTriangle, Clock, ChevronLeft, ChevronRight, Lightbulb } from 'lucide-react';
+import { getLearningPath } from '@/data/curriculum';
 import type { LearnerProfile, EAIAnalysis, DidacticTheme } from '@/types';
 
-// Intervention Toolbox Categories (moved from ChatInterface)
+// Learner-facing phase descriptions (no technical terms)
+const PHASE_CONTEXT: Record<string, { label: string; hint: string }> = {
+  P1: { label: 'Oriëntatie', hint: 'We verkennen samen het onderwerp en bepalen je startpunt.' },
+  P2: { label: 'Voorkennis', hint: 'We controleren wat je al weet, zodat de uitleg goed aansluit.' },
+  P3: { label: 'Uitleg & oefening', hint: 'Je krijgt uitleg en oefent stap voor stap.' },
+  P4: { label: 'Toepassen', hint: 'Je past toe wat je hebt geleerd in nieuwe situaties.' },
+  P5: { label: 'Reflectie', hint: 'Je kijkt terug op wat je hebt geleerd en hoe het ging.' },
+};
+
+// Intervention Toolbox Categories
 const TOOL_CATEGORIES: Record<string, { label: string; command: string; icon: string; desc: string; mode: DidacticTheme }[]> = {
   START: [
     { label: "Bepaal doel", command: "/checkin", icon: "📍", desc: "Doel en rol", mode: "COACH" },
@@ -41,13 +50,8 @@ interface LeskaartPanelProps {
 }
 
 const LeskaartPanel: React.FC<LeskaartPanelProps> = ({
-  profile,
-  analysis,
-  onNodeChange,
-  onSendCommand,
-  sessionStartTime,
+  profile, analysis, onNodeChange, onSendCommand, sessionStartTime,
 }) => {
-  // Determine active toolbox tab from analysis
   const autoTab = useMemo(() => {
     if (!analysis?.process_phases?.length) return 'START';
     const phase = analysis.process_phases[0];
@@ -61,7 +65,6 @@ const LeskaartPanel: React.FC<LeskaartPanelProps> = ({
 
   const [activeTab, setActiveTab] = useState(autoTab);
 
-  // Get learning path & current node
   const learningPath = useMemo(() => {
     if (!profile.subject || !profile.level) return null;
     return getLearningPath(profile.subject, profile.level);
@@ -87,10 +90,7 @@ const LeskaartPanel: React.FC<LeskaartPanelProps> = ({
     return () => clearInterval(interval);
   }, [sessionStartTime]);
 
-  // Sync active tab when analysis changes
-  React.useEffect(() => {
-    setActiveTab(autoTab);
-  }, [autoTab]);
+  React.useEffect(() => { setActiveTab(autoTab); }, [autoTab]);
 
   const navigateNode = (direction: -1 | 1) => {
     if (!learningPath) return;
@@ -99,6 +99,11 @@ const LeskaartPanel: React.FC<LeskaartPanelProps> = ({
       onNodeChange(learningPath.nodes[newIdx].id);
     }
   };
+
+  // Derive learner-facing phase context
+  const currentPhase = analysis?.process_phases?.[0] || null;
+  const phaseKey = currentPhase ? currentPhase.slice(0, 2) : null;
+  const phaseContext = phaseKey ? PHASE_CONTEXT[phaseKey] : null;
 
   const tools = TOOL_CATEGORIES[activeTab] || [];
 
@@ -173,6 +178,18 @@ const LeskaartPanel: React.FC<LeskaartPanelProps> = ({
           <p className="text-[11px] text-slate-600 italic">Selecteer een lesonderwerp via de header.</p>
         )}
       </div>
+
+      {/* Section: Leercontext — learner-facing phase explanation */}
+      {phaseContext && (
+        <div className="px-4 py-3 border-b border-slate-800">
+          <div className="flex items-center gap-2 mb-2">
+            <Lightbulb className="w-3 h-3 text-cyan-400" />
+            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Waar je nu bent</span>
+          </div>
+          <p className="text-[11px] text-cyan-300 font-medium mb-1">{phaseContext.label}</p>
+          <p className="text-[10px] text-slate-400 leading-relaxed">{phaseContext.hint}</p>
+        </div>
+      )}
 
       {/* Section: Inline Toolbox */}
       <div className="p-4 border-b border-slate-800 flex-1">

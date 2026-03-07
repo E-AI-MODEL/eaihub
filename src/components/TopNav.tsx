@@ -1,17 +1,19 @@
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
+import { LogOut, User } from 'lucide-react';
 
 const TopNav = () => {
   const location = useLocation();
-  const isLanding = location.pathname === '/' || location.pathname === '/concept' || location.pathname === '/student';
+  const { user, roles, signOut } = useAuth();
+  const isHidden = location.pathname === '/' || location.pathname === '/concept' || location.pathname === '/student' || location.pathname === '/auth' || location.pathname === '/reset-password';
 
-  // Hide generic nav on landing and concept page
-  if (isLanding) return null;
+  if (isHidden) return null;
 
   const navItems = [
-    { path: '/student', label: 'Student' },
-    { path: '/teacher', label: 'Docent' },
-    { path: '/admin', label: 'Admin' },
+    { path: '/student', label: 'Leerling', show: true },
+    { path: '/teacher', label: 'Docent', show: roles.includes('DOCENT') || roles.includes('ADMIN') },
+    { path: '/admin', label: 'Admin', show: roles.includes('ADMIN') },
   ];
 
   return (
@@ -20,20 +22,33 @@ const TopNav = () => {
         <Link to="/" className="font-semibold hover:text-foreground transition-colors">
           EAI Hub 15.0
         </Link>
-        <nav className="flex gap-4" aria-label="Hoofdnavigatie">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                "hover:text-foreground transition-colors",
-                location.pathname.startsWith(item.path) && "text-primary"
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <div className="flex items-center gap-4">
+          <nav className="flex gap-4" aria-label="Hoofdnavigatie">
+            {navItems.filter(i => i.show).map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={cn(
+                  "hover:text-foreground transition-colors",
+                  location.pathname.startsWith(item.path) && "text-primary"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          {user && (
+            <div className="flex items-center gap-2 pl-3 border-l border-border">
+              <User className="w-3 h-3" />
+              <span className="text-[9px] normal-case tracking-normal text-muted-foreground truncate max-w-[120px]">
+                {user.email}
+              </span>
+              <button onClick={signOut} className="p-1 hover:text-foreground transition-colors" title="Uitloggen">
+                <LogOut className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
