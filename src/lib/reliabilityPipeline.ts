@@ -537,17 +537,14 @@ export function executePipeline(
     message: 'Starting reliability pipeline',
   });
 
-  // Step 1: SSOT Healing
-  const { healed, events: healingEvents, ssotHealingCount, commandNullCount } = healAnalysisToSSOT(analysis, sessionId);
+  // Step 1: SSOT Healing (unified normalizer with fuzzy-map)
+  const { healed, events: healingEvents, ssotHealingCount, commandNullCount } = normalizeAnalysisToSSOT(analysis, sessionId);
 
   // Step 2: Epistemic Guard
   const { guarded, result: epistemicResult } = epistemicGuard(healed, sessionId);
 
-  // Step 3: Consolidated G-Factor (cross-dimensional + structural)
+  // Step 3: Consolidated G-Factor (includes logic gate check internally)
   const semanticValidation = calculateGFactor(guarded, sessionId);
-
-  // Step 4: Logic gate breach (authoritative, post-healing)
-  const logicGateBreach = checkLogicGatesAnalysis(guarded);
 
   // Update mechanical state with pipeline results
   const enhancedMechanical: MechanicalState = {
