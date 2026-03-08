@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import EITLWizard from '@/components/EITLWizard';
 import PluginVersionHistory from '@/components/PluginVersionHistory';
+import ObservabilityPanel from '@/components/ObservabilityPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -237,6 +238,7 @@ const AdminPanel = () => {
             <TabsTrigger value="actions" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">Admin </span>Actions</TabsTrigger>
             <TabsTrigger value="ssot" className="text-xs sm:text-sm whitespace-nowrap">SSOT<span className="hidden sm:inline"> Browser</span></TabsTrigger>
             <TabsTrigger value="eitl" className="text-xs sm:text-sm whitespace-nowrap">EITL<span className="hidden sm:inline"> Plugin</span></TabsTrigger>
+            <TabsTrigger value="observability" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">Observ</span>ability</TabsTrigger>
           </TabsList>
 
           {/* System Monitoring Tab */}
@@ -1278,6 +1280,10 @@ const AdminPanel = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+          {/* Observability Tab */}
+          <TabsContent value="observability">
+            <ObservabilityPanel />
           </TabsContent>
         </Tabs>
       </div>
