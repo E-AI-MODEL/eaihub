@@ -341,6 +341,8 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
         temperature: 0.8,
         timestamp: new Date().toISOString(),
         routerDecision: imageRouterDecision,
+        // Metrics contract: analysisSource per bericht, 'client' = geen edge-classificatie uitgevoerd
+        analysisSource: 'client',
       };
       const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
       updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
