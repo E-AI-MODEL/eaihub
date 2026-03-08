@@ -22,10 +22,20 @@ import {
 import { persistChatMessage } from '@/services/adminDbService';
 import { getNodeById, CURRICULUM_PATHS } from '@/data/curriculum';
 import { updateMastery } from '@/services/masteryService';
+import { supabase } from '@/integrations/supabase/client';
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-chat`;
 const CLASSIFY_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-classify`;
 const HISTORY_LIMIT = 10;
+
+/** Get the current user's JWT for authenticated edge function calls */
+async function getAuthToken(): Promise<string> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    throw new Error('Niet ingelogd. Log opnieuw in om de AI te gebruiken.');
+  }
+  return session.access_token;
+}
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -212,11 +222,12 @@ async function processBeeldTags(
     const beschrijving = match[1].trim();
     
     try {
+      const token = await getAuthToken();
       const response = await fetch(CHAT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           sessionId,
@@ -278,11 +289,12 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     const routerDecision = buildRouterDecision(request.message, sessionCtx);
     const taskType = routerDecision.intent_category === 'SLOW' ? 'deep' as TaskType : 'chat' as TaskType;
     
+    const token = await getAuthToken();
     const response = await fetch(CHAT_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         sessionId: request.sessionId,
@@ -530,11 +542,12 @@ export const streamChat = async ({
     const streamRouterDecision = buildRouterDecision(request.message, sessionCtx);
     const taskType: TaskType = streamRouterDecision.intent_category === 'SLOW' ? 'deep' : 'chat';
     
+    const token = await getAuthToken();
     const response = await fetch(CHAT_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         sessionId: request.sessionId,
@@ -957,11 +970,12 @@ async function attemptEdgeClassification(
 ): Promise<EdgeClassifyResult | null> {
   try {
     const ctx = getSessionContext(sessionId);
+    const token = await getAuthToken();
     const response = await fetch(CLASSIFY_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         userMessage,
