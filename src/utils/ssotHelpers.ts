@@ -451,7 +451,7 @@ export function validateSSOT(): string[] {
   }
   
   // Check each rubric has bands
-  for (const rubricId of SSOT_DATA.metadata.cycle.order) {
+  for (const rubricId of getCycleOrder()) {
     const rubric = getRubric(rubricId);
     if (!rubric) {
       issues.push(`Rubric not found: ${rubricId}`);
