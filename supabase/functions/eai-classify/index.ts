@@ -83,7 +83,7 @@ const CLASSIFY_TOOL = {
           description: "Dimensies die op of nabij een grens liggen, bv. ['K', 'P', 'TD']",
         },
       },
-      required: ["process_phases", "coregulation_bands", "task_densities", "secondary_dimensions", "cognitive_mode", "srl_state", "epistemic_status", "active_flags", "reasoning"],
+      required: ["process_phases", "knowledge_type", "coregulation_bands", "task_densities", "secondary_dimensions", "cognitive_mode", "srl_state", "epistemic_status", "active_flags", "reasoning"],
       additionalProperties: false,
     },
   },
