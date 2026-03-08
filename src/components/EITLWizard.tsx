@@ -13,6 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { BASE_SSOT, getSSOTVersion, getShortKey } from '@/data/ssot';
 import { validatePlugin, type PluginJson } from '@/lib/ssotValidator';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { useAuth } from '@/hooks/useAuth';
 import {
   ChevronLeft, ChevronRight, Save, CheckCircle, AlertTriangle,
@@ -243,7 +244,7 @@ const EITLWizard: React.FC<EITLWizardProps> = ({ existingPlugin, onClose, onSave
         school_id: state.schoolId,
         school_name: state.schoolName,
         based_on_version: getSSOTVersion(),
-        plugin_json: pluginJson as any,
+        plugin_json: pluginJson as Json,
         is_active: activate,
         change_notes: state.changeNotes.trim() || null,
         created_by: user.id,
