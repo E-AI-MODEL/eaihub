@@ -3,17 +3,19 @@
 // All components should import from here instead of hardcoding data
 
 import { 
-  SSOT_DATA, 
   getLogicGates, 
   getRubric, 
   getRubricByShortKey,
   getShortKey,
   getCommands,
   getSRLStates,
+  getCycleOrder,
+  getSSOTVersion,
   type Rubric,
   type RubricBand,
   type LogicGate
 } from '@/data/ssot';
+import { getEffectiveSSOT } from '@/lib/ssotRuntime';
 import { getNodeById, getLearningPath, type LearningNode } from '@/data/curriculum';
 import type { SessionContext } from '@/types';
 
