@@ -5,6 +5,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { BASE_SSOT, type SSOTData, type Rubric, type RubricBand, type SRLState } from '@/data/ssot';
+import type { AppRole } from '@/hooks/useAuth';
 import { validatePlugin, validateVersionMatch, type PluginJson } from '@/lib/ssotValidator';
 
 // ============= TYPES =============
