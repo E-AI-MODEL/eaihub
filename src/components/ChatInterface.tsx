@@ -9,6 +9,7 @@ import { calculateDynamicTTL } from '@/utils/eaiLearnAdapter';
 import { pushTrace } from '@/lib/reliabilityPipeline';
 import { getNodeById } from '@/data/curriculum';
 import { upsertSessionState, subscribeToTeacherMessages, fetchTeacherMessages, markMessageRead } from '@/services/sessionSyncService';
+import { getActivePlugin } from '@/lib/ssotRuntime';
 
 interface ChatInterfaceProps {
   profile: LearnerProfile;
