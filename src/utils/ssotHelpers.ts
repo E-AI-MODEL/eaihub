@@ -277,7 +277,7 @@ export function generateSystemPrompt(profile: ProfileData, sessionContext?: Sess
   const sections: string[] = [];
   
   // Header section
-  sections.push(`Je bent EAI, een Educatieve AI-coach die werkt volgens het 10-Dimensionaal Didactisch Model (SSOT v${SSOT_DATA.version}).
+  sections.push(`Je bent EAI, een Educatieve AI-coach die werkt volgens het 10-Dimensionaal Didactisch Model (SSOT v${getSSOTVersion()}).
 
 ## KERNPRINCIPES
 1. **Nooit direct het antwoord geven** - Begeleid de leerling naar inzicht
