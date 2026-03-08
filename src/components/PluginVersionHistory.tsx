@@ -110,6 +110,7 @@ const PluginVersionHistory: React.FC<PluginVersionHistoryProps> = ({ schoolId, o
         performed_by: user.id,
         change_notes: `Rollback naar versie ${versionId.slice(0, 8)} (was: ${currentActive?.id?.slice(0, 8) ?? 'geen'})`,
       });
+      if (auditErr) console.error('[VersionHistory] Audit insert failed:', auditErr);
 
       // Refresh cache
       clearSSOTCache();
