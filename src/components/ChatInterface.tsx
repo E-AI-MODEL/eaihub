@@ -82,7 +82,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   // ═══ SESSION SYNC: Push state to DB every 10s ═══
   useEffect(() => {
-    const userId = getOrCreateUserId();
     const pushState = () => {
       upsertSessionState({
         userId,
