@@ -13,6 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { BASE_SSOT, getSSOTVersion, getShortKey } from '@/data/ssot';
 import { validatePlugin, type PluginJson } from '@/lib/ssotValidator';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { useAuth } from '@/hooks/useAuth';
 import {
   ChevronLeft, ChevronRight, Save, CheckCircle, AlertTriangle,
