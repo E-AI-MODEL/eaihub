@@ -266,7 +266,7 @@ export type Database = {
       owns_session: { Args: { _session_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "LEERLING" | "DOCENT" | "ADMIN"
+      app_role: "LEERLING" | "DOCENT" | "ADMIN" | "SUPERUSER"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -394,7 +394,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["LEERLING", "DOCENT", "ADMIN"],
+      app_role: ["LEERLING", "DOCENT", "ADMIN", "SUPERUSER"],
     },
   },
 } as const
