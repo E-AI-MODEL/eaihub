@@ -139,6 +139,7 @@ export interface MechanicalState {
   healingEventCount?: number;
   ssotHealingCount?: number;
   commandNullCount?: number;
+  /** @deprecated Altijd 0 — JSON parse repair is verwijderd uit pipeline. Behouden voor backward compat. */
   parseRepairCount?: number;
   analysisSource?: 'edge' | 'client';
 }

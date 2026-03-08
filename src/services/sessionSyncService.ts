@@ -18,6 +18,12 @@ export interface TeacherMessage {
 // STUDENT SIDE: Push session state
 // ═══════════════════════════════════════════════════
 
+/**
+ * Push student session state to DB.
+ * Metrics contract:
+ * - pluginId: per sessie. null = base SSOT (geen plugin geladen), string = actief plugin ID.
+ * - progress: per sessie, afgeleid van mastery sync.
+ */
 export async function upsertSessionState(params: {
   userId: string;
   sessionId: string;
@@ -28,6 +34,7 @@ export async function upsertSessionState(params: {
   messagesCount: number;
   lastMessagePreview: string | null;
   progress?: number;
+  pluginId?: string | null;
 }) {
   const { error } = await supabase
     .from('student_sessions')
@@ -45,6 +52,7 @@ export async function upsertSessionState(params: {
       messages_count: params.messagesCount,
       last_message_preview: params.lastMessagePreview,
       progress: params.progress ?? 0,
+      plugin_id: params.pluginId ?? null,
       last_active_at: new Date().toISOString(),
     }, { onConflict: 'session_id' });
 

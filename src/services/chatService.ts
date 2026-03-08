@@ -341,6 +341,8 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
         temperature: 0.8,
         timestamp: new Date().toISOString(),
         routerDecision: imageRouterDecision,
+        // Metrics contract: analysisSource per bericht, 'client' = geen edge-classificatie uitgevoerd
+        analysisSource: 'client',
       };
       const pipelineResult = executePipeline(rawAnalysis, rawMechanical, request.sessionId);
       updateSessionContext(request.sessionId, pipelineResult.analysis, request.profile);
@@ -494,6 +496,13 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
         model: 'error',
         temperature: 0,
         timestamp: new Date().toISOString(),
+        // Metrics contract: fallback defaults — geen edge-resultaat beschikbaar
+        // Granulariteit: per bericht. null = niet beschikbaar, 0 = gemeten geen events.
+        analysisSource: 'client',
+        healingEventCount: 0,
+        ssotHealingCount: 0,
+        commandNullCount: 0,
+        parseRepairCount: 0,
       },
       auditId: null,
     };
@@ -648,6 +657,12 @@ export const streamChat = async ({
         model: 'error',
         temperature: 0,
         timestamp: new Date().toISOString(),
+        // Metrics contract: fallback defaults — geen edge-resultaat beschikbaar
+        analysisSource: 'client',
+        healingEventCount: 0,
+        ssotHealingCount: 0,
+        commandNullCount: 0,
+        parseRepairCount: 0,
       },
       auditId: null,
     });
@@ -1080,7 +1095,8 @@ function generateAnalysis(input: string, output: string, profile: LearnerProfile
   
   return {
     process_phases: [processPhase],
-    coregulation_bands: [knowledgeType, coRegulation, processPhase],
+    // Metrics contract: alleen C-bands. K-band → reasoning, P-band → process_phases
+    coregulation_bands: [coRegulation],
     task_densities: [taskDensity],
     // Include all secondary dimensions for full 10D coverage
     secondary_dimensions: [skillPotential, epistemicBand, toolAwareness, socialInteraction, learningContinuity, biasCorrection],

@@ -9,6 +9,7 @@ import { calculateDynamicTTL } from '@/utils/eaiLearnAdapter';
 import { pushTrace } from '@/lib/reliabilityPipeline';
 import { getNodeById } from '@/data/curriculum';
 import { upsertSessionState, subscribeToTeacherMessages, fetchTeacherMessages, markMessageRead } from '@/services/sessionSyncService';
+import { getActivePlugin } from '@/lib/ssotRuntime';
 
 interface ChatInterfaceProps {
   profile: LearnerProfile;
@@ -94,6 +95,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         messagesCount: messages.length,
         lastMessagePreview: messages.length > 0 ? messages[messages.length - 1].text.slice(0, 100) : null,
         progress: progressRef.current,
+        pluginId: getActivePlugin()?.id ?? null,
       });
       setSyncPulse(true);
       setTimeout(() => setSyncPulse(false), 800);
