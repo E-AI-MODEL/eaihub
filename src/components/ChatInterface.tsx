@@ -362,6 +362,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           >
             <Send className="w-4 h-4" />
           </button>
+          <div className="flex items-center gap-1 shrink-0 mb-1" title="Sessie sync · elke 10s">
+            <span
+              className={`inline-block w-1.5 h-1.5 rounded-full transition-opacity duration-700 ${
+                syncPulse ? 'bg-emerald-400 opacity-100' : 'bg-emerald-600 opacity-20'
+              }`}
+            />
+          </div>
         </div>
       </div>
     </div>
