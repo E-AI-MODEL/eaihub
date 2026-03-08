@@ -131,7 +131,8 @@ const AdminPanel = () => {
   };
 
 
-  const ssotDimensions = SSOT_DATA.rubrics.map(rubric => ({
+  const effectiveSSOT = getEffectiveSSOT();
+  const ssotDimensions = effectiveSSOT.rubrics.map(rubric => ({
     code: rubric.bands[0]?.band_id?.replace(/\d+/g, '') || rubric.rubric_id.toUpperCase().slice(0, 2),
     name: rubric.name,
     description: rubric.bands.map(b => b.label).join(' → '),
