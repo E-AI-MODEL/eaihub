@@ -1,6 +1,6 @@
 // ============= OBSERVABILITY PANEL =============
 // Fase 5: Plugin usage metrics, governance event metrics, runtime metrics.
-// Data sources: school_ssot, ssot_changes, student_sessions.
+// Data sources: school_ssot, ssot_changes.
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
