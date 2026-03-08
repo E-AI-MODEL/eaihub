@@ -37,10 +37,11 @@ Stap 1–7 afgerond. Fase 1–5 gedefinieerd voor stabilisatie, consistentie en 
 
 | # | Taak | Impact | Status |
 |---|------|--------|--------|
-| 1.1 | **RLS verscherpen** op `chat_messages`, `student_sessions`, `mastery`, `teacher_messages` | High | TODO |
+| 1.1 | **RLS verscherpen** op `chat_messages`, `student_sessions`, `mastery`, `teacher_messages` | High | ✅ DONE |
 |     | Student: eigen data (`auth.uid() = user_id`) | | |
 |     | Docent: leesrechten via `has_role(auth.uid(), 'DOCENT')` | | |
 |     | Admin: volledige toegang via `has_role(auth.uid(), 'ADMIN')` | | |
+|     | _Fix: eerste migratie maakte RESTRICTIVE policies (AND-logica); gecorrigeerd naar PERMISSIVE (OR-logica)_ | | |
 | 1.2 | **Healing consolideren** — `healAnalysisToSSOT()` en `validateAnalysisAgainstSSOT()` samenvoegen tot één `normalizeAnalysisToSSOT()` met fuzzy-map | Medium | TODO |
 |     | Admin audit gebruikt dezelfde functie in strict mode | | |
 
