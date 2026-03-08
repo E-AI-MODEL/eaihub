@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { SSOT_DATA } from '@/data/ssot';
+import { getSSOTVersion, getRubric, getShortKey, getCycleOrder } from '@/data/ssot';
 import { getDimensionMeta, getKnowledgeLevelsForUI, getLogicGatesForUI } from '@/utils/ssotHelpers';
 
 interface DidacticLegendProps {
