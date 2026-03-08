@@ -62,7 +62,8 @@ const PluginVersionHistory: React.FC<PluginVersionHistoryProps> = ({ schoolId, o
           .select('*')
           .eq('school_id', schoolId)
           .order('created_at', { ascending: false })
-          .limit(50),
+          .limit(50)
+          .then(res => res as any),
       ]);
 
       setVersions((versionsRes.data as PluginVersion[]) || []);
