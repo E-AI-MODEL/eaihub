@@ -91,7 +91,7 @@ Stap 1–7 afgerond. Fase 1–5 afgerond. Alle observability-metrics (edge/clien
 | 4.3 | Audit log — `ssot_changes` tabel met SUPERUSER ALL + ADMIN SELECT | ✅ DONE |
 | 4.4 | Diff-view — versiegeschiedenis + audit trail in EITL tab | ✅ DONE |
 
-### Fase 5 — Observability
+### Fase 5 — Observability ✅
 
 | # | Taak | Status |
 |---|------|--------|
