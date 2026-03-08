@@ -631,7 +631,9 @@ const EITLWizard: React.FC<EITLWizardProps> = ({ existingPlugin, onClose, onSave
   // ============= RENDER =============
 
   const stepRenderers = [renderStep0_Metadata, renderStep1_Bands, renderStep2_Commands, renderStep3_SRLAndGates, renderStep4_Review];
-  const canProceed = step === 0 ? (state.schoolId.trim() && state.schoolName.trim()) : true;
+  const canProceed = step === 0
+    ? !!(state.schoolId.trim() && state.schoolName.trim() && (!existingPlugin || state.changeNotes.trim()))
+    : true;
 
   return (
     <Card className="border-primary/30">
