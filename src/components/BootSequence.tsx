@@ -19,7 +19,7 @@ const BootSequence: React.FC<BootSequenceProps> = ({ onComplete }) => {
         // Phase 1: Fake Init
         await new Promise(r => setTimeout(r, 600));
         if (!isMounted) return;
-        setLogs(prev => [...prev, `MOUNTING SSOT FILE SYSTEM (v${SSOT_DATA.version})...`]);
+        setLogs(prev => [...prev, `MOUNTING SSOT FILE SYSTEM (v${getSSOTVersion()})...`]);
         setProgress(20);
 
         // Phase 2: Run Real Diagnostics
