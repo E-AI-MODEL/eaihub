@@ -974,7 +974,7 @@ const AdminPanel = () => {
                         className="p-2 rounded bg-secondary/30 border border-border"
                       >
                         <code className="text-xs text-primary font-mono">{cmd}</code>
-                        <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">{desc}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">{String(desc)}</p>
                       </div>
                     ))}
                   </div>
