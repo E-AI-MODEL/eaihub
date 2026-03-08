@@ -77,7 +77,6 @@ const StudentStudio: React.FC = () => {
   };
 
   const handleProfileComplete = async (newProfile: LearnerProfile) => {
-    const userId = getOrCreateUserId();
     await updateProfile(userId, newProfile);
     setProfile(newProfile);
     setPhase('READY');
@@ -88,7 +87,6 @@ const StudentStudio: React.FC = () => {
     if (profile) {
       const updatedProfile = { ...profile, currentNodeId: nodeId };
       setProfile(updatedProfile);
-      const userId = getOrCreateUserId();
       await updateProfile(userId, updatedProfile);
     }
   };
