@@ -4,6 +4,7 @@ import MessageBubble from '@/components/MessageBubble';
 import type { Message, LearnerProfile, EAIAnalysis, MechanicalState } from '@/types';
 import { sendChat } from '@/services/chatService';
 import { getOrCreateUserId } from '@/services/identity';
+import { useAuth } from '@/hooks/useAuth';
 import { calculateDynamicTTL } from '@/utils/eaiLearnAdapter';
 import { pushTrace } from '@/lib/reliabilityPipeline';
 import { getNodeById } from '@/data/curriculum';
