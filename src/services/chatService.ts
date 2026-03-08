@@ -22,10 +22,20 @@ import {
 import { persistChatMessage } from '@/services/adminDbService';
 import { getNodeById, CURRICULUM_PATHS } from '@/data/curriculum';
 import { updateMastery } from '@/services/masteryService';
+import { supabase } from '@/integrations/supabase/client';
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-chat`;
 const CLASSIFY_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-classify`;
 const HISTORY_LIMIT = 10;
+
+/** Get the current user's JWT for authenticated edge function calls */
+async function getAuthToken(): Promise<string> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    throw new Error('Niet ingelogd. Log opnieuw in om de AI te gebruiken.');
+  }
+  return session.access_token;
+}
 
 interface ChatMessage {
   role: 'user' | 'assistant';
