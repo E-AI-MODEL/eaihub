@@ -1,6 +1,6 @@
 // ============= OBSERVABILITY PANEL =============
 // Fase 5: Edge vs Client ratio, Healing frequency, Knowledge_type distribution, Plugin usage.
-// Data sources: chat_messages (analysis, mechanical), student_sessions, school_ssot, ssot_changes.
+// Trending charts (5.1–5.4) with day-bucketed time-series.
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +13,11 @@ import {
   BarChart3, Activity, Layers, RotateCcw, CheckCircle, Clock,
   RefreshCw, Shield, FileText, Cpu, Zap, Brain, TrendingUp
 } from 'lucide-react';
+import {
+  AreaChart, Area, BarChart, Bar, LineChart, Line,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
+} from 'recharts';
+import { format } from 'date-fns';
 
 // ── Types ──
 
@@ -20,13 +25,13 @@ interface AnalysisSourceMetrics {
   total: number;
   edge: number;
   client: number;
-  edgeRatio: number; // 0-100
+  edgeRatio: number;
 }
 
 interface HealingMetrics {
   totalMessages: number;
   withHealing: number;
-  healingRate: number; // 0-100
+  healingRate: number;
   ssotHealingTotal: number;
   commandNullTotal: number;
   parseRepairTotal: number;
@@ -70,6 +75,32 @@ interface RuntimeMetrics {
   isFallback: boolean;
 }
 
+// ── Trend types ──
+
+interface DailyEdgeClientTrend {
+  date: string;
+  edge: number;
+  client: number;
+}
+
+interface DailyHealingTrend {
+  date: string;
+  totalHealing: number; // ssotHealing + commandNull + parseRepair
+}
+
+interface DailyBreachTrend {
+  date: string;
+  breaches: number;
+  totalRuns: number;
+  breachRate: number; // breaches / totalRuns * 100
+}
+
+interface DailyPluginCoverageTrend {
+  date: string;
+  withPlugin: number;
+  withoutPlugin: number;
+}
+
 // ── Component ──
 
 const ObservabilityPanel: React.FC = () => {
@@ -81,13 +112,18 @@ const ObservabilityPanel: React.FC = () => {
   const [runtimeMetrics, setRuntimeMetrics] = useState<RuntimeMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Trend state
+  const [edgeClientTrend, setEdgeClientTrend] = useState<DailyEdgeClientTrend[]>([]);
+  const [healingTrend, setHealingTrend] = useState<DailyHealingTrend[]>([]);
+  const [breachTrend, setBreachTrend] = useState<DailyBreachTrend[]>([]);
+  const [pluginCoverageTrend, setPluginCoverageTrend] = useState<DailyPluginCoverageTrend[]>([]);
+
   const loadMetrics = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Parallel fetch all data sources
       const [messagesRes, sessionsRes, pluginsRes, eventsRes] = await Promise.all([
-        supabase.from('chat_messages').select('analysis, mechanical, role').eq('role', 'assistant').limit(1000),
-        supabase.from('student_sessions').select('analysis, plugin_id').limit(1000),
+        supabase.from('chat_messages').select('analysis, mechanical, role, created_at').eq('role', 'assistant').limit(1000),
+        supabase.from('student_sessions').select('analysis, plugin_id, last_active_at').limit(1000),
         supabase.from('school_ssot').select('id, school_id, school_name, is_active, based_on_version, created_at').order('created_at', { ascending: false }),
         supabase.from('ssot_changes').select('id, action, plugin_id, previous_plugin_id, change_notes, created_at, school_id').order('created_at', { ascending: false }).limit(100),
       ]);
@@ -97,7 +133,7 @@ const ObservabilityPanel: React.FC = () => {
       const plugins = pluginsRes.data || [];
       const events = eventsRes.data || [];
 
-      // ── 1. Edge vs Client Source ──
+      // ── 1. Edge vs Client Source (snapshot) ──
       let edgeCount = 0;
       let clientCount = 0;
       for (const m of messages) {
@@ -115,7 +151,7 @@ const ObservabilityPanel: React.FC = () => {
         edgeRatio: totalSourced > 0 ? Math.round((edgeCount / totalSourced) * 100) : 0,
       });
 
-      // ── 2. Healing Frequency ──
+      // ── 2. Healing Frequency (snapshot) ──
       let withHealing = 0;
       let ssotH = 0, cmdN = 0, parseR = 0;
       for (const m of messages) {
@@ -143,7 +179,6 @@ const ObservabilityPanel: React.FC = () => {
       for (const s of sessions) {
         const a = s.analysis as Record<string, unknown> | null;
         if (!a) continue;
-        // Primary: knowledge_type field. Fallback: coregulation_bands legacy
         let kt = a.knowledge_type as string | undefined;
         if (!kt) {
           const bands = a.coregulation_bands as string[] | undefined;
@@ -156,7 +191,7 @@ const ObservabilityPanel: React.FC = () => {
       }
       setKnowledgeDist(kDist);
 
-      // ── 4. Plugin Usage ──
+      // ── 4. Plugin Usage (snapshot) ──
       const schoolMap = new Map<string, { school_name: string; activeVersion: string | null; totalVersions: number }>();
       for (const p of plugins) {
         const existing = schoolMap.get(p.school_id);
@@ -195,6 +230,86 @@ const ObservabilityPanel: React.FC = () => {
         baseSSOTVersion: plugin?.based_on_version ?? null,
         isFallback: !active,
       });
+
+      // ════════════════════════════════════════════
+      // ── TRENDING: Day-bucketed time-series ──
+      // ════════════════════════════════════════════
+
+      // Helper: date string → "yyyy-MM-dd"
+      const toDay = (iso: string | null) => {
+        if (!iso) return null;
+        try { return format(new Date(iso), 'yyyy-MM-dd'); } catch { return null; }
+      };
+
+      // -- 5.1 Edge vs Client trend --
+      const ecMap = new Map<string, { edge: number; client: number }>();
+      for (const m of messages) {
+        const day = toDay(m.created_at);
+        if (!day) continue;
+        const mech = m.mechanical as Record<string, unknown> | null;
+        const src = mech?.analysisSource as string | undefined;
+        if (!src) continue;
+        const bucket = ecMap.get(day) || { edge: 0, client: 0 };
+        if (src === 'edge') bucket.edge++;
+        else if (src === 'client') bucket.client++;
+        ecMap.set(day, bucket);
+      }
+      setEdgeClientTrend(
+        Array.from(ecMap.entries()).map(([date, v]) => ({ date, ...v })).sort((a, b) => a.date.localeCompare(b.date))
+      );
+
+      // -- 5.3 Logic gate breach rate trend + 5.4 Healing trend --
+      const brMap = new Map<string, { breaches: number; totalRuns: number }>();
+      const hlMap = new Map<string, number>();
+      for (const m of messages) {
+        const day = toDay(m.created_at);
+        if (!day) continue;
+        const mech = m.mechanical as Record<string, unknown> | null;
+        if (!mech) continue;
+
+        // Breach counting
+        const brBucket = brMap.get(day) || { breaches: 0, totalRuns: 0 };
+        brBucket.totalRuns++;
+        if (mech.logicGateBreach) brBucket.breaches++;
+        brMap.set(day, brBucket);
+
+        // Healing: total signal = ssotHealingCount + commandNullCount + parseRepairCount
+        const totalHeal =
+          ((mech.ssotHealingCount as number) || 0) +
+          ((mech.commandNullCount as number) || 0) +
+          ((mech.parseRepairCount as number) || 0);
+        hlMap.set(day, (hlMap.get(day) || 0) + totalHeal);
+      }
+      setBreachTrend(
+        Array.from(brMap.entries())
+          .map(([date, v]) => ({
+            date,
+            breaches: v.breaches,
+            totalRuns: v.totalRuns,
+            breachRate: v.totalRuns > 0 ? Math.round((v.breaches / v.totalRuns) * 1000) / 10 : 0,
+          }))
+          .sort((a, b) => a.date.localeCompare(b.date))
+      );
+      setHealingTrend(
+        Array.from(hlMap.entries())
+          .map(([date, totalHealing]) => ({ date, totalHealing }))
+          .sort((a, b) => a.date.localeCompare(b.date))
+      );
+
+      // -- 5.2 Plugin coverage trend (active session coverage based on last_active_at) --
+      const pcMap = new Map<string, { withPlugin: number; withoutPlugin: number }>();
+      for (const s of sessions) {
+        const day = toDay(s.last_active_at);
+        if (!day) continue;
+        const bucket = pcMap.get(day) || { withPlugin: 0, withoutPlugin: 0 };
+        if (s.plugin_id) bucket.withPlugin++;
+        else bucket.withoutPlugin++;
+        pcMap.set(day, bucket);
+      }
+      setPluginCoverageTrend(
+        Array.from(pcMap.entries()).map(([date, v]) => ({ date, ...v })).sort((a, b) => a.date.localeCompare(b.date))
+      );
+
     } catch (err) {
       console.error('[Observability] Load error:', err);
     } finally {
@@ -211,6 +326,11 @@ const ObservabilityPanel: React.FC = () => {
       </div>
     );
   }
+
+  // Short date formatter for chart X-axis
+  const fmtDate = (d: string) => {
+    try { return format(new Date(d), 'dd/MM'); } catch { return d; }
+  };
 
   return (
     <div className="space-y-6">
@@ -237,7 +357,7 @@ const ObservabilityPanel: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* ── Edge vs Client Ratio ── */}
+        {/* ── Edge vs Client Ratio (snapshot) ── */}
         <Card>
           <CardHeader>
             <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
@@ -277,7 +397,7 @@ const ObservabilityPanel: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* ── Healing Frequency ── */}
+        {/* ── Healing Frequency (snapshot) ── */}
         <Card>
           <CardHeader>
             <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
@@ -336,7 +456,7 @@ const ObservabilityPanel: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* ── Plugin Usage per School ── */}
+        {/* ── Plugin Usage per School (snapshot) ── */}
         <Card>
           <CardHeader>
             <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
@@ -347,7 +467,6 @@ const ObservabilityPanel: React.FC = () => {
           <CardContent>
             {pluginMetrics && (
               <div className="space-y-3">
-                {/* Session plugin coverage */}
                 <div className="p-3 rounded-lg bg-secondary/30 text-xs">
                   <div className="flex justify-between mb-1">
                     <span className="text-muted-foreground">Sessies met plugin</span>
@@ -358,7 +477,6 @@ const ObservabilityPanel: React.FC = () => {
                     <span className="font-mono text-foreground">{pluginMetrics.sessionsWithoutPlugin}</span>
                   </div>
                 </div>
-                {/* Per school */}
                 {pluginMetrics.schools.length > 0 ? (
                   <div className="space-y-2">
                     {pluginMetrics.schools.map(s => (
@@ -380,6 +498,129 @@ const ObservabilityPanel: React.FC = () => {
                   <p className="text-sm text-muted-foreground">Geen plugins gevonden.</p>
                 )}
               </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ════════════════════════════════════════════ */}
+      {/* ── TRENDING CHARTS (5.1 – 5.4) ──          */}
+      {/* ════════════════════════════════════════════ */}
+
+      <div className="flex items-center gap-2 mt-4">
+        <TrendingUp className="w-5 h-5 text-primary" />
+        <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">Trending over tijd</h2>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        {/* ── 5.1 Edge vs Client Trending ── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
+              <Zap className="w-4 h-4 text-primary" />
+              5.1 Edge vs Client per dag
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {edgeClientTrend.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={edgeClientTrend}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="date" tickFormatter={fmtDate} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                  <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                  <Tooltip labelFormatter={v => `Datum: ${v}`} />
+                  <Area type="monotone" dataKey="edge" stackId="1" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.3)" name="Edge" />
+                  <Area type="monotone" dataKey="client" stackId="1" stroke="hsl(45 93% 47%)" fill="hsl(45 93% 47% / 0.3)" name="Client" />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-muted-foreground">Nog geen dagdata beschikbaar.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── 5.2 Plugin Coverage Trending ── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
+              <Layers className="w-4 h-4 text-primary" />
+              5.2 Plugin-sessie coverage per dag
+            </CardTitle>
+            <p className="text-[10px] text-muted-foreground">Actieve sessies (op basis van last_active_at)</p>
+          </CardHeader>
+          <CardContent>
+            {pluginCoverageTrend.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={pluginCoverageTrend}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="date" tickFormatter={fmtDate} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                  <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                  <Tooltip labelFormatter={v => `Datum: ${v}`} />
+                  <Bar dataKey="withPlugin" stackId="1" fill="hsl(var(--primary))" name="Met plugin" />
+                  <Bar dataKey="withoutPlugin" stackId="1" fill="hsl(var(--muted-foreground) / 0.4)" name="Base SSOT" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-muted-foreground">Nog geen dagdata beschikbaar.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── 5.3 Logic Gate Breach Rate Trending ── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
+              <Shield className="w-4 h-4 text-primary" />
+              5.3 Logic Gate Breach Rate per dag
+            </CardTitle>
+            <p className="text-[10px] text-muted-foreground">Breach rate = breaches / pipeline-runs die dag. Tooltip toont absoluut aantal.</p>
+          </CardHeader>
+          <CardContent>
+            {breachTrend.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={breachTrend}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="date" tickFormatter={fmtDate} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                  <YAxis unit="%" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                  <Tooltip
+                    labelFormatter={v => `Datum: ${v}`}
+                    formatter={(value: number, name: string, props: { payload: DailyBreachTrend }) => {
+                      if (name === 'Breach rate') return [`${value}%`, `Rate (${props.payload.breaches} / ${props.payload.totalRuns})`];
+                      return [value, name];
+                    }}
+                  />
+                  <Line type="monotone" dataKey="breachRate" stroke="hsl(0 84% 60%)" strokeWidth={2} dot={{ r: 3 }} name="Breach rate" />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-muted-foreground">Nog geen breach-data beschikbaar.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── 5.4 Healing Trending (total signal) ── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
+              <Cpu className="w-4 h-4 text-primary" />
+              5.4 Totaal Healing-signaal per dag
+            </CardTitle>
+            <p className="text-[10px] text-muted-foreground">ssotHealing + commandNull + parseRepair</p>
+          </CardHeader>
+          <CardContent>
+            {healingTrend.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={healingTrend}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="date" tickFormatter={fmtDate} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                  <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                  <Tooltip labelFormatter={v => `Datum: ${v}`} />
+                  <Area type="monotone" dataKey="totalHealing" stroke="hsl(45 93% 47%)" fill="hsl(45 93% 47% / 0.3)" name="Healing events" />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-muted-foreground">Nog geen healing-data beschikbaar.</p>
             )}
           </CardContent>
         </Card>

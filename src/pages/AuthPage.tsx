@@ -82,6 +82,12 @@ const AuthPage: React.FC = () => {
   return (
     <div className="fixed inset-0 z-[60] bg-slate-950 flex items-center justify-center">
       <div className="w-full max-w-sm px-6">
+        {/* Terug-knop */}
+        <Link to="/" className="inline-flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-indigo-400 transition-colors mb-6 group">
+          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+          Terug naar home
+        </Link>
+
         {/* Logo */}
         <div className="w-14 h-14 border border-slate-700 bg-slate-800/40 flex items-center justify-center mb-8 mx-auto">
           <span className="text-indigo-400 text-lg font-mono font-bold tracking-tighter">EAI</span>
