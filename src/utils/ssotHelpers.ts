@@ -536,13 +536,14 @@ let cachedCore: SSOTStructure | null = null;
 export function getEAICore(): SSOTStructure {
   if (cachedCore) return cachedCore;
   
-  const commandsObj = SSOT_DATA.command_library?.commands || {};
+  const ssot = getEffectiveSSOT();
+  const commandsObj = ssot.command_library?.commands || {};
   const commands: SSOTCommand[] = Object.entries(commandsObj).map(([cmd, desc]) => ({
     command: cmd,
     description: desc as string
   }));
 
-  const rubrics: SSOTRubric[] = SSOT_DATA.rubrics.map(r => ({
+  const rubrics: SSOTRubric[] = ssot.rubrics.map(r => ({
     rubric_id: r.rubric_id,
     name: r.name,
     dimension: r.dimension,
@@ -561,7 +562,7 @@ export function getEAICore(): SSOTStructure {
     }))
   }));
 
-  const logic_gates: SSOTLogicGate[] = (SSOT_DATA.interaction_protocol?.logic_gates || []).map(g => ({
+  const logic_gates: SSOTLogicGate[] = (ssot.interaction_protocol?.logic_gates || []).map(g => ({
     trigger_band: g.trigger_band,
     condition: g.condition,
     enforcement: g.enforcement,
@@ -571,10 +572,10 @@ export function getEAICore(): SSOTStructure {
   cachedCore = {
     commands,
     rubrics,
-    cycleOrder: SSOT_DATA.metadata.cycle.order,
+    cycleOrder: ssot.metadata.cycle.order,
     metadata: {
-      version: SSOT_DATA.version,
-      system: SSOT_DATA.metadata.system || 'EAI'
+      version: ssot.version,
+      system: ssot.metadata.system || 'EAI'
     },
     interaction_protocol: { logic_gates }
   };
