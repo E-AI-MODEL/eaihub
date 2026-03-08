@@ -19,10 +19,15 @@ const CLASSIFY_TOOL = {
           items: { type: "string", enum: ["P0", "P1", "P2", "P3", "P4", "P5"] },
           description: "Procesfase: P0=Ongedefinieerd, P1=Oriëntatie, P2=Voorkennis, P3=Instructie, P4=Toepassing, P5=Evaluatie",
         },
+        knowledge_type: {
+          type: "string",
+          enum: ["K0", "K1", "K2", "K3"],
+          description: "Kennistype: K0=Ongedefinieerd, K1=Reproductie, K2=Toepassing, K3=Metacognitie",
+        },
         coregulation_bands: {
           type: "array",
-          items: { type: "string" },
-          description: "Array met kennistype (K0-K3), co-regulatie (C0-C5), en procesfase (P0-P5)",
+          items: { type: "string", enum: ["C0", "C1", "C2", "C3", "C4", "C5"] },
+          description: "Alleen co-regulatie bands (C0-C5): C0=Ongedefinieerd, C1=Directief, C2=Begeleid, C3=Gedeeld, C4=Zelfregulerend, C5=Autonoom",
         },
         task_densities: {
           type: "array",
