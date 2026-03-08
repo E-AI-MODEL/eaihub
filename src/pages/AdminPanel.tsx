@@ -991,7 +991,7 @@ const AdminPanel = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {SSOT_DATA.interaction_protocol.logic_gates.map((gate, idx) => (
+                    {getLogicGates().map((gate, idx) => (
                       <div 
                         key={idx}
                         className={`p-3 rounded border ${

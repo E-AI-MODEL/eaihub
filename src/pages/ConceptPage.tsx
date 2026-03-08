@@ -239,7 +239,7 @@ const ConceptPage = () => {
             <div className="mb-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Grid3X3 className="w-5 h-5 text-primary" />
-                10 Dimensies (SSOT v{SSOT_DATA.version})
+                10 Dimensies (SSOT v{getSSOTVersion()})
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
                 Klik op een dimensie om de bands te bekijken.

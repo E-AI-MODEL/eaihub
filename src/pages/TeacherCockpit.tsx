@@ -12,7 +12,7 @@ import {
 import { fetchChatMessages } from '@/services/adminDbService';
 import { getNodeById } from '@/data/curriculum';
 import { getDimensionColors } from '@/utils/ssotHelpers';
-import { SSOT_DATA, getShortKey, getRubric } from '@/data/ssot';
+import { getShortKey, getRubric, getCycleOrder } from '@/data/ssot';
 import type { EAIAnalysis, MechanicalState } from '@/types';
 import type { EAIStateLike } from '@/utils/eaiLearnAdapter';
 

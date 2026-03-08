@@ -128,8 +128,8 @@ const DidacticLegend: React.FC<DidacticLegendProps> = ({ onClose }) => {
               <p className="text-[10px] text-muted-foreground italic mb-2">
                 Cyclus: K → P → TD → C → V → T → E → L → S → B. Elke dimensie heeft 6 niveaus (0–5).
               </p>
-              {SSOT_DATA.metadata.cycle.order.map((rubricId, idx) => {
-                const rubric = SSOT_DATA.rubrics.find(r => r.rubric_id === rubricId);
+              {getCycleOrder().map((rubricId, idx) => {
+                const rubric = getRubric(rubricId);
                 if (!rubric) return null;
                 
                 const shortKey = getShortKey(rubricId);

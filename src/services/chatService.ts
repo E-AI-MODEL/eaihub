@@ -11,7 +11,6 @@ import {
   getLearnerObsPatterns,
   getBand,
   getLogicGatesForBand,
-  SSOT_DATA
 } from '@/data/ssot';
 import { generateSystemPrompt } from '@/utils/ssotHelpers';
 import { 
