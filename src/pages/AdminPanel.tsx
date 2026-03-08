@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import EITLWizard from '@/components/EITLWizard';
 import PluginVersionHistory from '@/components/PluginVersionHistory';
+import ObservabilityPanel from '@/components/ObservabilityPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
