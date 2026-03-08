@@ -1095,7 +1095,8 @@ function generateAnalysis(input: string, output: string, profile: LearnerProfile
   
   return {
     process_phases: [processPhase],
-    coregulation_bands: [knowledgeType, coRegulation, processPhase],
+    // Metrics contract: alleen C-bands. K-band → reasoning, P-band → process_phases
+    coregulation_bands: [coRegulation],
     task_densities: [taskDensity],
     // Include all secondary dimensions for full 10D coverage
     secondary_dimensions: [skillPotential, epistemicBand, toolAwareness, socialInteraction, learningContinuity, biasCorrection],

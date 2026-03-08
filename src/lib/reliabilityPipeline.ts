@@ -554,7 +554,8 @@ export function executePipeline(
   // Update mechanical state with pipeline results
   const enhancedMechanical: MechanicalState = {
     ...mechanical,
-    repairAttempts: healingEvents.length > 0 ? 1 : 0,
+    // Metrics contract: echte count, niet boolean-als-int. Granulariteit: per pipeline-run.
+    repairAttempts: healingEvents.length,
     semanticValidation,
     logicGateBreach: gFactorResult.logicGateBreach,
     epistemicGuardResult: {
