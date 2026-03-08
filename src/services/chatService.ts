@@ -782,6 +782,14 @@ function detectSkillPotential(input: string, output: string): string {
 function detectEpistemicStatus(output: string): string {
   const lowerOutput = output.toLowerCase();
   
+  // Use SSOT learner_obs patterns first
+  if (ePatterns.get('E5')?.test(lowerOutput)) return 'E5';
+  if (ePatterns.get('E4')?.test(lowerOutput)) return 'E4';
+  if (ePatterns.get('E3')?.test(lowerOutput)) return 'E3';
+  if (ePatterns.get('E2')?.test(lowerOutput)) return 'E2';
+  if (ePatterns.get('E1')?.test(lowerOutput)) return 'E1';
+  
+  // Fallback regex
   if (/bewezen|wetenschappelijk|consensus|peer-reviewed/.test(lowerOutput)) return 'E5';
   if (/onderzoek.*toont|studies.*wijzen/.test(lowerOutput)) return 'E4';
   if (/interpretatie|perspectief|beargument/.test(lowerOutput)) return 'E3';
