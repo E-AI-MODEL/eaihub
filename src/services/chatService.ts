@@ -1021,6 +1021,7 @@ function mergeEdgeAnalysis(
     confidence: edgeAnalysis.confidence ?? clientAnalysis.confidence,
     secondary_bands: edgeAnalysis.secondary_bands ?? clientAnalysis.secondary_bands,
     borderline_dimensions: edgeAnalysis.borderline_dimensions ?? clientAnalysis.borderline_dimensions,
+    knowledge_type: (edgeAnalysis.knowledge_type ?? clientAnalysis.knowledge_type) as EAIAnalysis['knowledge_type'],
   };
 }
 
