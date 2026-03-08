@@ -657,13 +657,13 @@ const EITLWizard: React.FC<EITLWizardProps> = ({ existingPlugin, onClose, onSave
             return (
               <button
                 key={idx}
-                onClick={() => idx <= step && setStep(idx)}
-                className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] transition-colors ${
+                onClick={() => setStep(idx)}
+                className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] transition-colors cursor-pointer ${
                   idx === step
                     ? 'bg-primary/20 text-primary font-bold'
                     : idx < step
-                    ? 'text-primary/70 hover:bg-primary/10 cursor-pointer'
-                    : 'text-muted-foreground cursor-default'
+                    ? 'text-primary/70 hover:bg-primary/10'
+                    : 'text-muted-foreground hover:bg-muted/50'
                 }`}
               >
                 <Icon className="w-3 h-3" />
