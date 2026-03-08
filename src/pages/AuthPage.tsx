@@ -28,7 +28,7 @@ const AuthPage: React.FC = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -40,28 +40,10 @@ const AuthPage: React.FC = () => {
     if (error) {
       toast({ title: 'Registratie mislukt', description: error.message, variant: 'destructive' });
     } else {
-      // Create profile and assign default role
-      if (data.user) {
-        await supabase.from('profiles').insert({
-          id: data.user.id,
-          name,
-          email,
-        });
-        await supabase.from('user_roles').insert({
-          user_id: data.user.id,
-          role: 'LEERLING',
-        });
-        // Bootstrap admin
-        if (email.toLowerCase() === 'vis@emmauscollege.nl') {
-          await supabase.from('user_roles').insert([
-            { user_id: data.user.id, role: 'ADMIN' },
-            { user_id: data.user.id, role: 'DOCENT' },
-          ]);
-        }
-      }
+      // Profile + roles are auto-created by database trigger (handle_new_user)
       toast({
         title: 'Account aangemaakt',
-        description: 'Controleer je e-mail om je account te bevestigen.',
+        description: 'Je kunt nu inloggen.',
       });
       setMode('login');
     }

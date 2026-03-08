@@ -4,6 +4,7 @@ import MessageBubble from '@/components/MessageBubble';
 import type { Message, LearnerProfile, EAIAnalysis, MechanicalState } from '@/types';
 import { sendChat } from '@/services/chatService';
 import { getOrCreateUserId } from '@/services/identity';
+import { useAuth } from '@/hooks/useAuth';
 import { calculateDynamicTTL } from '@/utils/eaiLearnAdapter';
 import { pushTrace } from '@/lib/reliabilityPipeline';
 import { getNodeById } from '@/data/curriculum';
@@ -54,6 +55,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [internalSessionId] = useState(() => `session_${crypto.randomUUID()}`);
   const sessionId = externalSessionId || internalSessionId;
+  const { user } = useAuth();
+  const userId = user?.id || getOrCreateUserId();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const idleTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -79,7 +82,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   // ═══ SESSION SYNC: Push state to DB every 10s ═══
   useEffect(() => {
-    const userId = getOrCreateUserId();
     const pushState = () => {
       upsertSessionState({
         userId,
@@ -188,7 +190,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
 
     try {
-      const userId = getOrCreateUserId();
       const response = await sendChat({ sessionId, userId, message: textToSend, profile });
       messageCounterRef.current += 1;
       if (response.progress !== undefined) progressRef.current = response.progress;

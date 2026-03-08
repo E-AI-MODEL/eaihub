@@ -15,11 +15,16 @@
 
 ## Stap 7 — Auth en rollenmodel
 - Supabase Auth met e-mail/wachtwoord
+- Auto-confirm ingeschakeld (development)
 - user_roles tabel met LEERLING/DOCENT/ADMIN enum
 - has_role() security definer functie
+- **Database trigger `handle_new_user`**: automatische roltoewijzing + profielaanmaak bij signup
+  - LEERLING: altijd
+  - ADMIN + DOCENT: voor vis@emmauscollege.nl
 - AuthGuard component voor route protection
-- Bootstrap-admin: vis@emmauscollege.nl krijgt automatisch ADMIN+DOCENT rol
-- Geen hardcoded wachtwoorden
+- AuthPage: client-side role/profile inserts verwijderd (trigger doet dit nu)
+- Identiteit gekoppeld aan auth: `user.id` uit `useAuth` vervangt `getOrCreateUserId()` in StudentStudio en ChatInterface
+- profileService: leest uit profiles-tabel met localStorage-fallback
 - /auth login/signup pagina
 - /reset-password pagina
 - TopNav toont rol-gebaseerde navigatie + logout

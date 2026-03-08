@@ -49,9 +49,11 @@ const StudentStudio: React.FC = () => {
     return parts;
   }, [profile]);
 
+  const { user } = useAuth();
+  const userId = user?.id || getOrCreateUserId();
+
   useEffect(() => {
     const loadProfile = async () => {
-      const userId = getOrCreateUserId();
       const { profile: storedProfile } = await fetchProfile(userId);
       if (storedProfile && storedProfile.name && storedProfile.subject) {
         setProfile(storedProfile);
@@ -59,7 +61,7 @@ const StudentStudio: React.FC = () => {
       }
     };
     loadProfile();
-  }, []);
+  }, [userId]);
 
   // Mark session offline on unmount
   useEffect(() => {
@@ -75,7 +77,6 @@ const StudentStudio: React.FC = () => {
   };
 
   const handleProfileComplete = async (newProfile: LearnerProfile) => {
-    const userId = getOrCreateUserId();
     await updateProfile(userId, newProfile);
     setProfile(newProfile);
     setPhase('READY');
@@ -86,7 +87,6 @@ const StudentStudio: React.FC = () => {
     if (profile) {
       const updatedProfile = { ...profile, currentNodeId: nodeId };
       setProfile(updatedProfile);
-      const userId = getOrCreateUserId();
       await updateProfile(userId, updatedProfile);
     }
   };
