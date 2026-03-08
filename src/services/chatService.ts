@@ -289,11 +289,12 @@ export const sendChat = async (request: ChatRequest): Promise<ChatResponse> => {
     const routerDecision = buildRouterDecision(request.message, sessionCtx);
     const taskType = routerDecision.intent_category === 'SLOW' ? 'deep' as TaskType : 'chat' as TaskType;
     
+    const token = await getAuthToken();
     const response = await fetch(CHAT_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         sessionId: request.sessionId,
