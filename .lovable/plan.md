@@ -82,14 +82,14 @@ Stap 1–7 afgerond. Fase 1 (stabilisatie) en Fase 2 (analyse-consistentie) afge
 | 3.5.1 | 5-staps wizard in Admin Panel voor plugin CRUD (SUPERUSER-only) | ✅ DONE |
 | 3.5.2 | Plugin versioning met `change_notes` en `based_on_version` | ✅ DONE |
 
-### Fase 4 — Governance
+### Fase 4 — Governance ✅
 
 | # | Taak | Status |
 |---|------|--------|
-| 4.1 | Versioning — elke plugin-save als nieuwe rij | TODO |
-| 4.2 | Rollback — admin kan eerdere plugin-versie activeren | TODO |
-| 4.3 | Audit log — `ssot_changes` tabel | TODO |
-| 4.4 | Diff-view — base vs effective vergelijking (basis staat in 3.6) | TODO |
+| 4.1 | Versioning afronden (dedup save, change_notes verplicht bij edits) | ✅ DONE |
+| 4.2 | Rollback — SUPERUSER kan eerdere plugin-versie activeren via PluginVersionHistory | ✅ DONE |
+| 4.3 | Audit log — `ssot_changes` tabel met SUPERUSER ALL + ADMIN SELECT | ✅ DONE |
+| 4.4 | Diff-view — versiegeschiedenis + audit trail in EITL tab | ✅ DONE |
 
 ### Fase 5 — Observability
 
