@@ -16,7 +16,7 @@ const LandingPage = () => {
             EAI Hub
           </span>
         </div>
-        <ul className="flex gap-3 sm:gap-6 text-xs font-bold tracking-widest uppercase items-center list-none m-0 p-0">
+        <ul className="flex gap-2 sm:gap-6 text-[10px] sm:text-xs font-bold tracking-widest uppercase items-center list-none m-0 p-0">
           <li className="hidden sm:block">
             <Link 
               to="/concept" 
