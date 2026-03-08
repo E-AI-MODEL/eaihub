@@ -95,10 +95,10 @@ Stap 1–7 afgerond. Fase 1 (stabilisatie) en Fase 2 (analyse-consistentie) afge
 
 | # | Taak | Status |
 |---|------|--------|
-| 5.1 | Edge vs client analyse-ratio in dashboard | TODO |
-| 5.2 | Plugin-usage metrics per school | TODO |
-| 5.3 | Logic gate breach rate trending | TODO |
-| 5.4 | Healing event frequentie | TODO |
+| 5.1 | Edge vs client analyse-ratio in dashboard | ✅ DONE |
+| 5.2 | Plugin-usage metrics per school | ✅ DONE |
+| 5.3 | Logic gate breach rate trending | ✅ DONE |
+| 5.4 | Healing event frequentie | ✅ DONE |
 
 ---
 
