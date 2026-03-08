@@ -1118,6 +1118,14 @@ const AdminPanel = () => {
                 </CardContent>
               </Card>
 
+              {/* Version History + Audit Trail (SUPERUSER sees rollback, ADMIN sees read-only) */}
+              {hasActivePlugin() && (
+                <PluginVersionHistory
+                  schoolId={getActivePlugin()!.school_id}
+                  onRollback={loadSystemData}
+                />
+              )}
+
               {/* Effective SSOT Diff */}
               <Card>
                 <CardHeader>
