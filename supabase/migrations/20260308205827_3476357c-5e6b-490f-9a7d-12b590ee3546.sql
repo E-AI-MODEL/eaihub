@@ -1,0 +1,2 @@
+ALTER TABLE public.student_sessions ADD COLUMN plugin_id text DEFAULT NULL;
+COMMENT ON COLUMN public.student_sessions.plugin_id IS 'Active school plugin ID during session. NULL = base SSOT (geen plugin geladen).';

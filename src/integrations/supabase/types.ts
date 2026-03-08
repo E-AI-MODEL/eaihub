@@ -230,6 +230,7 @@ export type Database = {
           mechanical: Json | null
           messages_count: number | null
           name: string | null
+          plugin_id: string | null
           progress: number | null
           session_id: string
           status: string | null
@@ -249,6 +250,7 @@ export type Database = {
           mechanical?: Json | null
           messages_count?: number | null
           name?: string | null
+          plugin_id?: string | null
           progress?: number | null
           session_id: string
           status?: string | null
@@ -268,6 +270,7 @@ export type Database = {
           mechanical?: Json | null
           messages_count?: number | null
           name?: string | null
+          plugin_id?: string | null
           progress?: number | null
           session_id?: string
           status?: string | null
