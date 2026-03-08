@@ -52,7 +52,7 @@ const CollapsibleSection = ({ title, defaultOpen = false, nested = false, childr
   );
 };
 
-  const { isSuperUser, user } = useAuth();
+  const AdminPanel = () => {
   const [adminSchoolId, setAdminSchoolId] = useState<string | null>(null);
   const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
   const [storageItems, setStorageItems] = useState<StorageItem[]>([]);
