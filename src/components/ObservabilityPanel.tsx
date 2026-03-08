@@ -101,9 +101,9 @@ const ObservabilityPanel: React.FC = () => {
       let edgeCount = 0;
       let clientCount = 0;
       for (const m of messages) {
-        const a = m.analysis as Record<string, unknown> | null;
-        if (!a) continue;
-        const src = a.analysisSource as string | undefined;
+        const mech = m.mechanical as Record<string, unknown> | null;
+        if (!mech) continue;
+        const src = mech.analysisSource as string | undefined;
         if (src === 'edge') edgeCount++;
         else if (src === 'client') clientCount++;
       }
