@@ -72,7 +72,7 @@ const ConceptPage = () => {
           </Link>
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold tracking-wider uppercase px-2 py-1 rounded-full bg-primary/10 text-primary">
-              EAI v{SSOT_DATA.version}
+              EAI v{getSSOTVersion()}
             </span>
           </div>
         </div>
