@@ -489,133 +489,169 @@ const ConceptPage = () => {
               </p>
             </div>
 
-            <div className="space-y-4">
+            <Accordion type="multiple" className="space-y-2">
               {/* 1. Analyse-architectuur */}
-              <div className="p-5 rounded-xl border border-border bg-card">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">1</span>
-                  <h3 className="font-semibold text-foreground">Analyse-architectuur</h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Elke leerling-input doorloopt een tweestaps-analyse: eerst een snelle classificatie (edge-classify), daarna een diepere controle (reliabilityPipeline).
-                </p>
-                <p className="text-[10px] text-muted-foreground/50 italic">
-                  Technisch: edge-classify → reliabilityPipeline.ts → analysisSource tag op elk bericht.
-                </p>
-              </div>
+              <AccordionItem value="item-1" className="rounded-xl border border-border bg-card px-5">
+                <AccordionTrigger className="hover:no-underline py-4">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">1</span>
+                    <h3 className="font-semibold text-foreground text-left">Analyse-architectuur</h3>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pb-5">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Standaard AI-systemen sturen een vraag naar een LLM en geven het antwoord direct terug — zonder te controleren wat de leerling eigenlijk bedoelt. EAI Hub werkt anders: elke leerling-input doorloopt een <strong className="text-foreground">tweestaps-analyse</strong>. Eerst classificeert een snelle edge-functie de input op 10 didactische dimensies (zoals zelfregulatieniveau, misconcepties en kennisniveau). Daarna controleert de reliabilityPipeline of die classificatie klopt, en corrigeert waar nodig. Pas daarna wordt een respons gegenereerd — op basis van bewezen didactiek, niet op basis van gokken.
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/50 italic">
+                    Technisch: edge-classify → reliabilityPipeline.ts → analysisSource tag op elk bericht.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
 
               {/* 2. Nuance in classificatie */}
-              <div className="p-5 rounded-xl border border-border bg-card">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">2</span>
-                  <h3 className="font-semibold text-foreground">Nuance in classificatie</h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  De AI geeft nu een betrouwbaarheidsscore mee bij elke classificatie. Twijfelgevallen worden expliciet gemarkeerd zodat het systeem voorzichtiger reageert.
-                </p>
-                <p className="text-[10px] text-muted-foreground/50 italic">
-                  Technisch: confidence levels, knowledge_type K0-K3, borderline-detectie.
-                </p>
-              </div>
+              <AccordionItem value="item-2" className="rounded-xl border border-border bg-card px-5">
+                <AccordionTrigger className="hover:no-underline py-4">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">2</span>
+                    <h3 className="font-semibold text-foreground text-left">Nuance in classificatie</h3>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pb-5">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Niet elke leerling-input is eenduidig te classificeren. Daarom geeft het systeem een <strong className="text-foreground">betrouwbaarheidsscore</strong> mee bij elke classificatie. Twijfelgevallen — wanneer een antwoord op de grens zit tussen twee niveaus — worden expliciet als 'borderline' gemarkeerd. In die gevallen reageert het systeem voorzichtiger: het stelt een verduidelijkende vraag in plaats van een aanname te doen. Zo voorkomt EAI Hub dat een leerling onterecht wordt ingeschaald en verkeerde begeleiding krijgt.
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/50 italic">
+                    Technisch: confidence levels, knowledge_type K0-K3, borderline-detectie.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
 
               {/* 3. Leerlingervaring & rolzichtbaarheid */}
-              <div className="p-5 rounded-xl border border-border bg-card">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">3</span>
-                  <h3 className="font-semibold text-foreground">Leerlingervaring & rolzichtbaarheid</h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Drie perspectieven op dezelfde sessie: de leerling ziet een leskaart, de docent ziet voortgang en interventies, de beheerder ziet systeemstatus.
-                </p>
-                <p className="text-[10px] text-muted-foreground/50 italic">
-                  Technisch: rolgebaseerde UI met leskaart-panel, docent-cockpit en admin-dashboard.
-                </p>
-              </div>
+              <AccordionItem value="item-3" className="rounded-xl border border-border bg-card px-5">
+                <AccordionTrigger className="hover:no-underline py-4">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">3</span>
+                    <h3 className="font-semibold text-foreground text-left">Leerlingervaring & rolzichtbaarheid</h3>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pb-5">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Dezelfde leersessie wordt vanuit <strong className="text-foreground">drie perspectieven</strong> zichtbaar gemaakt. De leerling ziet een leskaart: een visueel overzicht van waar hij staat en wat de volgende stap is. De docent ziet voortgang, patronen en kan didactische interventies sturen. De beheerder ziet systeemstatus, analyse-kwaliteit en technische gezondheid. Ieder ziet precies wat relevant is voor zijn rol — niet meer, niet minder.
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/50 italic">
+                    Technisch: rolgebaseerde UI met leskaart-panel, docent-cockpit en admin-dashboard.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
 
               {/* 4. Auth & rollenmodel */}
-              <div className="p-5 rounded-xl border border-border bg-card">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">4</span>
-                  <h3 className="font-semibold text-foreground">Auth & rollenmodel</h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Vier rollen (Leerling, Docent, Admin, Superuser) met strikte toegangscontrole op elke tabel. Rollen worden server-side gevalideerd, niet via de browser.
-                </p>
-                <p className="text-[10px] text-muted-foreground/50 italic">
-                  Technisch: RBAC via user_roles tabel, RLS policies, has_role() security definer functie.
-                </p>
-              </div>
+              <AccordionItem value="item-4" className="rounded-xl border border-border bg-card px-5">
+                <AccordionTrigger className="hover:no-underline py-4">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">4</span>
+                    <h3 className="font-semibold text-foreground text-left">Auth & rollenmodel</h3>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pb-5">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Toegangscontrole is niet optioneel — het is een kernonderdeel van het systeem. EAI Hub werkt met <strong className="text-foreground">vier rollen</strong> (Leerling, Docent, Admin, Superuser), elk met strikt afgebakende rechten. Rollen worden niet in de browser bepaald (wat makkelijk te manipuleren is), maar <strong className="text-foreground">server-side gevalideerd</strong> op elke database-operatie. Een leerling kan nooit bij docentdata, een docent nooit bij admin-functies. Dit is niet alleen privacy, maar ook didactische integriteit.
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/50 italic">
+                    Technisch: RBAC via user_roles tabel, RLS policies op elke tabel, has_role() security definer functie.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
 
-              {/* 5. EITL plugin-architectuur */}
-              <div className="p-5 rounded-xl border border-border bg-card">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">5</span>
-                  <h3 className="font-semibold text-foreground">EITL — Education In The Loop</h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  EITL staat voor <strong className="text-foreground">Education In The Loop</strong>: het onderwijs — de docent, de didactiek, de schoolvisie — blijft altijd in de beslislus van het systeem, niet de AI. De SSOT (Single Source of Truth) vormt de didactische basis: een wetenschappelijk onderbouwd model dat bepaalt hoe het systeem reageert op leerlinggedrag. Maar wij begrijpen dat elke school een eigen context heeft — een eigen visie, curriculum en pedagogische aanpak. Daarom is er bewust ruimte ingebouwd via het plugin-systeem: scholen kunnen het didactisch model annoteren en aanpassen aan hun specifieke situatie, zonder de wetenschappelijke kern te breken.
-                </p>
-                <p className="text-[10px] text-muted-foreground/50 italic">
-                  Technisch: whitelistMerge-strategie, Zod-validatie, EITL Wizard met vrije navigatie. Plugin annoteert, maar herdefinieert niet.
-                </p>
-              </div>
+              {/* 5. EITL */}
+              <AccordionItem value="item-5" className="rounded-xl border border-border bg-card px-5">
+                <AccordionTrigger className="hover:no-underline py-4">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">5</span>
+                    <h3 className="font-semibold text-foreground text-left">EITL — Education In The Loop</h3>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pb-5">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    EITL staat voor <strong className="text-foreground">Education In The Loop</strong>: het onderwijs — de docent, de didactiek, de schoolvisie — blijft altijd in de beslislus van het systeem, niet de AI. De SSOT (Single Source of Truth) vormt de didactische basis: een wetenschappelijk onderbouwd model dat bepaalt hoe het systeem reageert op leerlinggedrag. Maar wij begrijpen dat elke school een eigen context heeft — een eigen visie, curriculum en pedagogische aanpak. Daarom is er bewust ruimte ingebouwd via het plugin-systeem: scholen kunnen het didactisch model annoteren en aanpassen aan hun specifieke situatie, zonder de wetenschappelijke kern te breken.
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/50 italic">
+                    Technisch: whitelistMerge-strategie, Zod-validatie, EITL Wizard met vrije navigatie. Plugin annoteert, maar herdefinieert niet.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
 
               {/* 6. Governance */}
-              <div className="p-5 rounded-xl border border-border bg-card">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">6</span>
-                  <h3 className="font-semibold text-foreground">Governance & versiebeheer</h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Elke wijziging aan het didactisch model wordt gelogd met wie, wanneer en waarom. Rollback naar eerdere versies is altijd mogelijk.
-                </p>
-                <p className="text-[10px] text-muted-foreground/50 italic">
-                  Technisch: ssot_changes audit log, versioning met hash-verificatie, rollback via admin panel.
-                </p>
-              </div>
+              <AccordionItem value="item-6" className="rounded-xl border border-border bg-card px-5">
+                <AccordionTrigger className="hover:no-underline py-4">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">6</span>
+                    <h3 className="font-semibold text-foreground text-left">Governance & versiebeheer</h3>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pb-5">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Transparantie en verantwoording zijn essentieel wanneer AI in het onderwijs wordt ingezet. Elke wijziging aan het didactisch model wordt <strong className="text-foreground">gelogd met wie, wanneer en waarom</strong>. Rollback naar eerdere versies is altijd mogelijk, zodat een fout nooit definitief is. Dit geeft schoolbesturen en docenten de zekerheid dat het systeem controleerbaar en auditeerbaar is — geen black box, maar een open boek.
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/50 italic">
+                    Technisch: ssot_changes audit log, versioning met hash-verificatie, rollback via admin panel.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
 
               {/* 7. Observability */}
-              <div className="p-5 rounded-xl border border-border bg-card">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">7</span>
-                  <h3 className="font-semibold text-foreground">Observability & monitoring</h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Real-time monitoring van systeemgezondheid: healing-signalen, breach rates en gateway-status worden bijgehouden en gevisualiseerd.
-                </p>
-                <p className="text-[10px] text-muted-foreground/50 italic">
-                  Technisch: trending-grafieken voor healing totaalsignaal, breach rate tracking, gateway reachability checks.
-                </p>
-              </div>
+              <AccordionItem value="item-7" className="rounded-xl border border-border bg-card px-5">
+                <AccordionTrigger className="hover:no-underline py-4">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">7</span>
+                    <h3 className="font-semibold text-foreground text-left">Observability & monitoring</h3>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pb-5">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Een didactisch systeem dat je niet kunt monitoren, kun je niet vertrouwen. EAI Hub biedt <strong className="text-foreground">real-time monitoring</strong> van systeemgezondheid: hoe vaak corrigeert het systeem zichzelf (healing), hoe vaak worden didactische grenzen overschreden (breach rate), en is de AI-gateway bereikbaar? Deze signalen worden gevisualiseerd in trending-grafieken, zodat beheerders proactief kunnen ingrijpen in plaats van reactief.
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/50 italic">
+                    Technisch: trending-grafieken voor healing totaalsignaal, breach rate tracking, gateway reachability checks.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
 
               {/* 8. Geheugenarchitectuur */}
-              <div className="p-5 rounded-xl border border-border bg-card">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">8</span>
-                  <h3 className="font-semibold text-foreground">Geheugenarchitectuur — kort- & langetermijn</h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  De LLM haalt informatie uit twee bronnen: <strong className="text-foreground">lokale opslag</strong> (LocalStorage) voor de lopende sessie, en de <strong className="text-foreground">backend</strong> voor langetermijndata. Dit is bewust afgekeken van hoe het menselijk geheugen werkt. Lokaal = snel, direct, in het moment — vergelijkbaar met het kortetermijngeheugen. Backend = persistent, deelbaar, over sessies heen — vergelijkbaar met het langetermijngeheugen. Door deze samenwerking voert de LLM snellere en vloeiendere gesprekken, zonder context te verliezen wanneer een leerling terugkomt na een pauze of op een ander moment verder werkt.
-                </p>
-                <p className="text-[10px] text-muted-foreground/50 italic">
-                  Technisch: LocalStorage voor sessie-state en eaiState, backend sync via student_sessions en chat_messages tabellen.
-                </p>
-              </div>
+              <AccordionItem value="item-8" className="rounded-xl border border-border bg-card px-5">
+                <AccordionTrigger className="hover:no-underline py-4">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">8</span>
+                    <h3 className="font-semibold text-foreground text-left">Geheugenarchitectuur — kort- & langetermijn</h3>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pb-5">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    De LLM haalt informatie uit twee bronnen: <strong className="text-foreground">lokale opslag</strong> (LocalStorage) voor de lopende sessie, en de <strong className="text-foreground">backend</strong> voor langetermijndata. Dit is bewust afgekeken van hoe het menselijk geheugen werkt. Lokaal = snel, direct, in het moment — vergelijkbaar met het kortetermijngeheugen. Backend = persistent, deelbaar, over sessies heen — vergelijkbaar met het langetermijngeheugen. Door deze samenwerking voert de LLM snellere en vloeiendere gesprekken, zonder context te verliezen wanneer een leerling terugkomt na een pauze of op een ander moment verder werkt.
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/50 italic">
+                    Technisch: LocalStorage voor sessie-state en eaiState, backend sync via student_sessions en chat_messages tabellen.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
 
               {/* 9. Beeldondersteuning */}
-              <div className="p-5 rounded-xl border border-border bg-card">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">9</span>
-                  <h3 className="font-semibold text-foreground">Beeldondersteuning (Image)</h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Image-generatie is toegevoegd in deze update. Visuele ondersteuning wordt <strong className="text-foreground">alleen actief ingezet wanneer het onderliggende model dit ondersteunt</strong> én wanneer een afbeelding het leren aantoonbaar versterkt — bijvoorbeeld bij biologische structuren, wiskundige grafieken of ruimtelijke concepten. Het systeem genereert geen plaatjes 'omdat het kan', maar omdat het de leerstap visueel verduidelijkt.
-                </p>
-                <p className="text-[10px] text-muted-foreground/50 italic">
-                  Technisch: conditionele image-generatie op basis van modelcapabiliteit en didactische relevantie.
-                </p>
-              </div>
-            </div>
+              <AccordionItem value="item-9" className="rounded-xl border border-border bg-card px-5">
+                <AccordionTrigger className="hover:no-underline py-4">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">9</span>
+                    <h3 className="font-semibold text-foreground text-left">Beeldondersteuning (Image)</h3>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pb-5">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Image-generatie is toegevoegd in deze update. Visuele ondersteuning wordt <strong className="text-foreground">alleen actief ingezet wanneer het onderliggende model dit ondersteunt</strong> én wanneer een afbeelding het leren aantoonbaar versterkt — bijvoorbeeld bij biologische structuren, wiskundige grafieken of ruimtelijke concepten. Het systeem genereert geen plaatjes 'omdat het kan', maar omdat het de leerstap visueel verduidelijkt.
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/50 italic">
+                    Technisch: conditionele image-generatie op basis van modelcapabiliteit en didactische relevantie.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </TabsContent>
         </Tabs>
 
