@@ -53,6 +53,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [syncPulse, setSyncPulse] = useState(false);
   const [internalSessionId] = useState(() => `session_${crypto.randomUUID()}`);
   const sessionId = externalSessionId || internalSessionId;
   const { user } = useAuth();
@@ -94,6 +95,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         lastMessagePreview: messages.length > 0 ? messages[messages.length - 1].text.slice(0, 100) : null,
         progress: progressRef.current,
       });
+      setSyncPulse(true);
+      setTimeout(() => setSyncPulse(false), 800);
     };
     pushState(); // immediate push
     const interval = setInterval(pushState, 10000);
@@ -359,6 +362,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           >
             <Send className="w-4 h-4" />
           </button>
+          <div className="flex items-center gap-1 shrink-0 mb-1" title="Sessie sync · elke 10s">
+            <span
+              className={`inline-block w-1.5 h-1.5 rounded-full transition-opacity duration-700 ${
+                syncPulse ? 'bg-emerald-400 opacity-100' : 'bg-emerald-600 opacity-20'
+              }`}
+            />
+          </div>
         </div>
       </div>
     </div>
