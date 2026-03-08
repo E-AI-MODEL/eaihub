@@ -968,7 +968,7 @@ const AdminPanel = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {Object.entries(SSOT_DATA.command_library.commands).map(([cmd, desc]) => (
+                    {Object.entries(getCommands()).map(([cmd, desc]) => (
                       <div 
                         key={cmd}
                         className="p-2 rounded bg-secondary/30 border border-border"
