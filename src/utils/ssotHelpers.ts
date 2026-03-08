@@ -93,7 +93,7 @@ const DEFAULT_COLORS = { text: 'text-primary', border: 'border-border', bg: 'bg-
  * Used by ConceptPage and DidacticLegend
  */
 export function getDimensionsForUI(): DimensionForUI[] {
-  const cycleOrder = SSOT_DATA.metadata.cycle.order;
+  const cycleOrder = getCycleOrder();
   const dimensions: DimensionForUI[] = [];
   
   for (const rubricId of cycleOrder) {
