@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { loadEffectiveSSOT, clearSSOTCache } from '@/lib/ssotRuntime';
 import type { User } from '@supabase/supabase-js';
+import type { AppRole } from '@/hooks/useAuth';
 
 /**
  * Bootstrap hook: loads the school-specific SSOT plugin after auth.
- * Non-blocking — getEffectiveSSOT() falls back to BASE_SSOT until loaded.
+ * Now assignment-aware: passes userId and roles to the resolution cascade.
  */
-export const useSchoolPlugin = (user: User | null) => {
+export const useSchoolPlugin = (user: User | null, roles: AppRole[] = []) => {
   const [isPluginLoading, setIsPluginLoading] = useState(false);
 
   useEffect(() => {
@@ -30,7 +31,7 @@ export const useSchoolPlugin = (user: User | null) => {
 
         if (cancelled) return;
 
-        await loadEffectiveSSOT(profile?.school_id ?? undefined);
+        await loadEffectiveSSOT(profile?.school_id ?? undefined, user.id, roles);
       } catch (err) {
         console.warn('[useSchoolPlugin] Bootstrap failed, using BASE_SSOT:', err);
       }
@@ -40,7 +41,7 @@ export const useSchoolPlugin = (user: User | null) => {
 
     bootstrap();
     return () => { cancelled = true; };
-  }, [user]);
+  }, [user, roles]);
 
   return { isPluginLoading };
 };
