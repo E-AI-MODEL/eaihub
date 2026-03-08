@@ -114,7 +114,7 @@ const LandingPage = () => {
                   </div>
                   <header className="mb-4">
                     <span className="text-primary font-bold text-xs uppercase tracking-widest block mb-2">Voor Leerlingen</span>
-                    <h3 className="text-2xl font-bold text-foreground">Student Studio</h3>
+                    <h3 className="text-2xl font-bold text-foreground">Leerlingomgeving</h3>
                   </header>
                   <p className="text-muted-foreground mb-8 max-w-sm leading-relaxed flex-1">
                     AI die je laat nadenken in plaats van antwoorden weggeeft. Start een sessie voor Biologie, Wiskunde of Economie en leer dieper.
