@@ -238,6 +238,7 @@ const AdminPanel = () => {
             <TabsTrigger value="actions" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">Admin </span>Actions</TabsTrigger>
             <TabsTrigger value="ssot" className="text-xs sm:text-sm whitespace-nowrap">SSOT<span className="hidden sm:inline"> Browser</span></TabsTrigger>
             <TabsTrigger value="eitl" className="text-xs sm:text-sm whitespace-nowrap">EITL<span className="hidden sm:inline"> Plugin</span></TabsTrigger>
+            <TabsTrigger value="observability" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">Observ</span>ability</TabsTrigger>
           </TabsList>
 
           {/* System Monitoring Tab */}
