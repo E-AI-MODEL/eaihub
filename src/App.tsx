@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,11 +14,34 @@ import ConceptPage from "@/pages/ConceptPage";
 import AuthPage from "@/pages/AuthPage";
 import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
+import { supabase } from "@/integrations/supabase/client";
+import { useSchoolPlugin } from "@/hooks/useSchoolPlugin";
+import type { User } from "@supabase/supabase-js";
 
 const queryClient = new QueryClient();
 
+/** Listens to auth state and bootstraps school plugin. Non-blocking. */
+const SchoolPluginProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useSchoolPlugin(user);
+
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <SchoolPluginProvider>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -48,6 +72,7 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
+    </SchoolPluginProvider>
   </QueryClientProvider>
 );
 
