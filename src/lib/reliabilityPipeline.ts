@@ -551,7 +551,7 @@ export function executePipeline(
     ...mechanical,
     repairAttempts: healingEvents.length > 0 ? 1 : 0,
     semanticValidation,
-    logicGateBreach: logicGateBreach || undefined,
+    logicGateBreach: checkLogicGatesAnalysis(guarded) || undefined,
     epistemicGuardResult: {
       label: epistemicResult.label,
       notes: epistemicResult.notes,
