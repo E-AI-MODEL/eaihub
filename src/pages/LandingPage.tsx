@@ -103,7 +103,7 @@ const LandingPage = () => {
           <div className="max-w-5xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
-              {/* Student Card */}
+              {/* Leerling Card */}
               <Link 
                 to="/student" 
                 className="group relative block eai-card-gradient border border-border rounded-3xl overflow-hidden hover:border-primary/50 transition-all hover:shadow-2xl hover:shadow-primary/10 focus:outline-none focus:ring-2 focus:ring-primary"
