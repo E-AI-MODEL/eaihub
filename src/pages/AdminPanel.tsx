@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle, MessageSquare, Users, BarChart3, ChevronDown, ChevronRight, Layers, Plus, Edit } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import EITLWizard from '@/components/EITLWizard';
 import PluginVersionHistory from '@/components/PluginVersionHistory';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
