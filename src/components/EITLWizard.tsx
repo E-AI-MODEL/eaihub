@@ -243,7 +243,7 @@ const EITLWizard: React.FC<EITLWizardProps> = ({ existingPlugin, onClose, onSave
         school_id: state.schoolId,
         school_name: state.schoolName,
         based_on_version: getSSOTVersion(),
-        plugin_json: pluginJson as any,
+        plugin_json: pluginJson as Json,
         is_active: activate,
         change_notes: state.changeNotes.trim() || null,
         created_by: user.id,
