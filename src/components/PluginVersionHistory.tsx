@@ -41,7 +41,7 @@ interface PluginVersionHistoryProps {
 }
 
 const PluginVersionHistory: React.FC<PluginVersionHistoryProps> = ({ schoolId, onRollback }) => {
-  const { user, isSuperUser } = useAuth();
+  const { user, isSuperUser, roles } = useAuth();
   const [versions, setVersions] = useState<PluginVersion[]>([]);
   const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
