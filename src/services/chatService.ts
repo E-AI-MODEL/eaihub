@@ -1099,7 +1099,9 @@ function generateAnalysis(input: string, output: string, profile: LearnerProfile
   
   return {
     process_phases: [processPhase],
-    // Metrics contract: alleen C-bands. K-band → reasoning, P-band → process_phases
+    // Metrics contract: knowledge_type als eerste-klas veld, per bericht, bron: client generateAnalysis
+    knowledge_type: knowledgeType as EAIAnalysis['knowledge_type'],
+    // Metrics contract: alleen C-bands. K-band → knowledge_type, P-band → process_phases
     coregulation_bands: [coRegulation],
     task_densities: [taskDensity],
     // Include all secondary dimensions for full 10D coverage

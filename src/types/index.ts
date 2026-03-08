@@ -162,6 +162,8 @@ export interface EAIAnalysis {
   confidence?: number;
   secondary_bands?: Record<string, string>;
   borderline_dimensions?: string[];
+  /** Kennistype als eerste-klas veld. Bron: generateAnalysis (client) of eai-classify (edge). Granulariteit: per bericht. */
+  knowledge_type?: 'K0' | 'K1' | 'K2' | 'K3';
 }
 
 // --- CHAT & UI ---

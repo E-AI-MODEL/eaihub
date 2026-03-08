@@ -144,9 +144,9 @@ AI-RESPONSE:
 ${aiResponse.slice(0, 2000)}
 
 Classificeer deze interactie. Let op:
-- Kennistype (K0-K3): wat voor kennis vraagt/toont de leerling?
+- Kennistype (knowledge_type, K0-K3): wat voor kennis vraagt/toont de leerling? Dit is een APART veld, NIET in coregulation_bands.
 - Procesfase (P0-P5): in welke fase van het leerproces zit dit?
-- Co-regulatie (C0-C5): wie stuurt het gesprek?
+- Co-regulatie (coregulation_bands, ALLEEN C0-C5): wie stuurt het gesprek? Zet hier GEEN K- of P-bands in.
 - Taakdichtheid (TD0-TD5): hoeveel doet de AI vs de leerling?
 - Vaardigheidspotentieel (V0-V5): welk vaardigheidsniveau?
 - Epistemische betrouwbaarheid (E0-E5): hoe betrouwbaar is de AI-output?
