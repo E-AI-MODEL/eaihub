@@ -29,6 +29,11 @@ const CLASSIFY_TOOL = {
           items: { type: "string", enum: ["TD0", "TD1", "TD2", "TD3", "TD4", "TD5"] },
           description: "Taakdichtheid: TD1=Leerling-geleid, TD2=Gedeeld, TD3=Gestuurd, TD4=AI-geleid, TD5=AI-dominant",
         },
+        secondary_dimensions: {
+          type: "array",
+          items: { type: "string" },
+          description: "Overige dimensies: V0-V5 (Vaardigheidspotentieel), E0-E5 (Epistemische betrouwbaarheid), T0-T5 (Technologische integratie), S0-S5 (Sociale interactie), L0-L5 (Leercontinuïteit), B0-B5 (Biascorrectie)",
+        },
         cognitive_mode: {
           type: "string",
           enum: ["ANALYTISCH", "REFLECTIEF", "SYSTEMISCH", "PRAGMATISCH", "CREATIEF", "NORMATIEF", "ONBEKEND"],
@@ -73,7 +78,7 @@ const CLASSIFY_TOOL = {
           description: "Dimensies die op of nabij een grens liggen, bv. ['K', 'P', 'TD']",
         },
       },
-      required: ["process_phases", "coregulation_bands", "task_densities", "cognitive_mode", "srl_state", "epistemic_status", "active_flags", "reasoning"],
+      required: ["process_phases", "coregulation_bands", "task_densities", "secondary_dimensions", "cognitive_mode", "srl_state", "epistemic_status", "active_flags", "reasoning"],
       additionalProperties: false,
     },
   },
