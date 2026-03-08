@@ -1,42 +1,74 @@
 
 
-# Beoordeling: het plan is goed en volledig
+# Status: Nee, geen van de drie lagen zit er al in
 
-Het voorgestelde drieluik — (1) end-to-end bootstrap testen, (2) testdata invoegen, (3) EITL Wizard bouwen — is de juiste volgorde. De architectuur is al volledig doorverbonden: `AdminPanel.tsx` importeert al `getEffectiveSSOT`, `getActivePlugin`, `hasActivePlugin` en `getAllGateAnnotations` uit `ssotRuntime.ts`. De downstream kant is klaar.
+Huidige stand in de code:
 
-## Wat er concreet moet gebeuren
+| Punt | Status |
+|------|--------|
+| `AppRole` type | Alleen `'LEERLING' \| 'DOCENT' \| 'ADMIN'` — geen `SUPERUSER` |
+| `hasRole()` in useAuth | `state.roles.includes(role)` — geen SUPERUSER-implicatie |
+| AuthGuard regel 49 | `!roles.includes(requiredRole)` — gebruikt **niet** `hasRole()` |
+| AuthPage redirect | Hardcoded `navigate('/student')` — geen role-based redirect |
+| `plugin_assignments` tabel | Bestaat niet |
+| `app_role` enum in database | Alleen `LEERLING`, `DOCENT`, `ADMIN` |
 
-### Stap 1: Testplugin invoegen via database-migratie
+Niets van het goedgekeurde plan is geïmplementeerd. Alles moet nog gebouwd worden.
 
-Een seed-migratie die:
-- Een testprofiel koppelt aan `school_id = 'test-lyceum'` (of een bestaand profiel update)
-- Een `school_ssot` record aanmaakt met een minimale maar zichtbare plugin:
-  - 1-2 band label overrides (bijv. K1, C2)
-  - 1 command description override
-  - 1 SRL label override
-  - `is_active = true`, `based_on_version = '15.0.0'`
+---
 
-### Stap 2: Handmatig de vier scenario's doorlopen
+## Implementatieplan met alle aanscherpingen verwerkt
 
-1. User zonder `school_id` → console toont "No active plugin", UI toont BASE_SSOT labels
-2. User met `school_id = 'test-lyceum'` maar plugin `is_active = false` → idem
-3. User met `school_id = 'test-lyceum'` en actieve plugin → console toont `Loaded plugin for school "Test Lyceum"`, UI toont gewijzigde labels
-4. Logout → console toont geen plugin-state meer, cache is leeg
+### Laag 1: Role-based login redirect
 
-### Stap 3: EITL Wizard (Fase 3.5) — pas na geslaagde test
+**`src/pages/AuthPage.tsx`** — `handleLogin` aanpassen:
 
-Nieuwe tab in `AdminPanel.tsx` met een stapsgewijze editor:
-1. School metadata (school_id, naam, versie)
-2. Band overrides per dimensie (label, description, didactic_principle, fix)
-3. Command description overrides
-4. SRL label/goal overrides
-5. Review + validatie + opslaan
+Na succesvolle login, rollen ophalen en redirecten in exacte volgorde:
+1. `SUPERUSER` of `ADMIN` → `/admin`
+2. `DOCENT` → `/teacher`
+3. Anders → `/student`
 
-## Wat ontbreekt in het plan (kleine aanvulling)
+### Laag 2: SUPERUSER rol + centrale implicatie
 
-Eén ding dat ik zou toevoegen: **na de testplugin invoegen, ook even checken dat de `school_ssot` RLS policies werken**. De huidige policies zijn `RESTRICTIVE` (niet permissive), wat betekent dat een admin zowel de ADMIN-policy als eventueel de DOCENT-policy nodig kan hebben. Dit is waarschijnlijk al correct, maar verdient een snelle verificatie bij het testen.
+**Database-migratie:**
+- `ALTER TYPE public.app_role ADD VALUE 'SUPERUSER'`
+- `INSERT` SUPERUSER rol voor `vis@emmauscollege.nl`
+- Update `handle_new_user()` trigger: ook SUPERUSER toekennen aan vis@
 
-## Conclusie
+**`src/hooks/useAuth.ts`:**
+- `AppRole` uitbreiden met `'SUPERUSER'`
+- `hasRole`: `state.roles.includes('SUPERUSER') || state.roles.includes(role)`
+- Nieuwe export: `isSuperUser` convenience getter
 
-Het plan is volledig. De volgorde test → testdata → wizard is architectonisch juist. Geen ontbrekende stappen.
+**`src/components/AuthGuard.tsx` (kritieke fix):**
+- Regel 49: `!roles.includes(requiredRole)` → `!hasRole(requiredRole)` (de `hasRole` uit de hook die de implicatie bevat)
+
+### Laag 3: Plugin-assignments
+
+**Database-migratie — nieuwe tabel `plugin_assignments`:**
+- `assigned_to_role` beperkt tot `DOCENT` en `LEERLING` via CHECK constraint
+- XOR-constraint: precies één targettype per record
+- RLS: SUPERUSER beheert, users lezen eigen assignments
+
+**`src/lib/ssotRuntime.ts`:**
+- `loadEffectiveSSOT(schoolId?, userId?, userRoles?)` — cascade:
+  1. User-specific enabled assignment
+  2. Role-specific enabled assignment
+  3. School-wide `is_active`
+  4. `BASE_SSOT`
+
+**`src/hooks/useSchoolPlugin.ts`:**
+- User ID en rollen doorgeven aan de loader
+
+### Bestanden
+
+| Bestand | Wijziging |
+|---------|-----------|
+| Database migratie | SUPERUSER enum + toekenning + trigger update |
+| Database migratie | `plugin_assignments` tabel + RLS + constraints |
+| `src/hooks/useAuth.ts` | AppRole, hasRole implicatie, isSuperUser |
+| `src/components/AuthGuard.tsx` | `hasRole()` i.p.v. `roles.includes()` |
+| `src/pages/AuthPage.tsx` | Role-based redirect |
+| `src/lib/ssotRuntime.ts` | Assignment-aware cascade |
+| `src/hooks/useSchoolPlugin.ts` | userId + roles doorgeven |
 
