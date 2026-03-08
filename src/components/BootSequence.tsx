@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { runDiagnostics } from '../utils/diagnostics';
-import { SSOT_DATA } from '@/data/ssot';
+import { getSSOTVersion } from '@/data/ssot';
+import { getEffectiveSSOT } from '@/lib/ssotRuntime';
 
 interface BootSequenceProps {
   onComplete: () => void;
