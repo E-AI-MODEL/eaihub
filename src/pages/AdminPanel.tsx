@@ -25,6 +25,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 
 const AdminPanel = () => {
+  const { isSuperUser } = useAuth();
   const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
   const [storageItems, setStorageItems] = useState<StorageItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,6 +37,8 @@ const AdminPanel = () => {
   const [dbFilter, setDbFilter] = useState('');
   const [dbLoading, setDbLoading] = useState(false);
   const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
+  // EITL Wizard state
+  const [showWizard, setShowWizard] = useState(false);
 
   // Load system data on mount
   useEffect(() => {
