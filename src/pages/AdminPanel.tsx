@@ -986,7 +986,7 @@ const AdminPanel = () => {
                 <CardHeader>
                   <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 text-primary" />
-                    Logic Gates ({SSOT_DATA.interaction_protocol.logic_gates.length} rules)
+                    Logic Gates ({getLogicGates().length} rules)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
