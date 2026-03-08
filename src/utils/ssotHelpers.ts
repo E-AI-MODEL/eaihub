@@ -323,7 +323,7 @@ Gebruik deze context om:
   }
 
   // 10D Rubric section — COMMAND_INTENTS instead of raw fix texts
-  sections.push('\n## 10D RUBRIC DIMENSIES (SSOT v' + SSOT_DATA.version + ')\n');
+  sections.push('\n## 10D RUBRIC DIMENSIES (SSOT v' + getSSOTVersion() + ')\n');
   
   const COMMAND_INTENTS: Record<string, string> = {
     // Core didactic fixes
