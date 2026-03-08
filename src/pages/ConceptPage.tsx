@@ -135,6 +135,10 @@ const ConceptPage = () => {
               <Zap className="w-4 h-4" />
               <span className="hidden sm:inline">ICAP & TD</span>
             </TabsTrigger>
+            <TabsTrigger value="update2026" className="flex items-center gap-2 data-[state=active]:bg-background rounded-lg px-4">
+              <Sparkles className="w-4 h-4" />
+              <span className="hidden sm:inline">Update mrt2026</span>
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
