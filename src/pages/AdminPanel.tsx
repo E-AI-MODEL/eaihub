@@ -921,7 +921,7 @@ const AdminPanel = () => {
                 <CardHeader>
                   <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
                     <Database className="w-4 h-4 text-primary" />
-                    10D Matrix - Rubrics (v{SSOT_DATA.version})
+                    10D Matrix - Rubrics (v{getSSOTVersion()})
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
