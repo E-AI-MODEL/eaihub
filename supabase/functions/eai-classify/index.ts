@@ -158,6 +158,7 @@ Classificeer deze interactie. Let op:
 - SRL-fase: zelfregulerend leren status
 - Epistemische status: hoe betrouwbaar is de AI-output (FEIT/INTERPRETATIE/SPECULATIE/ONBEKEND)?
 - Vul secondary_dimensions met V, E, T, S, L, B bands.
+- BELANGRIJK: knowledge_type (K0-K3) is een apart veld. Zet GEEN K-bands in coregulation_bands. coregulation_bands bevat ALLEEN C-bands.
 - Als een dimensie duidelijk op of nabij een grens ligt, geef dat aan via borderline_dimensions en vul secondary_bands waar relevant. Geef confidence alleen als globale schatting.`;
 
     console.log(`[eai-classify] Starting classification, profile: ${profile.subject}/${profile.level}`);
