@@ -146,7 +146,7 @@ const sPatterns = getLearnerObsPatterns('S_SocialeInteractie');
 const lPatterns = getLearnerObsPatterns('L_LeercontinuiteitTransfer');
 const bPatterns = getLearnerObsPatterns('B_BiasCorrectie');
 
-// ═══ DIDACTISCH-GEDREVEN MODEL ROUTER ═══
+const ePatterns = getLearnerObsPatterns('E_EpistemischeBetrouwbaarheid');
 type TaskType = 'chat' | 'deep' | 'image';
 
 
