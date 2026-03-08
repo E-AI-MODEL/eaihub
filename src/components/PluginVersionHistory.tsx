@@ -121,7 +121,7 @@ const PluginVersionHistory: React.FC<PluginVersionHistoryProps> = ({ schoolId, o
         .eq('id', user.id)
         .maybeSingle();
 
-      await loadEffectiveSSOT(profile?.school_id ?? undefined, user.id, []);
+      await loadEffectiveSSOT(profile?.school_id ?? undefined, user.id, roles);
 
       toast({ title: 'Versie geactiveerd', description: `Versie ${versionId.slice(0, 8)}… is nu actief.` });
       await loadData();

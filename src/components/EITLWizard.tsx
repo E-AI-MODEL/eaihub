@@ -255,7 +255,7 @@ const EITLWizard: React.FC<EITLWizardProps> = ({ existingPlugin, onClose, onSave
         plugin_id: newPlugin.id,
         previous_plugin_id: previousPluginId,
         school_id: state.schoolId,
-        action: activate ? 'CREATED' : 'CREATED',
+        action: activate ? 'CREATED_AND_ACTIVATED' : 'CREATED',
         performed_by: user.id,
         change_notes: state.changeNotes.trim() || null,
       });

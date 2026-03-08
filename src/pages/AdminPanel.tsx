@@ -1153,10 +1153,10 @@ const AdminPanel = () => {
               </Card>
 
               {/* Version History + Audit Trail (SUPERUSER sees rollback, ADMIN sees read-only) */}
-              {hasActivePlugin() && (
+              {(hasActivePlugin() ? getActivePlugin()!.school_id : adminSchoolId) && (
                 <PluginVersionHistory
-                  schoolId={getActivePlugin()!.school_id}
-                  onRollback={loadSystemData}
+                  schoolId={(hasActivePlugin() ? getActivePlugin()!.school_id : adminSchoolId)!}
+                  onRollback={() => { loadSystemData(); if (!hasActivePlugin() && adminSchoolId) setAdminSchoolId(adminSchoolId); }}
                 />
               )}
 
