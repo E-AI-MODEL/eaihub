@@ -29,7 +29,29 @@ import {
 } from '@/services/adminDbService';
 import { toast } from '@/hooks/use-toast';
 
-const AdminPanel = () => {
+// ── Helper components for structured expanded rows ──
+const Field = ({ label, value }: { label: string; value: string | null | undefined }) => (
+  <div>
+    <span className="text-muted-foreground">{label}: </span>
+    <span className="text-foreground font-medium">{value || '—'}</span>
+  </div>
+);
+
+const CollapsibleSection = ({ title, defaultOpen = false, nested = false, children }: { title: string; defaultOpen?: boolean; nested?: boolean; children: React.ReactNode }) => {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <Collapsible open={open} onOpenChange={setOpen} className={nested ? 'mt-1.5' : 'rounded border border-border bg-background p-2'}>
+      <CollapsibleTrigger className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground hover:text-foreground cursor-pointer w-full">
+        {open ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+        {title}
+      </CollapsibleTrigger>
+      <CollapsibleContent className="mt-1.5">
+        {children}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+};
+
   const { isSuperUser, user } = useAuth();
   const [adminSchoolId, setAdminSchoolId] = useState<string | null>(null);
   const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
