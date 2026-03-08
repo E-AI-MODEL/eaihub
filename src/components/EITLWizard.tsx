@@ -291,13 +291,18 @@ const EITLWizard: React.FC<EITLWizardProps> = ({ existingPlugin, onClose, onSave
         />
       </div>
       <div>
-        <label className="text-xs font-medium text-foreground mb-1 block">Wijzigingsnotitie</label>
+        <label className="text-xs font-medium text-foreground mb-1 block">
+          Wijzigingsnotitie {existingPlugin ? '*' : ''}
+        </label>
         <Textarea
           value={state.changeNotes}
           onChange={e => setState(prev => ({ ...prev, changeNotes: e.target.value }))}
-          placeholder="Beschrijf wat er veranderd is (optioneel)"
+          placeholder={existingPlugin ? "Beschrijf wat er veranderd is (verplicht bij bewerkingen)" : "Beschrijf wat er veranderd is (optioneel)"}
           rows={3}
         />
+        {existingPlugin && !state.changeNotes.trim() && (
+          <p className="text-[10px] text-destructive mt-1">Wijzigingsnotitie is verplicht bij bewerkingen</p>
+        )}
       </div>
       <div className="p-3 rounded bg-secondary/30 border border-border text-xs">
         <span className="text-muted-foreground">Gebaseerd op SSOT versie: </span>
