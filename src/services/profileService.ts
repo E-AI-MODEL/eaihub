@@ -24,6 +24,7 @@ export const fetchProfile = async (userId: string): Promise<{ userId: string; pr
           name: data.name || localProfile?.name || '',
           subject: localProfile?.subject || '',
           level: localProfile?.level || '',
+          grade: localProfile?.grade || null,
           currentNodeId: localProfile?.currentNodeId,
         };
         return { userId, profile: profile.subject ? profile : localProfile };

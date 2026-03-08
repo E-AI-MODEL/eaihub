@@ -190,7 +190,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
 
     try {
-      const userId = getOrCreateUserId();
       const response = await sendChat({ sessionId, userId, message: textToSend, profile });
       messageCounterRef.current += 1;
       if (response.progress !== undefined) progressRef.current = response.progress;
