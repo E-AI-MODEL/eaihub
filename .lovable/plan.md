@@ -79,8 +79,8 @@ Stap 1–7 afgerond. Fase 1 (stabilisatie) en Fase 2 (analyse-consistentie) afge
 
 | # | Taak | Status |
 |---|------|--------|
-| 3.5.1 | 5-staps wizard in Admin Panel voor plugin CRUD | TODO |
-| 3.5.2 | Plugin versioning met `change_notes` en `based_on_version` | TODO |
+| 3.5.1 | 5-staps wizard in Admin Panel voor plugin CRUD (SUPERUSER-only) | ✅ DONE |
+| 3.5.2 | Plugin versioning met `change_notes` en `based_on_version` | ✅ DONE |
 
 ### Fase 4 — Governance
 

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle, MessageSquare, Users, BarChart3, ChevronDown, ChevronRight, Layers } from 'lucide-react';
+import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle, MessageSquare, Users, BarChart3, ChevronDown, ChevronRight, Layers, Plus, Edit } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import EITLWizard from '@/components/EITLWizard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -23,6 +25,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 
 const AdminPanel = () => {
+  const { isSuperUser } = useAuth();
   const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
   const [storageItems, setStorageItems] = useState<StorageItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,6 +37,8 @@ const AdminPanel = () => {
   const [dbFilter, setDbFilter] = useState('');
   const [dbLoading, setDbLoading] = useState(false);
   const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
+  // EITL Wizard state
+  const [showWizard, setShowWizard] = useState(false);
 
   // Load system data on mount
   useEffect(() => {
@@ -1024,7 +1029,42 @@ const AdminPanel = () => {
           {/* EITL Plugin Tab */}
           <TabsContent value="eitl">
             <div className="space-y-6">
-              {/* Plugin Status */}
+              {/* SUPERUSER: Wizard toggle */}
+              {isSuperUser && !showWizard && (
+                <div className="flex items-center gap-2">
+                  <Button size="sm" onClick={() => setShowWizard(true)}>
+                    {hasActivePlugin() ? (
+                      <><Edit className="w-4 h-4 mr-1" />Plugin bewerken</>
+                    ) : (
+                      <><Plus className="w-4 h-4 mr-1" />Nieuwe plugin aanmaken</>
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              {/* Wizard (SUPERUSER only) */}
+              {isSuperUser && showWizard && (
+                <EITLWizard
+                  existingPlugin={hasActivePlugin() ? (() => {
+                    const p = getActivePlugin()!;
+                    return {
+                      id: p.id,
+                      school_id: p.school_id,
+                      school_name: p.school_name,
+                      plugin_json: p.plugin_json,
+                      change_notes: p.change_notes,
+                    };
+                  })() : null}
+                  onClose={() => setShowWizard(false)}
+                  onSaved={() => {
+                    setShowWizard(false);
+                    // Force re-render by reloading system data
+                    loadSystemData();
+                  }}
+                />
+              )}
+
+              {/* Plugin Status (visible to all admins) */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
@@ -1131,20 +1171,20 @@ const AdminPanel = () => {
                                     {overlay.label && (
                                       <div className="mt-1">
                                         <span className="text-muted-foreground">Label: </span>
-                                        <span className="text-red-400 line-through mr-2">{baseBand?.label}</span>
-                                        <span className="text-green-400">{overlay.label}</span>
+                                        <span className="text-destructive line-through mr-2">{baseBand?.label}</span>
+                                        <span className="text-green-500">{overlay.label}</span>
                                       </div>
                                     )}
                                     {overlay.description && (
                                       <div className="mt-1">
                                         <span className="text-muted-foreground">Beschrijving: </span>
-                                        <span className="text-green-400">{overlay.description.slice(0, 80)}…</span>
+                                        <span className="text-green-500">{overlay.description.slice(0, 80)}…</span>
                                       </div>
                                     )}
                                     {overlay.didactic_principle && (
                                       <div className="mt-1">
                                         <span className="text-muted-foreground">Principe: </span>
-                                        <span className="text-green-400">{overlay.didactic_principle.slice(0, 80)}…</span>
+                                        <span className="text-green-500">{overlay.didactic_principle.slice(0, 80)}…</span>
                                       </div>
                                     )}
                                   </div>
@@ -1163,7 +1203,7 @@ const AdminPanel = () => {
                                 <div key={cmd} className="p-2 rounded bg-secondary/20 border border-border text-xs">
                                   <code className="font-mono text-primary">{cmd}</code>
                                   <span className="text-muted-foreground ml-2">→</span>
-                                  <span className="text-green-400 ml-2">{String(pj.commands![cmd]).slice(0, 100)}</span>
+                                  <span className="text-green-500 ml-2">{String(pj.commands![cmd]).slice(0, 100)}</span>
                                 </div>
                               ))}
                             </div>
