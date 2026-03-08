@@ -16,6 +16,7 @@ import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
 import { useSchoolPlugin } from "@/hooks/useSchoolPlugin";
 import { useAuth } from "@/hooks/useAuth";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const SchoolPluginProvider = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <AuthProvider>
     <SchoolPluginProvider>
     <TooltipProvider>
       <Toaster />
