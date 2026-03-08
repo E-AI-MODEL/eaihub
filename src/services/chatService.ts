@@ -542,11 +542,12 @@ export const streamChat = async ({
     const streamRouterDecision = buildRouterDecision(request.message, sessionCtx);
     const taskType: TaskType = streamRouterDecision.intent_category === 'SLOW' ? 'deep' : 'chat';
     
+    const token = await getAuthToken();
     const response = await fetch(CHAT_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         sessionId: request.sessionId,
