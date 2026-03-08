@@ -205,6 +205,10 @@ const EITLWizard: React.FC<EITLWizardProps> = ({ existingPlugin, onClose, onSave
       toast({ title: 'Vul school-ID en -naam in', variant: 'destructive' });
       return;
     }
+    if (existingPlugin && !state.changeNotes.trim()) {
+      toast({ title: 'Wijzigingsnotitie verplicht', description: 'Beschrijf wat er veranderd is.', variant: 'destructive' });
+      return;
+    }
 
     const pluginJson = buildPluginJson();
     const val = validatePlugin(pluginJson, BASE_SSOT);
@@ -215,46 +219,56 @@ const EITLWizard: React.FC<EITLWizardProps> = ({ existingPlugin, onClose, onSave
 
     setIsSaving(true);
     try {
-      if (existingPlugin) {
-        // Versioning: insert new row (new version), deactivate old
-        if (activate) {
+      // Capture previous active plugin id for audit trail
+      let previousPluginId: string | null = null;
+      if (activate) {
+        const { data: prev } = await supabase
+          .from('school_ssot')
+          .select('id')
+          .eq('school_id', state.schoolId)
+          .eq('is_active', true)
+          .limit(1)
+          .maybeSingle();
+        previousPluginId = prev?.id ?? null;
+
+        if (previousPluginId) {
           await supabase
             .from('school_ssot')
             .update({ is_active: false })
-            .eq('school_id', state.schoolId)
-            .eq('is_active', true);
+            .eq('id', previousPluginId);
         }
+      }
 
-        const { error } = await supabase.from('school_ssot').insert({
-          school_id: state.schoolId,
-          school_name: state.schoolName,
-          based_on_version: getSSOTVersion(),
-          plugin_json: pluginJson as any,
-          is_active: activate,
-          change_notes: state.changeNotes.trim() || null,
-          created_by: user.id,
-        });
-        if (error) throw error;
-      } else {
-        // New plugin
-        if (activate) {
-          await supabase
-            .from('school_ssot')
-            .update({ is_active: false })
-            .eq('school_id', state.schoolId)
-            .eq('is_active', true);
-        }
+      const { data: newPlugin, error } = await supabase.from('school_ssot').insert({
+        school_id: state.schoolId,
+        school_name: state.schoolName,
+        based_on_version: getSSOTVersion(),
+        plugin_json: pluginJson as any,
+        is_active: activate,
+        change_notes: state.changeNotes.trim() || null,
+        created_by: user.id,
+      }).select('id').single();
+      if (error) throw error;
 
-        const { error } = await supabase.from('school_ssot').insert({
+      // Audit log
+      await supabase.from('ssot_changes' as any).insert({
+        plugin_id: newPlugin.id,
+        previous_plugin_id: previousPluginId,
+        school_id: state.schoolId,
+        action: activate ? 'CREATED' : 'CREATED',
+        performed_by: user.id,
+        change_notes: state.changeNotes.trim() || null,
+      });
+
+      if (activate && previousPluginId) {
+        await supabase.from('ssot_changes' as any).insert({
+          plugin_id: newPlugin.id,
+          previous_plugin_id: previousPluginId,
           school_id: state.schoolId,
-          school_name: state.schoolName,
-          based_on_version: getSSOTVersion(),
-          plugin_json: pluginJson as any,
-          is_active: activate,
-          change_notes: state.changeNotes.trim() || null,
-          created_by: user.id,
+          action: 'ACTIVATED',
+          performed_by: user.id,
+          change_notes: `Activatie: vervangt versie ${previousPluginId.slice(0, 8)}`,
         });
-        if (error) throw error;
       }
 
       toast({ title: activate ? 'Plugin opgeslagen en geactiveerd' : 'Plugin opgeslagen als concept' });
