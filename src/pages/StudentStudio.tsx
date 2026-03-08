@@ -323,6 +323,7 @@ const StudioHeader: React.FC<StudioHeaderProps> = ({
   compact,
 }) => {
   const navigate = useNavigate();
+  const { roles } = useAuth();
 
   return (
     <div className="h-12 px-3 flex items-center justify-between border-b border-slate-700 bg-slate-900 shrink-0">
