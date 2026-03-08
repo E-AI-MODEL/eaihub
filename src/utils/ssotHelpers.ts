@@ -347,7 +347,7 @@ Gebruik deze context om:
     '/fase_check': 'Bepaal waar de leerling zich bevindt in het leerproces.',
   };
 
-  for (const rubricId of SSOT_DATA.metadata.cycle.order) {
+  for (const rubricId of getCycleOrder()) {
     const rubric = getRubric(rubricId);
     if (!rubric) continue;
     
