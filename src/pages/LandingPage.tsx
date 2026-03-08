@@ -81,9 +81,9 @@ const LandingPage = () => {
                 <Link 
                   to="/student" 
                   className="group bg-foreground text-background hover:bg-foreground/90 px-8 py-4 rounded text-center text-sm font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3"
-                  aria-label="Start Student Studio"
+                  aria-label="Start Leerling Hub"
                 >
-                  Start Student Hub 
+                  Start Leerling Hub 
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
                 </Link>
                 <Link 
@@ -103,7 +103,7 @@ const LandingPage = () => {
           <div className="max-w-5xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
-              {/* Student Card */}
+              {/* Leerling Card */}
               <Link 
                 to="/student" 
                 className="group relative block eai-card-gradient border border-border rounded-3xl overflow-hidden hover:border-primary/50 transition-all hover:shadow-2xl hover:shadow-primary/10 focus:outline-none focus:ring-2 focus:ring-primary"
@@ -114,7 +114,7 @@ const LandingPage = () => {
                   </div>
                   <header className="mb-4">
                     <span className="text-primary font-bold text-xs uppercase tracking-widest block mb-2">Voor Leerlingen</span>
-                    <h3 className="text-2xl font-bold text-foreground">Student Studio</h3>
+                    <h3 className="text-2xl font-bold text-foreground">Leerlingomgeving</h3>
                   </header>
                   <p className="text-muted-foreground mb-8 max-w-sm leading-relaxed flex-1">
                     AI die je laat nadenken in plaats van antwoorden weggeeft. Start een sessie voor Biologie, Wiskunde of Economie en leer dieper.

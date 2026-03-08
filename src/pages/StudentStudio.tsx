@@ -323,6 +323,7 @@ const StudioHeader: React.FC<StudioHeaderProps> = ({
   compact,
 }) => {
   const navigate = useNavigate();
+  const { roles } = useAuth();
 
   return (
     <div className="h-12 px-3 flex items-center justify-between border-b border-slate-700 bg-slate-900 shrink-0">
@@ -373,20 +374,24 @@ const StudioHeader: React.FC<StudioHeaderProps> = ({
         >
           <Home className="w-3 h-3" />
         </button>
-        <button
-          onClick={() => navigate('/teacher')}
-          className="h-7 px-2 text-[9px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-700 transition-colors"
-          title="Docent"
-        >
-          <GraduationCap className="w-3 h-3" />
-        </button>
-        <button
-          onClick={() => navigate('/admin')}
-          className="h-7 px-2 text-[9px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-700 transition-colors"
-          title="Admin"
-        >
-          <Shield className="w-3 h-3" />
-        </button>
+        {(roles.includes('DOCENT') || roles.includes('ADMIN')) && (
+          <button
+            onClick={() => navigate('/teacher')}
+            className="h-7 px-2 text-[9px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-700 transition-colors"
+            title="Docent"
+          >
+            <GraduationCap className="w-3 h-3" />
+          </button>
+        )}
+        {roles.includes('ADMIN') && (
+          <button
+            onClick={() => navigate('/admin')}
+            className="h-7 px-2 text-[9px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-700 transition-colors"
+            title="Admin"
+          >
+            <Shield className="w-3 h-3" />
+          </button>
+        )}
 
         <div className="w-px h-5 bg-slate-800 mx-0.5" />
 
