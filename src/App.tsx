@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,41 +14,15 @@ import ConceptPage from "@/pages/ConceptPage";
 import AuthPage from "@/pages/AuthPage";
 import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
-import { supabase } from "@/integrations/supabase/client";
 import { useSchoolPlugin } from "@/hooks/useSchoolPlugin";
-import type { User } from "@supabase/supabase-js";
+import { useAuth } from "@/hooks/useAuth";
 
 const queryClient = new QueryClient();
 
-/** Listens to auth state and bootstraps school plugin. Non-blocking. */
+/** Bootstraps school plugin using centralised auth state. */
 const SchoolPluginProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [roles, setRoles] = useState<string[]>([]);
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const u = session?.user ?? null;
-      setUser(u);
-      if (u) {
-        const { data } = await supabase.from('user_roles').select('role').eq('user_id', u.id);
-        setRoles((data || []).map(r => r.role));
-      } else {
-        setRoles([]);
-      }
-    });
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      const u = session?.user ?? null;
-      setUser(u);
-      if (u) {
-        const { data } = await supabase.from('user_roles').select('role').eq('user_id', u.id);
-        setRoles((data || []).map(r => r.role));
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-
-  useSchoolPlugin(user, roles as any);
-
+  const { user, roles } = useAuth();
+  useSchoolPlugin(user, roles);
   return <>{children}</>;
 };
 

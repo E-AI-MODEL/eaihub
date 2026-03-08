@@ -76,7 +76,7 @@ export const useAuth = () => {
   }, [resolveUser]);
 
   const hasRole = useCallback((role: AppRole) => state.roles.includes('SUPERUSER') || state.roles.includes(role), [state.roles]);
-  const isSuperUser = useCallback(() => state.roles.includes('SUPERUSER'), [state.roles]);
+  const isSuperUser = state.roles.includes('SUPERUSER');
 
   const retryRoleBootstrap = useCallback(async () => {
     if (!state.user || !state.session) return;

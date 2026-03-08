@@ -1,86 +1,122 @@
-# Audit bevestigd — alle 5 punten kloppen
 
-Ik heb de database-configuratie en code geverifieerd. Hier is de status:
+# Strategische roadmap — EAIHUB
 
-## Punt 1: RESTRICTIVE RLS — BEVESTIGD, KRITIEK
+## Status
 
-**Elke** RLS policy in het hele project is `Permissive: No` (RESTRICTIVE). Dit geldt voor:
-
-- `plugin_assignments` (2 policies, beide restrictive)
-- `school_ssot` (2 policies, beide restrictive)
-- `chat_messages` (4 policies, alle restrictive)
-- `student_sessions` (5 policies, alle restrictive)
-- `user_roles` (2 policies, beide restrictive)
-- `mastery` (5 policies, alle restrictive)
-- `profiles` (4 policies, alle restrictive)
-- `teacher_messages` (4 policies, alle restrictive)
-
-In PostgreSQL: zonder minstens één PERMISSIVE policy per tabel is het resultaat altijd "geen toegang". Als het nu werkt, is dat puur omdat het Supabase-gedrag hier mee-valt, maar het is architectonisch fout en fragiel.
-
-## Punt 2: `has_role()` mist SUPERUSER-implicatie — BEVESTIGD
-
-Database-functie doet alleen: `WHERE user_id = _user_id AND role = _role`
-
-De app-laag (`useAuth.ts` regel 78) doet wél: `state.roles.includes('SUPERUSER') || state.roles.includes(role)`
-
-Dit is inconsistent. Als vis@ alleen SUPERUSER heeft (zonder expliciete ADMIN), falen alle DB-policies die `has_role(uid, 'ADMIN')` checken. Nu werkt het toevallig omdat de trigger alle rollen toekent.
-
-## Punt 3: `isSuperUser` is functie — BEVESTIGD
-
-Regel 79: `const isSuperUser = useCallback(() => state.roles.includes('SUPERUSER'), [state.roles]);`
-Moet boolean worden.
-
-## Punt 4: Assignment-queries niet deterministisch — BEVESTIGD
-
-Regels 115-122 en 132-139: `.limit(1).maybeSingle()` zonder `.order(...)`.
-
-## Punt 5: App.tsx dupliceert auth — BEVESTIGD
-
-Al eerder vastgesteld, `SchoolPluginProvider` heeft eigen auth-listener naast `useAuth`.
+Stap 1–7 afgerond. Fase 1 (stabilisatie) en Fase 2 (analyse-consistentie) afgerond. Fase 3 (EITL plugin-architectuur) afgerond. Fase 3.5–5 gedefinieerd.
 
 ---
 
-## Plan: alle 5 fixes in één keer
+## Huidige architectuur
 
-### Database-migratie (1 migratie, 3 acties)
+1. `eai-classify` edge function — primaire 10D-classificatie via Gemini (tool-calling schema)
+2. `generateAnalysis()` in `chatService.ts` — client-side fallback via regex/heuristics
+3. `reliabilityPipeline.ts` — enige bron voor SSOT-healing, G-factor, logic gates, epistemic guard
+4. `eaiLearnAdapter.ts` — state-/viewmodel-laag (scaffolding, TTL, history)
+5. `ssot_v15.json` + `ssot.ts` — statische SSOT singleton met typed helpers, **nu via `getEffectiveSSOT()`**
+6. `ssotRuntime.ts` — runtime loader + whitelist merge voor school plugin overlays
+7. `ssotValidator.ts` — drielaags Zod-validatie (schema, referentieel, runtime)
+8. Auth via Supabase: `user_roles` (LEERLING/DOCENT/ADMIN), `has_role()` SECURITY DEFINER, `AuthGuard`
+9. Persistentie: `chat_messages`, `student_sessions`, `mastery`, `teacher_messages`, `profiles`, `school_ssot`
 
-**A. `has_role()` updaten met SUPERUSER-implicatie:**
+---
 
-```sql
-CREATE OR REPLACE FUNCTION public.has_role(...)
-  WHERE user_id = _user_id AND (role = _role OR role = 'SUPERUSER')
-```
+## Afgeronde stappen
 
-**B. Alle RLS policies op alle 8 tabellen droppen en herscreëren als PERMISSIVE** (de standaard). Zelfde logica, alleen zonder het `RESTRICTIVE` keyword. Dit raakt:
+### Stap 1 — Analyse naar edge function ✅
+### Stap 2 — Dubbele validatie opschonen ✅
+### Stap 3 — EAIAnalysis uitbreiden met nuancevelden ✅
+### Stap 4 — UI aanpassen op rijkere analyse ✅
+### Stap 5 — Leerlingervaring en Leskaart-context ✅
+### Stap 6 — Kwaliteitszichtbaarheid per rol ✅
+### Stap 7 — Veilig rollenmodel en Auth ✅
 
-- `plugin_assignments` (2 policies)
-- `school_ssot` (2 policies)
-- `chat_messages` (4 policies)
-- `student_sessions` (5 policies)
-- `user_roles` (2 policies)
-- `mastery` (5 policies)
-- `profiles` (4 policies)
-- `teacher_messages` (4 policies)
+---
 
-Totaal: 28 policies droppen + 28 herscreëren als permissive.
+## Implementatieplan — 5 fasen
 
-**C. Geen structuurwijzigingen** — alleen function + policies.
+### Fase 1 — Stabilisatie (security + healing) ✅
 
-### Code-wijzigingen
+| # | Taak | Status |
+|---|------|--------|
+| 1.1 | RLS verscherpen | ✅ DONE |
+| 1.2 | Healing consolideren | ✅ DONE |
+| 1.3 | Defensieve role-check | ✅ DONE |
 
+### Fase 2 — Analyse-consistentie ✅
 
-| Bestand                  | Wijziging                                                                                                        |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| `src/hooks/useAuth.ts`   | `isSuperUser` van `useCallback(() => ...)` naar `state.roles.includes('SUPERUSER')`                              |
-| `src/lib/ssotRuntime.ts` | `.order('created_at', { ascending: false })` toevoegen op beide assignment-queries (regels 121 en 138)           |
-| `src/App.tsx`            | `SchoolPluginProvider` refactoren: eigen auth-listener vervangen door `useAuth()` hook, `roles as any` verdwijnt |
+| # | Taak | Status |
+|---|------|--------|
+| 2.1 | Edge-classify uitbreiden met secondary_dimensions | ✅ DONE |
+| 2.2 | E-dimensie aansluiten op SSOT | ✅ DONE |
+| 2.3 | Logic gate check vereenvoudigen | ✅ DONE |
 
+### Fase 3 — EITL: SSOT plug-in architectuur ✅
 
-### Risico-inschatting
+| # | Taak | Status |
+|---|------|--------|
+| 3.1 | `school_ssot` tabel + RLS (admins CRUD, docenten SELECT) | ✅ DONE |
+| 3.2 | `ssotValidator.ts` — drielaags Zod-validatie (schema, referentieel, runtime) | ✅ DONE |
+| 3.3 | `ssotRuntime.ts` — `whitelistMerge` + `loadEffectiveSSOT` + cache | ✅ DONE |
+| 3.4 | `ssot.ts` refactor — `SSOT_DATA` → `BASE_SSOT` + `getEffectiveSSOT()` | ✅ DONE |
+| 3.5 | Component updates — alle directe `SSOT_DATA` refs vervangen | ✅ DONE |
+| 3.6 | Read-only EITL preview tab in Admin Panel | ✅ DONE |
 
-- Migratie is groot (28 policies) maar puur declaratief — geen datawijzigingen
-- `has_role()` wijziging is backward-compatible (voegt alleen SUPERUSER-implicatie toe)
-- Code-wijzigingen zijn minimaal en backward-compatible  
-  
-voer uit maar en sluit af met grondige check 
-- &nbsp;
+#### MVP Plugin Whitelist
+- **Toegestaan**: band `label`, `description`, `didactic_principle`, `fix` (tekst); command descriptions; SRL `label`/`goal`; gate annotations (rationale, teacher_note)
+- **Immutable**: `band_id`, `fix_ref`, `score_range`, `mechanistic`, `enforcement`, command keys, `cycle.order`, `trigger_band`, `learner_obs`, `ai_obs`, `nl_profile`, `trace_tags`, `band_weight`, `fix_type`, `band_ref`
+- **Niet in MVP**: rubric `name`, rubric `goal`
+
+### Fase 3.5 — EITL Wizard (edit-flow)
+
+| # | Taak | Status |
+|---|------|--------|
+| 3.5.1 | 5-staps wizard in Admin Panel voor plugin CRUD | TODO |
+| 3.5.2 | Plugin versioning met `change_notes` en `based_on_version` | TODO |
+
+### Fase 4 — Governance
+
+| # | Taak | Status |
+|---|------|--------|
+| 4.1 | Versioning — elke plugin-save als nieuwe rij | TODO |
+| 4.2 | Rollback — admin kan eerdere plugin-versie activeren | TODO |
+| 4.3 | Audit log — `ssot_changes` tabel | TODO |
+| 4.4 | Diff-view — base vs effective vergelijking (basis staat in 3.6) | TODO |
+
+### Fase 5 — Observability
+
+| # | Taak | Status |
+|---|------|--------|
+| 5.1 | Edge vs client analyse-ratio in dashboard | TODO |
+| 5.2 | Plugin-usage metrics per school | TODO |
+| 5.3 | Logic gate breach rate trending | TODO |
+| 5.4 | Healing event frequentie | TODO |
+
+---
+
+## Bekende technische schuld
+
+| # | Issue | Impact | Fase |
+|---|-------|--------|------|
+| 4 | Mixed dimensions in `coregulation_bands` veld | Low | documenteren of refactor bij EITL wizard |
+| 7 | Token schatting is character-based proxy | Low | 5.x of labelen |
+| 8 | `COMMAND_INTENTS` hardcoded in `ssotHelpers.ts` | Low | 3.5 (verplaatsen naar plugin-laag) |
+
+---
+
+## Wat expliciet buiten scope blijft
+
+- Volledige vervanging van de SSOT per school (alleen overlay)
+- Generieke deep merge (alleen whitelisted paden)
+- Structurele of machinekritische velden in de plugin-laag
+- Meerdere fasen tegelijk uitvoeren
+- `tiktoken` (Python-only) — indien nodig: `gpt-tokenizer` (npm) of proxy-label
+
+---
+
+## Kernprincipe
+
+Constatering → Interpretatie → Beslissing.
+De base SSOT blijft constitutieve bronlaag.
+De plugin annoteert, maar herdefinieert niet.
+Stabilisatie vóór uitbreiding.

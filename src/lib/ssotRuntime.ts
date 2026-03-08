@@ -118,6 +118,7 @@ export async function loadEffectiveSSOT(schoolId?: string, userId?: string, user
         .eq('assigned_to_user_id', userId)
         .eq('school_id', schoolId)
         .eq('is_enabled', true)
+        .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
@@ -135,6 +136,7 @@ export async function loadEffectiveSSOT(schoolId?: string, userId?: string, user
             .in('assigned_to_role', targetRoles)
             .eq('school_id', schoolId)
             .eq('is_enabled', true)
+            .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
 
