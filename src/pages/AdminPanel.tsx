@@ -1116,9 +1116,41 @@ const AdminPanel = () => {
                     const plugin = getActivePlugin()!;
                     return (
                       <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-green-500" />
-                          <span className="text-sm font-medium text-foreground">Plugin Actief</span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-green-500" />
+                            <span className="text-sm font-medium text-foreground">Plugin Actief</span>
+                          </div>
+                          {isSuperUser && (
+                            <Switch
+                              checked={plugin.is_active}
+                              onCheckedChange={async (checked) => {
+                                try {
+                                  await supabase
+                                    .from('school_ssot')
+                                    .update({ is_active: checked })
+                                    .eq('id', plugin.id);
+                                  await supabase
+                                    .from('ssot_changes')
+                                    .insert({
+                                      plugin_id: plugin.id,
+                                      school_id: plugin.school_id,
+                                      performed_by: user!.id,
+                                      action: checked ? 'ACTIVATED' : 'DEACTIVATED',
+                                      change_notes: checked ? 'Plugin geactiveerd' : 'Plugin gedeactiveerd',
+                                    });
+                                  clearSSOTCache();
+                                  toast({
+                                    title: checked ? 'Plugin geactiveerd' : 'Plugin gedeactiveerd',
+                                    description: checked ? 'School plugin is nu actief.' : 'Base SSOT wordt nu gebruikt.',
+                                  });
+                                  loadSystemData();
+                                } catch {
+                                  toast({ title: 'Fout', description: 'Kon plugin status niet wijzigen.', variant: 'destructive' });
+                                }
+                              }}
+                            />
+                          )}
                         </div>
                         <div className="grid grid-cols-2 gap-3 text-xs">
                           <div className="p-3 rounded bg-secondary/30 border border-border">
