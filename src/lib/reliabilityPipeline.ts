@@ -494,66 +494,19 @@ export interface SSOTValidationResult {
 
 /**
  * Validate and heal an EAIAnalysis against SSOT.
- * Consolidated from eaiLearnAdapter — this is now the single authoritative validator.
+ * Delegates to normalizeAnalysisToSSOT (the single authoritative healer)
+ * and adds a logic gate check.
  */
 export function validateAnalysisAgainstSSOT(analysis: EAIAnalysis, _language: 'nl' | 'en' = 'nl'): SSOTValidationResult {
-  const core = getEAICore();
-  const knownBandIds = new Set<string>();
-  const knownCommands = new Set<string>();
-  const warnings: string[] = [];
-  const healed = JSON.parse(JSON.stringify(analysis));
-
-  core.rubrics.forEach((rubric: any) => {
-    (rubric.bands ?? []).forEach((band: any) => {
-      if (band.band_id) knownBandIds.add(band.band_id);
-    });
-  });
-  core.commands.forEach((cmd: any) => knownCommands.add(cmd.command));
-
-  const cleanBandList = (list: string[], fieldName: string) => {
-    const clean: string[] = [];
-    list.forEach(bandId => {
-      if (knownBandIds.has(bandId)) {
-        clean.push(bandId);
-      } else if (bandId && bandId.length > 1) {
-        warnings.push(`Pruned unknown band ID: ${bandId} in ${fieldName}`);
-      }
-    });
-    return clean;
-  };
-
-  healed.process_phases = cleanBandList(healed.process_phases || [], 'process_phases');
-  healed.coregulation_bands = cleanBandList(healed.coregulation_bands || [], 'coregulation_bands');
-  healed.task_densities = cleanBandList(healed.task_densities || [], 'task_densities');
-  healed.secondary_dimensions = cleanBandList(healed.secondary_dimensions || [], 'secondary_dimensions');
-
-  if (healed.active_fix && healed.active_fix !== 'NONE' && healed.active_fix !== 'null') {
-    const fix = healed.active_fix.trim();
-    if (!knownCommands.has(fix)) {
-      if (COMMAND_FUZZY_MAP[fix]) {
-        healed.active_fix = COMMAND_FUZZY_MAP[fix];
-        warnings.push(`Healed command: '${fix}' -> '${healed.active_fix}'`);
-      } else if (!fix.startsWith('/') && knownCommands.has(`/${fix}`)) {
-        healed.active_fix = `/${fix}`;
-        warnings.push(`Added missing prefix: '${fix}' -> '${healed.active_fix}'`);
-      } else {
-        warnings.push(`Nullified unknown command: '${fix}'`);
-        healed.active_fix = null;
-      }
-    }
-  } else {
-    healed.active_fix = null;
-  }
-
-  const validSrl = ['PLAN', 'MONITOR', 'REFLECT', 'ADJUST', 'UNKNOWN'];
-  if (healed.srl_state && !validSrl.includes(healed.srl_state)) {
-    warnings.push(`Invalid SRL state: ${healed.srl_state}. Resetting to UNKNOWN.`);
-    healed.srl_state = 'UNKNOWN';
-  }
-
+  const { healed, events } = normalizeAnalysisToSSOT(analysis, '__audit__', { strict: true });
   const gateBreach = checkLogicGatesAnalysis(healed);
 
-  return { ok: true, warnings, healedAnalysis: healed, logicGateBreach: gateBreach };
+  return {
+    ok: true,
+    warnings: events.map(e => e.replace(/:/, ': ')),
+    healedAnalysis: healed,
+    logicGateBreach: gateBreach,
+  };
 }
 
 // ============= FULL PIPELINE EXECUTION =============
