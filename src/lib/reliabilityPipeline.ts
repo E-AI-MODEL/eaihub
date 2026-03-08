@@ -2,7 +2,7 @@
 // Contract-first, SSOT-first, Observability-first
 // Version 15.0.0
 
-import { SSOT_DATA, getRubric, getBand, getCommandDescription } from '@/data/ssot';
+import { getRubric, getBand, getCommandDescription } from '@/data/ssot';
 import { getEAICore } from '@/utils/ssotHelpers';
 import type { EAIAnalysis, MechanicalState, SemanticValidation, LogicGateBreach } from '@/types';
 

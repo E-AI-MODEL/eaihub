@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { SSOT_DATA } from '@/data/ssot';
+import { getSSOTVersion, getRubric, getShortKey, getCycleOrder } from '@/data/ssot';
 import { getDimensionMeta, getKnowledgeLevelsForUI, getLogicGatesForUI } from '@/utils/ssotHelpers';
 
 interface DidacticLegendProps {
@@ -24,7 +24,7 @@ const DidacticLegend: React.FC<DidacticLegendProps> = ({ onClose }) => {
         <div className="p-4 border-b border-border bg-muted/50">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="text-foreground font-bold text-sm tracking-wide uppercase">EAI v{SSOT_DATA.version} Didactiek</h3>
+              <h3 className="text-foreground font-bold text-sm tracking-wide uppercase">EAI v{getSSOTVersion()} Didactiek</h3>
               <p className="text-[10px] text-muted-foreground">Wetenschappelijk fundament — Single Source of Truth</p>
             </div>
             <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -128,8 +128,8 @@ const DidacticLegend: React.FC<DidacticLegendProps> = ({ onClose }) => {
               <p className="text-[10px] text-muted-foreground italic mb-2">
                 Cyclus: K → P → TD → C → V → T → E → L → S → B. Elke dimensie heeft 6 niveaus (0–5).
               </p>
-              {SSOT_DATA.metadata.cycle.order.map((rubricId, idx) => {
-                const rubric = SSOT_DATA.rubrics.find(r => r.rubric_id === rubricId);
+              {getCycleOrder().map((rubricId, idx) => {
+                const rubric = getRubric(rubricId);
                 if (!rubric) return null;
                 
                 const shortKey = getShortKey(rubricId);

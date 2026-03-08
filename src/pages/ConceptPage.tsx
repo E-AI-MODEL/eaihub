@@ -16,7 +16,7 @@ import {
   Lock
 } from 'lucide-react';
 import { getDimensionsForUI, getLogicGatesForUI, getDimensionColors } from '@/utils/ssotHelpers';
-import { SSOT_DATA } from '@/data/ssot';
+import { getSSOTVersion } from '@/data/ssot';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Accordion,
@@ -72,7 +72,7 @@ const ConceptPage = () => {
           </Link>
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold tracking-wider uppercase px-2 py-1 rounded-full bg-primary/10 text-primary">
-              EAI v{SSOT_DATA.version}
+              EAI v{getSSOTVersion()}
             </span>
           </div>
         </div>
@@ -239,7 +239,7 @@ const ConceptPage = () => {
             <div className="mb-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Grid3X3 className="w-5 h-5 text-primary" />
-                10 Dimensies (SSOT v{SSOT_DATA.version})
+                10 Dimensies (SSOT v{getSSOTVersion()})
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
                 Klik op een dimensie om de bands te bekijken.

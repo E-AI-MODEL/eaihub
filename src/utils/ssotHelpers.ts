@@ -3,17 +3,19 @@
 // All components should import from here instead of hardcoding data
 
 import { 
-  SSOT_DATA, 
   getLogicGates, 
   getRubric, 
   getRubricByShortKey,
   getShortKey,
   getCommands,
   getSRLStates,
+  getCycleOrder,
+  getSSOTVersion,
   type Rubric,
   type RubricBand,
   type LogicGate
 } from '@/data/ssot';
+import { getEffectiveSSOT } from '@/lib/ssotRuntime';
 import { getNodeById, getLearningPath, type LearningNode } from '@/data/curriculum';
 import type { SessionContext } from '@/types';
 
@@ -91,7 +93,7 @@ const DEFAULT_COLORS = { text: 'text-primary', border: 'border-border', bg: 'bg-
  * Used by ConceptPage and DidacticLegend
  */
 export function getDimensionsForUI(): DimensionForUI[] {
-  const cycleOrder = SSOT_DATA.metadata.cycle.order;
+  const cycleOrder = getCycleOrder();
   const dimensions: DimensionForUI[] = [];
   
   for (const rubricId of cycleOrder) {
@@ -181,7 +183,7 @@ export function getKnowledgeLevelsForUI(): KnowledgeLevelForUI[] {
 export function getDimensionMeta(): Record<string, DimensionMeta> {
   const meta: Record<string, DimensionMeta> = {};
   
-  for (const rubricId of SSOT_DATA.metadata.cycle.order) {
+  for (const rubricId of getCycleOrder()) {
     const rubric = getRubric(rubricId);
     const shortKey = getShortKey(rubricId);
     const colors = DIMENSION_COLORS[shortKey] || DEFAULT_COLORS;
@@ -202,7 +204,7 @@ export function getDimensionMeta(): Record<string, DimensionMeta> {
 export function getDimensionLabels(): Record<string, DimensionLabel> {
   const labels: Record<string, DimensionLabel> = {};
   
-  for (const rubricId of SSOT_DATA.metadata.cycle.order) {
+  for (const rubricId of getCycleOrder()) {
     const rubric = getRubric(rubricId);
     const shortKey = getShortKey(rubricId);
     
@@ -275,7 +277,7 @@ export function generateSystemPrompt(profile: ProfileData, sessionContext?: Sess
   const sections: string[] = [];
   
   // Header section
-  sections.push(`Je bent EAI, een Educatieve AI-coach die werkt volgens het 10-Dimensionaal Didactisch Model (SSOT v${SSOT_DATA.version}).
+  sections.push(`Je bent EAI, een Educatieve AI-coach die werkt volgens het 10-Dimensionaal Didactisch Model (SSOT v${getSSOTVersion()}).
 
 ## KERNPRINCIPES
 1. **Nooit direct het antwoord geven** - Begeleid de leerling naar inzicht
@@ -321,7 +323,7 @@ Gebruik deze context om:
   }
 
   // 10D Rubric section — COMMAND_INTENTS instead of raw fix texts
-  sections.push('\n## 10D RUBRIC DIMENSIES (SSOT v' + SSOT_DATA.version + ')\n');
+  sections.push('\n## 10D RUBRIC DIMENSIES (SSOT v' + getSSOTVersion() + ')\n');
   
   const COMMAND_INTENTS: Record<string, string> = {
     // Core didactic fixes
@@ -345,7 +347,7 @@ Gebruik deze context om:
     '/fase_check': 'Bepaal waar de leerling zich bevindt in het leerproces.',
   };
 
-  for (const rubricId of SSOT_DATA.metadata.cycle.order) {
+  for (const rubricId of getCycleOrder()) {
     const rubric = getRubric(rubricId);
     if (!rubric) continue;
     
@@ -443,13 +445,13 @@ export function validateSSOT(): string[] {
   const issues: string[] = [];
   
   // Check rubric count matches cycle order
-  const cycleCount = SSOT_DATA.metadata.cycle.order.length;
+  const cycleCount = getCycleOrder().length;
   if (cycleCount !== 10) {
     issues.push(`Expected 10 dimensions in cycle order, found ${cycleCount}`);
   }
   
   // Check each rubric has bands
-  for (const rubricId of SSOT_DATA.metadata.cycle.order) {
+  for (const rubricId of getCycleOrder()) {
     const rubric = getRubric(rubricId);
     if (!rubric) {
       issues.push(`Rubric not found: ${rubricId}`);
@@ -534,13 +536,14 @@ let cachedCore: SSOTStructure | null = null;
 export function getEAICore(): SSOTStructure {
   if (cachedCore) return cachedCore;
   
-  const commandsObj = SSOT_DATA.command_library?.commands || {};
+  const ssot = getEffectiveSSOT();
+  const commandsObj = ssot.command_library?.commands || {};
   const commands: SSOTCommand[] = Object.entries(commandsObj).map(([cmd, desc]) => ({
     command: cmd,
     description: desc as string
   }));
 
-  const rubrics: SSOTRubric[] = SSOT_DATA.rubrics.map(r => ({
+  const rubrics: SSOTRubric[] = ssot.rubrics.map(r => ({
     rubric_id: r.rubric_id,
     name: r.name,
     dimension: r.dimension,
@@ -559,7 +562,7 @@ export function getEAICore(): SSOTStructure {
     }))
   }));
 
-  const logic_gates: SSOTLogicGate[] = (SSOT_DATA.interaction_protocol?.logic_gates || []).map(g => ({
+  const logic_gates: SSOTLogicGate[] = (ssot.interaction_protocol?.logic_gates || []).map(g => ({
     trigger_band: g.trigger_band,
     condition: g.condition,
     enforcement: g.enforcement,
@@ -569,10 +572,10 @@ export function getEAICore(): SSOTStructure {
   cachedCore = {
     commands,
     rubrics,
-    cycleOrder: SSOT_DATA.metadata.cycle.order,
+    cycleOrder: ssot.metadata.cycle.order,
     metadata: {
-      version: SSOT_DATA.version,
-      system: SSOT_DATA.metadata.system || 'EAI'
+      version: ssot.version,
+      system: ssot.metadata.system || 'EAI'
     },
     interaction_protocol: { logic_gates }
   };

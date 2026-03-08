@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { runDiagnostics } from '../utils/diagnostics';
-import { SSOT_DATA } from '@/data/ssot';
+import { getSSOTVersion } from '@/data/ssot';
+import { getEffectiveSSOT } from '@/lib/ssotRuntime';
 
 interface BootSequenceProps {
   onComplete: () => void;
@@ -18,7 +19,7 @@ const BootSequence: React.FC<BootSequenceProps> = ({ onComplete }) => {
         // Phase 1: Fake Init
         await new Promise(r => setTimeout(r, 600));
         if (!isMounted) return;
-        setLogs(prev => [...prev, `MOUNTING SSOT FILE SYSTEM (v${SSOT_DATA.version})...`]);
+        setLogs(prev => [...prev, `MOUNTING SSOT FILE SYSTEM (v${getSSOTVersion()})...`]);
         setProgress(20);
 
         // Phase 2: Run Real Diagnostics
@@ -101,7 +102,7 @@ const BootSequence: React.FC<BootSequenceProps> = ({ onComplete }) => {
                 EAI HUB
             </div>
             <div className="bg-green-900/30 border border-green-500/30 px-2 py-0.5 rounded text-[10px] font-bold text-green-400 tracking-wider shadow-[0_0_10px_rgba(34,197,94,0.2)]">
-                v{SSOT_DATA.version}
+                v{getSSOTVersion()}
             </div>
         </div>
     </div>

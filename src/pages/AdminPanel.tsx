@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle, MessageSquare, Users, BarChart3, ChevronDown, ChevronRight } from 'lucide-react';
+import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle, MessageSquare, Users, BarChart3, ChevronDown, ChevronRight, Layers } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { SSOT_DATA } from '@/data/ssot';
+import { getSSOTVersion, getCommands, getLogicGates, getCycleOrder, getRubric, getShortKey, BASE_SSOT } from '@/data/ssot';
+import { getEffectiveSSOT, getActivePlugin, hasActivePlugin, getAllGateAnnotations } from '@/lib/ssotRuntime';
 import { 
   runSystemAudit, 
   getStorageInspectorData, 
@@ -130,7 +131,8 @@ const AdminPanel = () => {
   };
 
 
-  const ssotDimensions = SSOT_DATA.rubrics.map(rubric => ({
+  const effectiveSSOT = getEffectiveSSOT();
+  const ssotDimensions = effectiveSSOT.rubrics.map(rubric => ({
     code: rubric.bands[0]?.band_id?.replace(/\d+/g, '') || rubric.rubric_id.toUpperCase().slice(0, 2),
     name: rubric.name,
     description: rubric.bands.map(b => b.label).join(' → '),
@@ -193,6 +195,7 @@ const AdminPanel = () => {
             <TabsTrigger value="storage" className="text-xs sm:text-sm whitespace-nowrap">Storage<span className="hidden sm:inline"> Inspector</span></TabsTrigger>
             <TabsTrigger value="actions" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">Admin </span>Actions</TabsTrigger>
             <TabsTrigger value="ssot" className="text-xs sm:text-sm whitespace-nowrap">SSOT<span className="hidden sm:inline"> Browser</span></TabsTrigger>
+            <TabsTrigger value="eitl" className="text-xs sm:text-sm whitespace-nowrap">EITL<span className="hidden sm:inline"> Plugin</span></TabsTrigger>
           </TabsList>
 
           {/* System Monitoring Tab */}
@@ -919,7 +922,7 @@ const AdminPanel = () => {
                 <CardHeader>
                   <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
                     <Database className="w-4 h-4 text-primary" />
-                    10D Matrix - Rubrics (v{SSOT_DATA.version})
+                    10D Matrix - Rubrics (v{getSSOTVersion()})
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -961,18 +964,18 @@ const AdminPanel = () => {
                 <CardHeader>
                   <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-primary" />
-                    Command Library ({Object.keys(SSOT_DATA.command_library.commands).length} commands)
+                    Command Library ({Object.keys(getCommands()).length} commands)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {Object.entries(SSOT_DATA.command_library.commands).map(([cmd, desc]) => (
+                    {Object.entries(getCommands()).map(([cmd, desc]) => (
                       <div 
                         key={cmd}
                         className="p-2 rounded bg-secondary/30 border border-border"
                       >
                         <code className="text-xs text-primary font-mono">{cmd}</code>
-                        <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">{desc}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">{String(desc)}</p>
                       </div>
                     ))}
                   </div>
@@ -984,12 +987,12 @@ const AdminPanel = () => {
                 <CardHeader>
                   <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 text-primary" />
-                    Logic Gates ({SSOT_DATA.interaction_protocol.logic_gates.length} rules)
+                    Logic Gates ({getLogicGates().length} rules)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {SSOT_DATA.interaction_protocol.logic_gates.map((gate, idx) => (
+                    {getLogicGates().map((gate, idx) => (
                       <div 
                         key={idx}
                         className={`p-3 rounded border ${
@@ -1013,6 +1016,181 @@ const AdminPanel = () => {
                       </div>
                     ))}
                   </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* EITL Plugin Tab */}
+          <TabsContent value="eitl">
+            <div className="space-y-6">
+              {/* Plugin Status */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-primary" />
+                    School Plugin Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {hasActivePlugin() ? (() => {
+                    const plugin = getActivePlugin()!;
+                    return (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-green-500" />
+                          <span className="text-sm font-medium text-foreground">Plugin Actief</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div className="p-3 rounded bg-secondary/30 border border-border">
+                            <span className="text-muted-foreground">School</span>
+                            <p className="font-medium text-foreground mt-1">{plugin.school_name}</p>
+                          </div>
+                          <div className="p-3 rounded bg-secondary/30 border border-border">
+                            <span className="text-muted-foreground">School ID</span>
+                            <p className="font-mono font-medium text-foreground mt-1">{plugin.school_id}</p>
+                          </div>
+                          <div className="p-3 rounded bg-secondary/30 border border-border">
+                            <span className="text-muted-foreground">Gebaseerd op</span>
+                            <p className="font-mono text-foreground mt-1">SSOT v{plugin.based_on_version}</p>
+                          </div>
+                          <div className="p-3 rounded bg-secondary/30 border border-border">
+                            <span className="text-muted-foreground">Laatst bijgewerkt</span>
+                            <p className="text-foreground mt-1">{new Date(plugin.updated_at).toLocaleDateString('nl-NL')}</p>
+                          </div>
+                        </div>
+                        {plugin.change_notes && (
+                          <div className="p-3 rounded bg-secondary/30 border border-border text-xs">
+                            <span className="text-muted-foreground">Notities:</span>
+                            <p className="text-foreground mt-1">{plugin.change_notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })() : (
+                    <div className="text-center py-8">
+                      <Layers className="w-8 h-8 mx-auto mb-3 text-muted-foreground/50" />
+                      <p className="text-sm text-muted-foreground">Geen school plugin actief</p>
+                      <p className="text-xs text-muted-foreground/70 mt-1">De base SSOT v{getSSOTVersion()} wordt gebruikt</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Effective SSOT Diff */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
+                    <Eye className="w-4 h-4 text-primary" />
+                    Base vs Effective SSOT
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {!hasActivePlugin() ? (
+                    <p className="text-sm text-muted-foreground">Geen plugin actief — effective SSOT is identiek aan base.</p>
+                  ) : (() => {
+                    const plugin = getActivePlugin()!;
+                    const pj = plugin.plugin_json;
+                    const bandOverrides = pj.bands ? Object.keys(pj.bands) : [];
+                    const cmdOverrides = pj.commands ? Object.keys(pj.commands) : [];
+                    const srlOverrides = pj.srl_states ? Object.keys(pj.srl_states) : [];
+                    const gateAnnotations = pj.logic_gate_annotations ? Object.keys(pj.logic_gate_annotations) : [];
+
+                    return (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          <div className="p-3 rounded bg-secondary/30 border border-border text-center">
+                            <p className="text-2xl font-bold text-primary">{bandOverrides.length}</p>
+                            <p className="text-[10px] text-muted-foreground">Band overrides</p>
+                          </div>
+                          <div className="p-3 rounded bg-secondary/30 border border-border text-center">
+                            <p className="text-2xl font-bold text-primary">{cmdOverrides.length}</p>
+                            <p className="text-[10px] text-muted-foreground">Command overrides</p>
+                          </div>
+                          <div className="p-3 rounded bg-secondary/30 border border-border text-center">
+                            <p className="text-2xl font-bold text-primary">{srlOverrides.length}</p>
+                            <p className="text-[10px] text-muted-foreground">SRL overrides</p>
+                          </div>
+                          <div className="p-3 rounded bg-secondary/30 border border-border text-center">
+                            <p className="text-2xl font-bold text-primary">{gateAnnotations.length}</p>
+                            <p className="text-[10px] text-muted-foreground">Gate annotations</p>
+                          </div>
+                        </div>
+
+                        {/* Band diff detail */}
+                        {bandOverrides.length > 0 && (
+                          <div>
+                            <h4 className="text-xs font-bold text-foreground mb-2">Band Overrides</h4>
+                            <div className="space-y-2">
+                              {bandOverrides.map(bandId => {
+                                const overlay = pj.bands![bandId];
+                                const baseBand = BASE_SSOT.rubrics.flatMap(r => r.bands).find(b => b.band_id === bandId);
+                                return (
+                                  <div key={bandId} className="p-3 rounded bg-secondary/20 border border-border text-xs">
+                                    <code className="font-mono text-primary font-bold">{bandId}</code>
+                                    {overlay.label && (
+                                      <div className="mt-1">
+                                        <span className="text-muted-foreground">Label: </span>
+                                        <span className="text-red-400 line-through mr-2">{baseBand?.label}</span>
+                                        <span className="text-green-400">{overlay.label}</span>
+                                      </div>
+                                    )}
+                                    {overlay.description && (
+                                      <div className="mt-1">
+                                        <span className="text-muted-foreground">Beschrijving: </span>
+                                        <span className="text-green-400">{overlay.description.slice(0, 80)}…</span>
+                                      </div>
+                                    )}
+                                    {overlay.didactic_principle && (
+                                      <div className="mt-1">
+                                        <span className="text-muted-foreground">Principe: </span>
+                                        <span className="text-green-400">{overlay.didactic_principle.slice(0, 80)}…</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Command diff detail */}
+                        {cmdOverrides.length > 0 && (
+                          <div>
+                            <h4 className="text-xs font-bold text-foreground mb-2">Command Overrides</h4>
+                            <div className="space-y-1">
+                              {cmdOverrides.map(cmd => (
+                                <div key={cmd} className="p-2 rounded bg-secondary/20 border border-border text-xs">
+                                  <code className="font-mono text-primary">{cmd}</code>
+                                  <span className="text-muted-foreground ml-2">→</span>
+                                  <span className="text-green-400 ml-2">{String(pj.commands![cmd]).slice(0, 100)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Gate annotations */}
+                        {gateAnnotations.length > 0 && (
+                          <div>
+                            <h4 className="text-xs font-bold text-foreground mb-2">Logic Gate Annotations</h4>
+                            <div className="space-y-1">
+                              {gateAnnotations.map(bandId => {
+                                const ann = pj.logic_gate_annotations![bandId];
+                                return (
+                                  <div key={bandId} className="p-2 rounded bg-secondary/20 border border-border text-xs">
+                                    <code className="font-mono text-primary font-bold">{bandId}</code>
+                                    {ann.rationale && <p className="text-muted-foreground mt-1">Rationale: {ann.rationale}</p>}
+                                    {ann.teacher_note && <p className="text-muted-foreground mt-1">Docentnotitie: {ann.teacher_note}</p>}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             </div>
