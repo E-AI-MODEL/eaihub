@@ -102,7 +102,7 @@ const PluginVersionHistory: React.FC<PluginVersionHistoryProps> = ({ schoolId, o
         .eq('id', versionId);
 
       // Audit: ROLLBACK
-      await supabase.from('ssot_changes' as any).insert({
+      const { error: auditErr } = await supabase.from('ssot_changes').insert({
         plugin_id: versionId,
         previous_plugin_id: currentActive?.id ?? null,
         school_id: schoolId,

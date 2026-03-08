@@ -251,7 +251,7 @@ const EITLWizard: React.FC<EITLWizardProps> = ({ existingPlugin, onClose, onSave
       if (error) throw error;
 
       // Audit log
-      await supabase.from('ssot_changes' as any).insert({
+      const { error: auditErr } = await supabase.from('ssot_changes').insert({
         plugin_id: newPlugin.id,
         previous_plugin_id: previousPluginId,
         school_id: state.schoolId,
@@ -259,9 +259,10 @@ const EITLWizard: React.FC<EITLWizardProps> = ({ existingPlugin, onClose, onSave
         performed_by: user.id,
         change_notes: state.changeNotes.trim() || null,
       });
+      if (auditErr) console.error('[EITL Wizard] Audit insert failed:', auditErr);
 
       if (activate && previousPluginId) {
-        await supabase.from('ssot_changes' as any).insert({
+        await supabase.from('ssot_changes').insert({
           plugin_id: newPlugin.id,
           previous_plugin_id: previousPluginId,
           school_id: state.schoolId,
