@@ -98,6 +98,48 @@ export type Database = {
         }
         Relationships: []
       }
+      school_ssot: {
+        Row: {
+          based_on_version: string
+          change_notes: string | null
+          created_at: string
+          created_by: string
+          effective_hash: string | null
+          id: string
+          is_active: boolean
+          plugin_json: Json
+          school_id: string
+          school_name: string
+          updated_at: string
+        }
+        Insert: {
+          based_on_version: string
+          change_notes?: string | null
+          created_at?: string
+          created_by: string
+          effective_hash?: string | null
+          id?: string
+          is_active?: boolean
+          plugin_json?: Json
+          school_id: string
+          school_name: string
+          updated_at?: string
+        }
+        Update: {
+          based_on_version?: string
+          change_notes?: string | null
+          created_at?: string
+          created_by?: string
+          effective_hash?: string | null
+          id?: string
+          is_active?: boolean
+          plugin_json?: Json
+          school_id?: string
+          school_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       student_sessions: {
         Row: {
           analysis: Json | null
