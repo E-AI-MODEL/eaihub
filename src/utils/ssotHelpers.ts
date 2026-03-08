@@ -183,7 +183,7 @@ export function getKnowledgeLevelsForUI(): KnowledgeLevelForUI[] {
 export function getDimensionMeta(): Record<string, DimensionMeta> {
   const meta: Record<string, DimensionMeta> = {};
   
-  for (const rubricId of SSOT_DATA.metadata.cycle.order) {
+  for (const rubricId of getCycleOrder()) {
     const rubric = getRubric(rubricId);
     const shortKey = getShortKey(rubricId);
     const colors = DIMENSION_COLORS[shortKey] || DEFAULT_COLORS;
