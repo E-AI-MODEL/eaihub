@@ -395,11 +395,11 @@ export function checkLogicGatesAnalysis(analysis: EAIAnalysis): LogicGateBreach 
 export function calculateGFactor(
   analysis: EAIAnalysis,
   sessionId: string
-): SemanticValidation {
+): SemanticValidation & { logicGateBreach?: LogicGateBreach } {
   const penalties: string[] = [];
   let gFactor = 1.0;
 
-  // --- Logic gate breach penalty ---
+  // --- Logic gate breach penalty (single authoritative check) ---
   const breach = checkLogicGatesAnalysis(analysis);
   if (breach) {
     if (breach.priority === 'CRITICAL') {
@@ -480,7 +480,7 @@ export function calculateGFactor(
     data: { gFactor: finalScore, penalties, alignment_status, logicGateBreach: breach || null },
   });
 
-  return { gFactor: finalScore, penalties, alignment_status };
+  return { gFactor: finalScore, penalties, alignment_status, logicGateBreach: breach || undefined };
 }
 
 // ============= SSOT VALIDATION (CONSOLIDATED) =============
