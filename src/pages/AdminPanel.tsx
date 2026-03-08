@@ -195,6 +195,7 @@ const AdminPanel = () => {
             <TabsTrigger value="storage" className="text-xs sm:text-sm whitespace-nowrap">Storage<span className="hidden sm:inline"> Inspector</span></TabsTrigger>
             <TabsTrigger value="actions" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">Admin </span>Actions</TabsTrigger>
             <TabsTrigger value="ssot" className="text-xs sm:text-sm whitespace-nowrap">SSOT<span className="hidden sm:inline"> Browser</span></TabsTrigger>
+            <TabsTrigger value="eitl" className="text-xs sm:text-sm whitespace-nowrap">EITL<span className="hidden sm:inline"> Plugin</span></TabsTrigger>
           </TabsList>
 
           {/* System Monitoring Tab */}
