@@ -51,6 +51,13 @@ Stap 1–7 afgerond. Fase 1 (stabilisatie) en Fase 2 (analyse-consistentie) afge
 | 2.2 | E-dimensie aansluiten op SSOT | ✅ DONE |
 | 2.3 | Logic gate check vereenvoudigen | ✅ DONE |
 
+### Fase 3.x — Auth consolidatie ✅
+
+| # | Taak | Status |
+|---|------|--------|
+| 3.x.1 | `useAuth()` refactor naar `AuthProvider` context (één listener, gedeelde state) | ✅ DONE |
+
+
 ### Fase 3 — EITL: SSOT plug-in architectuur ✅
 
 | # | Taak | Status |
