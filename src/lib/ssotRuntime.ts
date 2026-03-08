@@ -136,6 +136,7 @@ export async function loadEffectiveSSOT(schoolId?: string, userId?: string, user
             .in('assigned_to_role', targetRoles)
             .eq('school_id', schoolId)
             .eq('is_enabled', true)
+            .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
 
