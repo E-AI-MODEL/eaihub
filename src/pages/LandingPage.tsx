@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, BarChart3 } from 'lucide-react';
+import { ArrowRight, BookOpen, BarChart3, ShieldCheck } from 'lucide-react';
 
 const LandingPage = () => {
   return (
@@ -32,18 +32,34 @@ const LandingPage = () => {
 
           <li>
             <Link 
+              to="/student" 
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              Leerling
+            </Link>
+          </li>
+          <li>
+            <Link 
               to="/teacher" 
               className="text-muted-foreground hover:text-primary transition-colors"
             >
               Docent
             </Link>
           </li>
+          <li className="hidden sm:block">
+            <Link 
+              to="/admin" 
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              Admin
+            </Link>
+          </li>
           <li>
             <Link 
-              to="/student" 
+              to="/auth" 
               className="bg-primary text-primary-foreground border border-primary px-3 py-1.5 sm:px-5 sm:py-2 rounded hover:bg-primary/90 transition-all sm:eai-glow-teal"
             >
-              Start Demo
+              Start EAI Hub
             </Link>
           </li>
         </ul>
@@ -79,11 +95,11 @@ const LandingPage = () => {
               
               <div className="mt-6 sm:mt-10 flex flex-col sm:flex-row gap-4 sm:gap-5">
                 <Link 
-                  to="/student" 
+                  to="/auth" 
                   className="group bg-foreground text-background hover:bg-foreground/90 px-8 py-4 rounded text-center text-sm font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3"
-                  aria-label="Start Leerling Hub"
+                  aria-label="Start EAI Hub"
                 >
-                  Start Leerling Hub 
+                  Start EAI Hub 
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
                 </Link>
                 <Link 
@@ -100,8 +116,8 @@ const LandingPage = () => {
         {/* ROLE CARDS SECTION */}
         <section className="py-12 sm:py-24 px-4 sm:px-6 bg-background border-t border-border/50" aria-labelledby="access-title">
           <h2 id="access-title" className="sr-only">Kies uw rol</h2>
-          <div className="max-w-5xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
               {/* Leerling Card */}
               <Link 
@@ -136,13 +152,35 @@ const LandingPage = () => {
                   </div>
                   <header className="mb-4">
                     <span className="text-eai-purple font-bold text-xs uppercase tracking-widest block mb-2">Voor Docenten</span>
-                    <h3 className="text-2xl font-bold text-foreground">Teacher Cockpit</h3>
+                    <h3 className="text-2xl font-bold text-foreground">Docentomgeving</h3>
                   </header>
                   <p className="text-muted-foreground mb-8 max-w-sm leading-relaxed flex-1">
                     Kijk "onder de motorkap". Bekijk live analytics, detecteer welke leerlingen vastlopen en stuur didactische interventies.
                   </p>
                   <div className="inline-flex items-center text-eai-purple font-bold uppercase text-xs tracking-widest group-hover:gap-3 transition-all">
                     Open Dashboard <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
+                  </div>
+                </article>
+              </Link>
+
+              {/* Admin Card */}
+              <Link 
+                to="/admin" 
+                className="group relative block eai-card-gradient border border-border rounded-3xl overflow-hidden hover:border-primary/50 transition-all hover:shadow-2xl hover:shadow-primary/10 focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <article className="p-6 sm:p-10 h-full flex flex-col">
+                  <div className="absolute top-0 right-0 p-4 sm:p-6 opacity-10 group-hover:opacity-20 transition-opacity" aria-hidden="true">
+                    <ShieldCheck className="w-20 sm:w-32 h-20 sm:h-32 text-foreground" strokeWidth={1} />
+                  </div>
+                  <header className="mb-4">
+                    <span className="text-primary font-bold text-xs uppercase tracking-widest block mb-2">Voor Admins</span>
+                    <h3 className="text-2xl font-bold text-foreground">Admin Panel</h3>
+                  </header>
+                  <p className="text-muted-foreground mb-8 max-w-sm leading-relaxed flex-1">
+                    Beheer gebruikers, rollen, plugins en SSOT-configuratie. Observability dashboard en governance audit trail.
+                  </p>
+                  <div className="inline-flex items-center text-primary font-bold uppercase text-xs tracking-widest group-hover:gap-3 transition-all">
+                    Open Admin <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
                   </div>
                 </article>
               </Link>
@@ -156,8 +194,8 @@ const LandingPage = () => {
       <footer className="border-t border-border/50 py-12 px-6 bg-card">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="text-center md:text-left">
-            <div className="text-lg font-bold tracking-tight text-foreground mb-1">EAI HUB 15.0</div>
-            <p className="text-xs text-muted-foreground">© 2025 Educational Artificial Intelligence Engineering.</p>
+            <div className="text-lg font-bold tracking-tight text-foreground mb-1">EAI HUB</div>
+            <p className="text-xs text-muted-foreground">© 2026 Educational Artificial Intelligence Engineering.</p>
           </div>
           
           <div className="flex gap-4">
