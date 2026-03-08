@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { toast } from '@/hooks/use-toast';
 
 type Mode = 'login' | 'signup' | 'forgot';
 
