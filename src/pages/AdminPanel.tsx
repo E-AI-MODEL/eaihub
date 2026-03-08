@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle, MessageSquare, Users, BarChart3, ChevronDown, ChevronRight, Layers, Plus, Edit } from 'lucide-react';
+import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle, MessageSquare, Users, BarChart3, ChevronDown, ChevronRight, Layers, Plus, Edit, Wrench, Info } from 'lucide-react';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import EITLWizard from '@/components/EITLWizard';
@@ -27,6 +28,29 @@ import {
   deleteTeacherMessage,
 } from '@/services/adminDbService';
 import { toast } from '@/hooks/use-toast';
+
+// ── Helper components for structured expanded rows ──
+const Field = ({ label, value }: { label: string; value: string | null | undefined }) => (
+  <div>
+    <span className="text-muted-foreground">{label}: </span>
+    <span className="text-foreground font-medium">{value || '—'}</span>
+  </div>
+);
+
+const CollapsibleSection = ({ title, defaultOpen = false, nested = false, children }: { title: string; defaultOpen?: boolean; nested?: boolean; children: React.ReactNode }) => {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <Collapsible open={open} onOpenChange={setOpen} className={nested ? 'mt-1.5' : 'rounded border border-border bg-background p-2'}>
+      <CollapsibleTrigger className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground hover:text-foreground cursor-pointer w-full">
+        {open ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+        {title}
+      </CollapsibleTrigger>
+      <CollapsibleContent className="mt-1.5">
+        {children}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+};
 
 const AdminPanel = () => {
   const { isSuperUser, user } = useAuth();
@@ -539,26 +563,99 @@ const AdminPanel = () => {
                           );
                         })}
                         {/* Expanded JSON preview row */}
-                        {dbMessages.slice(0, 100).map((m: any) => expandedMessageId === m.id && (m.analysis || m.mechanical) ? (
-                          <tr key={`${m.id}-expand`} className="border-t border-border bg-secondary/20">
-                            <td colSpan={10} className="px-2 py-2">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                {m.analysis && (
-                                  <div>
-                                    <p className="text-[9px] font-bold text-muted-foreground mb-1">Analysis</p>
-                                    <pre className="text-[9px] font-mono text-muted-foreground bg-background p-2 rounded max-h-40 overflow-auto">{JSON.stringify(m.analysis, null, 2)}</pre>
-                                  </div>
-                                )}
-                                {m.mechanical && (
-                                  <div>
-                                    <p className="text-[9px] font-bold text-muted-foreground mb-1">Mechanical</p>
-                                    <pre className="text-[9px] font-mono text-muted-foreground bg-background p-2 rounded max-h-40 overflow-auto">{JSON.stringify(m.mechanical, null, 2)}</pre>
-                                  </div>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ) : null)}
+                        {dbMessages.slice(0, 100).map((m: any) => {
+                          if (expandedMessageId !== m.id || (!m.analysis && !m.mechanical)) return null;
+                          const mech = m.mechanical || {};
+                          const anal = m.analysis || {};
+                          const ssotHealing = mech.ssotHealingCount ?? 0;
+                          const cmdNull = mech.commandNullCount ?? 0;
+                          const parseRepair = mech.parseRepairCount ?? 0;
+                          const totalRepairs = ssotHealing + cmdNull + parseRepair;
+                          const penalties: string[] = mech.semanticValidation?.penalties ?? [];
+                          const hasLogicBreach = !!mech.logicGateBreach;
+
+                          return (
+                            <tr key={`${m.id}-expand`} className="border-t border-border bg-secondary/20">
+                              <td colSpan={10} className="px-3 py-3">
+                                <div className="space-y-2">
+                                  {/* ── Repair Summary (always visible when relevant) ── */}
+                                  {(totalRepairs > 0 || hasLogicBreach || penalties.length > 0) && (
+                                    <div className="rounded border border-border bg-background p-2 space-y-1.5">
+                                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-foreground">
+                                        <Wrench className="w-3 h-3" /> Repair Summary
+                                      </div>
+                                      <div className="flex flex-wrap gap-1.5">
+                                        <Badge className={`text-[8px] ${ssotHealing > 0 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-green-500/20 text-green-400'}`}>
+                                          SSOT Healing: {ssotHealing}
+                                        </Badge>
+                                        <Badge className={`text-[8px] ${cmdNull > 0 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-green-500/20 text-green-400'}`}>
+                                          Command Null: {cmdNull}
+                                        </Badge>
+                                        <Badge className={`text-[8px] ${parseRepair > 0 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-green-500/20 text-green-400'}`}>
+                                          Parse Repair: {parseRepair}
+                                        </Badge>
+                                        {hasLogicBreach && (
+                                          <Badge className="text-[8px] bg-red-500/20 text-red-400">
+                                            Logic Gate Breach: {mech.logicGateBreach?.trigger_band} ({mech.logicGateBreach?.priority})
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      {penalties.length > 0 && (
+                                        <div className="mt-1">
+                                          <p className="text-[9px] text-muted-foreground font-medium mb-0.5">Redenen:</p>
+                                          <ul className="list-disc list-inside text-[9px] text-muted-foreground space-y-0.5">
+                                            {penalties.map((p: string, i: number) => <li key={i}>{p}</li>)}
+                                          </ul>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* ── Analysis (collapsible) ── */}
+                                  {m.analysis && (
+                                    <CollapsibleSection title="Analysis" defaultOpen={false}>
+                                      <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 text-[9px]">
+                                        <Field label="Fases" value={anal.process_phases?.join(', ')} />
+                                        <Field label="Active Fix" value={anal.active_fix} />
+                                        <Field label="Epistemic" value={anal.epistemic_status} />
+                                        <Field label="Confidence" value={anal.confidence != null ? `${(anal.confidence * 100).toFixed(0)}%` : null} />
+                                        <Field label="Knowledge Type" value={anal.knowledge_type} />
+                                        <Field label="Cognitive Mode" value={anal.cognitive_mode} />
+                                        <Field label="SRL" value={anal.srl_state} />
+                                        <Field label="Secondary" value={anal.secondary_dimensions?.join(', ')} />
+                                      </div>
+                                      {anal.borderline_dimensions?.length > 0 && (
+                                        <p className="text-[9px] text-yellow-400 mt-1">Borderline: {anal.borderline_dimensions.join(', ')}</p>
+                                      )}
+                                      <CollapsibleSection title="Toon JSON" defaultOpen={false} nested>
+                                        <pre className="text-[8px] font-mono text-muted-foreground bg-background p-1.5 rounded max-h-32 overflow-auto">{JSON.stringify(m.analysis, null, 2)}</pre>
+                                      </CollapsibleSection>
+                                    </CollapsibleSection>
+                                  )}
+
+                                  {/* ── Mechanical (collapsible) ── */}
+                                  {m.mechanical && (
+                                    <CollapsibleSection title="Mechanical" defaultOpen={false}>
+                                      <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 text-[9px]">
+                                        <Field label="Model" value={mech.model} />
+                                        <Field label="Latency" value={mech.latencyMs != null ? `${mech.latencyMs}ms` : null} />
+                                        <Field label="Tokens" value={mech.inputTokens != null ? `${mech.inputTokens}→${mech.outputTokens}` : null} />
+                                        <Field label="Source" value={mech.analysisSource} />
+                                        <Field label="Router" value={mech.routerDecision ? `${mech.routerDecision.target_model} (${mech.routerDecision.intent_category})` : null} />
+                                        <Field label="Epistemic Guard" value={mech.epistemicGuardResult ? `${mech.epistemicGuardResult.label} (${(mech.epistemicGuardResult.confidence * 100).toFixed(0)}%)` : null} />
+                                        <Field label="G-Factor" value={mech.semanticValidation?.gFactor != null ? `${(mech.semanticValidation.gFactor * 100).toFixed(0)}%` : null} />
+                                        <Field label="Alignment" value={mech.semanticValidation?.alignment_status} />
+                                      </div>
+                                      <CollapsibleSection title="Toon JSON" defaultOpen={false} nested>
+                                        <pre className="text-[8px] font-mono text-muted-foreground bg-background p-1.5 rounded max-h-32 overflow-auto">{JSON.stringify(m.mechanical, null, 2)}</pre>
+                                      </CollapsibleSection>
+                                    </CollapsibleSection>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
                         {dbMessages.length === 0 && (
                           <tr><td colSpan={10} className="px-2 py-4 text-center text-muted-foreground">Geen berichten</td></tr>
                         )}
