@@ -3,7 +3,7 @@
 
 ## Status
 
-Stap 1–7 afgerond. Fase 1 (stabilisatie) en Fase 2 (analyse-consistentie) afgerond. Fase 3–5 gedefinieerd.
+Stap 1–7 afgerond. Fase 1 (stabilisatie) en Fase 2 (analyse-consistentie) afgerond. Fase 3 (EITL plugin-architectuur) afgerond. Fase 3.5–5 gedefinieerd.
 
 ---
 
@@ -13,9 +13,11 @@ Stap 1–7 afgerond. Fase 1 (stabilisatie) en Fase 2 (analyse-consistentie) afge
 2. `generateAnalysis()` in `chatService.ts` — client-side fallback via regex/heuristics
 3. `reliabilityPipeline.ts` — enige bron voor SSOT-healing, G-factor, logic gates, epistemic guard
 4. `eaiLearnAdapter.ts` — state-/viewmodel-laag (scaffolding, TTL, history)
-5. `ssot_v15.json` + `ssot.ts` — statische SSOT singleton met typed helpers
-6. Auth via Supabase: `user_roles` (LEERLING/DOCENT/ADMIN), `has_role()` SECURITY DEFINER, `AuthGuard`
-7. Persistentie: `chat_messages`, `student_sessions`, `mastery`, `teacher_messages`, `profiles`
+5. `ssot_v15.json` + `ssot.ts` — statische SSOT singleton met typed helpers, **nu via `getEffectiveSSOT()`**
+6. `ssotRuntime.ts` — runtime loader + whitelist merge voor school plugin overlays
+7. `ssotValidator.ts` — drielaags Zod-validatie (schema, referentieel, runtime)
+8. Auth via Supabase: `user_roles` (LEERLING/DOCENT/ADMIN), `has_role()` SECURITY DEFINER, `AuthGuard`
+9. Persistentie: `chat_messages`, `student_sessions`, `mastery`, `teacher_messages`, `profiles`, `school_ssot`
 
 ---
 
@@ -33,46 +35,53 @@ Stap 1–7 afgerond. Fase 1 (stabilisatie) en Fase 2 (analyse-consistentie) afge
 
 ## Implementatieplan — 5 fasen
 
-### Fase 1 — Stabilisatie (security + healing)
-
-| # | Taak | Impact | Status |
-|---|------|--------|--------|
-| 1.1 | **RLS verscherpen** op `chat_messages`, `student_sessions`, `mastery`, `teacher_messages` | High | ✅ DONE |
-|     | Student: eigen data (`auth.uid() = user_id`) | | |
-|     | Docent: leesrechten via `has_role(auth.uid(), 'DOCENT')` | | |
-|     | Admin: volledige toegang via `has_role(auth.uid(), 'ADMIN')` | | |
-|     | _Fix: eerste migratie maakte RESTRICTIVE policies (AND-logica); gecorrigeerd naar PERMISSIVE (OR-logica)_ | | |
-| 1.2 | **Healing consolideren** — `healAnalysisToSSOT()` en `validateAnalysisAgainstSSOT()` samenvoegen tot één `normalizeAnalysisToSSOT()` met fuzzy-map | Medium | ✅ DONE |
-|     | Admin audit gebruikt dezelfde functie in strict mode | | |
-| 1.3 | **Defensieve role-check** — `useAuth` retry bij lege rollen + `AuthGuard` melding bij bootstrap failure | Medium | ✅ DONE |
-
-### Fase 2 — Analyse-consistentie
-
-| # | Taak | Impact | Status |
-|---|------|--------|--------|
-| 2.1 | **Edge-classify uitbreiden** — `secondary_dimensions` (V,E,T,S,L,B) als verplicht veld in tool-calling schema | Medium | ✅ DONE |
-| 2.2 | **E-dimensie aansluiten op SSOT** — `ePatterns` uit `getLearnerObsPatterns('E_EpistemischeBetrouwbaarheid')` als primaire detectie | Low-Medium | ✅ DONE |
-| 2.3 | **Logic gate check vereenvoudigen** — dubbele gate-check verwijderd; `calculateGFactor` retourneert breach, `executePipeline` hergebruikt | Low | ✅ DONE |
-
-### Fase 3 — EITL: SSOT plug-in architectuur
-
-Gedetailleerd ontwerp: `.lovable/stap8-eitl.md`
+### Fase 1 — Stabilisatie (security + healing) ✅
 
 | # | Taak | Status |
 |---|------|--------|
-| 3.1 | **`school_ssot` tabel** + RLS (admins CRUD, docenten SELECT) | TODO |
-| 3.2 | **`ssotRuntime.ts`** — `loadEffectiveSSOT(schoolId?)` met whitelisted merge | TODO |
-| 3.3 | **`ssotValidator.ts`** — drielaags Zod-validatie (schema, referentieel, runtime) | TODO |
-| 3.4 | **Admin EITL Wizard** — 5-staps flow, alleen plugin-allowed velden | TODO |
+| 1.1 | RLS verscherpen | ✅ DONE |
+| 1.2 | Healing consolideren | ✅ DONE |
+| 1.3 | Defensieve role-check | ✅ DONE |
+
+### Fase 2 — Analyse-consistentie ✅
+
+| # | Taak | Status |
+|---|------|--------|
+| 2.1 | Edge-classify uitbreiden met secondary_dimensions | ✅ DONE |
+| 2.2 | E-dimensie aansluiten op SSOT | ✅ DONE |
+| 2.3 | Logic gate check vereenvoudigen | ✅ DONE |
+
+### Fase 3 — EITL: SSOT plug-in architectuur ✅
+
+| # | Taak | Status |
+|---|------|--------|
+| 3.1 | `school_ssot` tabel + RLS (admins CRUD, docenten SELECT) | ✅ DONE |
+| 3.2 | `ssotValidator.ts` — drielaags Zod-validatie (schema, referentieel, runtime) | ✅ DONE |
+| 3.3 | `ssotRuntime.ts` — `whitelistMerge` + `loadEffectiveSSOT` + cache | ✅ DONE |
+| 3.4 | `ssot.ts` refactor — `SSOT_DATA` → `BASE_SSOT` + `getEffectiveSSOT()` | ✅ DONE |
+| 3.5 | Component updates — alle directe `SSOT_DATA` refs vervangen | ✅ DONE |
+| 3.6 | Read-only EITL preview tab in Admin Panel | ✅ DONE |
+
+#### MVP Plugin Whitelist
+- **Toegestaan**: band `label`, `description`, `didactic_principle`, `fix` (tekst); command descriptions; SRL `label`/`goal`; gate annotations (rationale, teacher_note)
+- **Immutable**: `band_id`, `fix_ref`, `score_range`, `mechanistic`, `enforcement`, command keys, `cycle.order`, `trigger_band`, `learner_obs`, `ai_obs`, `nl_profile`, `trace_tags`, `band_weight`, `fix_type`, `band_ref`
+- **Niet in MVP**: rubric `name`, rubric `goal`
+
+### Fase 3.5 — EITL Wizard (edit-flow)
+
+| # | Taak | Status |
+|---|------|--------|
+| 3.5.1 | 5-staps wizard in Admin Panel voor plugin CRUD | TODO |
+| 3.5.2 | Plugin versioning met `change_notes` en `based_on_version` | TODO |
 
 ### Fase 4 — Governance
 
 | # | Taak | Status |
 |---|------|--------|
-| 4.1 | **Versioning** — elke plugin-save als nieuwe rij met `change_notes` en `based_on_version` | TODO |
-| 4.2 | **Rollback** — admin kan eerdere plugin-versie activeren | TODO |
-| 4.3 | **Audit log** — `ssot_changes` tabel (who, when, what changed) | TODO |
-| 4.4 | **Diff-view** — base vs effective SSOT vergelijking in admin | TODO |
+| 4.1 | Versioning — elke plugin-save als nieuwe rij | TODO |
+| 4.2 | Rollback — admin kan eerdere plugin-versie activeren | TODO |
+| 4.3 | Audit log — `ssot_changes` tabel | TODO |
+| 4.4 | Diff-view — base vs effective vergelijking (basis staat in 3.6) | TODO |
 
 ### Fase 5 — Observability
 
@@ -89,14 +98,9 @@ Gedetailleerd ontwerp: `.lovable/stap8-eitl.md`
 
 | # | Issue | Impact | Fase |
 |---|-------|--------|------|
-| 1 | Dubbele healing: fuzzy-map ontbreekt in `healAnalysisToSSOT` | Medium | 1.2 |
-| 2 | E-dimensie mist SSOT learner_obs patronen | Low-Medium | 2.2 |
-| 3 | Edge classify mist `secondary_dimensions` in schema | Medium | 2.1 |
-| 4 | Mixed dimensions in `coregulation_bands` veld | Low | documenteren of refactor bij EITL |
-| 5 | Logic gate check dubbel uitgevoerd in pipeline | Low | 2.3 |
-| 6 | RLS open (`true`) op 4 datatafels | High | 1.1 |
+| 4 | Mixed dimensions in `coregulation_bands` veld | Low | documenteren of refactor bij EITL wizard |
 | 7 | Token schatting is character-based proxy | Low | 5.x of labelen |
-| 8 | `COMMAND_INTENTS` hardcoded in `ssotHelpers.ts` | Low | 3.x (verplaatsen naar plugin-laag) |
+| 8 | `COMMAND_INTENTS` hardcoded in `ssotHelpers.ts` | Low | 3.5 (verplaatsen naar plugin-laag) |
 
 ---
 
