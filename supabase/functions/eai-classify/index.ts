@@ -143,9 +143,16 @@ Classificeer deze interactie. Let op:
 - Procesfase (P0-P5): in welke fase van het leerproces zit dit?
 - Co-regulatie (C0-C5): wie stuurt het gesprek?
 - Taakdichtheid (TD0-TD5): hoeveel doet de AI vs de leerling?
+- Vaardigheidspotentieel (V0-V5): welk vaardigheidsniveau?
+- Epistemische betrouwbaarheid (E0-E5): hoe betrouwbaar is de AI-output?
+- Technologische integratie (T0-T5): hoe bewust is de leerling van de AI?
+- Sociale interactie (S0-S5): werkt de leerling alleen of samen?
+- Leercontinuïteit (L0-L5): hoe verbonden is dit met eerdere/toekomstige leeractiviteiten?
+- Biascorrectie (B0-B5): hoeveel kritisch bewustzijn toont de leerling?
 - Cognitieve modus: hoe denkt de leerling?
 - SRL-fase: zelfregulerend leren status
-- Epistemische status: hoe betrouwbaar is de AI-output?
+- Epistemische status: hoe betrouwbaar is de AI-output (FEIT/INTERPRETATIE/SPECULATIE/ONBEKEND)?
+- Vul secondary_dimensions met V, E, T, S, L, B bands.
 - Als een dimensie duidelijk op of nabij een grens ligt, geef dat aan via borderline_dimensions en vul secondary_bands waar relevant. Geef confidence alleen als globale schatting.`;
 
     console.log(`[eai-classify] Starting classification, profile: ${profile.subject}/${profile.level}`);
