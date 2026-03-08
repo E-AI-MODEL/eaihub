@@ -72,6 +72,7 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
+    </SchoolPluginProvider>
   </QueryClientProvider>
 );
 
