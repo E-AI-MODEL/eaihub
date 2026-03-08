@@ -963,7 +963,7 @@ const AdminPanel = () => {
                 <CardHeader>
                   <CardTitle className="text-sm uppercase tracking-wider flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-primary" />
-                    Command Library ({Object.keys(SSOT_DATA.command_library.commands).length} commands)
+                    Command Library ({Object.keys(getCommands()).length} commands)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
