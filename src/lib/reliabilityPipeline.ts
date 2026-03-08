@@ -543,15 +543,20 @@ export function executePipeline(
   // Step 2: Epistemic Guard
   const { guarded, result: epistemicResult } = epistemicGuard(healed, sessionId);
 
-  // Step 3: Consolidated G-Factor (includes logic gate check internally)
-  const semanticValidation = calculateGFactor(guarded, sessionId);
+  // Step 3: Consolidated G-Factor (includes single authoritative logic gate check)
+  const gFactorResult = calculateGFactor(guarded, sessionId);
+  const semanticValidation: SemanticValidation = {
+    gFactor: gFactorResult.gFactor,
+    penalties: gFactorResult.penalties,
+    alignment_status: gFactorResult.alignment_status,
+  };
 
   // Update mechanical state with pipeline results
   const enhancedMechanical: MechanicalState = {
     ...mechanical,
     repairAttempts: healingEvents.length > 0 ? 1 : 0,
     semanticValidation,
-    logicGateBreach: checkLogicGatesAnalysis(guarded) || undefined,
+    logicGateBreach: gFactorResult.logicGateBreach,
     epistemicGuardResult: {
       label: epistemicResult.label,
       notes: epistemicResult.notes,
