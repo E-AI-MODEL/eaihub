@@ -19,10 +19,15 @@ const CLASSIFY_TOOL = {
           items: { type: "string", enum: ["P0", "P1", "P2", "P3", "P4", "P5"] },
           description: "Procesfase: P0=Ongedefinieerd, P1=Oriëntatie, P2=Voorkennis, P3=Instructie, P4=Toepassing, P5=Evaluatie",
         },
+        knowledge_type: {
+          type: "string",
+          enum: ["K0", "K1", "K2", "K3"],
+          description: "Kennistype: K0=Ongedefinieerd, K1=Reproductie, K2=Toepassing, K3=Metacognitie",
+        },
         coregulation_bands: {
           type: "array",
-          items: { type: "string" },
-          description: "Array met kennistype (K0-K3), co-regulatie (C0-C5), en procesfase (P0-P5)",
+          items: { type: "string", enum: ["C0", "C1", "C2", "C3", "C4", "C5"] },
+          description: "Alleen co-regulatie bands (C0-C5): C0=Ongedefinieerd, C1=Directief, C2=Begeleid, C3=Gedeeld, C4=Zelfregulerend, C5=Autonoom",
         },
         task_densities: {
           type: "array",
@@ -78,7 +83,7 @@ const CLASSIFY_TOOL = {
           description: "Dimensies die op of nabij een grens liggen, bv. ['K', 'P', 'TD']",
         },
       },
-      required: ["process_phases", "coregulation_bands", "task_densities", "secondary_dimensions", "cognitive_mode", "srl_state", "epistemic_status", "active_flags", "reasoning"],
+      required: ["process_phases", "knowledge_type", "coregulation_bands", "task_densities", "secondary_dimensions", "cognitive_mode", "srl_state", "epistemic_status", "active_flags", "reasoning"],
       additionalProperties: false,
     },
   },
@@ -139,9 +144,9 @@ AI-RESPONSE:
 ${aiResponse.slice(0, 2000)}
 
 Classificeer deze interactie. Let op:
-- Kennistype (K0-K3): wat voor kennis vraagt/toont de leerling?
+- Kennistype (knowledge_type, K0-K3): wat voor kennis vraagt/toont de leerling? Dit is een APART veld, NIET in coregulation_bands.
 - Procesfase (P0-P5): in welke fase van het leerproces zit dit?
-- Co-regulatie (C0-C5): wie stuurt het gesprek?
+- Co-regulatie (coregulation_bands, ALLEEN C0-C5): wie stuurt het gesprek? Zet hier GEEN K- of P-bands in.
 - Taakdichtheid (TD0-TD5): hoeveel doet de AI vs de leerling?
 - Vaardigheidspotentieel (V0-V5): welk vaardigheidsniveau?
 - Epistemische betrouwbaarheid (E0-E5): hoe betrouwbaar is de AI-output?
@@ -153,6 +158,7 @@ Classificeer deze interactie. Let op:
 - SRL-fase: zelfregulerend leren status
 - Epistemische status: hoe betrouwbaar is de AI-output (FEIT/INTERPRETATIE/SPECULATIE/ONBEKEND)?
 - Vul secondary_dimensions met V, E, T, S, L, B bands.
+- BELANGRIJK: knowledge_type (K0-K3) is een apart veld. Zet GEEN K-bands in coregulation_bands. coregulation_bands bevat ALLEEN C-bands.
 - Als een dimensie duidelijk op of nabij een grens ligt, geef dat aan via borderline_dimensions en vul secondary_bands waar relevant. Geef confidence alleen als globale schatting.`;
 
     console.log(`[eai-classify] Starting classification, profile: ${profile.subject}/${profile.level}`);

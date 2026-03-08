@@ -56,7 +56,10 @@ function updateSessionContext(sessionId: string, analysis: EAIAnalysis, profile:
   ctx.turn_count += 1;
 
   // Track knowledge trajectory
-  const kBand = analysis.coregulation_bands?.find(b => b.startsWith('K')) || null;
+  // Metrics contract: knowledge_type is eerste-klas veld, legacy fallback voor oude records
+  const kBand = analysis.knowledge_type
+    || analysis.coregulation_bands?.find(b => b.startsWith('K'))
+    || null;
   if (kBand && (ctx.knowledge_trajectory.length === 0 || ctx.knowledge_trajectory[ctx.knowledge_trajectory.length - 1] !== kBand)) {
     ctx.knowledge_trajectory.push(kBand);
   }
@@ -1018,6 +1021,7 @@ function mergeEdgeAnalysis(
     confidence: edgeAnalysis.confidence ?? clientAnalysis.confidence,
     secondary_bands: edgeAnalysis.secondary_bands ?? clientAnalysis.secondary_bands,
     borderline_dimensions: edgeAnalysis.borderline_dimensions ?? clientAnalysis.borderline_dimensions,
+    knowledge_type: (edgeAnalysis.knowledge_type ?? clientAnalysis.knowledge_type) as EAIAnalysis['knowledge_type'],
   };
 }
 
@@ -1095,7 +1099,9 @@ function generateAnalysis(input: string, output: string, profile: LearnerProfile
   
   return {
     process_phases: [processPhase],
-    // Metrics contract: alleen C-bands. K-band → reasoning, P-band → process_phases
+    // Metrics contract: knowledge_type als eerste-klas veld, per bericht, bron: client generateAnalysis
+    knowledge_type: knowledgeType as EAIAnalysis['knowledge_type'],
+    // Metrics contract: alleen C-bands. K-band → knowledge_type, P-band → process_phases
     coregulation_bands: [coRegulation],
     task_densities: [taskDensity],
     // Include all secondary dimensions for full 10D coverage

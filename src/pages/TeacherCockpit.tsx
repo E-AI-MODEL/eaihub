@@ -321,7 +321,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
               {/* Metrics grid */}
               <div className="grid grid-cols-2 border-b border-slate-800">
                 <MetricCell label="Interventie" value={analysis?.active_fix || '—'} icon={<Zap className="w-3 h-3 text-slate-500" />} accent={analysis?.active_fix ? 'indigo' : undefined} />
-                <MetricCell label="Kennistype" value={analysis?.coregulation_bands?.find(c => c.startsWith('K')) || '—'} icon={<Brain className="w-3 h-3 text-yellow-400" />} />
+                <MetricCell label="Kennistype" value={analysis?.knowledge_type || analysis?.coregulation_bands?.find(c => c.startsWith('K')) || '—'} icon={<Brain className="w-3 h-3 text-yellow-400" />} />
                 <MetricCell label="Zelfstandigheid" value={agencyScore !== undefined ? `${agencyScore}%` : '—'} icon={<TrendingUp className="w-3 h-3 text-emerald-400" />} accent={agencyScore !== undefined && agencyScore < 40 ? 'red' : undefined} />
                 <MetricCell label="G-Factor" value={gFactor !== undefined ? `${Math.round(gFactor * 100)}%` : '—'} icon={<Cpu className="w-3 h-3 text-slate-400" />} />
                 <MetricCell label="Alignment" value={mechanical?.semanticValidation?.alignment_status || '—'} icon={<Activity className="w-3 h-3 text-cyan-400" />} accent={mechanical?.semanticValidation?.alignment_status === 'CRITICAL' ? 'red' : undefined} />
