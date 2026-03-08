@@ -1281,6 +1281,10 @@ const AdminPanel = () => {
               </Card>
             </div>
           </TabsContent>
+          {/* Observability Tab */}
+          <TabsContent value="observability">
+            <ObservabilityPanel />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
