@@ -184,6 +184,39 @@ export type Database = {
         }
         Relationships: []
       }
+      ssot_changes: {
+        Row: {
+          action: string
+          change_notes: string | null
+          created_at: string
+          id: string
+          performed_by: string
+          plugin_id: string
+          previous_plugin_id: string | null
+          school_id: string
+        }
+        Insert: {
+          action: string
+          change_notes?: string | null
+          created_at?: string
+          id?: string
+          performed_by: string
+          plugin_id: string
+          previous_plugin_id?: string | null
+          school_id: string
+        }
+        Update: {
+          action?: string
+          change_notes?: string | null
+          created_at?: string
+          id?: string
+          performed_by?: string
+          plugin_id?: string
+          previous_plugin_id?: string | null
+          school_id?: string
+        }
+        Relationships: []
+      }
       student_sessions: {
         Row: {
           analysis: Json | null
