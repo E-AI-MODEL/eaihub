@@ -89,5 +89,5 @@ export const useAuth = () => {
     await supabase.auth.signOut();
   }, []);
 
-  return { ...state, hasRole, signOut, roleBootstrapFailed, retryRoleBootstrap };
+  return { ...state, hasRole, isSuperUser, signOut, roleBootstrapFailed, retryRoleBootstrap };
 };
