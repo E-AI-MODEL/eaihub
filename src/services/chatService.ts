@@ -970,11 +970,12 @@ async function attemptEdgeClassification(
 ): Promise<EdgeClassifyResult | null> {
   try {
     const ctx = getSessionContext(sessionId);
+    const token = await getAuthToken();
     const response = await fetch(CLASSIFY_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         userMessage,
