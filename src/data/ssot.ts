@@ -1,8 +1,10 @@
 // SSOT Data - Single Source of Truth for EAI Didactic Engine
 // TypeScript wrapper for the authoritative v15.0.0 JSON
-// This imports the JSON and provides typed access to all SSOT data
+// BASE_SSOT = immutable base data (for validator/merge input)
+// All helpers read from getEffectiveSSOT() which returns the active effective SSOT
 
 import ssotJson from './ssot_v15.json';
+import { getEffectiveSSOT } from '@/lib/ssotRuntime';
 
 // ============= TYPE DEFINITIONS =============
 
@@ -171,24 +173,27 @@ export interface SSOTData {
   rubrics: Rubric[];
 }
 
-// ============= SSOT DATA EXPORT =============
+// ============= BASE SSOT DATA =============
+// Immutable base layer — used by validator and merge as input.
+// Do NOT use directly in components or helpers; use getEffectiveSSOT() instead.
 
-export const SSOT_DATA = ssotJson as unknown as SSOTData;
+export const BASE_SSOT = ssotJson as unknown as SSOTData;
 
 // ============= HELPER FUNCTIONS =============
+// All helpers read from getEffectiveSSOT() to support school plugin overlays.
 
 /**
  * Get a rubric by its ID (e.g., "K_KennisType", "C_CoRegulatie")
  */
 export function getRubric(rubricId: string): Rubric | undefined {
-  return SSOT_DATA.rubrics.find(r => r.rubric_id === rubricId);
+  return getEffectiveSSOT().rubrics.find(r => r.rubric_id === rubricId);
 }
 
 /**
  * Get a specific band from a rubric (e.g., "K1", "C3")
  */
 export function getBand(bandId: string): RubricBand | undefined {
-  for (const rubric of SSOT_DATA.rubrics) {
+  for (const rubric of getEffectiveSSOT().rubrics) {
     const band = rubric.bands.find(b => b.band_id === bandId);
     if (band) return band;
   }
@@ -200,8 +205,6 @@ export function getBand(bandId: string): RubricBand | undefined {
  */
 export function getFixForBand(bandId: string): string | null {
   const band = getBand(bandId);
-  // fix_ref is the command reference (e.g. "/flits"), fix is descriptive text.
-  // Prefer fix_ref because healers and UI expect a command ID.
   return band?.fix_ref || null;
 }
 
@@ -273,7 +276,7 @@ export function getAiObsPatterns(rubricId: string): Map<string, RegExp> {
  * Get all commands from the command library
  */
 export function getCommands(): Record<string, string> {
-  return SSOT_DATA.command_library.commands;
+  return getEffectiveSSOT().command_library.commands;
 }
 
 /**
@@ -281,21 +284,21 @@ export function getCommands(): Record<string, string> {
  */
 export function getCommandDescription(command: string): string | null {
   const cmd = command.startsWith('/') ? command : `/${command}`;
-  return SSOT_DATA.command_library.commands[cmd] || null;
+  return getEffectiveSSOT().command_library.commands[cmd] || null;
 }
 
 /**
  * Get all logic gates
  */
 export function getLogicGates(): LogicGate[] {
-  return SSOT_DATA.interaction_protocol.logic_gates;
+  return getEffectiveSSOT().interaction_protocol.logic_gates;
 }
 
 /**
  * Get logic gates for a specific trigger band
  */
 export function getLogicGatesForBand(bandId: string): LogicGate[] {
-  return SSOT_DATA.interaction_protocol.logic_gates.filter(
+  return getEffectiveSSOT().interaction_protocol.logic_gates.filter(
     gate => gate.trigger_band === bandId
   );
 }
@@ -304,14 +307,14 @@ export function getLogicGatesForBand(bandId: string): LogicGate[] {
  * Get the cycle order (dimension processing order)
  */
 export function getCycleOrder(): string[] {
-  return SSOT_DATA.metadata.cycle.order;
+  return getEffectiveSSOT().metadata.cycle.order;
 }
 
 /**
  * Get SRL states
  */
 export function getSRLStates(): SRLState[] {
-  return SSOT_DATA.srl_model.states;
+  return getEffectiveSSOT().srl_model.states;
 }
 
 /**
@@ -342,12 +345,19 @@ export function getShortKey(rubricId: string): string {
  * Get all short dimension keys from SSOT cycle order
  */
 export function getDimensionKeys(): string[] {
-  return SSOT_DATA.metadata.cycle.order.map(id => id.split('_')[0]);
+  return getEffectiveSSOT().metadata.cycle.order.map(id => id.split('_')[0]);
 }
 
 /**
  * Get rubric by short key (e.g., "K" -> K_KennisType rubric)
  */
 export function getRubricByShortKey(shortKey: string): Rubric | undefined {
-  return SSOT_DATA.rubrics.find(r => r.rubric_id.startsWith(shortKey + '_'));
+  return getEffectiveSSOT().rubrics.find(r => r.rubric_id.startsWith(shortKey + '_'));
+}
+
+/**
+ * Get the SSOT version string
+ */
+export function getSSOTVersion(): string {
+  return getEffectiveSSOT().version;
 }
