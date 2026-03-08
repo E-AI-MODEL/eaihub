@@ -1,75 +1,72 @@
 
-# Strategische roadmap — EAIHUB
 
-## Status
+# Plan: EITL Plugin-architectuur + bijgewerkte plan.md
 
-Stap 1 en 2 zijn afgerond. Codebase is schoon en conform scope.
+## Samenvatting
 
----
-
-## Huidige architectuur
-
-1. `generateAnalysis()` in `chatService.ts` — client-side analyse via losse `detect*()` functies (fallback)
-2. `eai-classify` edge function — backend-classificatie via Gemini 2.5 Flash (primaire producer)
-3. `reliabilityPipeline.ts` — enige bron voor SSOT-healing, G-factor, logic gates, epistemic guard
-4. `eaiLearnAdapter.ts` — state-/viewmodel-laag (scaffolding, TTL, history)
-5. UI toont afgeleide labels en validaties
+Twee bestanden schrijven die het volledige EITL-ontwerp documenteren als roadmap-stap, gebaseerd op het plugin/overlay-principe dat in de gesprekken is uitgewerkt en geverifieerd tegen de codebase.
 
 ---
 
-## Diagnose (oorspronkelijk)
+## Wat er gebeurt
 
-1. ~~**Analyse is client-side en single-label**~~ → opgelost in stap 1 (edge-classificatie)
-2. ~~**Dubbele validatie**~~ → opgelost in stap 2 (pipeline = enige inhoudelijke waarheid)
-3. **UI toont alleen afgeleide labels** — geen rijke bronconstatering of nuance
-4. **Onderwijs zit tussen descriptoren** — single-label is onvoldoende als volledige representatie
+### 1. `.lovable/plan.md` — bijgewerkte roadmap
+
+- Stap 1–7 markeren als ✅ afgerond
+- Huidige architectuur-sectie bijwerken (edge-first, pipeline, auth/RLS)
+- **Stap 8 — EITL** toevoegen als volgende roadmap-stap met substappen 8a–8d
+- Bekende technische schuld sectie toevoegen (de 8 cross-ref bevindingen)
+
+### 2. `.lovable/stap8-eitl.md` — gedetailleerd EITL-ontwerp
+
+Bevat het volledige architectuurontwerp:
+
+**Drielagenmodel:**
+- **Immutable core** — band_ids, fix_ref, command keys, score ranges, mechanistic signatures, enforcement regex (`MAX_TD`/`ALLOW_TD`), learner_obs, cycle order, trace/context schema
+- **Plugin-allowed layer** — labels, descriptions, didactic_principles, command descriptions, SRL labels/goals, toelichtende gate-tekst (niet de machine-enforced kern)
+- **Effective runtime** — `effectiveSSOT = whitelistMerge(base, plugin)`
+
+**Database-ontwerp:**
+- `school_ssot` tabel met `plugin_json` (JSONB, alleen overrides), `based_on_version`, `effective_hash`, `is_active`, versioning
+- RLS: admins beheren, docenten lezen
+
+**Technische componenten (4 substappen):**
+- **8a**: `school_ssot` tabel + `loadEffectiveSSOT()` in `ssot.ts` met whitelisted merge (geen generieke deep merge)
+- **8b**: `ssotValidator.ts` — drielaags Zod-validatie (schema, referentieel, runtime/gedrag)
+- **8c**: Admin EITL Wizard — 5-staps vraag-antwoord flow, alleen plugin-allowed velden bewerkbaar
+- **8d**: Governance — versioning, rollback, diff-view, `based_on_version` check bij SSOT-upgrade
+
+**Machinegevoelige velden** (expliciet gedocumenteerd):
+- `enforcement` strings — regex-geparsed in `reliabilityPipeline.ts:355-360`
+- `learner_obs` — gecompileerd naar regex in `ssot.ts:158-170`
+- `band_id`, `fix_ref`, `trigger_band` — lookup-keys in healing en gate checks
+- `COMMAND_INTENTS` in `ssotHelpers.ts:326-346` — bij EITL verplaatsen naar plugin-laag
+
+**Whitelist-merge specificatie:**
+```text
+Toegestane override-paden per rubric band:
+  rubrics[].bands[].label
+  rubrics[].bands[].description
+  rubrics[].bands[].didactic_principle
+  rubrics[].bands[].fix  (beschrijvende tekst, NIET fix_ref)
+
+Toegestane override-paden overig:
+  command_library.commands[key].description  (NIET de key zelf)
+  srl_model.states[].label
+  srl_model.states[].goal
+  interaction_protocol.logic_gates[].rationale  (nieuw veld, NIET enforcement)
+```
 
 ---
 
-## Afgesproken volgorde
+## Wat NIET verandert
 
-### Stap 1 — Analyse naar edge function verplaatsen ✅
+- Geen code-wijzigingen in deze stap — alleen documentatie
+- De base SSOT (`ssot_v15.json`) wordt niet aangeraakt
+- Bestaande consumers (`ssotHelpers.ts`, `chatService.ts`, `reliabilityPipeline.ts`) worden niet gewijzigd
 
-Aparte `eai-classify` edge function levert gestructureerde 10D-analyse.
-Client-side `generateAnalysis()` blijft als verplichte fallback.
-Observability via `analysisSource` in `MechanicalState`.
+## Geschatte omvang
 
-**Status: afgerond**
+- `plan.md`: ~120 regels
+- `stap8-eitl.md`: ~200 regels
 
-### Stap 2 — Dubbele validatie opschonen ✅
-
-Alle inhoudelijke validatie (SSOT healing, G-factor, logic gates, command fuzzy-map) geconsolideerd in `reliabilityPipeline.ts`.
-`eaiLearnAdapter.ts` teruggebracht tot state/viewmodel-laag.
-
-**Status: afgerond**
-
-### Stap 3 — EAIAnalysis uitbreiden met nuancevelden
-
-Optionele velden: `confidence`, `secondary_bands`, `borderline_dimensions`.
-Ontwerp uitgewerkt in `.lovable/stap3.md`.
-
-**Status: ontwerp goedgekeurd — klaar voor implementatie**
-
-### Stap 4 — UI aanpassen
-
-Teacher/Admin/UI laten aansluiten op rijkere analyse.
-Pas zinvol zodra de data echt bestaat.
-
-**Status: nog niet gestart — wacht op stap 3**
-
----
-
-## Wat expliciet buiten scope blijft
-
-- EAIAnalysis uitbreiden zonder producer
-- UI refactoren voor data die nog niet bestaat
-- Terugkeer naar een centrale formule
-- Meerdere stappen tegelijk uitvoeren
-
----
-
-## Kernprincipe
-
-Constatering → Interpretatie → Beslissing.
-De parameterconstatering moet bronlaag blijven.
-Elke stap wordt apart ontworpen, goedgekeurd en geïmplementeerd.
