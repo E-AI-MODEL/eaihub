@@ -56,7 +56,10 @@ function updateSessionContext(sessionId: string, analysis: EAIAnalysis, profile:
   ctx.turn_count += 1;
 
   // Track knowledge trajectory
-  const kBand = analysis.coregulation_bands?.find(b => b.startsWith('K')) || null;
+  // Metrics contract: knowledge_type is eerste-klas veld, legacy fallback voor oude records
+  const kBand = analysis.knowledge_type
+    || analysis.coregulation_bands?.find(b => b.startsWith('K'))
+    || null;
   if (kBand && (ctx.knowledge_trajectory.length === 0 || ctx.knowledge_trajectory[ctx.knowledge_trajectory.length - 1] !== kBand)) {
     ctx.knowledge_trajectory.push(kBand);
   }
