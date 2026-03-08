@@ -95,6 +95,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         lastMessagePreview: messages.length > 0 ? messages[messages.length - 1].text.slice(0, 100) : null,
         progress: progressRef.current,
       });
+      setSyncPulse(true);
+      setTimeout(() => setSyncPulse(false), 800);
     };
     pushState(); // immediate push
     const interval = setInterval(pushState, 10000);
