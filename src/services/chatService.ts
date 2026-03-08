@@ -657,6 +657,12 @@ export const streamChat = async ({
         model: 'error',
         temperature: 0,
         timestamp: new Date().toISOString(),
+        // Metrics contract: fallback defaults — geen edge-resultaat beschikbaar
+        analysisSource: 'client',
+        healingEventCount: 0,
+        ssotHealingCount: 0,
+        commandNullCount: 0,
+        parseRepairCount: 0,
       },
       auditId: null,
     });
