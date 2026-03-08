@@ -476,6 +476,119 @@ const ConceptPage = () => {
               </p>
             </div>
           </TabsContent>
+
+          {/* Update mrt2026 Tab */}
+          <TabsContent value="update2026" className="animate-in fade-in-50 duration-300">
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                Architectuur Update — maart 2026
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Overzicht van alle architecturele verbeteringen die in maart 2026 zijn doorgevoerd.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {/* 1. Analyse-architectuur */}
+              <div className="p-5 rounded-xl border border-border bg-card">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">1</span>
+                  <h3 className="font-semibold text-foreground">Analyse-architectuur</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Elke leerling-input doorloopt een tweestaps-analyse: eerst een snelle classificatie (edge-classify), daarna een diepere controle (reliabilityPipeline).
+                </p>
+                <p className="text-[10px] text-muted-foreground/50 italic">
+                  Technisch: edge-classify → reliabilityPipeline.ts → analysisSource tag op elk bericht.
+                </p>
+              </div>
+
+              {/* 2. Nuance in classificatie */}
+              <div className="p-5 rounded-xl border border-border bg-card">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">2</span>
+                  <h3 className="font-semibold text-foreground">Nuance in classificatie</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  De AI geeft nu een betrouwbaarheidsscore mee bij elke classificatie. Twijfelgevallen worden expliciet gemarkeerd zodat het systeem voorzichtiger reageert.
+                </p>
+                <p className="text-[10px] text-muted-foreground/50 italic">
+                  Technisch: confidence levels, knowledge_type K0-K3, borderline-detectie.
+                </p>
+              </div>
+
+              {/* 3. Leerlingervaring & rolzichtbaarheid */}
+              <div className="p-5 rounded-xl border border-border bg-card">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">3</span>
+                  <h3 className="font-semibold text-foreground">Leerlingervaring & rolzichtbaarheid</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Drie perspectieven op dezelfde sessie: de leerling ziet een leskaart, de docent ziet voortgang en interventies, de beheerder ziet systeemstatus.
+                </p>
+                <p className="text-[10px] text-muted-foreground/50 italic">
+                  Technisch: rolgebaseerde UI met leskaart-panel, docent-cockpit en admin-dashboard.
+                </p>
+              </div>
+
+              {/* 4. Auth & rollenmodel */}
+              <div className="p-5 rounded-xl border border-border bg-card">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">4</span>
+                  <h3 className="font-semibold text-foreground">Auth & rollenmodel</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Vier rollen (Leerling, Docent, Admin, Superuser) met strikte toegangscontrole op elke tabel. Rollen worden server-side gevalideerd, niet via de browser.
+                </p>
+                <p className="text-[10px] text-muted-foreground/50 italic">
+                  Technisch: RBAC via user_roles tabel, RLS policies, has_role() security definer functie.
+                </p>
+              </div>
+
+              {/* 5. EITL plugin-architectuur */}
+              <div className="p-5 rounded-xl border border-border bg-card">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">5</span>
+                  <h3 className="font-semibold text-foreground">EITL plugin-architectuur</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Scholen kunnen het didactisch model aanpassen via plugins: eigen niveaus, aangepaste regels en school-specifieke interventies — zonder de kern te breken.
+                </p>
+                <p className="text-[10px] text-muted-foreground/50 italic">
+                  Technisch: whitelistMerge-strategie, Zod-validatie, EITL Wizard met vrije navigatie.
+                </p>
+              </div>
+
+              {/* 6. Governance */}
+              <div className="p-5 rounded-xl border border-border bg-card">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">6</span>
+                  <h3 className="font-semibold text-foreground">Governance & versiebeheer</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Elke wijziging aan het didactisch model wordt gelogd met wie, wanneer en waarom. Rollback naar eerdere versies is altijd mogelijk.
+                </p>
+                <p className="text-[10px] text-muted-foreground/50 italic">
+                  Technisch: ssot_changes audit log, versioning met hash-verificatie, rollback via admin panel.
+                </p>
+              </div>
+
+              {/* 7. Observability */}
+              <div className="p-5 rounded-xl border border-border bg-card">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">7</span>
+                  <h3 className="font-semibold text-foreground">Observability & monitoring</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Real-time monitoring van systeemgezondheid: healing-signalen, breach rates en gateway-status worden bijgehouden en gevisualiseerd.
+                </p>
+                <p className="text-[10px] text-muted-foreground/50 italic">
+                  Technisch: trending-grafieken voor healing totaalsignaal, breach rate tracking, gateway reachability checks.
+                </p>
+              </div>
+            </div>
+          </TabsContent>
         </Tabs>
 
         {/* CTA */}
