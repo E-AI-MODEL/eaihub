@@ -112,6 +112,34 @@ serve(async (req) => {
   }
 
   try {
+    // ═══ JWT VALIDATION ═══
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized: geen geldig token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.49.1");
+    const authSupabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await authSupabase.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      console.error("[eai-classify] JWT validation failed:", claimsError);
+      return new Response(
+        JSON.stringify({ error: "Unauthorized: ongeldig token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log(`[eai-classify] Authenticated user: ${claimsData.claims.sub}`);
+
     const { userMessage, aiResponse, profile, sessionContext }: ClassifyRequest = await req.json();
 
     if (!userMessage || !aiResponse) {
