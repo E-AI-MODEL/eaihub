@@ -8,7 +8,7 @@ interface AuthGuardProps {
 }
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children, requiredRole }) => {
-  const { user, roles, isLoading, roleBootstrapFailed, retryRoleBootstrap } = useAuth();
+  const { user, hasRole, isLoading, roleBootstrapFailed, retryRoleBootstrap } = useAuth();
 
   if (isLoading) {
     return (
@@ -46,7 +46,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children, requiredRole }) => {
     );
   }
 
-  if (requiredRole && !roles.includes(requiredRole)) {
+  if (requiredRole && !hasRole(requiredRole)) {
     return (
       <div className="fixed inset-0 bg-slate-950 flex items-center justify-center">
         <div className="text-center max-w-sm px-6">

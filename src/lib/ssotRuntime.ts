@@ -5,6 +5,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { BASE_SSOT, type SSOTData, type Rubric, type RubricBand, type SRLState } from '@/data/ssot';
+import type { AppRole } from '@/hooks/useAuth';
 import { validatePlugin, validateVersionMatch, type PluginJson } from '@/lib/ssotValidator';
 
 // ============= TYPES =============
@@ -96,7 +97,7 @@ export function whitelistMerge(base: SSOTData, plugin: PluginJson): SSOTData {
  * @param schoolId - Optional school ID. If omitted, returns base SSOT.
  * @returns The effective SSOT data.
  */
-export async function loadEffectiveSSOT(schoolId?: string): Promise<SSOTData> {
+export async function loadEffectiveSSOT(schoolId?: string, userId?: string, userRoles?: AppRole[]): Promise<SSOTData> {
   // No school = base SSOT
   if (!schoolId) {
     cachedEffective = null;
@@ -106,11 +107,55 @@ export async function loadEffectiveSSOT(schoolId?: string): Promise<SSOTData> {
   }
 
   try {
-    const { data, error } = await supabase
-      .from('school_ssot')
-      .select('*')
-      .eq('school_id', schoolId)
-      .eq('is_active', true)
+    let pluginId: string | null = null;
+
+    // --- Assignment cascade: user-specific → role-specific → school-wide ---
+    if (userId) {
+      // 1. User-specific assignment
+      const { data: userAssign } = await supabase
+        .from('plugin_assignments')
+        .select('plugin_id')
+        .eq('assigned_to_user_id', userId)
+        .eq('school_id', schoolId)
+        .eq('is_enabled', true)
+        .limit(1)
+        .maybeSingle();
+
+      if (userAssign) {
+        pluginId = userAssign.plugin_id;
+      }
+
+      // 2. Role-specific assignment (if no user-specific hit)
+      if (!pluginId && userRoles && userRoles.length > 0) {
+        const targetRoles = userRoles.filter(r => r === 'DOCENT' || r === 'LEERLING');
+        if (targetRoles.length > 0) {
+          const { data: roleAssign } = await supabase
+            .from('plugin_assignments')
+            .select('plugin_id')
+            .in('assigned_to_role', targetRoles)
+            .eq('school_id', schoolId)
+            .eq('is_enabled', true)
+            .limit(1)
+            .maybeSingle();
+
+          if (roleAssign) {
+            pluginId = roleAssign.plugin_id;
+          }
+        }
+      }
+    }
+
+    // 3. Fetch the resolved plugin (by assignment or school-wide fallback)
+    let query = supabase.from('school_ssot').select('*');
+
+    if (pluginId) {
+      query = query.eq('id', pluginId);
+    } else {
+      // School-wide fallback
+      query = query.eq('school_id', schoolId).eq('is_active', true);
+    }
+
+    const { data, error } = await query
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle();

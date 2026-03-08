@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 
-export type AppRole = 'LEERLING' | 'DOCENT' | 'ADMIN';
+export type AppRole = 'LEERLING' | 'DOCENT' | 'ADMIN' | 'SUPERUSER';
 
 interface AuthState {
   user: User | null;
@@ -75,7 +75,8 @@ export const useAuth = () => {
     return () => subscription.unsubscribe();
   }, [resolveUser]);
 
-  const hasRole = useCallback((role: AppRole) => state.roles.includes(role), [state.roles]);
+  const hasRole = useCallback((role: AppRole) => state.roles.includes('SUPERUSER') || state.roles.includes(role), [state.roles]);
+  const isSuperUser = useCallback(() => state.roles.includes('SUPERUSER'), [state.roles]);
 
   const retryRoleBootstrap = useCallback(async () => {
     if (!state.user || !state.session) return;
@@ -88,5 +89,5 @@ export const useAuth = () => {
     await supabase.auth.signOut();
   }, []);
 
-  return { ...state, hasRole, signOut, roleBootstrapFailed, retryRoleBootstrap };
+  return { ...state, hasRole, isSuperUser, signOut, roleBootstrapFailed, retryRoleBootstrap };
 };

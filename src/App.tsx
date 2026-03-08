@@ -23,18 +23,31 @@ const queryClient = new QueryClient();
 /** Listens to auth state and bootstraps school plugin. Non-blocking. */
 const SchoolPluginProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [roles, setRoles] = useState<string[]>([]);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) {
+        const { data } = await supabase.from('user_roles').select('role').eq('user_id', u.id);
+        setRoles((data || []).map(r => r.role));
+      } else {
+        setRoles([]);
+      }
     });
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) {
+        const { data } = await supabase.from('user_roles').select('role').eq('user_id', u.id);
+        setRoles((data || []).map(r => r.role));
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
 
-  useSchoolPlugin(user);
+  useSchoolPlugin(user, roles as any);
 
   return <>{children}</>;
 };

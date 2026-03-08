@@ -77,6 +77,47 @@ export type Database = {
         }
         Relationships: []
       }
+      plugin_assignments: {
+        Row: {
+          assigned_to_role: Database["public"]["Enums"]["app_role"] | null
+          assigned_to_user_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          is_enabled: boolean
+          plugin_id: string
+          school_id: string
+        }
+        Insert: {
+          assigned_to_role?: Database["public"]["Enums"]["app_role"] | null
+          assigned_to_user_id?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          is_enabled?: boolean
+          plugin_id: string
+          school_id: string
+        }
+        Update: {
+          assigned_to_role?: Database["public"]["Enums"]["app_role"] | null
+          assigned_to_user_id?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_enabled?: boolean
+          plugin_id?: string
+          school_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plugin_assignments_plugin_id_fkey"
+            columns: ["plugin_id"]
+            isOneToOne: false
+            referencedRelation: "school_ssot"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -266,7 +307,7 @@ export type Database = {
       owns_session: { Args: { _session_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "LEERLING" | "DOCENT" | "ADMIN"
+      app_role: "LEERLING" | "DOCENT" | "ADMIN" | "SUPERUSER"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -394,7 +435,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["LEERLING", "DOCENT", "ADMIN"],
+      app_role: ["LEERLING", "DOCENT", "ADMIN", "SUPERUSER"],
     },
   },
 } as const

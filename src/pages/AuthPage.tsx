@@ -16,11 +16,26 @@ const AuthPage: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setIsLoading(false);
+    const { data: { user }, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      setIsLoading(false);
       toast({ title: 'Inloggen mislukt', description: error.message, variant: 'destructive' });
+      return;
+    }
+    // Role-based redirect
+    if (user) {
+      const { data: roles } = await supabase.from('user_roles').select('role').eq('user_id', user.id);
+      const r = (roles || []).map(x => x.role);
+      setIsLoading(false);
+      if (r.includes('SUPERUSER') || r.includes('ADMIN')) {
+        navigate('/admin');
+      } else if (r.includes('DOCENT')) {
+        navigate('/teacher');
+      } else {
+        navigate('/student');
+      }
     } else {
+      setIsLoading(false);
       navigate('/student');
     }
   };
