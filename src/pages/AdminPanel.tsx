@@ -5,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { SSOT_DATA } from '@/data/ssot';
+import { getSSOTVersion, getCommands, getLogicGates, getCycleOrder, getRubric, getShortKey } from '@/data/ssot';
+import { getEffectiveSSOT } from '@/lib/ssotRuntime';
 import { 
   runSystemAudit, 
   getStorageInspectorData, 
