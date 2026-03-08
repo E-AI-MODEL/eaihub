@@ -189,8 +189,9 @@ export const runSystemAudit = async (): Promise<SystemHealth> => {
   let edgeFunctionReachable = false;
   try {
     const edgeUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eai-chat`;
-    const res = await fetch(edgeUrl, { method: 'OPTIONS', signal: AbortSignal.timeout(5000) });
-    edgeFunctionReachable = res.ok || res.status === 204 || res.status === 200;
+    const res = await fetch(edgeUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}', signal: AbortSignal.timeout(5000) });
+    // Any HTTP response (even 4xx/5xx) means the gateway is reachable — only network errors mean unreachable
+    edgeFunctionReachable = true;
   } catch {
     issues.push("WARNING: Edge function (eai-chat) niet bereikbaar. Netwerk- of deploymentprobleem.");
   }

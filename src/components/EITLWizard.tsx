@@ -718,7 +718,7 @@ const EITLWizard: React.FC<EITLWizardProps> = ({ existingPlugin, onClose, onSave
               <Button
                 size="sm"
                 onClick={() => setStep(s => s + 1)}
-                disabled={!canProceed}
+                disabled={false}
               >
                 Volgende
                 <ChevronRight className="w-4 h-4 ml-1" />

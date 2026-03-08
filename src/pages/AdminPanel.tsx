@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { getSSOTVersion, getCommands, getLogicGates, getCycleOrder, getRubric, getShortKey, BASE_SSOT } from '@/data/ssot';
-import { getEffectiveSSOT, getActivePlugin, hasActivePlugin, getAllGateAnnotations } from '@/lib/ssotRuntime';
+import { getEffectiveSSOT, getActivePlugin, hasActivePlugin, getAllGateAnnotations, clearSSOTCache } from '@/lib/ssotRuntime';
 import { 
   runSystemAudit, 
   getStorageInspectorData, 
