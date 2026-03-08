@@ -18,27 +18,47 @@ export const useAuth = () => {
     roles: [],
     isLoading: true,
   });
+  const [roleBootstrapFailed, setRoleBootstrapFailed] = useState(false);
 
-  const fetchRoles = useCallback(async (userId: string): Promise<AppRole[]> => {
+  const fetchRoles = useCallback(async (userId: string, retryCount = 0): Promise<AppRole[]> => {
     const { data } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', userId);
-    return (data || []).map(r => r.role as AppRole);
+    const roles = (data || []).map(r => r.role as AppRole);
+
+    // Defensive: if user is authenticated but has no roles, the trigger may not have fired yet.
+    // Retry once after a short delay to account for trigger propagation.
+    if (roles.length === 0 && retryCount < 2) {
+      console.warn(`[useAuth] No roles found for ${userId}, retry ${retryCount + 1}/2`);
+      await new Promise(r => setTimeout(r, 1500));
+      return fetchRoles(userId, retryCount + 1);
+    }
+
+    return roles;
   }, []);
+
+  const resolveUser = useCallback(async (user: import('@supabase/supabase-js').User, session: Session) => {
+    const roles = await fetchRoles(user.id);
+    if (roles.length === 0) {
+      console.error(`[useAuth] Role bootstrap failed for ${user.id} — trigger may be missing`);
+      setRoleBootstrapFailed(true);
+    } else {
+      setRoleBootstrapFailed(false);
+    }
+    setState({ user, session, roles, isLoading: false });
+  }, [fetchRoles]);
 
   useEffect(() => {
     // Set up listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const user = session?.user ?? null;
       if (user) {
         // Defer role fetch to avoid deadlock
-        setTimeout(async () => {
-          const roles = await fetchRoles(user.id);
-          setState({ user, session, roles, isLoading: false });
-        }, 0);
+        setTimeout(() => resolveUser(user, session!), 0);
       } else {
         setState({ user: null, session: null, roles: [], isLoading: false });
+        setRoleBootstrapFailed(false);
       }
     });
 
@@ -46,21 +66,27 @@ export const useAuth = () => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       const user = session?.user ?? null;
       if (user) {
-        const roles = await fetchRoles(user.id);
-        setState({ user, session, roles, isLoading: false });
+        await resolveUser(user, session!);
       } else {
         setState({ user: null, session: null, roles: [], isLoading: false });
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchRoles]);
+  }, [resolveUser]);
 
   const hasRole = useCallback((role: AppRole) => state.roles.includes(role), [state.roles]);
+
+  const retryRoleBootstrap = useCallback(async () => {
+    if (!state.user || !state.session) return;
+    setRoleBootstrapFailed(false);
+    setState(s => ({ ...s, isLoading: true }));
+    await resolveUser(state.user, state.session);
+  }, [state.user, state.session, resolveUser]);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
   }, []);
 
-  return { ...state, hasRole, signOut };
+  return { ...state, hasRole, signOut, roleBootstrapFailed, retryRoleBootstrap };
 };

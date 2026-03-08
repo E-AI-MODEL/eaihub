@@ -3,7 +3,7 @@
 
 ## Status
 
-Stap 1–7 afgerond. Fase 1–5 gedefinieerd voor stabilisatie, consistentie en EITL.
+Stap 1–7 afgerond. Fase 1 (stabilisatie) en Fase 2 (analyse-consistentie) afgerond. Fase 3–5 gedefinieerd.
 
 ---
 
@@ -42,16 +42,17 @@ Stap 1–7 afgerond. Fase 1–5 gedefinieerd voor stabilisatie, consistentie en 
 |     | Docent: leesrechten via `has_role(auth.uid(), 'DOCENT')` | | |
 |     | Admin: volledige toegang via `has_role(auth.uid(), 'ADMIN')` | | |
 |     | _Fix: eerste migratie maakte RESTRICTIVE policies (AND-logica); gecorrigeerd naar PERMISSIVE (OR-logica)_ | | |
-| 1.2 | **Healing consolideren** — `healAnalysisToSSOT()` en `validateAnalysisAgainstSSOT()` samenvoegen tot één `normalizeAnalysisToSSOT()` met fuzzy-map | Medium | TODO |
+| 1.2 | **Healing consolideren** — `healAnalysisToSSOT()` en `validateAnalysisAgainstSSOT()` samenvoegen tot één `normalizeAnalysisToSSOT()` met fuzzy-map | Medium | ✅ DONE |
 |     | Admin audit gebruikt dezelfde functie in strict mode | | |
+| 1.3 | **Defensieve role-check** — `useAuth` retry bij lege rollen + `AuthGuard` melding bij bootstrap failure | Medium | ✅ DONE |
 
 ### Fase 2 — Analyse-consistentie
 
 | # | Taak | Impact | Status |
 |---|------|--------|--------|
-| 2.1 | **Edge-classify uitbreiden** — `secondary_dimensions` toevoegen aan tool-calling schema zodat alle 10D door LLM worden geclassificeerd | Medium | TODO |
-| 2.2 | **E-dimensie aansluiten op SSOT** — `ePatterns` toevoegen aan `detectEpistemicStatus()` naast bestaande regex | Low-Medium | TODO |
-| 2.3 | **Logic gate check vereenvoudigen** — dubbele gate-check verwijderen uit `executePipeline()` | Low | TODO |
+| 2.1 | **Edge-classify uitbreiden** — `secondary_dimensions` (V,E,T,S,L,B) als verplicht veld in tool-calling schema | Medium | ✅ DONE |
+| 2.2 | **E-dimensie aansluiten op SSOT** — `ePatterns` uit `getLearnerObsPatterns('E_EpistemischeBetrouwbaarheid')` als primaire detectie | Low-Medium | ✅ DONE |
+| 2.3 | **Logic gate check vereenvoudigen** — dubbele gate-check verwijderd; `calculateGFactor` retourneert breach, `executePipeline` hergebruikt | Low | ✅ DONE |
 
 ### Fase 3 — EITL: SSOT plug-in architectuur
 

@@ -29,6 +29,11 @@ const CLASSIFY_TOOL = {
           items: { type: "string", enum: ["TD0", "TD1", "TD2", "TD3", "TD4", "TD5"] },
           description: "Taakdichtheid: TD1=Leerling-geleid, TD2=Gedeeld, TD3=Gestuurd, TD4=AI-geleid, TD5=AI-dominant",
         },
+        secondary_dimensions: {
+          type: "array",
+          items: { type: "string" },
+          description: "Overige dimensies: V0-V5 (Vaardigheidspotentieel), E0-E5 (Epistemische betrouwbaarheid), T0-T5 (Technologische integratie), S0-S5 (Sociale interactie), L0-L5 (Leercontinuïteit), B0-B5 (Biascorrectie)",
+        },
         cognitive_mode: {
           type: "string",
           enum: ["ANALYTISCH", "REFLECTIEF", "SYSTEMISCH", "PRAGMATISCH", "CREATIEF", "NORMATIEF", "ONBEKEND"],
@@ -73,7 +78,7 @@ const CLASSIFY_TOOL = {
           description: "Dimensies die op of nabij een grens liggen, bv. ['K', 'P', 'TD']",
         },
       },
-      required: ["process_phases", "coregulation_bands", "task_densities", "cognitive_mode", "srl_state", "epistemic_status", "active_flags", "reasoning"],
+      required: ["process_phases", "coregulation_bands", "task_densities", "secondary_dimensions", "cognitive_mode", "srl_state", "epistemic_status", "active_flags", "reasoning"],
       additionalProperties: false,
     },
   },
@@ -138,9 +143,16 @@ Classificeer deze interactie. Let op:
 - Procesfase (P0-P5): in welke fase van het leerproces zit dit?
 - Co-regulatie (C0-C5): wie stuurt het gesprek?
 - Taakdichtheid (TD0-TD5): hoeveel doet de AI vs de leerling?
+- Vaardigheidspotentieel (V0-V5): welk vaardigheidsniveau?
+- Epistemische betrouwbaarheid (E0-E5): hoe betrouwbaar is de AI-output?
+- Technologische integratie (T0-T5): hoe bewust is de leerling van de AI?
+- Sociale interactie (S0-S5): werkt de leerling alleen of samen?
+- Leercontinuïteit (L0-L5): hoe verbonden is dit met eerdere/toekomstige leeractiviteiten?
+- Biascorrectie (B0-B5): hoeveel kritisch bewustzijn toont de leerling?
 - Cognitieve modus: hoe denkt de leerling?
 - SRL-fase: zelfregulerend leren status
-- Epistemische status: hoe betrouwbaar is de AI-output?
+- Epistemische status: hoe betrouwbaar is de AI-output (FEIT/INTERPRETATIE/SPECULATIE/ONBEKEND)?
+- Vul secondary_dimensions met V, E, T, S, L, B bands.
 - Als een dimensie duidelijk op of nabij een grens ligt, geef dat aan via borderline_dimensions en vul secondary_bands waar relevant. Geef confidence alleen als globale schatting.`;
 
     console.log(`[eai-classify] Starting classification, profile: ${profile.subject}/${profile.level}`);
