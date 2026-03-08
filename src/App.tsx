@@ -30,38 +30,38 @@ const SchoolPluginProvider = ({ children }: { children: React.ReactNode }) => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-    <SchoolPluginProvider>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <TopNav />
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/concept" element={<ConceptPage />} />
-          <Route path="/student" element={
-            <AuthGuard>
-              <StudentStudio />
-            </AuthGuard>
-          } />
-          <Route path="/teacher" element={
-            <AuthGuard requiredRole="DOCENT">
-              <TeacherCockpit />
-            </AuthGuard>
-          } />
-          <Route path="/admin" element={
-            <AuthGuard requiredRole="ADMIN">
-              <AdminPanel />
-            </AuthGuard>
-          } />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-    </SchoolPluginProvider>
+      <SchoolPluginProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <TopNav />
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/concept" element={<ConceptPage />} />
+              <Route path="/student" element={
+                <AuthGuard>
+                  <StudentStudio />
+                </AuthGuard>
+              } />
+              <Route path="/teacher" element={
+                <AuthGuard requiredRole="DOCENT">
+                  <TeacherCockpit />
+                </AuthGuard>
+              } />
+              <Route path="/admin" element={
+                <AuthGuard requiredRole="ADMIN">
+                  <AdminPanel />
+                </AuthGuard>
+              } />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </SchoolPluginProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
