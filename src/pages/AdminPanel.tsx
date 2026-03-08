@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle, MessageSquare, Users, BarChart3, ChevronDown, ChevronRight, Layers, Plus, Edit } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import EITLWizard from '@/components/EITLWizard';
 import PluginVersionHistory from '@/components/PluginVersionHistory';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,7 +27,8 @@ import {
 import { toast } from '@/hooks/use-toast';
 
 const AdminPanel = () => {
-  const { isSuperUser } = useAuth();
+  const { isSuperUser, user } = useAuth();
+  const [adminSchoolId, setAdminSchoolId] = useState<string | null>(null);
   const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
   const [storageItems, setStorageItems] = useState<StorageItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,6 +42,39 @@ const AdminPanel = () => {
   const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
   // EITL Wizard state
   const [showWizard, setShowWizard] = useState(false);
+
+  // Resolve admin's school_id for version history
+  useEffect(() => {
+    const resolveSchoolId = async () => {
+      if (!user) return;
+      // Try active plugin first
+      if (hasActivePlugin()) {
+        setAdminSchoolId(getActivePlugin()!.school_id);
+        return;
+      }
+      // Fallback: profile school_id
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('school_id')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (profile?.school_id) {
+        setAdminSchoolId(profile.school_id);
+        return;
+      }
+      // Fallback: any school_ssot record (superuser)
+      if (isSuperUser) {
+        const { data } = await supabase
+          .from('school_ssot')
+          .select('school_id')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (data) setAdminSchoolId(data.school_id);
+      }
+    };
+    resolveSchoolId();
+  }, [user, isSuperUser]);
 
   // Load system data on mount
   useEffect(() => {
@@ -1119,10 +1154,10 @@ const AdminPanel = () => {
               </Card>
 
               {/* Version History + Audit Trail (SUPERUSER sees rollback, ADMIN sees read-only) */}
-              {hasActivePlugin() && (
+              {(hasActivePlugin() ? getActivePlugin()!.school_id : adminSchoolId) && (
                 <PluginVersionHistory
-                  schoolId={getActivePlugin()!.school_id}
-                  onRollback={loadSystemData}
+                  schoolId={(hasActivePlugin() ? getActivePlugin()!.school_id : adminSchoolId)!}
+                  onRollback={() => { loadSystemData(); if (!hasActivePlugin() && adminSchoolId) setAdminSchoolId(adminSchoolId); }}
                 />
               )}
 

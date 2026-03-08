@@ -41,7 +41,7 @@ interface PluginVersionHistoryProps {
 }
 
 const PluginVersionHistory: React.FC<PluginVersionHistoryProps> = ({ schoolId, onRollback }) => {
-  const { user, isSuperUser } = useAuth();
+  const { user, isSuperUser, roles } = useAuth();
   const [versions, setVersions] = useState<PluginVersion[]>([]);
   const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -121,7 +121,7 @@ const PluginVersionHistory: React.FC<PluginVersionHistoryProps> = ({ schoolId, o
         .eq('id', user.id)
         .maybeSingle();
 
-      await loadEffectiveSSOT(profile?.school_id ?? undefined, user.id, []);
+      await loadEffectiveSSOT(profile?.school_id ?? undefined, user.id, roles);
 
       toast({ title: 'Versie geactiveerd', description: `Versie ${versionId.slice(0, 8)}… is nu actief.` });
       await loadData();
