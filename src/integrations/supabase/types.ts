@@ -218,6 +218,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      owns_session: { Args: { _session_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "LEERLING" | "DOCENT" | "ADMIN"

@@ -80,14 +80,7 @@ export function downloadTraceJSON(sessionId: string): void {
 // ============= SSOT HEALING =============
 
 /**
- * Validate that a rubric ID exists in SSOT
- */
-function ssotHasRubric(rubricId: string): boolean {
-  return getRubric(rubricId) !== undefined;
-}
-
-/**
- * Validate that a band ID exists in a rubric
+ * Validate that a band ID exists in SSOT
  */
 function ssotHasBand(rubricId: string, bandId: string): boolean {
   const rubric = getRubric(rubricId);
@@ -102,131 +95,150 @@ function ssotHasCommand(commandId: string): boolean {
 }
 
 /**
- * SSOT-healing: prune unknown rubric/band/command references
- * This is the control-plane anti-hallucination mechanism
+ * Unified SSOT normalization: prune unknown bands, heal commands via fuzzy-map,
+ * validate SRL state. This is the single authoritative healing function used by
+ * both the pipeline and admin audit.
+ *
+ * @param strict - When true (admin audit), warnings are collected but no trace events emitted.
  */
-export function healAnalysisToSSOT(
+export function normalizeAnalysisToSSOT(
   analysis: EAIAnalysis,
-  sessionId: string
+  sessionId: string,
+  options: { strict?: boolean } = {}
 ): { healed: EAIAnalysis; events: string[]; ssotHealingCount: number; commandNullCount: number } {
   const events: string[] = [];
   const healed: EAIAnalysis = structuredClone(analysis);
 
-  // Validate coregulation_bands
-  if (healed.coregulation_bands) {
-    const validBands = healed.coregulation_bands.filter(bandId => {
-      const band = getBand(bandId);
-      if (!band) {
-        events.push(`PRUNE_UNKNOWN_BAND:${bandId}`);
-        pushTrace(sessionId, {
-          severity: 'REPAIR',
-          source: 'SSOT',
-          step: 'SSOT_HEAL',
-          message: `Pruned unknown band: ${bandId}`,
-          data: { prunedBand: bandId },
-        });
-        return false;
-      }
-      return true;
-    });
-    healed.coregulation_bands = validBands;
+  // --- Band validation (all four band arrays) ---
+  const bandFields: (keyof Pick<EAIAnalysis, 'coregulation_bands' | 'process_phases' | 'task_densities' | 'secondary_dimensions'>)[] =
+    ['coregulation_bands', 'process_phases', 'task_densities', 'secondary_dimensions'];
+
+  for (const field of bandFields) {
+    if (healed[field]) {
+      const validBands = (healed[field] as string[]).filter(bandId => {
+        const band = getBand(bandId);
+        if (!band) {
+          // Skip very short / empty strings silently
+          if (bandId && bandId.length > 1) {
+            events.push(`PRUNE_UNKNOWN_BAND:${bandId}:${field}`);
+            if (!options.strict) {
+              pushTrace(sessionId, {
+                severity: 'REPAIR',
+                source: 'SSOT',
+                step: 'SSOT_HEAL',
+                message: `Pruned unknown band: ${bandId} in ${field}`,
+                data: { prunedBand: bandId, field },
+              });
+            }
+          }
+          return false;
+        }
+        return true;
+      });
+      (healed as any)[field] = validBands;
+    }
   }
 
-  // Validate process_phases
-  if (healed.process_phases) {
-    const validPhases = healed.process_phases.filter(phase => {
-      const band = getBand(phase);
-      if (!band) {
-        events.push(`PRUNE_UNKNOWN_PHASE:${phase}`);
-        pushTrace(sessionId, {
-          severity: 'REPAIR',
-          source: 'SSOT',
-          step: 'SSOT_HEAL',
-          message: `Pruned unknown phase: ${phase}`,
-          data: { prunedPhase: phase },
-        });
-        return false;
+  // --- Command validation with fuzzy-map healing ---
+  if (healed.active_fix && healed.active_fix !== 'NONE' && healed.active_fix !== 'null') {
+    const fix = healed.active_fix.trim();
+    if (!ssotHasCommand(fix)) {
+      // Try fuzzy-map first
+      if (COMMAND_FUZZY_MAP[fix]) {
+        const healed_fix = COMMAND_FUZZY_MAP[fix];
+        events.push(`FUZZY_HEAL_COMMAND:${fix}→${healed_fix}`);
+        if (!options.strict) {
+          pushTrace(sessionId, {
+            severity: 'REPAIR',
+            source: 'SSOT',
+            step: 'SSOT_HEAL',
+            message: `Healed command via fuzzy-map: '${fix}' → '${healed_fix}'`,
+            data: { original: fix, healed: healed_fix },
+          });
+        }
+        healed.active_fix = healed_fix;
+      // Try adding missing slash prefix
+      } else if (!fix.startsWith('/') && ssotHasCommand(`/${fix}`)) {
+        const prefixed = `/${fix}`;
+        events.push(`PREFIX_HEAL_COMMAND:${fix}→${prefixed}`);
+        if (!options.strict) {
+          pushTrace(sessionId, {
+            severity: 'REPAIR',
+            source: 'SSOT',
+            step: 'SSOT_HEAL',
+            message: `Added missing prefix: '${fix}' → '${prefixed}'`,
+            data: { original: fix, healed: prefixed },
+          });
+        }
+        healed.active_fix = prefixed;
+      } else {
+        events.push(`NULL_UNKNOWN_COMMAND:${fix}`);
+        if (!options.strict) {
+          pushTrace(sessionId, {
+            severity: 'REPAIR',
+            source: 'SSOT',
+            step: 'SSOT_HEAL',
+            message: `Nulled unknown command: ${fix}`,
+            data: { nulledCommand: fix },
+          });
+        }
+        healed.active_fix = null;
       }
-      return true;
-    });
-    healed.process_phases = validPhases;
-  }
-
-  // Validate task_densities
-  if (healed.task_densities) {
-    const validTDs = healed.task_densities.filter(td => {
-      const band = getBand(td);
-      if (!band) {
-        events.push(`PRUNE_UNKNOWN_TD:${td}`);
-        pushTrace(sessionId, {
-          severity: 'REPAIR',
-          source: 'SSOT',
-          step: 'SSOT_HEAL',
-          message: `Pruned unknown task density: ${td}`,
-          data: { prunedTD: td },
-        });
-        return false;
-      }
-      return true;
-    });
-    healed.task_densities = validTDs;
-  }
-
-  // Validate secondary_dimensions
-  if (healed.secondary_dimensions) {
-    const validSecondary = healed.secondary_dimensions.filter(dim => {
-      const band = getBand(dim);
-      if (!band) {
-        events.push(`PRUNE_UNKNOWN_SECONDARY:${dim}`);
-        pushTrace(sessionId, {
-          severity: 'REPAIR',
-          source: 'SSOT',
-          step: 'SSOT_HEAL',
-          message: `Pruned unknown secondary dimension: ${dim}`,
-          data: { prunedDim: dim },
-        });
-        return false;
-      }
-      return true;
-    });
-    healed.secondary_dimensions = validSecondary;
-  }
-
-  // Validate active_fix command
-  if (healed.active_fix && !ssotHasCommand(healed.active_fix)) {
-    events.push(`NULL_UNKNOWN_COMMAND:${healed.active_fix}`);
-    pushTrace(sessionId, {
-      severity: 'REPAIR',
-      source: 'SSOT',
-      step: 'SSOT_HEAL',
-      message: `Nulled unknown command: ${healed.active_fix}`,
-      data: { nulledCommand: healed.active_fix },
-    });
+    }
+  } else {
     healed.active_fix = null;
   }
 
-  // Log summary if any healing occurred
-  if (events.length > 0) {
-    pushTrace(sessionId, {
-      severity: 'WARNING',
-      source: 'SSOT',
-      step: 'SSOT_HEAL',
-      message: `SSOT healing complete: ${events.length} corrections made`,
-      data: { corrections: events },
-    });
-  } else {
-    pushTrace(sessionId, {
-      severity: 'INFO',
-      source: 'SSOT',
-      step: 'SSOT_HEAL',
-      message: 'SSOT validation passed, no healing required',
-    });
+  // --- SRL state validation ---
+  const validSrl = ['PLAN', 'MONITOR', 'REFLECT', 'ADJUST', 'UNKNOWN'];
+  if (healed.srl_state && !validSrl.includes(healed.srl_state)) {
+    events.push(`INVALID_SRL:${healed.srl_state}→UNKNOWN`);
+    if (!options.strict) {
+      pushTrace(sessionId, {
+        severity: 'REPAIR',
+        source: 'SSOT',
+        step: 'SSOT_HEAL',
+        message: `Invalid SRL state: ${healed.srl_state}. Reset to UNKNOWN.`,
+        data: { original: healed.srl_state },
+      });
+    }
+    healed.srl_state = 'UNKNOWN';
+  }
+
+  // --- Summary trace ---
+  if (!options.strict) {
+    if (events.length > 0) {
+      pushTrace(sessionId, {
+        severity: 'WARNING',
+        source: 'SSOT',
+        step: 'SSOT_HEAL',
+        message: `SSOT healing complete: ${events.length} corrections made`,
+        data: { corrections: events },
+      });
+    } else {
+      pushTrace(sessionId, {
+        severity: 'INFO',
+        source: 'SSOT',
+        step: 'SSOT_HEAL',
+        message: 'SSOT validation passed, no healing required',
+      });
+    }
   }
 
   const ssotHealingCount = events.filter(e => e.startsWith('PRUNE_UNKNOWN_')).length;
   const commandNullCount = events.filter(e => e.startsWith('NULL_UNKNOWN_COMMAND')).length;
 
   return { healed, events, ssotHealingCount, commandNullCount };
+}
+
+/**
+ * @deprecated Use normalizeAnalysisToSSOT instead. Kept for backwards compatibility.
+ */
+export function healAnalysisToSSOT(
+  analysis: EAIAnalysis,
+  sessionId: string
+): { healed: EAIAnalysis; events: string[]; ssotHealingCount: number; commandNullCount: number } {
+  return normalizeAnalysisToSSOT(analysis, sessionId);
 }
 
 // ============= EPISTEMIC GUARD =============
@@ -482,66 +494,19 @@ export interface SSOTValidationResult {
 
 /**
  * Validate and heal an EAIAnalysis against SSOT.
- * Consolidated from eaiLearnAdapter — this is now the single authoritative validator.
+ * Delegates to normalizeAnalysisToSSOT (the single authoritative healer)
+ * and adds a logic gate check.
  */
 export function validateAnalysisAgainstSSOT(analysis: EAIAnalysis, _language: 'nl' | 'en' = 'nl'): SSOTValidationResult {
-  const core = getEAICore();
-  const knownBandIds = new Set<string>();
-  const knownCommands = new Set<string>();
-  const warnings: string[] = [];
-  const healed = JSON.parse(JSON.stringify(analysis));
-
-  core.rubrics.forEach((rubric: any) => {
-    (rubric.bands ?? []).forEach((band: any) => {
-      if (band.band_id) knownBandIds.add(band.band_id);
-    });
-  });
-  core.commands.forEach((cmd: any) => knownCommands.add(cmd.command));
-
-  const cleanBandList = (list: string[], fieldName: string) => {
-    const clean: string[] = [];
-    list.forEach(bandId => {
-      if (knownBandIds.has(bandId)) {
-        clean.push(bandId);
-      } else if (bandId && bandId.length > 1) {
-        warnings.push(`Pruned unknown band ID: ${bandId} in ${fieldName}`);
-      }
-    });
-    return clean;
-  };
-
-  healed.process_phases = cleanBandList(healed.process_phases || [], 'process_phases');
-  healed.coregulation_bands = cleanBandList(healed.coregulation_bands || [], 'coregulation_bands');
-  healed.task_densities = cleanBandList(healed.task_densities || [], 'task_densities');
-  healed.secondary_dimensions = cleanBandList(healed.secondary_dimensions || [], 'secondary_dimensions');
-
-  if (healed.active_fix && healed.active_fix !== 'NONE' && healed.active_fix !== 'null') {
-    const fix = healed.active_fix.trim();
-    if (!knownCommands.has(fix)) {
-      if (COMMAND_FUZZY_MAP[fix]) {
-        healed.active_fix = COMMAND_FUZZY_MAP[fix];
-        warnings.push(`Healed command: '${fix}' -> '${healed.active_fix}'`);
-      } else if (!fix.startsWith('/') && knownCommands.has(`/${fix}`)) {
-        healed.active_fix = `/${fix}`;
-        warnings.push(`Added missing prefix: '${fix}' -> '${healed.active_fix}'`);
-      } else {
-        warnings.push(`Nullified unknown command: '${fix}'`);
-        healed.active_fix = null;
-      }
-    }
-  } else {
-    healed.active_fix = null;
-  }
-
-  const validSrl = ['PLAN', 'MONITOR', 'REFLECT', 'ADJUST', 'UNKNOWN'];
-  if (healed.srl_state && !validSrl.includes(healed.srl_state)) {
-    warnings.push(`Invalid SRL state: ${healed.srl_state}. Resetting to UNKNOWN.`);
-    healed.srl_state = 'UNKNOWN';
-  }
-
+  const { healed, events } = normalizeAnalysisToSSOT(analysis, '__audit__', { strict: true });
   const gateBreach = checkLogicGatesAnalysis(healed);
 
-  return { ok: true, warnings, healedAnalysis: healed, logicGateBreach: gateBreach };
+  return {
+    ok: true,
+    warnings: events.map(e => e.replace(/:/, ': ')),
+    healedAnalysis: healed,
+    logicGateBreach: gateBreach,
+  };
 }
 
 // ============= FULL PIPELINE EXECUTION =============
@@ -572,24 +537,21 @@ export function executePipeline(
     message: 'Starting reliability pipeline',
   });
 
-  // Step 1: SSOT Healing
-  const { healed, events: healingEvents, ssotHealingCount, commandNullCount } = healAnalysisToSSOT(analysis, sessionId);
+  // Step 1: SSOT Healing (unified normalizer with fuzzy-map)
+  const { healed, events: healingEvents, ssotHealingCount, commandNullCount } = normalizeAnalysisToSSOT(analysis, sessionId);
 
   // Step 2: Epistemic Guard
   const { guarded, result: epistemicResult } = epistemicGuard(healed, sessionId);
 
-  // Step 3: Consolidated G-Factor (cross-dimensional + structural)
+  // Step 3: Consolidated G-Factor (includes logic gate check internally)
   const semanticValidation = calculateGFactor(guarded, sessionId);
-
-  // Step 4: Logic gate breach (authoritative, post-healing)
-  const logicGateBreach = checkLogicGatesAnalysis(guarded);
 
   // Update mechanical state with pipeline results
   const enhancedMechanical: MechanicalState = {
     ...mechanical,
     repairAttempts: healingEvents.length > 0 ? 1 : 0,
     semanticValidation,
-    logicGateBreach: logicGateBreach || undefined,
+    logicGateBreach: checkLogicGatesAnalysis(guarded) || undefined,
     epistemicGuardResult: {
       label: epistemicResult.label,
       notes: epistemicResult.notes,
