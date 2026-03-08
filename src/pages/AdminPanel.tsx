@@ -42,6 +42,39 @@ const AdminPanel = () => {
   // EITL Wizard state
   const [showWizard, setShowWizard] = useState(false);
 
+  // Resolve admin's school_id for version history
+  useEffect(() => {
+    const resolveSchoolId = async () => {
+      if (!user) return;
+      // Try active plugin first
+      if (hasActivePlugin()) {
+        setAdminSchoolId(getActivePlugin()!.school_id);
+        return;
+      }
+      // Fallback: profile school_id
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('school_id')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (profile?.school_id) {
+        setAdminSchoolId(profile.school_id);
+        return;
+      }
+      // Fallback: any school_ssot record (superuser)
+      if (isSuperUser) {
+        const { data } = await supabase
+          .from('school_ssot')
+          .select('school_id')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (data) setAdminSchoolId(data.school_id);
+      }
+    };
+    resolveSchoolId();
+  }, [user, isSuperUser]);
+
   // Load system data on mount
   useEffect(() => {
     loadSystemData();
