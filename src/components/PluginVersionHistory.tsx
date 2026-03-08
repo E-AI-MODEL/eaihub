@@ -58,7 +58,7 @@ const PluginVersionHistory: React.FC<PluginVersionHistoryProps> = ({ schoolId, o
           .eq('school_id', schoolId)
           .order('created_at', { ascending: false }),
         supabase
-          .from('ssot_changes' as any)
+          .from('ssot_changes')
           .select('*')
           .eq('school_id', schoolId)
           .order('created_at', { ascending: false })
@@ -102,7 +102,7 @@ const PluginVersionHistory: React.FC<PluginVersionHistoryProps> = ({ schoolId, o
         .eq('id', versionId);
 
       // Audit: ROLLBACK
-      await supabase.from('ssot_changes' as any).insert({
+      const { error: auditErr } = await supabase.from('ssot_changes').insert({
         plugin_id: versionId,
         previous_plugin_id: currentActive?.id ?? null,
         school_id: schoolId,
@@ -110,6 +110,7 @@ const PluginVersionHistory: React.FC<PluginVersionHistoryProps> = ({ schoolId, o
         performed_by: user.id,
         change_notes: `Rollback naar versie ${versionId.slice(0, 8)} (was: ${currentActive?.id?.slice(0, 8) ?? 'geen'})`,
       });
+      if (auditErr) console.error('[VersionHistory] Audit insert failed:', auditErr);
 
       // Refresh cache
       clearSSOTCache();
