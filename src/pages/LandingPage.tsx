@@ -194,8 +194,8 @@ const LandingPage = () => {
       <footer className="border-t border-border/50 py-12 px-6 bg-card">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="text-center md:text-left">
-            <div className="text-lg font-bold tracking-tight text-foreground mb-1">EAI HUB</div>
-            <p className="text-xs text-muted-foreground">© 2026 Educational Artificial Intelligence Engineering.</p>
+            <div className="text-lg font-bold tracking-tight text-foreground mb-1">EAIHUB</div>
+            <p className="text-xs text-muted-foreground">EAIHUB is een product van EAI Analys&amp;Advies — H. Visser</p>
           </div>
           
           <div className="flex gap-4">

@@ -550,13 +550,13 @@ const ConceptPage = () => {
               <div className="p-5 rounded-xl border border-border bg-card">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">5</span>
-                  <h3 className="font-semibold text-foreground">EITL plugin-architectuur</h3>
+                  <h3 className="font-semibold text-foreground">EITL — Education In The Loop</h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Scholen kunnen het didactisch model aanpassen via plugins: eigen niveaus, aangepaste regels en school-specifieke interventies — zonder de kern te breken.
+                  EITL staat voor <strong className="text-foreground">Education In The Loop</strong>: het onderwijs — de docent, de didactiek, de schoolvisie — blijft altijd in de beslislus van het systeem, niet de AI. De SSOT (Single Source of Truth) vormt de didactische basis: een wetenschappelijk onderbouwd model dat bepaalt hoe het systeem reageert op leerlinggedrag. Maar wij begrijpen dat elke school een eigen context heeft — een eigen visie, curriculum en pedagogische aanpak. Daarom is er bewust ruimte ingebouwd via het plugin-systeem: scholen kunnen het didactisch model annoteren en aanpassen aan hun specifieke situatie, zonder de wetenschappelijke kern te breken.
                 </p>
                 <p className="text-[10px] text-muted-foreground/50 italic">
-                  Technisch: whitelistMerge-strategie, Zod-validatie, EITL Wizard met vrije navigatie.
+                  Technisch: whitelistMerge-strategie, Zod-validatie, EITL Wizard met vrije navigatie. Plugin annoteert, maar herdefinieert niet.
                 </p>
               </div>
 
@@ -585,6 +585,34 @@ const ConceptPage = () => {
                 </p>
                 <p className="text-[10px] text-muted-foreground/50 italic">
                   Technisch: trending-grafieken voor healing totaalsignaal, breach rate tracking, gateway reachability checks.
+                </p>
+              </div>
+
+              {/* 8. Geheugenarchitectuur */}
+              <div className="p-5 rounded-xl border border-border bg-card">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">8</span>
+                  <h3 className="font-semibold text-foreground">Geheugenarchitectuur — kort- & langetermijn</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  De LLM haalt informatie uit twee bronnen: <strong className="text-foreground">lokale opslag</strong> (LocalStorage) voor de lopende sessie, en de <strong className="text-foreground">backend</strong> voor langetermijndata. Dit is bewust afgekeken van hoe het menselijk geheugen werkt. Lokaal = snel, direct, in het moment — vergelijkbaar met het kortetermijngeheugen. Backend = persistent, deelbaar, over sessies heen — vergelijkbaar met het langetermijngeheugen. Door deze samenwerking voert de LLM snellere en vloeiendere gesprekken, zonder context te verliezen wanneer een leerling terugkomt na een pauze of op een ander moment verder werkt.
+                </p>
+                <p className="text-[10px] text-muted-foreground/50 italic">
+                  Technisch: LocalStorage voor sessie-state en eaiState, backend sync via student_sessions en chat_messages tabellen.
+                </p>
+              </div>
+
+              {/* 9. Beeldondersteuning */}
+              <div className="p-5 rounded-xl border border-border bg-card">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">9</span>
+                  <h3 className="font-semibold text-foreground">Beeldondersteuning (Image)</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Image-generatie is toegevoegd in deze update. Visuele ondersteuning wordt <strong className="text-foreground">alleen actief ingezet wanneer het onderliggende model dit ondersteunt</strong> én wanneer een afbeelding het leren aantoonbaar versterkt — bijvoorbeeld bij biologische structuren, wiskundige grafieken of ruimtelijke concepten. Het systeem genereert geen plaatjes 'omdat het kan', maar omdat het de leerstap visueel verduidelijkt.
+                </p>
+                <p className="text-[10px] text-muted-foreground/50 italic">
+                  Technisch: conditionele image-generatie op basis van modelcapabiliteit en didactische relevantie.
                 </p>
               </div>
             </div>
