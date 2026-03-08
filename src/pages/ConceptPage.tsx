@@ -16,7 +16,7 @@ import {
   Lock
 } from 'lucide-react';
 import { getDimensionsForUI, getLogicGatesForUI, getDimensionColors } from '@/utils/ssotHelpers';
-import { SSOT_DATA } from '@/data/ssot';
+import { getSSOTVersion } from '@/data/ssot';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Accordion,
