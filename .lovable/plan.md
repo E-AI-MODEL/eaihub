@@ -3,7 +3,7 @@
 
 ## Status
 
-Stap 1–7 afgerond. Fase 1 (stabilisatie) en Fase 2 (analyse-consistentie) afgerond. Fase 3 (EITL plugin-architectuur) afgerond. Fase 3.5–5 gedefinieerd.
+Stap 1–7 afgerond. Fase 1–5 afgerond. Alle observability-metrics (edge/client ratio, plugin-usage, healing frequentie, knowledge_type distributie) live en correct aangesloten. `analysisSource`-bug gefixt (mechanical i.p.v. analysis).
 
 ---
 
