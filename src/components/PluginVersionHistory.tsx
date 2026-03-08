@@ -58,7 +58,7 @@ const PluginVersionHistory: React.FC<PluginVersionHistoryProps> = ({ schoolId, o
           .eq('school_id', schoolId)
           .order('created_at', { ascending: false }),
         supabase
-          .from('ssot_changes' as any)
+          .from('ssot_changes')
           .select('*')
           .eq('school_id', schoolId)
           .order('created_at', { ascending: false })
