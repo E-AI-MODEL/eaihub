@@ -3,7 +3,7 @@
 
 ## Status
 
-Stap 1–7 afgerond. Fase 1–5 gedefinieerd voor stabilisatie, consistentie en EITL.
+Stap 1–7 afgerond. Fase 1 (stabilisatie) en Fase 2 (analyse-consistentie) afgerond. Fase 3–5 gedefinieerd.
 
 ---
 
