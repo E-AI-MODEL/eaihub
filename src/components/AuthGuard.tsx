@@ -8,7 +8,7 @@ interface AuthGuardProps {
 }
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children, requiredRole }) => {
-  const { user, roles, isLoading } = useAuth();
+  const { user, roles, isLoading, roleBootstrapFailed, retryRoleBootstrap } = useAuth();
 
   if (isLoading) {
     return (
