@@ -204,7 +204,7 @@ export function getDimensionMeta(): Record<string, DimensionMeta> {
 export function getDimensionLabels(): Record<string, DimensionLabel> {
   const labels: Record<string, DimensionLabel> = {};
   
-  for (const rubricId of SSOT_DATA.metadata.cycle.order) {
+  for (const rubricId of getCycleOrder()) {
     const rubric = getRubric(rubricId);
     const shortKey = getShortKey(rubricId);
     
