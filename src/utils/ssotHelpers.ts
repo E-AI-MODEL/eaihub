@@ -445,7 +445,7 @@ export function validateSSOT(): string[] {
   const issues: string[] = [];
   
   // Check rubric count matches cycle order
-  const cycleCount = SSOT_DATA.metadata.cycle.order.length;
+  const cycleCount = getCycleOrder().length;
   if (cycleCount !== 10) {
     issues.push(`Expected 10 dimensions in cycle order, found ${cycleCount}`);
   }
