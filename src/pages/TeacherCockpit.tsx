@@ -78,8 +78,8 @@ const TeacherCockpit = () => {
 
   const onlineSessions = sessions.filter(s => s.status === 'ONLINE');
   const needsAttention = sessions.filter(s => {
-    const analysis = s.analysis as EAIAnalysis | null;
-    return analysis?.scaffolding?.agency_score !== undefined && analysis.scaffolding.agency_score < 40;
+    const eai = s.eai_state as EAIStateLike | null;
+    return eai?.scaffolding?.agency_score !== undefined && eai.scaffolding.agency_score < 40;
   });
 
   const getTimeSince = (dateStr: string) => {
