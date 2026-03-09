@@ -21,6 +21,8 @@ import { toast } from '@/hooks/use-toast';
 
 const TeacherCockpit = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const teacherName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'Docent';
   const [sessions, setSessions] = useState<StudentSessionRow[]>([]);
   const [selectedSession, setSelectedSession] = useState<StudentSessionRow | null>(null);
   const [messageInput, setMessageInput] = useState('');
