@@ -105,10 +105,14 @@ const TeacherCockpit = () => {
         </div>
         <div className="flex items-center gap-3">
           {needsAttention.length > 0 && (
-            <div className="flex items-center gap-1.5 px-2 py-1 border border-amber-500/40 bg-amber-500/10">
+            <button
+              onClick={() => setSelectedSession(needsAttention[0])}
+              className="flex items-center gap-1.5 px-2 py-1 border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 transition-colors cursor-pointer"
+              title={`Spring naar ${needsAttention[0]?.name || 'leerling'}`}
+            >
               <AlertTriangle className="w-3 h-3 text-amber-400" />
               <span className="text-[9px] font-mono text-amber-300">{needsAttention.length} INTERVENTIE NODIG</span>
-            </div>
+            </button>
           )}
           <span className="text-[9px] font-mono text-slate-600">
             {lastRefresh.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
