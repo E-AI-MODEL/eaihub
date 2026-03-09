@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, BarChart3, ShieldCheck } from 'lucide-react';
+import FactoryDiagram from '@/components/FactoryDiagram';
 
 const LandingPage = () => {
   return (
