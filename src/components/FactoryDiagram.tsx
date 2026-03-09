@@ -502,6 +502,8 @@ const FactoryDiagram = () => {
       </div>
     </div>
   );
-};
+});
+
+FactoryDiagram.displayName = "FactoryDiagram";
 
 export default FactoryDiagram;
