@@ -539,7 +539,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     Dezelfde leersessie wordt vanuit <strong className="text-foreground">drie perspectieven</strong> zichtbaar gemaakt. De leerling ziet een leskaart: een visueel overzicht van waar hij staat en wat de volgende stap is. De docent ziet voortgang, patronen en kan didactische interventies sturen. De beheerder ziet systeemstatus, analyse-kwaliteit en technische gezondheid. Ieder ziet precies wat relevant is voor zijn rol — niet meer, niet minder.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: rolgebaseerde UI met leskaart-panel, docent-cockpit en admin-dashboard.
                   </p>
                 </AccordionContent>
