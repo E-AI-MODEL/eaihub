@@ -647,7 +647,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     Image-generatie is toegevoegd in deze update. Visuele ondersteuning wordt <strong className="text-foreground">alleen actief ingezet wanneer het onderliggende model dit ondersteunt</strong> én wanneer een afbeelding het leren aantoonbaar versterkt — bijvoorbeeld bij biologische structuren, wiskundige grafieken of ruimtelijke concepten. Het systeem genereert geen plaatjes 'omdat het kan', maar omdat het de leerstap visueel verduidelijkt.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: conditionele image-generatie op basis van modelcapabiliteit en didactische relevantie.
                   </p>
                 </AccordionContent>
