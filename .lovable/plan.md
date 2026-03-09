@@ -1,130 +1,51 @@
 
-# Strategische roadmap — EAIHUB
 
-## Status
+# Plan: FactoryDiagram inhoudelijk corrigeren — juiste volgorde en beschrijvingen
 
-Stap 1–7 afgerond. Fase 1–5 afgerond. Alle observability-metrics (edge/client ratio, plugin-usage, healing frequentie, knowledge_type distributie) live en correct aangesloten. `analysisSource`-bug gefixt (mechanical i.p.v. analysis).
+## Gevonden fouten
 
----
+Na analyse van `chatService.ts`, `reliabilityPipeline.ts` en de edge functions blijkt de **stationsvolgorde fout**:
 
-## Huidige architectuur
+| # | Huidig diagram | Werkelijke volgorde in code |
+|---|---|---|
+| 1 | INPUT | INPUT — gebruiker typt bericht |
+| 2 | AUTH | **SSOT/PROMPT** — systeem-prompt gebouwd uit reeds geladen SSOT |
+| 3 | SSOT | **AUTH** — JWT token opgehaald |
+| 4 | CLASSIFY | **CHAT** — eai-chat edge function (streaming antwoord) |
+| 5 | PIPELINE | **CLASSIFY** — eai-classify edge function (NA het antwoord) |
+| 6 | CHAT | **PIPELINE** — reliability pipeline op de classificatie |
+| 7 | DATABASE | DATABASE — persistChatMessage() |
+| 8 | OUTPUT | OUTPUT — render in rol-view |
 
-1. `eai-classify` edge function — primaire 10D-classificatie via Gemini (tool-calling schema)
-2. `generateAnalysis()` in `chatService.ts` — client-side fallback via regex/heuristics
-3. `reliabilityPipeline.ts` — enige bron voor SSOT-healing, G-factor, logic gates, epistemic guard
-4. `eaiLearnAdapter.ts` — state-/viewmodel-laag (scaffolding, TTL, history)
-5. `ssot_v15.json` + `ssot.ts` — statische SSOT singleton met typed helpers, **nu via `getEffectiveSSOT()`**
-6. `ssotRuntime.ts` — runtime loader + whitelist merge voor school plugin overlays
-7. `ssotValidator.ts` — drielaags Zod-validatie (schema, referentieel, runtime)
-8. Auth via Supabase: `user_roles` (LEERLING/DOCENT/ADMIN), `has_role()` SECURITY DEFINER, `AuthGuard`
-9. Persistentie: `chat_messages`, `student_sessions`, `mastery`, `teacher_messages`, `profiles`, `school_ssot`
+### Specifieke fouten in huidige teksten
 
----
+1. **SSOT** wordt getoond als "per bericht laden" — in werkelijkheid laadt `useSchoolPlugin` de SSOT bij app-bootstrap. Per bericht wordt alleen `generateSystemPrompt()` aangeroepen.
+2. **CLASSIFY staat VOOR CHAT** — fout. In `chatService.ts` regel 452: `attemptEdgeClassification()` wordt pas aangeroepen NADAT het streaming-antwoord volledig is.
+3. **PIPELINE staat TUSSEN CLASSIFY en CHAT** — fout. `executePipeline()` draait na zowel chat als classify (regel 472).
+4. **CHAT whatHappens** zegt "het eindantwoord wordt gegenereerd" — maar CHAT is niet het einde, er komt nog CLASSIFY + PIPELINE + DATABASE + OUTPUT.
+5. **AUTH** beschrijving klopt wel, maar de positie is fout (staat nu voor SSOT, moet na SSOT/PROMPT).
 
-## Afgeronde stappen
+## Wijzigingen
 
-### Stap 1 — Analyse naar edge function ✅
-### Stap 2 — Dubbele validatie opschonen ✅
-### Stap 3 — EAIAnalysis uitbreiden met nuancevelden ✅
-### Stap 4 — UI aanpassen op rijkere analyse ✅
-### Stap 5 — Leerlingervaring en Leskaart-context ✅
-### Stap 6 — Kwaliteitszichtbaarheid per rol ✅
-### Stap 7 — Veilig rollenmodel en Auth ✅
+### `src/components/FactoryDiagram.tsx` — STATIONS array herschrijven
 
----
+Nieuwe volgorde met gecorrigeerde inhoud:
 
-## Implementatieplan — 5 fasen
+1. **INPUT** (groen) — "Je typt een vraag. Profiel, vak, niveau, sessionId en curriculumContext worden automatisch toegevoegd."
+2. **PROMPT** (amber) — "Het systeem-prompt wordt samengesteld uit de SSOT die bij het opstarten is geladen. School-plugins zijn al samengevoegd via whitelistMerge()." Modules: `generateSystemPrompt()`, `getEffectiveSSOT()`, `10D rubrics`, `interventies`
+3. **AUTH** (paars) — "Je JWT-token wordt opgehaald en meegegeven. De edge function valideert je identiteit en rol server-side." Modules: `getAuthToken()`, `JWT validatie`, `has_role()`, `RLS`
+4. **CHAT** (cyaan) — "Je bericht wordt naar de AI gestuurd. De Model Router kiest FAST (Gemini Flash) of SLOW (Gemini Pro) op basis van kennistype en gespreksdiepte." Modules: `eai-chat edge fn`, `Model Router`, `FAST → gemini-3-flash-preview`, `SLOW → gemini-2.5-pro`, `streaming response`
+5. **CLASSIFY** (cyaan) — "Na het antwoord analyseert een tweede AI-call je interactie langs 10 dimensies. Dit gebeurt NADAT je het antwoord al ziet." Modules: `eai-classify edge fn`, `Gemini tool-calling`, `10D: K·P·C·TD·V·E·T·S·L·B`
+6. **PIPELINE** (groen) — "De ruwe classificatie doorloopt 9 automatische controles." Modules: de 9 stappen. Detail corrigeren: pipeline draait op de CLASSIFICATIE, niet op het chat-antwoord.
+7. **DATABASE** (indigo) — ongewijzigd, klopt
+8. **OUTPUT** (groen) — ongewijzigd, klopt
 
-### Fase 1 — Stabilisatie (security + healing) ✅
+### Geen wijzigingen aan `LandingPage.tsx`
 
-| # | Taak | Status |
-|---|------|--------|
-| 1.1 | RLS verscherpen | ✅ DONE |
-| 1.2 | Healing consolideren | ✅ DONE |
-| 1.3 | Defensieve role-check | ✅ DONE |
+De component-integratie blijft hetzelfde, alleen de data in STATIONS wijzigt.
 
-### Fase 2 — Analyse-consistentie ✅
+### Technisch
+- 1 bestand wijzigen (`FactoryDiagram.tsx`)
+- Alleen de STATIONS array en labels herschrijven
+- SVG-structuur en animaties blijven intact
 
-| # | Taak | Status |
-|---|------|--------|
-| 2.1 | Edge-classify uitbreiden met secondary_dimensions | ✅ DONE |
-| 2.2 | E-dimensie aansluiten op SSOT | ✅ DONE |
-| 2.3 | Logic gate check vereenvoudigen | ✅ DONE |
-
-### Fase 3.x — Auth consolidatie & governance hardening ✅
-
-| # | Taak | Status |
-|---|------|--------|
-| 3.x.1 | `useAuth()` refactor naar `AuthProvider` context (één listener, gedeelde state) | ✅ DONE |
-| 3.x.2 | RLS tightening: `user_roles` en `school_ssot` van ADMIN ALL → SUPERUSER ALL + ADMIN/DOCENT SELECT | ✅ DONE |
-
-
-### Fase 3 — EITL: SSOT plug-in architectuur ✅
-
-| # | Taak | Status |
-|---|------|--------|
-| 3.1 | `school_ssot` tabel + RLS (admins CRUD, docenten SELECT) | ✅ DONE |
-| 3.2 | `ssotValidator.ts` — drielaags Zod-validatie (schema, referentieel, runtime) | ✅ DONE |
-| 3.3 | `ssotRuntime.ts` — `whitelistMerge` + `loadEffectiveSSOT` + cache | ✅ DONE |
-| 3.4 | `ssot.ts` refactor — `SSOT_DATA` → `BASE_SSOT` + `getEffectiveSSOT()` | ✅ DONE |
-| 3.5 | Component updates — alle directe `SSOT_DATA` refs vervangen | ✅ DONE |
-| 3.6 | Read-only EITL preview tab in Admin Panel | ✅ DONE |
-
-#### MVP Plugin Whitelist
-- **Toegestaan**: band `label`, `description`, `didactic_principle`, `fix` (tekst); command descriptions; SRL `label`/`goal`; gate annotations (rationale, teacher_note)
-- **Immutable**: `band_id`, `fix_ref`, `score_range`, `mechanistic`, `enforcement`, command keys, `cycle.order`, `trigger_band`, `learner_obs`, `ai_obs`, `nl_profile`, `trace_tags`, `band_weight`, `fix_type`, `band_ref`
-- **Niet in MVP**: rubric `name`, rubric `goal`
-
-### Fase 3.5 — EITL Wizard (edit-flow)
-
-| # | Taak | Status |
-|---|------|--------|
-| 3.5.1 | 5-staps wizard in Admin Panel voor plugin CRUD (SUPERUSER-only) | ✅ DONE |
-| 3.5.2 | Plugin versioning met `change_notes` en `based_on_version` | ✅ DONE |
-
-### Fase 4 — Governance ✅
-
-| # | Taak | Status |
-|---|------|--------|
-| 4.1 | Versioning afronden (dedup save, change_notes verplicht bij edits) | ✅ DONE |
-| 4.2 | Rollback — SUPERUSER kan eerdere plugin-versie activeren via PluginVersionHistory | ✅ DONE |
-| 4.3 | Audit log — `ssot_changes` tabel met SUPERUSER ALL + ADMIN SELECT | ✅ DONE |
-| 4.4 | Diff-view — versiegeschiedenis + audit trail in EITL tab | ✅ DONE |
-
-### Fase 5 — Observability ✅
-
-| # | Taak | Status |
-|---|------|--------|
-| 5.1 | Edge vs client analyse-ratio in dashboard | ✅ DONE |
-| 5.2 | Plugin-usage metrics per school | ✅ DONE |
-| 5.3 | Logic gate breach rate trending | ✅ DONE |
-| 5.4 | Healing event frequentie | ✅ DONE |
-
----
-
-## Bekende technische schuld
-
-| # | Issue | Impact | Fase |
-|---|-------|--------|------|
-| 4 | Mixed dimensions in `coregulation_bands` veld | Low | documenteren of refactor bij EITL wizard |
-| 7 | Token schatting is character-based proxy | Low | 5.x of labelen |
-| 8 | `COMMAND_INTENTS` hardcoded in `ssotHelpers.ts` | Low | 3.5 (verplaatsen naar plugin-laag) |
-
----
-
-## Wat expliciet buiten scope blijft
-
-- Volledige vervanging van de SSOT per school (alleen overlay)
-- Generieke deep merge (alleen whitelisted paden)
-- Structurele of machinekritische velden in de plugin-laag
-- Meerdere fasen tegelijk uitvoeren
-- `tiktoken` (Python-only) — indien nodig: `gpt-tokenizer` (npm) of proxy-label
-
----
-
-## Kernprincipe
-
-Constatering → Interpretatie → Beslissing.
-De base SSOT blijft constitutieve bronlaag.
-De plugin annoteert, maar herdefinieert niet.
-Stabilisatie vóór uitbreiding.
