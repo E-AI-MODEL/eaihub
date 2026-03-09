@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 // ── Station types ──
 interface Station {
@@ -166,7 +166,7 @@ function useParticles(count: number, speed: number): Particle[] {
   return particles;
 }
 
-const FactoryDiagram = () => {
+const FactoryDiagram = React.forwardRef<HTMLDivElement>((_, ref) => {
   const [active, setActive] = useState<number | null>(null);
   const [showTechnical, setShowTechnical] = useState(false);
   const [tick, setTick] = useState(0);
@@ -185,7 +185,7 @@ const FactoryDiagram = () => {
   const af = active !== null ? STATIONS[active] : null;
 
   return (
-    <div className="flex flex-col items-center font-mono select-none" style={{ overflowX: "auto" }}>
+    <div ref={ref} className="flex flex-col items-center font-mono select-none" style={{ overflowX: "auto" }}>
       {/* Header */}
       <div className="text-center py-3">
         <div className="text-[9px] tracking-[5px] text-primary/40 mb-1">
@@ -502,6 +502,8 @@ const FactoryDiagram = () => {
       </div>
     </div>
   );
-};
+});
+
+FactoryDiagram.displayName = "FactoryDiagram";
 
 export default FactoryDiagram;
