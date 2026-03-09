@@ -24,6 +24,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import FactoryDiagram from '@/components/FactoryDiagram';
 
 const ConceptPage = () => {
   const dimensions = useMemo(() => getDimensionsForUI(), []);
