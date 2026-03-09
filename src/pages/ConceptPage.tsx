@@ -503,7 +503,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     Standaard AI-systemen sturen een vraag naar een LLM en geven het antwoord direct terug — zonder te controleren wat de leerling eigenlijk bedoelt. EAI Hub werkt anders: elke leerling-input doorloopt een <strong className="text-foreground">tweestaps-analyse</strong>. Eerst classificeert een snelle edge-functie de input op 10 didactische dimensies (zoals zelfregulatieniveau, misconcepties en kennisniveau). Daarna controleert de reliabilityPipeline of die classificatie klopt, en corrigeert waar nodig. Pas daarna wordt een respons gegenereerd — op basis van bewezen didactiek, niet op basis van gokken.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: edge-classify → reliabilityPipeline.ts → analysisSource tag op elk bericht.
                   </p>
                 </AccordionContent>
