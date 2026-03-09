@@ -138,14 +138,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     return unsub;
   }, [sessionId]);
 
-  // Handle pending command from LeskaartPanel
-  useEffect(() => {
-    if (pendingCommand) {
-      handleSend(pendingCommand);
-      onCommandConsumed?.();
-    }
-  }, [pendingCommand, handleSend, onCommandConsumed]);
-
   // Idle timer
   useEffect(() => {
     if (idleTimerRef.current) { clearInterval(idleTimerRef.current); idleTimerRef.current = null; }
@@ -183,7 +175,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     const isCommand = textToSend.startsWith('/');
 
     messageCounterRef.current += 1;
-    // Don't show /commands as user messages — the student shouldn't see them
     if (!isCommand) {
       const userMessage: Message = { id: `msg_${crypto.randomUUID()}`, role: 'user', text: textToSend, timestamp: new Date() };
       setMessages(prev => [...prev, userMessage]);
@@ -191,7 +182,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     setInput('');
     setIsLoading(true);
 
-    // Reset textarea height
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
 
     try {
@@ -209,6 +199,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       resetInteraction();
     }
   }, [input, isLoading, profile, sessionId, userId, onAnalysisUpdate]);
+
+  // Handle pending command from LeskaartPanel (must be after handleSend declaration)
+  useEffect(() => {
+    if (pendingCommand) {
+      handleSend(pendingCommand);
+      onCommandConsumed?.();
+    }
+  }, [pendingCommand, handleSend, onCommandConsumed]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
