@@ -652,6 +652,25 @@ const ConceptPage = () => {
                   </p>
                 </AccordionContent>
               </AccordionItem>
+
+              {/* 10. Productielijn — dwarsdoorsnede */}
+              <AccordionItem value="item-10" className="rounded-xl border border-border bg-card px-5">
+                <AccordionTrigger className="hover:no-underline py-4">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">10</span>
+                    <h3 className="font-semibold text-foreground text-left">Productielijn — dwarsdoorsnede</h3>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pb-5">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Geen gestapeld gebouw, maar een <strong className="text-foreground">fabriek van opzij doorgezaagd</strong>: een lange hal met machines naast elkaar, transportbanden tussen de stations, en alles zichtbaar als je er dwars doorheen kijkt. Eén productielijn van links (gebruikersinput) naar rechts (eindantwoord). Klik op een station voor details.
+                  </p>
+                  <FactoryDiagram />
+                  <p className="text-[11px] text-muted-foreground/70 italic mt-3">
+                    Technisch: 8 stations representeren de volledige request-response cyclus — van sendMessage() tot MessageBubble render.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
             </Accordion>
           </TabsContent>
         </Tabs>
