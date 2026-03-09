@@ -185,7 +185,7 @@ const FactoryDiagram = React.forwardRef<HTMLDivElement>((_, ref) => {
   const af = active !== null ? STATIONS[active] : null;
 
   return (
-    <div className="flex flex-col items-center font-mono select-none" style={{ overflowX: "auto" }}>
+    <div ref={ref} className="flex flex-col items-center font-mono select-none" style={{ overflowX: "auto" }}>
       {/* Header */}
       <div className="text-center py-3">
         <div className="text-[9px] tracking-[5px] text-primary/40 mb-1">
