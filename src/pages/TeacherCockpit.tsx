@@ -16,9 +16,13 @@ import { getDimensionColors } from '@/utils/ssotHelpers';
 import { getShortKey, getRubric, getCycleOrder } from '@/data/ssot';
 import type { EAIAnalysis, MechanicalState } from '@/types';
 import type { EAIStateLike } from '@/utils/eaiLearnAdapter';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/hooks/use-toast';
 
 const TeacherCockpit = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const teacherName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'Docent';
   const [sessions, setSessions] = useState<StudentSessionRow[]>([]);
   const [selectedSession, setSelectedSession] = useState<StudentSessionRow | null>(null);
   const [messageInput, setMessageInput] = useState('');
@@ -65,16 +69,18 @@ const TeacherCockpit = () => {
     if (!selectedSession || !messageInput.trim() || isSending) return;
     setIsSending(true);
     try {
-      await sendTeacherMessage(selectedSession.session_id, messageInput.trim());
+      await sendTeacherMessage(selectedSession.session_id, messageInput.trim(), teacherName);
       setMessageInput('');
       const msgs = await fetchMessagesForSession(selectedSession.session_id);
       setSentMessages(msgs);
+      toast({ title: 'Bericht verzonden', description: `Naar ${selectedSession.name || 'leerling'}` });
     } catch (e) {
       console.error('Failed to send message:', e);
+      toast({ title: 'Verzenden mislukt', description: 'Probeer het opnieuw.', variant: 'destructive' });
     } finally {
       setIsSending(false);
     }
-  }, [selectedSession, messageInput, isSending]);
+  }, [selectedSession, messageInput, isSending, teacherName]);
 
   const onlineSessions = sessions.filter(s => s.status === 'ONLINE');
   const needsAttention = sessions.filter(s => {
