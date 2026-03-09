@@ -59,7 +59,10 @@ export async function fetchChatMessages(sessionId?: string) {
   if (sessionId) query = query.eq('session_id', sessionId);
   
   const { data, error } = await query;
-  if (error) throw error;
+  if (error) {
+    console.error('[AdminDB] fetchChatMessages error:', error);
+    return [];
+  }
   return data || [];
 }
 

@@ -144,7 +144,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       handleSend(pendingCommand);
       onCommandConsumed?.();
     }
-  }, [pendingCommand]);
+  }, [pendingCommand, handleSend, onCommandConsumed]);
 
   // Idle timer
   useEffect(() => {
