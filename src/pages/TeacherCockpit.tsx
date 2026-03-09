@@ -7,7 +7,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   subscribeToSessions, sendTeacherMessage, fetchMessagesForSession,
-  type StudentSessionRow, type TeacherMessage,
+  subscribeToChatMessages,
+  type StudentSessionRow, type TeacherMessage, type ChatMessageRow,
 } from '@/services/sessionSyncService';
 import { fetchChatMessages } from '@/services/adminDbService';
 import { getNodeById } from '@/data/curriculum';
@@ -15,16 +16,6 @@ import { getDimensionColors } from '@/utils/ssotHelpers';
 import { getShortKey, getRubric, getCycleOrder } from '@/data/ssot';
 import type { EAIAnalysis, MechanicalState } from '@/types';
 import type { EAIStateLike } from '@/utils/eaiLearnAdapter';
-
-interface ChatMessageRow {
-  id: string;
-  session_id: string;
-  role: string;
-  content: string;
-  analysis: any;
-  mechanical: any;
-  created_at: string;
-}
 
 const TeacherCockpit = () => {
   const navigate = useNavigate();
