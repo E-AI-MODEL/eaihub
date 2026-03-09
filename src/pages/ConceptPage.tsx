@@ -629,7 +629,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     De LLM haalt informatie uit twee bronnen: <strong className="text-foreground">lokale opslag</strong> (LocalStorage) voor de lopende sessie, en de <strong className="text-foreground">backend</strong> voor langetermijndata. Dit is bewust afgekeken van hoe het menselijk geheugen werkt. Lokaal = snel, direct, in het moment — vergelijkbaar met het kortetermijngeheugen. Backend = persistent, deelbaar, over sessies heen — vergelijkbaar met het langetermijngeheugen. Door deze samenwerking voert de LLM snellere en vloeiendere gesprekken, zonder context te verliezen wanneer een leerling terugkomt na een pauze of op een ander moment verder werkt.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: LocalStorage voor sessie-state en eaiState, backend sync via student_sessions en chat_messages tabellen.
                   </p>
                 </AccordionContent>
