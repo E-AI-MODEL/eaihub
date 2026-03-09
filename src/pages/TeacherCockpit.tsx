@@ -7,7 +7,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   subscribeToSessions, sendTeacherMessage, fetchMessagesForSession,
-  type StudentSessionRow, type TeacherMessage,
+  subscribeToChatMessages,
+  type StudentSessionRow, type TeacherMessage, type ChatMessageRow,
 } from '@/services/sessionSyncService';
 import { fetchChatMessages } from '@/services/adminDbService';
 import { getNodeById } from '@/data/curriculum';
@@ -15,16 +16,6 @@ import { getDimensionColors } from '@/utils/ssotHelpers';
 import { getShortKey, getRubric, getCycleOrder } from '@/data/ssot';
 import type { EAIAnalysis, MechanicalState } from '@/types';
 import type { EAIStateLike } from '@/utils/eaiLearnAdapter';
-
-interface ChatMessageRow {
-  id: string;
-  session_id: string;
-  role: string;
-  content: string;
-  analysis: any;
-  mechanical: any;
-  created_at: string;
-}
 
 const TeacherCockpit = () => {
   const navigate = useNavigate();
@@ -44,11 +35,30 @@ const TeacherCockpit = () => {
     return unsub;
   }, []);
 
-  // When a session is selected, fetch its teacher messages + chat log
+  // When a session is selected: fetch + subscribe live
   useEffect(() => {
-    if (!selectedSession) { setSentMessages([]); setChatLog([]); return; }
+    if (!selectedSession) {
+      setSentMessages([]);
+      setChatLog([]);
+      return;
+    }
+
+    // Initiële fetch
     fetchMessagesForSession(selectedSession.session_id).then(setSentMessages);
-    fetchChatMessages(selectedSession.session_id).then(setChatLog).catch(() => setChatLog([]));
+    fetchChatMessages(selectedSession.session_id)
+      .then(setChatLog)
+      .catch((e) => {
+        console.error('[TeacherCockpit] fetchChatMessages error:', e);
+        setChatLog([]);
+      });
+
+    // Live subscription: elke nieuwe INSERT direct appenden
+    const unsubChat = subscribeToChatMessages(
+      selectedSession.session_id,
+      (msg) => setChatLog(prev => [...prev, msg])
+    );
+
+    return unsubChat; // cleanup bij sessie-wissel of unmount
   }, [selectedSession?.session_id]);
 
   const handleSendMessage = useCallback(async () => {
@@ -68,8 +78,8 @@ const TeacherCockpit = () => {
 
   const onlineSessions = sessions.filter(s => s.status === 'ONLINE');
   const needsAttention = sessions.filter(s => {
-    const analysis = s.analysis as EAIAnalysis | null;
-    return analysis?.scaffolding?.agency_score !== undefined && analysis.scaffolding.agency_score < 40;
+    const eai = s.eai_state as EAIStateLike | null;
+    return eai?.scaffolding?.agency_score !== undefined && eai.scaffolding.agency_score < 40;
   });
 
   const getTimeSince = (dateStr: string) => {
@@ -95,10 +105,14 @@ const TeacherCockpit = () => {
         </div>
         <div className="flex items-center gap-3">
           {needsAttention.length > 0 && (
-            <div className="flex items-center gap-1.5 px-2 py-1 border border-amber-500/40 bg-amber-500/10">
+            <button
+              onClick={() => setSelectedSession(needsAttention[0])}
+              className="flex items-center gap-1.5 px-2 py-1 border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 transition-colors cursor-pointer"
+              title={`Spring naar ${needsAttention[0]?.name || 'leerling'}`}
+            >
               <AlertTriangle className="w-3 h-3 text-amber-400" />
               <span className="text-[9px] font-mono text-amber-300">{needsAttention.length} INTERVENTIE NODIG</span>
-            </div>
+            </button>
           )}
           <span className="text-[9px] font-mono text-slate-600">
             {lastRefresh.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
