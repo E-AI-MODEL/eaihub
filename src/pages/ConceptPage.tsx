@@ -593,7 +593,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     Transparantie en verantwoording zijn essentieel wanneer AI in het onderwijs wordt ingezet. Elke wijziging aan het didactisch model wordt <strong className="text-foreground">gelogd met wie, wanneer en waarom</strong>. Rollback naar eerdere versies is altijd mogelijk, zodat een fout nooit definitief is. Dit geeft schoolbesturen en docenten de zekerheid dat het systeem controleerbaar en auditeerbaar is — geen black box, maar een open boek.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: ssot_changes audit log, versioning met hash-verificatie, rollback via admin panel.
                   </p>
                 </AccordionContent>
