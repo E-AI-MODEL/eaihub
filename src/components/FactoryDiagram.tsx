@@ -7,6 +7,7 @@ interface Station {
   sublabel: string;
   color: string;
   modules: string[];
+  whatHappens: string;
   detail: string;
   machine: string;
   pipes: string[];
@@ -18,8 +19,9 @@ const STATIONS: Station[] = [
     label: "INPUT",
     sublabel: "Gebruiker",
     color: "#4ade80",
-    modules: ["Leerling · Docent · Admin", "sendMessage(tekst, profiel)"],
-    detail: "Het bericht wordt verstuurd vanuit StudentStudio, TeacherCockpit of AdminPanel. Inclusief profiel, sessionId en curriculum context.",
+    modules: ["Leerling · Docent · Admin", "sendMessage(tekst, profiel, sessionId)", "curriculumContext meegeven"],
+    whatHappens: "Je typt een vraag. Het systeem voegt automatisch je profiel, vak, niveau en curriculumpositie toe.",
+    detail: "Het bericht wordt verstuurd vanuit StudentStudio, TeacherCockpit of AdminPanel. Naast de tekst gaan profiel, sessionId en curriculumContext mee als metadata.",
     machine: "TERMINAL",
     pipes: ["right"],
   },
@@ -29,7 +31,8 @@ const STATIONS: Station[] = [
     sublabel: "Beveiliging",
     color: "#7c3aed",
     modules: ["AuthGuard check", "JWT validatie", "has_role() verify", "RLS enforcement"],
-    detail: "Elk binnenkomend verzoek passeert AuthGuard. JWT-token wordt geverifieerd, rol bepaald, en RLS op database-niveau afgedwongen.",
+    whatHappens: "Je identiteit wordt gecontroleerd. Alleen ingelogde gebruikers met de juiste rol mogen door.",
+    detail: "Elk binnenkomend verzoek passeert AuthGuard. JWT-token wordt geverifieerd, rol bepaald via has_role() SECURITY DEFINER, en RLS op database-niveau afgedwongen.",
     machine: "GATE",
     pipes: ["left", "right"],
   },
@@ -39,7 +42,8 @@ const STATIONS: Station[] = [
     sublabel: "Kennislaag",
     color: "#f59e0b",
     modules: ["getEffectiveSSOT()", "whitelistMerge()", "school overlay", "10D model laden"],
-    detail: "De effectieve SSOT wordt opgebouwd: BASE SSOT plus optionele school plugin overlay via whitelistMerge(). Het 10D didactisch model is nu beschikbaar.",
+    whatHappens: "Het didactisch model (10 dimensies, rubrics, interventies) wordt geladen. Als je school een eigen plugin heeft, wordt die hier samengevoegd.",
+    detail: "De effectieve SSOT wordt opgebouwd: BASE SSOT (v15.0.0) plus optionele school plugin overlay via whitelistMerge(). Het volledige 10D didactisch model is nu beschikbaar voor classificatie en promptbouw.",
     machine: "VAULT",
     pipes: ["left", "right"],
   },
@@ -48,8 +52,9 @@ const STATIONS: Station[] = [
     label: "CLASSIFY",
     sublabel: "eai-classify",
     color: "#00e5ff",
-    modules: ["Gemini tool-calling", "10D analyse", "K C P TD V E T S L B", "epistemic status"],
-    detail: "Edge Function roept Gemini aan via tool-calling schema. Elke dimensie wordt geclassificeerd: Kennis, Co-regulatie, Procesfase, Taakdichtheid, en meer.",
+    modules: ["Gemini tool-calling", "10D analyse", "K · P · C · TD · V · E · T · S · L · B", "epistemic status"],
+    whatHappens: "AI analyseert je bericht langs 10 dimensies: Kennis, Proces, Co-regulatie, Taakdichtheid, Vaardigheid, Epistemisch, Technologie, Sociaal, Transfer en Bias.",
+    detail: "Edge Function eai-classify roept Gemini aan via tool-calling schema. Elke dimensie wordt geclassificeerd met band-toewijzing. Output: EAIAnalysis met cognitive_mode, srl_state, epistemic_status en knowledge_type.",
     machine: "SCANNER",
     pipes: ["left", "right"],
   },
@@ -58,8 +63,19 @@ const STATIONS: Station[] = [
     label: "PIPELINE",
     sublabel: "Reliability",
     color: "#10b981",
-    modules: ["PARSE · REPAIR", "SCHEMA VALIDATE", "SSOT HEAL", "LOGIC GATE"],
-    detail: "5 geautomatiseerde stappen: het ruwe AI-antwoord wordt geparsed, gerepareerd, gevalideerd tegen het SSOT-schema, geheald en door logic gates gehaald.",
+    modules: [
+      "① PROMPT_ASSEMBLY",
+      "② MODEL_CALL",
+      "③ PARSE",
+      "④ REPAIR",
+      "⑤ SCHEMA_VALIDATE",
+      "⑥ SSOT_HEAL",
+      "⑦ EPISTEMIC_GUARD",
+      "⑧ LOGIC_GATE_CHECK",
+      "⑨ RENDER",
+    ],
+    whatHappens: "Het ruwe AI-antwoord doorloopt 9 automatische controles: van JSON-parsing tot logische kwaliteitsgates.",
+    detail: "reliabilityPipeline.ts voert 9 stappen uit: prompt samenstellen, model aanroepen, JSON parsen, repareren bij fouten, schema valideren tegen Zod, SSOT-healing bij ontbrekende velden, epistemische bewaking, logic gate controle, en tenslotte renderen.",
     machine: "PROCESSOR",
     pipes: ["left", "right"],
   },
@@ -68,8 +84,9 @@ const STATIONS: Station[] = [
     label: "CHAT",
     sublabel: "eai-chat",
     color: "#00e5ff",
-    modules: ["Model Router", "gemini-3-flash / 2.5-pro", "Socratisch prompt", "EAIAnalysis merge"],
-    detail: "Model Router selecteert FAST/MID/SLOW route. Gemini genereert het antwoord op basis van het Socratisch systeem-prompt en de geclassificeerde context.",
+    modules: ["Model Router", "FAST → gemini-3-flash-preview", "SLOW → gemini-2.5-pro", "Socratisch prompt", "EAIAnalysis merge"],
+    whatHappens: "Het eindantwoord wordt gegenereerd. Bij standaardvragen met Gemini Flash, bij diep metacognitief werk met Gemini Pro.",
+    detail: "Edge Function eai-chat bevat een Model Router die FAST of SLOW selecteert op basis van intent_category. Gemini genereert het antwoord op basis van het Socratisch systeem-prompt en de geclassificeerde context. De EAIAnalysis wordt gemerged in het response.",
     machine: "REACTOR",
     pipes: ["left", "right"],
   },
@@ -78,8 +95,9 @@ const STATIONS: Station[] = [
     label: "DATABASE",
     sublabel: "Persistentie",
     color: "#818cf8",
-    modules: ["persistChatMessage()", "analysis JSONB", "mechanical JSONB", "updateMastery()"],
-    detail: "Het bericht, de EAIAnalysis en MechanicalState worden als JSONB opgeslagen in chat_messages. Mastery wordt bijgewerkt op basis van de classificatie.",
+    modules: ["persistChatMessage()", "analysis JSONB", "mechanical JSONB", "updateMastery()", "student_sessions"],
+    whatHappens: "Alles wordt opgeslagen: je bericht, de analyse, de mechanische staat en je voortgang per leerdoel.",
+    detail: "Het bericht, de EAIAnalysis en MechanicalState worden als JSONB opgeslagen in chat_messages. Mastery wordt bijgewerkt op basis van de classificatie. student_sessions houdt voortgang en status bij.",
     machine: "ARCHIVE",
     pipes: ["left", "right"],
   },
@@ -88,8 +106,9 @@ const STATIONS: Station[] = [
     label: "OUTPUT",
     sublabel: "Rol-View",
     color: "#4ade80",
-    modules: ["MessageBubble render", "EAIAnalysis badge", "LeskaartPanel update", "ObservabilityPanel"],
-    detail: "Het eindantwoord wordt gerenderd in de juiste rol-view. Student ziet tekst + voortgang, docent ziet EAIAnalysis, admin ziet observability metrics.",
+    modules: ["MessageBubble render", "EAIAnalysis badge", "LeskaartPanel update", "ObservabilityPanel", "[BEELD:] tag → image gen"],
+    whatHappens: "Je ziet het antwoord. Als de AI een [BEELD:] tag heeft geplaatst, wordt er automatisch een afbeelding gegenereerd.",
+    detail: "Het eindantwoord wordt gerenderd in de juiste rol-view. Leerling ziet tekst + voortgang, docent ziet EAIAnalysis, admin ziet observability metrics. [BEELD:] tags worden gedetecteerd en triggeren automatische beeldgeneratie.",
     machine: "DISPLAY",
     pipes: ["left"],
   },
@@ -155,6 +174,7 @@ function useParticles(count: number, speed: number): Particle[] {
 
 const FactoryDiagram = () => {
   const [active, setActive] = useState<number | null>(null);
+  const [showTechnical, setShowTechnical] = useState(false);
   const [tick, setTick] = useState(0);
   const particles = useParticles(28, 0.9);
 
@@ -163,6 +183,11 @@ const FactoryDiagram = () => {
     return () => clearInterval(id);
   }, []);
 
+  // Reset technical view when switching stations
+  useEffect(() => {
+    setShowTechnical(false);
+  }, [active]);
+
   const af = active !== null ? STATIONS[active] : null;
 
   return (
@@ -170,7 +195,7 @@ const FactoryDiagram = () => {
       {/* Header */}
       <div className="text-center py-3">
         <div className="text-[9px] tracking-[5px] text-primary/40 mb-1">
-          PRODUCTIELIJN · DWARSDOORSNEDE · v15.0.0
+          PRODUCTIELIJN · DWARSDOORSNEDE
         </div>
         <div className="text-2xl font-bold tracking-wider text-foreground">
           EAI<span className="text-primary">HUB</span>
@@ -422,21 +447,43 @@ const FactoryDiagram = () => {
       }`}>
         {af ? (
           <>
-            <div className="flex items-baseline gap-3 mb-2">
+            <div className="flex items-baseline gap-3 mb-3">
               <span className="text-sm font-bold tracking-widest" style={{ color: af.color }}>{af.label}</span>
               <span className="text-[9px] text-muted-foreground/50 tracking-wider">{af.sublabel}</span>
               <span onClick={() => setActive(null)} className="ml-auto text-[9px] text-muted-foreground/40 cursor-pointer tracking-wider hover:text-muted-foreground transition-colors">
                 SLUIT
               </span>
             </div>
-            <p className="text-[11px] text-muted-foreground leading-relaxed tracking-wide mb-2">{af.detail}</p>
-            <div className="flex flex-wrap gap-1.5">
-              {af.modules.map(m => (
-                <span key={m} className="px-2.5 py-1 rounded text-[9.5px] font-mono border border-border/50 bg-secondary/30 text-muted-foreground">
-                  {m}
-                </span>
-              ))}
-            </div>
+            
+            {/* whatHappens — always visible, plain language */}
+            <p className="text-xs text-foreground/80 leading-relaxed mb-3">{af.whatHappens}</p>
+            
+            {/* Technical details — toggle */}
+            {!showTechnical ? (
+              <button 
+                onClick={(e) => { e.stopPropagation(); setShowTechnical(true); }}
+                className="text-[10px] text-primary/60 hover:text-primary tracking-wider uppercase cursor-pointer transition-colors"
+              >
+                ▸ Technisch detail
+              </button>
+            ) : (
+              <div className="space-y-2 animate-in fade-in duration-200">
+                <p className="text-[11px] text-muted-foreground leading-relaxed tracking-wide">{af.detail}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {af.modules.map(m => (
+                    <span key={m} className="px-2.5 py-1 rounded text-[9.5px] font-mono border border-border/50 bg-secondary/30 text-muted-foreground">
+                      {m}
+                    </span>
+                  ))}
+                </div>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setShowTechnical(false); }}
+                  className="text-[10px] text-muted-foreground/40 hover:text-muted-foreground tracking-wider uppercase cursor-pointer transition-colors"
+                >
+                  ▾ Verberg
+                </button>
+              </div>
+            )}
           </>
         ) : (
           <div className="text-muted-foreground/30 text-[10px] tracking-widest text-center pt-5">

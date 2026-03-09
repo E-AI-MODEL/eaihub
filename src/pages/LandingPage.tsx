@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, BarChart3, ShieldCheck } from 'lucide-react';
+import FactoryDiagram from '@/components/FactoryDiagram';
 
 const LandingPage = () => {
   return (
@@ -183,6 +184,29 @@ const LandingPage = () => {
                     Open Admin <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
                   </div>
                 </article>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* FACTORY DIAGRAM SECTION */}
+        <section className="py-12 sm:py-24 px-4 sm:px-6 bg-card/30 border-t border-border/50" aria-labelledby="factory-title">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 id="factory-title" className="text-2xl sm:text-4xl font-bold tracking-tight text-foreground mb-4">
+                Hoe verwerkt EAI Hub jouw bericht?
+              </h2>
+              <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                Elk bericht doorloopt 8 stations — van invoer tot didactisch verantwoord antwoord. Klik op een station om te zien wat er gebeurt.
+              </p>
+            </div>
+            <FactoryDiagram />
+            <div className="text-center mt-8">
+              <Link 
+                to="/concept" 
+                className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
+              >
+                Meer weten over de architectuur? <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
               </Link>
             </div>
           </div>
