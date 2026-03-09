@@ -35,11 +35,30 @@ const TeacherCockpit = () => {
     return unsub;
   }, []);
 
-  // When a session is selected, fetch its teacher messages + chat log
+  // When a session is selected: fetch + subscribe live
   useEffect(() => {
-    if (!selectedSession) { setSentMessages([]); setChatLog([]); return; }
+    if (!selectedSession) {
+      setSentMessages([]);
+      setChatLog([]);
+      return;
+    }
+
+    // Initiële fetch
     fetchMessagesForSession(selectedSession.session_id).then(setSentMessages);
-    fetchChatMessages(selectedSession.session_id).then(setChatLog).catch(() => setChatLog([]));
+    fetchChatMessages(selectedSession.session_id)
+      .then(setChatLog)
+      .catch((e) => {
+        console.error('[TeacherCockpit] fetchChatMessages error:', e);
+        setChatLog([]);
+      });
+
+    // Live subscription: elke nieuwe INSERT direct appenden
+    const unsubChat = subscribeToChatMessages(
+      selectedSession.session_id,
+      (msg) => setChatLog(prev => [...prev, msg])
+    );
+
+    return unsubChat; // cleanup bij sessie-wissel of unmount
   }, [selectedSession?.session_id]);
 
   const handleSendMessage = useCallback(async () => {
