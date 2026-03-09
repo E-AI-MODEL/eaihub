@@ -104,6 +104,43 @@ export async function fetchTeacherMessages(sessionId: string): Promise<TeacherMe
   return (data || []) as TeacherMessage[];
 }
 
+// ═══════════════════════════════════════════════════
+// TEACHER SIDE: Subscribe to chat messages (live)
+// ═══════════════════════════════════════════════════
+
+export interface ChatMessageRow {
+  id: string;
+  session_id: string;
+  role: string;
+  content: string;
+  analysis: any;
+  mechanical: any;
+  created_at: string;
+}
+
+export function subscribeToChatMessages(
+  sessionId: string,
+  onInsert: (msg: ChatMessageRow) => void
+) {
+  const channel = supabase
+    .channel(`chat-msgs-${sessionId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_messages',
+        filter: `session_id=eq.${sessionId}`,
+      },
+      (payload) => {
+        onInsert(payload.new as ChatMessageRow);
+      }
+    )
+    .subscribe();
+
+  return () => { supabase.removeChannel(channel); };
+}
+
 export async function markMessageRead(messageId: string) {
   await supabase
     .from('teacher_messages')
