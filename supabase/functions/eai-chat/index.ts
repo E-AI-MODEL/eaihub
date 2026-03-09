@@ -104,17 +104,16 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await authSupabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
-      console.error("[EAI Chat] JWT validation failed:", claimsError);
+    const { data: { user }, error: userError } = await authSupabase.auth.getUser();
+    if (userError || !user) {
+      console.error("[EAI Chat] JWT validation failed:", userError);
       return new Response(
         JSON.stringify({ error: "Unauthorized: ongeldig token" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const authenticatedUserId = claimsData.claims.sub;
+    const authenticatedUserId = user.id;
     console.log(`[EAI Chat] Authenticated user: ${authenticatedUserId}`);
 
     const { sessionId, userId, message, profile, systemPrompt, history = [], taskType = "chat", curriculumContext }: ChatRequest = await req.json();

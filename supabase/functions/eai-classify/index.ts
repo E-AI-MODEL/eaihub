@@ -128,17 +128,16 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await authSupabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
-      console.error("[eai-classify] JWT validation failed:", claimsError);
+    const { data: { user }, error: userError } = await authSupabase.auth.getUser();
+    if (userError || !user) {
+      console.error("[eai-classify] JWT validation failed:", userError);
       return new Response(
         JSON.stringify({ error: "Unauthorized: ongeldig token" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`[eai-classify] Authenticated user: ${claimsData.claims.sub}`);
+    console.log(`[eai-classify] Authenticated user: ${user.id}`);
 
     const { userMessage, aiResponse, profile, sessionContext }: ClassifyRequest = await req.json();
 
