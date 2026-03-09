@@ -174,7 +174,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   const resetInteraction = () => { lastInteractionRef.current = Date.now(); nudgeLevelRef.current = 0; };
 
-  const handleSend = async (textOverride?: string) => {
+  const handleSend = useCallback(async (textOverride?: string) => {
     const textToSend = textOverride || input.trim();
     if (textToSend === 'GAME_NEURO') return;
     if (!textToSend || isLoading) return;
@@ -208,7 +208,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       setIsLoading(false);
       resetInteraction();
     }
-  };
+  }, [input, isLoading, profile, sessionId, userId, onAnalysisUpdate]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
