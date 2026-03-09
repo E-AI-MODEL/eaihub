@@ -575,7 +575,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     EITL staat voor <strong className="text-foreground">Education In The Loop</strong>: het onderwijs — de docent, de didactiek, de schoolvisie — blijft altijd in de beslislus van het systeem, niet de AI. De SSOT (Single Source of Truth) vormt de didactische basis: een wetenschappelijk onderbouwd model dat bepaalt hoe het systeem reageert op leerlinggedrag. Maar wij begrijpen dat elke school een eigen context heeft — een eigen visie, curriculum en pedagogische aanpak. Daarom is er bewust ruimte ingebouwd via het plugin-systeem: scholen kunnen het didactisch model annoteren en aanpassen aan hun specifieke situatie, zonder de wetenschappelijke kern te breken.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: whitelistMerge-strategie, Zod-validatie, EITL Wizard met vrije navigatie. Plugin annoteert, maar herdefinieert niet.
                   </p>
                 </AccordionContent>
