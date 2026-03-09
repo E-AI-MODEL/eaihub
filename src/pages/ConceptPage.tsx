@@ -611,7 +611,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     Een didactisch systeem dat je niet kunt monitoren, kun je niet vertrouwen. EAI Hub biedt <strong className="text-foreground">real-time monitoring</strong> van systeemgezondheid: hoe vaak corrigeert het systeem zichzelf (healing), hoe vaak worden didactische grenzen overschreden (breach rate), en is de AI-gateway bereikbaar? Deze signalen worden gevisualiseerd in trending-grafieken, zodat beheerders proactief kunnen ingrijpen in plaats van reactief.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: trending-grafieken voor healing totaalsignaal, breach rate tracking, gateway reachability checks.
                   </p>
                 </AccordionContent>
