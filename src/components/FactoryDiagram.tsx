@@ -166,7 +166,7 @@ function useParticles(count: number, speed: number): Particle[] {
   return particles;
 }
 
-const FactoryDiagram = () => {
+const FactoryDiagram = React.forwardRef<HTMLDivElement>((_, ref) => {
   const [active, setActive] = useState<number | null>(null);
   const [showTechnical, setShowTechnical] = useState(false);
   const [tick, setTick] = useState(0);
