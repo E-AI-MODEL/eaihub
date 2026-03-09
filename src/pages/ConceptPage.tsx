@@ -24,6 +24,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import FactoryDiagram from '@/components/FactoryDiagram';
 
 const ConceptPage = () => {
   const dimensions = useMemo(() => getDimensionsForUI(), []);
@@ -502,7 +503,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     Standaard AI-systemen sturen een vraag naar een LLM en geven het antwoord direct terug — zonder te controleren wat de leerling eigenlijk bedoelt. EAI Hub werkt anders: elke leerling-input doorloopt een <strong className="text-foreground">tweestaps-analyse</strong>. Eerst classificeert een snelle edge-functie de input op 10 didactische dimensies (zoals zelfregulatieniveau, misconcepties en kennisniveau). Daarna controleert de reliabilityPipeline of die classificatie klopt, en corrigeert waar nodig. Pas daarna wordt een respons gegenereerd — op basis van bewezen didactiek, niet op basis van gokken.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: edge-classify → reliabilityPipeline.ts → analysisSource tag op elk bericht.
                   </p>
                 </AccordionContent>
@@ -520,7 +521,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     Niet elke leerling-input is eenduidig te classificeren. Daarom geeft het systeem een <strong className="text-foreground">betrouwbaarheidsscore</strong> mee bij elke classificatie. Twijfelgevallen — wanneer een antwoord op de grens zit tussen twee niveaus — worden expliciet als 'borderline' gemarkeerd. In die gevallen reageert het systeem voorzichtiger: het stelt een verduidelijkende vraag in plaats van een aanname te doen. Zo voorkomt EAI Hub dat een leerling onterecht wordt ingeschaald en verkeerde begeleiding krijgt.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: confidence levels, knowledge_type K0-K3, borderline-detectie.
                   </p>
                 </AccordionContent>
@@ -538,7 +539,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     Dezelfde leersessie wordt vanuit <strong className="text-foreground">drie perspectieven</strong> zichtbaar gemaakt. De leerling ziet een leskaart: een visueel overzicht van waar hij staat en wat de volgende stap is. De docent ziet voortgang, patronen en kan didactische interventies sturen. De beheerder ziet systeemstatus, analyse-kwaliteit en technische gezondheid. Ieder ziet precies wat relevant is voor zijn rol — niet meer, niet minder.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: rolgebaseerde UI met leskaart-panel, docent-cockpit en admin-dashboard.
                   </p>
                 </AccordionContent>
@@ -556,7 +557,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     Toegangscontrole is niet optioneel — het is een kernonderdeel van het systeem. EAI Hub werkt met <strong className="text-foreground">vier rollen</strong> (Leerling, Docent, Admin, Superuser), elk met strikt afgebakende rechten. Rollen worden niet in de browser bepaald (wat makkelijk te manipuleren is), maar <strong className="text-foreground">server-side gevalideerd</strong> op elke database-operatie. Een leerling kan nooit bij docentdata, een docent nooit bij admin-functies. Dit is niet alleen privacy, maar ook didactische integriteit.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: RBAC via user_roles tabel, RLS policies op elke tabel, has_role() security definer functie.
                   </p>
                 </AccordionContent>
@@ -574,7 +575,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     EITL staat voor <strong className="text-foreground">Education In The Loop</strong>: het onderwijs — de docent, de didactiek, de schoolvisie — blijft altijd in de beslislus van het systeem, niet de AI. De SSOT (Single Source of Truth) vormt de didactische basis: een wetenschappelijk onderbouwd model dat bepaalt hoe het systeem reageert op leerlinggedrag. Maar wij begrijpen dat elke school een eigen context heeft — een eigen visie, curriculum en pedagogische aanpak. Daarom is er bewust ruimte ingebouwd via het plugin-systeem: scholen kunnen het didactisch model annoteren en aanpassen aan hun specifieke situatie, zonder de wetenschappelijke kern te breken.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: whitelistMerge-strategie, Zod-validatie, EITL Wizard met vrije navigatie. Plugin annoteert, maar herdefinieert niet.
                   </p>
                 </AccordionContent>
@@ -592,7 +593,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     Transparantie en verantwoording zijn essentieel wanneer AI in het onderwijs wordt ingezet. Elke wijziging aan het didactisch model wordt <strong className="text-foreground">gelogd met wie, wanneer en waarom</strong>. Rollback naar eerdere versies is altijd mogelijk, zodat een fout nooit definitief is. Dit geeft schoolbesturen en docenten de zekerheid dat het systeem controleerbaar en auditeerbaar is — geen black box, maar een open boek.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: ssot_changes audit log, versioning met hash-verificatie, rollback via admin panel.
                   </p>
                 </AccordionContent>
@@ -610,7 +611,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     Een didactisch systeem dat je niet kunt monitoren, kun je niet vertrouwen. EAI Hub biedt <strong className="text-foreground">real-time monitoring</strong> van systeemgezondheid: hoe vaak corrigeert het systeem zichzelf (healing), hoe vaak worden didactische grenzen overschreden (breach rate), en is de AI-gateway bereikbaar? Deze signalen worden gevisualiseerd in trending-grafieken, zodat beheerders proactief kunnen ingrijpen in plaats van reactief.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: trending-grafieken voor healing totaalsignaal, breach rate tracking, gateway reachability checks.
                   </p>
                 </AccordionContent>
@@ -628,7 +629,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     De LLM haalt informatie uit twee bronnen: <strong className="text-foreground">lokale opslag</strong> (LocalStorage) voor de lopende sessie, en de <strong className="text-foreground">backend</strong> voor langetermijndata. Dit is bewust afgekeken van hoe het menselijk geheugen werkt. Lokaal = snel, direct, in het moment — vergelijkbaar met het kortetermijngeheugen. Backend = persistent, deelbaar, over sessies heen — vergelijkbaar met het langetermijngeheugen. Door deze samenwerking voert de LLM snellere en vloeiendere gesprekken, zonder context te verliezen wanneer een leerling terugkomt na een pauze of op een ander moment verder werkt.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: LocalStorage voor sessie-state en eaiState, backend sync via student_sessions en chat_messages tabellen.
                   </p>
                 </AccordionContent>
@@ -646,8 +647,27 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     Image-generatie is toegevoegd in deze update. Visuele ondersteuning wordt <strong className="text-foreground">alleen actief ingezet wanneer het onderliggende model dit ondersteunt</strong> én wanneer een afbeelding het leren aantoonbaar versterkt — bijvoorbeeld bij biologische structuren, wiskundige grafieken of ruimtelijke concepten. Het systeem genereert geen plaatjes 'omdat het kan', maar omdat het de leerstap visueel verduidelijkt.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: conditionele image-generatie op basis van modelcapabiliteit en didactische relevantie.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* 10. Productielijn — dwarsdoorsnede */}
+              <AccordionItem value="item-10" className="rounded-xl border border-border bg-card px-5">
+                <AccordionTrigger className="hover:no-underline py-4">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">10</span>
+                    <h3 className="font-semibold text-foreground text-left">Productielijn — dwarsdoorsnede</h3>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pb-5">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Geen gestapeld gebouw, maar een <strong className="text-foreground">fabriek van opzij doorgezaagd</strong>: een lange hal met machines naast elkaar, transportbanden tussen de stations, en alles zichtbaar als je er dwars doorheen kijkt. Eén productielijn van links (gebruikersinput) naar rechts (eindantwoord). Klik op een station voor details.
+                  </p>
+                  <FactoryDiagram />
+                  <p className="text-[11px] text-muted-foreground/70 italic mt-3">
+                    Technisch: 8 stations representeren de volledige request-response cyclus — van sendMessage() tot MessageBubble render.
                   </p>
                 </AccordionContent>
               </AccordionItem>
