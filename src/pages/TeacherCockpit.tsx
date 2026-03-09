@@ -16,6 +16,8 @@ import { getDimensionColors } from '@/utils/ssotHelpers';
 import { getShortKey, getRubric, getCycleOrder } from '@/data/ssot';
 import type { EAIAnalysis, MechanicalState } from '@/types';
 import type { EAIStateLike } from '@/utils/eaiLearnAdapter';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/hooks/use-toast';
 
 const TeacherCockpit = () => {
   const navigate = useNavigate();
