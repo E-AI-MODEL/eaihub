@@ -557,7 +557,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     Toegangscontrole is niet optioneel — het is een kernonderdeel van het systeem. EAI Hub werkt met <strong className="text-foreground">vier rollen</strong> (Leerling, Docent, Admin, Superuser), elk met strikt afgebakende rechten. Rollen worden niet in de browser bepaald (wat makkelijk te manipuleren is), maar <strong className="text-foreground">server-side gevalideerd</strong> op elke database-operatie. Een leerling kan nooit bij docentdata, een docent nooit bij admin-functies. Dit is niet alleen privacy, maar ook didactische integriteit.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: RBAC via user_roles tabel, RLS policies op elke tabel, has_role() security definer functie.
                   </p>
                 </AccordionContent>
