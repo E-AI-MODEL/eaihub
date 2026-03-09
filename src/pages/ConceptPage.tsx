@@ -521,7 +521,7 @@ const ConceptPage = () => {
                   <p className="text-sm text-muted-foreground mb-2">
                     Niet elke leerling-input is eenduidig te classificeren. Daarom geeft het systeem een <strong className="text-foreground">betrouwbaarheidsscore</strong> mee bij elke classificatie. Twijfelgevallen — wanneer een antwoord op de grens zit tussen twee niveaus — worden expliciet als 'borderline' gemarkeerd. In die gevallen reageert het systeem voorzichtiger: het stelt een verduidelijkende vraag in plaats van een aanname te doen. Zo voorkomt EAI Hub dat een leerling onterecht wordt ingeschaald en verkeerde begeleiding krijgt.
                   </p>
-                  <p className="text-[10px] text-muted-foreground/50 italic">
+                  <p className="text-[11px] text-muted-foreground/70 italic">
                     Technisch: confidence levels, knowledge_type K0-K3, borderline-detectie.
                   </p>
                 </AccordionContent>
