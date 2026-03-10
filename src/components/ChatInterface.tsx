@@ -10,6 +10,7 @@ import { pushTrace } from '@/lib/reliabilityPipeline';
 import { getNodeById } from '@/data/curriculum';
 import { upsertSessionState, subscribeToTeacherMessages, fetchTeacherMessages, markMessageRead } from '@/services/sessionSyncService';
 import { getActivePlugin } from '@/lib/ssotRuntime';
+import { fetchChatMessages } from '@/services/adminDbService';
 
 interface ChatInterfaceProps {
   profile: LearnerProfile;
@@ -20,6 +21,7 @@ interface ChatInterfaceProps {
   currentAnalysis?: EAIAnalysis | null;
   currentMechanical?: MechanicalState | null;
   eaiState?: any;
+  onResetSession?: () => void;
 }
 
 // Idle nudge messages by escalation level
@@ -50,10 +52,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   currentAnalysis,
   currentMechanical,
   eaiState,
+  onResetSession,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const [syncPulse, setSyncPulse] = useState(false);
   const [internalSessionId] = useState(() => `session_${crypto.randomUUID()}`);
   const sessionId = externalSessionId || internalSessionId;
@@ -74,6 +78,30 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   }, []);
 
   useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
+
+  // ═══ LOAD EXISTING CHAT HISTORY from DB on mount ═══
+  useEffect(() => {
+    if (historyLoaded) return;
+    fetchChatMessages(sessionId).then(rows => {
+      if (rows.length > 0) {
+        const loaded: Message[] = rows.map(r => ({
+          id: r.id,
+          role: r.role === 'user' ? 'user' as const : 'model' as const,
+          text: r.content,
+          timestamp: new Date(r.created_at),
+          analysis: r.analysis as unknown as EAIAnalysis | undefined,
+          mechanical: r.mechanical as unknown as MechanicalState | undefined,
+        }));
+        setMessages(loaded);
+        // Restore latest analysis to parent
+        const lastModel = [...loaded].reverse().find(m => m.role === 'model' && m.analysis);
+        if (lastModel?.analysis && onAnalysisUpdate) {
+          onAnalysisUpdate(lastModel.analysis, lastModel.mechanical);
+        }
+      }
+      setHistoryLoaded(true);
+    }).catch(() => setHistoryLoaded(true));
+  }, [sessionId, historyLoaded]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -221,7 +249,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     el.style.height = Math.min(el.scrollHeight, 120) + 'px';
   };
 
-  const handleClearChat = () => { setMessages([]); nudgeLevelRef.current = 0; analysisRef.current = null; };
+  const handleClearChat = () => {
+    setMessages([]);
+    nudgeLevelRef.current = 0;
+    analysisRef.current = null;
+    setHistoryLoaded(false);
+    onResetSession?.();
+  };
 
   return (
     <div className="flex flex-col h-full bg-slate-950">
@@ -229,8 +263,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           CHAT WELL — Scrollable work area with grid background
           ═══════════════════════════════════════════════════════════ */}
       <div className="flex-1 overflow-y-auto px-4 lg:px-6 py-4">
-        {messages.length === 0 ? (
-          /* Empty State */
+        {messages.length === 0 && !isLoading ? (
           <div className="h-full flex flex-col items-center justify-center">
             <div className="text-center max-w-lg">
               {/* EAI Monogram */}

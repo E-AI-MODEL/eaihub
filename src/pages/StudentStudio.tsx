@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ChatInterface } from '@/components/ChatInterface';
 import Dashboard from '@/components/Dashboard';
 import ProfileSetup from '@/components/ProfileSetup';
@@ -21,6 +21,26 @@ import type { LearnerProfile, EAIAnalysis, MechanicalState, Message } from '@/ty
 type AppPhase = 'BOOT' | 'PROFILE_SETUP' | 'READY';
 type MobileTab = 'leskaart' | 'chat' | 'analyse';
 
+/** Get or create a stable sessionId per user per day */
+function getStableSessionId(userId: string): string {
+  const dateKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const storageKey = `eai_session_${userId}_${dateKey}`;
+  const existing = localStorage.getItem(storageKey);
+  if (existing) return existing;
+  const newId = `session_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  localStorage.setItem(storageKey, newId);
+  return newId;
+}
+
+/** Reset sessionId — creates a fresh one for today */
+function resetSessionId(userId: string): string {
+  const dateKey = new Date().toISOString().slice(0, 10);
+  const storageKey = `eai_session_${userId}_${dateKey}`;
+  const newId = `session_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  localStorage.setItem(storageKey, newId);
+  return newId;
+}
+
 const StudentStudio: React.FC = () => {
   const [phase, setPhase] = useState<AppPhase>('BOOT');
   const [profile, setProfile] = useState<LearnerProfile | null>(null);
@@ -33,7 +53,6 @@ const StudentStudio: React.FC = () => {
   const [showTechReport, setShowTechReport] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(16).slice(2)}`);
   const [sessionStartTime] = useState(() => Date.now());
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [mobileTab, setMobileTab] = useState<MobileTab>('chat');
@@ -51,6 +70,16 @@ const StudentStudio: React.FC = () => {
 
   const { user } = useAuth();
   const userId = user?.id || getOrCreateUserId();
+  const [sessionId, setSessionId] = useState(() => getStableSessionId(userId));
+
+  const handleResetSession = useCallback(() => {
+    const newId = resetSessionId(userId);
+    setSessionId(newId);
+    setMessages([]);
+    setCurrentAnalysis(null);
+    setCurrentMechanical(null);
+    setEaiState(createInitialEAIState());
+  }, [userId]);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -133,30 +162,35 @@ const StudentStudio: React.FC = () => {
           compact
         />
 
-        {/* Tab Content */}
-        <div className="flex-1 overflow-hidden">
-          {mobileTab === 'leskaart' && profile && (
-            <LeskaartPanel
-              profile={profile}
-              analysis={currentAnalysis}
-              onNodeChange={handleNodeChange}
-              onSendCommand={handleSendCommand}
-              sessionStartTime={sessionStartTime}
-            />
-          )}
-          {mobileTab === 'chat' && profile && (
-            <ChatInterface
-              profile={profile}
-              onAnalysisUpdate={handleAnalysisUpdate}
-              sessionId={sessionId}
-              pendingCommand={pendingCommand}
-              onCommandConsumed={() => setPendingCommand(null)}
-              currentAnalysis={currentAnalysis}
-              currentMechanical={currentMechanical}
-              eaiState={eaiState}
-            />
-          )}
-          {mobileTab === 'analyse' && (
+        {/* Tab Content — all panels stay mounted, hidden via CSS */}
+        <div className="flex-1 overflow-hidden relative">
+          <div className={mobileTab === 'leskaart' ? 'h-full' : 'hidden'}>
+            {profile && (
+              <LeskaartPanel
+                profile={profile}
+                analysis={currentAnalysis}
+                onNodeChange={handleNodeChange}
+                onSendCommand={handleSendCommand}
+                sessionStartTime={sessionStartTime}
+              />
+            )}
+          </div>
+          <div className={mobileTab === 'chat' ? 'h-full' : 'hidden'}>
+            {profile && (
+              <ChatInterface
+                profile={profile}
+                onAnalysisUpdate={handleAnalysisUpdate}
+                sessionId={sessionId}
+                pendingCommand={pendingCommand}
+                onCommandConsumed={() => setPendingCommand(null)}
+                currentAnalysis={currentAnalysis}
+                currentMechanical={currentMechanical}
+                eaiState={eaiState}
+                onResetSession={handleResetSession}
+              />
+            )}
+          </div>
+          <div className={mobileTab === 'analyse' ? 'h-full' : 'hidden'}>
             <Dashboard
               analysis={currentAnalysis}
               mechanical={currentMechanical}
@@ -168,7 +202,7 @@ const StudentStudio: React.FC = () => {
               onEditProfile={() => setShowProfileEdit(true)}
               inline
             />
-          )}
+          </div>
         </div>
 
         {/* Tab Bar — 48px */}
@@ -254,6 +288,7 @@ const StudentStudio: React.FC = () => {
                   currentAnalysis={currentAnalysis}
                   currentMechanical={currentMechanical}
                   eaiState={eaiState}
+                  onResetSession={handleResetSession}
                 />
               )}
             </div>
