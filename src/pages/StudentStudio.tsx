@@ -162,30 +162,35 @@ const StudentStudio: React.FC = () => {
           compact
         />
 
-        {/* Tab Content */}
-        <div className="flex-1 overflow-hidden">
-          {mobileTab === 'leskaart' && profile && (
-            <LeskaartPanel
-              profile={profile}
-              analysis={currentAnalysis}
-              onNodeChange={handleNodeChange}
-              onSendCommand={handleSendCommand}
-              sessionStartTime={sessionStartTime}
-            />
-          )}
-          {mobileTab === 'chat' && profile && (
-            <ChatInterface
-              profile={profile}
-              onAnalysisUpdate={handleAnalysisUpdate}
-              sessionId={sessionId}
-              pendingCommand={pendingCommand}
-              onCommandConsumed={() => setPendingCommand(null)}
-              currentAnalysis={currentAnalysis}
-              currentMechanical={currentMechanical}
-              eaiState={eaiState}
-            />
-          )}
-          {mobileTab === 'analyse' && (
+        {/* Tab Content — all panels stay mounted, hidden via CSS */}
+        <div className="flex-1 overflow-hidden relative">
+          <div className={mobileTab === 'leskaart' ? 'h-full' : 'hidden'}>
+            {profile && (
+              <LeskaartPanel
+                profile={profile}
+                analysis={currentAnalysis}
+                onNodeChange={handleNodeChange}
+                onSendCommand={handleSendCommand}
+                sessionStartTime={sessionStartTime}
+              />
+            )}
+          </div>
+          <div className={mobileTab === 'chat' ? 'h-full' : 'hidden'}>
+            {profile && (
+              <ChatInterface
+                profile={profile}
+                onAnalysisUpdate={handleAnalysisUpdate}
+                sessionId={sessionId}
+                pendingCommand={pendingCommand}
+                onCommandConsumed={() => setPendingCommand(null)}
+                currentAnalysis={currentAnalysis}
+                currentMechanical={currentMechanical}
+                eaiState={eaiState}
+                onResetSession={handleResetSession}
+              />
+            )}
+          </div>
+          <div className={mobileTab === 'analyse' ? 'h-full' : 'hidden'}>
             <Dashboard
               analysis={currentAnalysis}
               mechanical={currentMechanical}
@@ -197,7 +202,7 @@ const StudentStudio: React.FC = () => {
               onEditProfile={() => setShowProfileEdit(true)}
               inline
             />
-          )}
+          </div>
         </div>
 
         {/* Tab Bar — 48px */}
