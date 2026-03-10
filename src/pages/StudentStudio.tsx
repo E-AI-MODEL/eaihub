@@ -21,6 +21,26 @@ import type { LearnerProfile, EAIAnalysis, MechanicalState, Message } from '@/ty
 type AppPhase = 'BOOT' | 'PROFILE_SETUP' | 'READY';
 type MobileTab = 'leskaart' | 'chat' | 'analyse';
 
+/** Get or create a stable sessionId per user per day */
+function getStableSessionId(userId: string): string {
+  const dateKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const storageKey = `eai_session_${userId}_${dateKey}`;
+  const existing = localStorage.getItem(storageKey);
+  if (existing) return existing;
+  const newId = `session_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  localStorage.setItem(storageKey, newId);
+  return newId;
+}
+
+/** Reset sessionId — creates a fresh one for today */
+function resetSessionId(userId: string): string {
+  const dateKey = new Date().toISOString().slice(0, 10);
+  const storageKey = `eai_session_${userId}_${dateKey}`;
+  const newId = `session_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  localStorage.setItem(storageKey, newId);
+  return newId;
+}
+
 const StudentStudio: React.FC = () => {
   const [phase, setPhase] = useState<AppPhase>('BOOT');
   const [profile, setProfile] = useState<LearnerProfile | null>(null);
@@ -33,7 +53,6 @@ const StudentStudio: React.FC = () => {
   const [showTechReport, setShowTechReport] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(16).slice(2)}`);
   const [sessionStartTime] = useState(() => Date.now());
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [mobileTab, setMobileTab] = useState<MobileTab>('chat');
