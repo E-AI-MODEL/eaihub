@@ -263,8 +263,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           CHAT WELL — Scrollable work area with grid background
           ═══════════════════════════════════════════════════════════ */}
       <div className="flex-1 overflow-y-auto px-4 lg:px-6 py-4">
-        {messages.length === 0 ? (
-          /* Empty State */
+        {messages.length === 0 && !isLoading ? (
           <div className="h-full flex flex-col items-center justify-center">
             <div className="text-center max-w-lg">
               {/* EAI Monogram */}
