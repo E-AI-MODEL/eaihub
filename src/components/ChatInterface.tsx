@@ -10,6 +10,7 @@ import { pushTrace } from '@/lib/reliabilityPipeline';
 import { getNodeById } from '@/data/curriculum';
 import { upsertSessionState, subscribeToTeacherMessages, fetchTeacherMessages, markMessageRead } from '@/services/sessionSyncService';
 import { getActivePlugin } from '@/lib/ssotRuntime';
+import { fetchChatMessages } from '@/services/adminDbService';
 
 interface ChatInterfaceProps {
   profile: LearnerProfile;
