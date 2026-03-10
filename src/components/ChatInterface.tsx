@@ -89,8 +89,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           role: r.role === 'user' ? 'user' as const : 'model' as const,
           text: r.content,
           timestamp: new Date(r.created_at),
-          analysis: r.analysis as EAIAnalysis | undefined,
-          mechanical: r.mechanical as MechanicalState | undefined,
+          analysis: r.analysis as unknown as EAIAnalysis | undefined,
+          mechanical: r.mechanical as unknown as MechanicalState | undefined,
         }));
         setMessages(loaded);
         // Restore latest analysis to parent
