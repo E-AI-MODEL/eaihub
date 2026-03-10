@@ -79,6 +79,30 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
 
+  // ═══ LOAD EXISTING CHAT HISTORY from DB on mount ═══
+  useEffect(() => {
+    if (historyLoaded) return;
+    fetchChatMessages(sessionId).then(rows => {
+      if (rows.length > 0) {
+        const loaded: Message[] = rows.map(r => ({
+          id: r.id,
+          role: r.role === 'user' ? 'user' as const : 'model' as const,
+          text: r.content,
+          timestamp: new Date(r.created_at),
+          analysis: r.analysis as EAIAnalysis | undefined,
+          mechanical: r.mechanical as MechanicalState | undefined,
+        }));
+        setMessages(loaded);
+        // Restore latest analysis to parent
+        const lastModel = [...loaded].reverse().find(m => m.role === 'model' && m.analysis);
+        if (lastModel?.analysis && onAnalysisUpdate) {
+          onAnalysisUpdate(lastModel.analysis, lastModel.mechanical);
+        }
+      }
+      setHistoryLoaded(true);
+    }).catch(() => setHistoryLoaded(true));
+  }, [sessionId, historyLoaded]);
+
   useEffect(() => {
     if (messages.length > 0) {
       const lastModelMsg = [...messages].reverse().find(m => m.role === 'model' && m.analysis);
