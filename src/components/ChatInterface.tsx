@@ -249,7 +249,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     el.style.height = Math.min(el.scrollHeight, 120) + 'px';
   };
 
-  const handleClearChat = () => { setMessages([]); nudgeLevelRef.current = 0; analysisRef.current = null; };
+  const handleClearChat = () => {
+    setMessages([]);
+    nudgeLevelRef.current = 0;
+    analysisRef.current = null;
+    setHistoryLoaded(false);
+    onResetSession?.();
+  };
 
   return (
     <div className="flex flex-col h-full bg-slate-950">
