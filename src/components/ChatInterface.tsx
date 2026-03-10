@@ -20,6 +20,7 @@ interface ChatInterfaceProps {
   currentAnalysis?: EAIAnalysis | null;
   currentMechanical?: MechanicalState | null;
   eaiState?: any;
+  onResetSession?: () => void;
 }
 
 // Idle nudge messages by escalation level
