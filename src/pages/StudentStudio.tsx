@@ -70,6 +70,16 @@ const StudentStudio: React.FC = () => {
 
   const { user } = useAuth();
   const userId = user?.id || getOrCreateUserId();
+  const [sessionId, setSessionId] = useState(() => getStableSessionId(userId));
+
+  const handleResetSession = useCallback(() => {
+    const newId = resetSessionId(userId);
+    setSessionId(newId);
+    setMessages([]);
+    setCurrentAnalysis(null);
+    setCurrentMechanical(null);
+    setEaiState(createInitialEAIState());
+  }, [userId]);
 
   useEffect(() => {
     const loadProfile = async () => {
