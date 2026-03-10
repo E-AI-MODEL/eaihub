@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ChatInterface } from '@/components/ChatInterface';
 import Dashboard from '@/components/Dashboard';
 import ProfileSetup from '@/components/ProfileSetup';
