@@ -288,6 +288,7 @@ const StudentStudio: React.FC = () => {
                   currentAnalysis={currentAnalysis}
                   currentMechanical={currentMechanical}
                   eaiState={eaiState}
+                  onResetSession={handleResetSession}
                 />
               )}
             </div>

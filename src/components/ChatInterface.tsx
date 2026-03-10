@@ -51,10 +51,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   currentAnalysis,
   currentMechanical,
   eaiState,
+  onResetSession,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const [syncPulse, setSyncPulse] = useState(false);
   const [internalSessionId] = useState(() => `session_${crypto.randomUUID()}`);
   const sessionId = externalSessionId || internalSessionId;
