@@ -12,6 +12,8 @@ import { upsertSessionState, subscribeToTeacherMessages, fetchTeacherMessages, m
 import { getActivePlugin } from '@/lib/ssotRuntime';
 import { fetchChatMessages } from '@/services/adminDbService';
 
+import type { WorkMode } from '@/services/sessionSyncService';
+
 interface ChatInterfaceProps {
   profile: LearnerProfile;
   onAnalysisUpdate?: (analysis: EAIAnalysis, mechanical?: MechanicalState) => void;
@@ -22,6 +24,7 @@ interface ChatInterfaceProps {
   currentMechanical?: MechanicalState | null;
   eaiState?: any;
   onResetSession?: () => void;
+  workMode?: WorkMode;
 }
 
 // Idle nudge messages by escalation level
