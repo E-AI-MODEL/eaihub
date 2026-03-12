@@ -263,7 +263,7 @@ const AdminUsersTab: React.FC = () => {
               </div>
             </div>
 
-            <SectionLabel>Rollen</SectionLabel>
+            <SectionLabel icon={<Shield className="w-3 h-3 text-primary" />} label="Rollen" />
             <div className="flex flex-wrap gap-2">
               {selectedUser.roles.map(role => {
                 const meta = ROLE_META[role];
