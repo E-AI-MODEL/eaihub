@@ -16,6 +16,7 @@ import { getDimensionColors } from '@/utils/ssotHelpers';
 import { getShortKey, getRubric, getCycleOrder } from '@/data/ssot';
 import {
   translateBand, translateFix, translatePhase, translateTrend,
+  translateAdvice, getAgencyLabel, getTeacherStatusLine,
   getUrgencyLevel, sortByUrgency,
 } from '@/utils/teacherTranslations';
 import type { EAIAnalysis, MechanicalState } from '@/types';
