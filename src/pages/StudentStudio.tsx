@@ -69,8 +69,7 @@ const StudentStudio: React.FC = () => {
     return parts;
   }, [profile]);
 
-  const { user } = useAuth();
-  const { roles } = useAuth();
+  const { user, roles } = useAuth();
   const isMultiRole = roles.length > 1;
   const userId = user?.id || getOrCreateUserId();
   const [sessionId, setSessionId] = useState(() => getStableSessionId(userId));
