@@ -181,7 +181,7 @@ const TeacherCockpit = () => {
                       <span className="text-slate-700">·</span>
                       <span>{node?.title || '—'}</span>
                     </div>
-                    <div className="flex items-center gap-3 mt-1.5">
+                    <div className="flex items-center gap-3 mt-1">
                       {analysis?.process_phases?.[0] && (
                         <span className="text-[8px] font-mono px-1.5 py-0.5 border border-slate-700 bg-slate-900 text-cyan-400">
                           {translatePhase(analysis.process_phases[0])}
@@ -199,6 +199,12 @@ const TeacherCockpit = () => {
                       )}
                       <span className="text-[8px] font-mono text-slate-600 ml-auto">
                         <MessageSquare className="w-2.5 h-2.5 inline mr-0.5" />{session.messages_count}
+                      </span>
+                    </div>
+                    {/* Compact teacher status line */}
+                    <div className="mt-1">
+                      <span className={`text-[8px] italic ${urgency.color}`}>
+                        {getTeacherStatusLine(session)}
                       </span>
                     </div>
                   </button>
