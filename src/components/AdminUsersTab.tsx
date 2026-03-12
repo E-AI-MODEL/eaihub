@@ -168,7 +168,7 @@ const AdminUsersTab: React.FC = () => {
       {adminSchoolId && (
         <div className="text-[10px] font-mono text-muted-foreground">
           School: <span className="text-foreground">{adminSchoolId}</span>
-          {!isSuperUser && <span className="ml-2 text-amber-500/70">(gefilterd op eigen school)</span>}
+          {!isSuperUser && <span className="ml-2 text-amber-500/70">(gefilterd op eigen school — alleen frontend)</span>}
         </div>
       )}
 
@@ -294,7 +294,7 @@ const AdminUsersTab: React.FC = () => {
                   </Button>
                 </div>
                 <p className="text-[9px] text-muted-foreground mt-1.5">
-                  Admin- en superuserrollen kunnen hier niet worden gewijzigd.
+                  Admin- en superuserrollen kunnen hier niet worden gewijzigd. Schoolscope is nog niet op databaseniveau afgedwongen.
                 </p>
               </div>
             )}
