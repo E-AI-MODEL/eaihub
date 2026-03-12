@@ -24,6 +24,7 @@ import type { EAIStateLike } from '@/utils/eaiLearnAdapter';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import MetricCell from '@/components/dashboard/MetricCell';
+import SectionLabel from '@/components/dashboard/SectionLabel';
 
 const TeacherCockpit = () => {
   const navigate = useNavigate();
