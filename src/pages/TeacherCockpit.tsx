@@ -371,7 +371,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                     ))}
                   </div>
                   {eai.scaffolding.advice && (
-                    <div className="text-[8px] text-amber-300 mt-2">💡 {eai.scaffolding.advice}</div>
+                    <div className="text-[8px] text-amber-300 mt-2">{translateAdvice(eai.scaffolding.advice)}</div>
                   )}
                 </div>
               )}
