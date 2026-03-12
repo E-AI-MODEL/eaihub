@@ -494,6 +494,15 @@ const StudioHeader: React.FC<StudioHeaderProps> = ({
         >
           <Settings className="w-3 h-3" />
         </button>
+        {canRequestRole && (
+          <button
+            onClick={() => setShowRoleDialog(true)}
+            className="h-7 px-2.5 text-[9px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-700 transition-colors"
+            title="Rol aanvragen"
+          >
+            <UserPlus className="w-3 h-3" />
+          </button>
+        )}
         <button
           onClick={onToggleDashboard}
           className={`h-7 px-2.5 text-[9px] font-mono uppercase tracking-wider transition-colors border ${
@@ -505,6 +514,18 @@ const StudioHeader: React.FC<StudioHeaderProps> = ({
           <BarChart3 className="w-3 h-3" />
         </button>
       </div>
+
+      <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
+        <DialogContent className="max-w-md bg-slate-900 border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-slate-200">Rol aanvragen</DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Vraag een extra rol aan. Een beheerder beoordeelt je aanvraag.
+            </DialogDescription>
+          </DialogHeader>
+          <RoleRequestForm />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
