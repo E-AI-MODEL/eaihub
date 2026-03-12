@@ -267,7 +267,6 @@ const AdminPanel = () => {
               <Clock className="w-3 h-3 mr-1 sm:mr-1.5" />
               <span className="hidden sm:inline">Aanvragen</span><span className="sm:hidden">Reqs</span>
             </TabsTrigger>
-            </TabsTrigger>
             <span className="self-center mx-1 text-border">│</span>
             {/* Technisch */}
             <TabsTrigger value="monitoring" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">System </span>Health</TabsTrigger>
