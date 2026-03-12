@@ -444,10 +444,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
               {/* 7. Sparkline — icoon toegevoegd */}
               {eai?.scaffolding && (
                 <div className="px-4 py-3 border-b border-slate-800">
-                  <div className="flex items-center gap-1.5">
-                    <TrendingUp className="w-3 h-3 text-slate-400" />
-                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Zelfstandigheid over tijd</span>
-                  </div>
+                  <SectionLabel icon={<TrendingUp className="w-3 h-3 text-slate-400" />} label="Zelfstandigheid over tijd" />
                   <div className="h-6 flex items-end gap-0.5 mt-2">
                     {eai.scaffolding.history_window.map((score: number, i: number) => (
                       <div key={i} className="flex-1 bg-slate-800 relative overflow-hidden rounded-sm">
