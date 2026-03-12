@@ -93,7 +93,7 @@ const LandingPage = () => {
               
               {/* Leerling Card */}
               <Link 
-                to="/student" 
+                to="/auth" 
                 className="group relative block eai-card-gradient border border-border rounded-3xl overflow-hidden hover:border-primary/50 transition-all hover:shadow-2xl hover:shadow-primary/10 focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <article className="p-6 sm:p-10 h-full flex flex-col">
