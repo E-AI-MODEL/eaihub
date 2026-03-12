@@ -507,9 +507,20 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
           )}
         </TabsContent>
 
-        {/* 10D Analysis tab */}
+        {/* 10D Analysis tab — includes technical metrics moved from overview */}
         <TabsContent value="analysis" className="flex-1 overflow-y-auto mt-0 px-4 py-3">
           <div className="max-w-2xl mx-auto">
+            {/* Technical metrics (moved from overview) */}
+            <h3 className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-2">Systeemkwaliteit</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-0 border border-slate-800 mb-4">
+              <MetricCell label="G-Factor" value={gFactor !== undefined ? `${Math.round(gFactor * 100)}%` : '—'} icon={<Cpu className="w-3 h-3 text-slate-400" />} />
+              <MetricCell label="Alignment" value={mechanical?.semanticValidation?.alignment_status || '—'} icon={<Activity className="w-3 h-3 text-cyan-400" />} accent={mechanical?.semanticValidation?.alignment_status === 'CRITICAL' ? 'red' : undefined} />
+              <MetricCell label="Epistemic Guard" value={mechanical?.epistemicGuardResult?.label || '—'} icon={<AlertTriangle className="w-3 h-3 text-amber-400" />} accent={mechanical?.epistemicGuardResult?.label === 'VERIFY' ? 'red' : undefined} />
+              <MetricCell label="Repairs" value={mechanical?.repairAttempts != null ? String(mechanical.repairAttempts) : '—'} icon={<RefreshCw className="w-3 h-3 text-slate-400" />} accent={mechanical?.repairAttempts && mechanical.repairAttempts > 0 ? 'red' : undefined} />
+              <MetricCell label="Confidence" value={analysis?.confidence != null ? `${Math.round(analysis.confidence * 100)}%` : '—'} icon={<Eye className="w-3 h-3 text-slate-400" />} accent={analysis?.confidence != null && analysis.confidence < 0.4 ? 'red' : undefined} />
+              <MetricCell label="Borderline" value={analysis?.borderline_dimensions?.length ? analysis.borderline_dimensions.join(', ') : '—'} icon={<AlertTriangle className="w-3 h-3 text-slate-400" />} accent={analysis?.borderline_dimensions?.length ? 'indigo' : undefined} />
+            </div>
+
             <h3 className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-3">Alle 10 Dimensies — Live Status</h3>
             <div className="grid grid-cols-2 gap-2">
               {getCycleOrder().map(rubricId => {
