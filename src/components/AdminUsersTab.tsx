@@ -278,7 +278,7 @@ const AdminUsersTab: React.FC = () => {
             {/* Role management — only DOCENT toggle for now */}
             {selectedUser.id !== currentUser?.id && (
               <div className="pt-2 border-t border-border">
-                <SectionLabel>Rolbeheer</SectionLabel>
+                <SectionLabel icon={<GraduationCap className="w-3 h-3 text-primary" />} label="Rolbeheer" />
                 <div className="flex gap-2 mt-2">
                   <Button
                     variant={selectedUser.roles.includes('DOCENT') ? 'destructive' : 'outline'}
