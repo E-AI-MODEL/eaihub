@@ -23,6 +23,7 @@ import type { EAIAnalysis, MechanicalState } from '@/types';
 import type { EAIStateLike } from '@/utils/eaiLearnAdapter';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import MetricCell from '@/components/dashboard/MetricCell';
 
 const TeacherCockpit = () => {
   const navigate = useNavigate();
@@ -422,7 +423,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 <MetricCell label="Zelfstandigheid" value={(() => { const al = getAgencyLabel(agencyScore); return al.label; })()} icon={<TrendingUp className="w-3 h-3 text-emerald-400" />} accent={agencyScore !== undefined && agencyScore < 40 ? 'red' : undefined} subtitle={agencyScore !== undefined ? `${agencyScore}%` : undefined} />
                 <MetricCell label="Kennistype" value={translateBand(analysis?.knowledge_type || analysis?.coregulation_bands?.find(c => c.startsWith('K')))} icon={<Brain className="w-3 h-3 text-yellow-400" />} />
                 <MetricCell label="Verloop" value={translateTrend(eai?.scaffolding?.trend)} icon={<TrendingUp className="w-3 h-3 text-slate-400" />} accent={eai?.scaffolding?.trend === 'FALLING' ? 'red' : undefined} />
-                <MetricCell label="Fase" value={translatePhase(phase)} icon={<Brain className="w-3 h-3 text-cyan-400" />} />
+                <MetricCell label="Berichten" value={String(session.messages_count ?? 0)} icon={<MessageSquare className="w-3 h-3 text-slate-400" />} />
               </div>
 
               {/* 11. Phase stepper — vóór sparkline geplaatst */}
@@ -684,32 +685,5 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
     </div>
   );
 };
-
-// ═══════════════════════════════════════════════════════════════
-// METRIC CELL
-// ═══════════════════════════════════════════════════════════════
-
-const MetricCell: React.FC<{
-  label: string;
-  value: string;
-  icon: React.ReactNode;
-  accent?: 'indigo' | 'red';
-  subtitle?: string;
-}> = ({ label, value, icon, accent, subtitle }) => (
-  <div className="px-3 py-2.5 border-b border-r border-slate-800">
-    <div className="flex items-center gap-1.5 mb-1">
-      {icon}
-      <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider">{label}</span>
-    </div>
-    <span className={`text-[11px] font-mono font-medium ${
-      accent === 'indigo' ? 'text-indigo-300' :
-      accent === 'red' ? 'text-red-300' :
-      'text-slate-300'
-    }`}>
-      {value}
-    </span>
-    {subtitle && <span className="text-[8px] font-mono text-slate-600 ml-1.5">{subtitle}</span>}
-  </div>
-);
 
 export default TeacherCockpit;
