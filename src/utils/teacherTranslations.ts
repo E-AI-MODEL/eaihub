@@ -51,6 +51,7 @@ export function translateFix(fixCode: string | null | undefined): string {
 // ── Process phase code → label ──
 
 const PHASE_LABEL_MAP: Record<string, string> = {
+  P0: 'Oriëntatie',
   P1: 'Start',
   P2: 'Uitleg',
   P3: 'Oefening',
