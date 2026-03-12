@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle, MessageSquare, Users, BarChart3, ChevronDown, ChevronRight, Layers, Plus, Edit, Wrench, Info } from 'lucide-react';
+import { Shield, Database, Cpu, Activity, CheckCircle, AlertTriangle, BookOpen, Trash2, Download, RefreshCw, HardDrive, Zap, Terminal, Eye, XCircle, MessageSquare, Users, BarChart3, ChevronDown, ChevronRight, Layers, Plus, Edit, Wrench, Info, Clock } from 'lucide-react';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,6 +7,7 @@ import EITLWizard from '@/components/EITLWizard';
 import PluginVersionHistory from '@/components/PluginVersionHistory';
 import ObservabilityPanel from '@/components/ObservabilityPanel';
 import AdminUsersTab from '@/components/AdminUsersTab';
+import RoleRequestsReviewTab from '@/components/RoleRequestsReviewTab';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -262,6 +263,10 @@ const AdminPanel = () => {
               <Users className="w-3 h-3 mr-1 sm:mr-1.5" />
               <span className="hidden sm:inline">Gebruikers</span><span className="sm:hidden">Users</span>
             </TabsTrigger>
+            <TabsTrigger value="requests" className="text-xs sm:text-sm whitespace-nowrap">
+              <Clock className="w-3 h-3 mr-1 sm:mr-1.5" />
+              <span className="hidden sm:inline">Aanvragen</span><span className="sm:hidden">Reqs</span>
+            </TabsTrigger>
             <span className="self-center mx-1 text-border">│</span>
             {/* Technisch */}
             <TabsTrigger value="monitoring" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">System </span>Health</TabsTrigger>
@@ -277,6 +282,11 @@ const AdminPanel = () => {
           {/* Users Tab — bestuurlijk */}
           <TabsContent value="users">
             <AdminUsersTab />
+          </TabsContent>
+
+          {/* Role Requests Tab — bestuurlijk */}
+          <TabsContent value="requests">
+            <RoleRequestsReviewTab />
           </TabsContent>
 
           {/* System Monitoring Tab */}
