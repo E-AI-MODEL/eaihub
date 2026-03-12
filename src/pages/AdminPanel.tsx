@@ -285,6 +285,11 @@ const AdminPanel = () => {
             <AdminUsersTab />
           </TabsContent>
 
+          {/* Role Requests Tab — bestuurlijk */}
+          <TabsContent value="requests">
+            <RoleRequestsReviewTab />
+          </TabsContent>
+
           {/* System Monitoring Tab */}
           <TabsContent value="monitoring">
             {isLoading ? (
