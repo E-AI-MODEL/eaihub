@@ -255,8 +255,9 @@ const AdminPanel = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="monitoring" className="space-y-4 sm:space-y-6">
+        <Tabs defaultValue="users" className="space-y-4 sm:space-y-6">
           <TabsList className="bg-secondary border border-border w-full overflow-x-auto flex justify-start">
+            <TabsTrigger value="users" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">Gebruikers</span><span className="sm:hidden">Users</span></TabsTrigger>
             <TabsTrigger value="monitoring" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">System </span>Health</TabsTrigger>
             <TabsTrigger value="database" onClick={loadDbData} className="text-xs sm:text-sm whitespace-nowrap">Database</TabsTrigger>
             <TabsTrigger value="pipeline" onClick={loadDbData} className="text-xs sm:text-sm whitespace-nowrap">Pipeline</TabsTrigger>
@@ -266,6 +267,11 @@ const AdminPanel = () => {
             <TabsTrigger value="eitl" className="text-xs sm:text-sm whitespace-nowrap">EITL<span className="hidden sm:inline"> Plugin</span></TabsTrigger>
             <TabsTrigger value="observability" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">Observ</span>ability</TabsTrigger>
           </TabsList>
+
+          {/* Users Tab — bestuurlijk */}
+          <TabsContent value="users">
+            <AdminUsersTab />
+          </TabsContent>
 
           {/* System Monitoring Tab */}
           <TabsContent value="monitoring">
