@@ -613,7 +613,8 @@ const MetricCell: React.FC<{
   value: string;
   icon: React.ReactNode;
   accent?: 'indigo' | 'red';
-}> = ({ label, value, icon, accent }) => (
+  subtitle?: string;
+}> = ({ label, value, icon, accent, subtitle }) => (
   <div className="px-3 py-2.5 border-b border-r border-slate-800">
     <div className="flex items-center gap-1.5 mb-1">
       {icon}
@@ -626,6 +627,7 @@ const MetricCell: React.FC<{
     }`}>
       {value}
     </span>
+    {subtitle && <span className="text-[8px] font-mono text-slate-600 ml-1.5">{subtitle}</span>}
   </div>
 );
 
