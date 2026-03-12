@@ -294,7 +294,7 @@ const AdminUsersTab: React.FC = () => {
                   </Button>
                 </div>
                 <p className="text-[9px] text-muted-foreground mt-1.5">
-                  Admin- en superuserrollen kunnen hier niet worden gewijzigd.
+                  Admin- en superuserrollen kunnen hier niet worden gewijzigd. Schoolscope is nog niet op databaseniveau afgedwongen.
                 </p>
               </div>
             )}

@@ -257,7 +257,13 @@ const AdminPanel = () => {
 
         <Tabs defaultValue="users" className="space-y-4 sm:space-y-6">
           <TabsList className="bg-secondary border border-border w-full overflow-x-auto flex justify-start">
-            <TabsTrigger value="users" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">Gebruikers</span><span className="sm:hidden">Users</span></TabsTrigger>
+            {/* Bestuurlijk */}
+            <TabsTrigger value="users" className="text-xs sm:text-sm whitespace-nowrap">
+              <Users className="w-3 h-3 mr-1 sm:mr-1.5" />
+              <span className="hidden sm:inline">Gebruikers</span><span className="sm:hidden">Users</span>
+            </TabsTrigger>
+            <span className="self-center mx-1 text-border">│</span>
+            {/* Technisch */}
             <TabsTrigger value="monitoring" className="text-xs sm:text-sm whitespace-nowrap"><span className="hidden sm:inline">System </span>Health</TabsTrigger>
             <TabsTrigger value="database" onClick={loadDbData} className="text-xs sm:text-sm whitespace-nowrap">Database</TabsTrigger>
             <TabsTrigger value="pipeline" onClick={loadDbData} className="text-xs sm:text-sm whitespace-nowrap">Pipeline</TabsTrigger>
