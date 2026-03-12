@@ -405,8 +405,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                       {relevantBands.map(({ id, data }) => (
                         <div key={id}>
                           <div className="flex items-center gap-1.5 mb-1">
-                            <span className="text-[8px] font-mono text-slate-500">{translateBand(id)}</span>
-                            <span className="text-[7px] font-mono text-slate-700">({id})</span>
+                            <span className="text-[8px] font-mono font-medium text-slate-400">{translateBand(id)}</span>
                           </div>
                           <div className="space-y-0.5 pl-2 border-l border-slate-800">
                             {data!.learner_obs!.slice(0, 2).map((obs, i) => (
