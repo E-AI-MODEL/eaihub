@@ -386,6 +386,7 @@ interface StudioHeaderProps {
   showLeftPanel?: boolean;
   onToggleLeftPanel?: () => void;
   compact?: boolean;
+  workMode?: WorkMode;
 }
 
 const StudioHeader: React.FC<StudioHeaderProps> = ({
