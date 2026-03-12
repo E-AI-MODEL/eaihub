@@ -105,6 +105,17 @@ const AdminPanel = () => {
     resolveSchoolId();
   }, [user, isSuperUser]);
 
+  // Fetch pending role request count
+  const fetchPendingCount = async () => {
+    const { count } = await supabase
+      .from('role_requests')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'PENDING');
+    setPendingRequestCount(count ?? 0);
+  };
+
+  useEffect(() => { fetchPendingCount(); }, []);
+
   // Load system data on mount
   useEffect(() => {
     loadSystemData();
