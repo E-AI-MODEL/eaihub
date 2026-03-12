@@ -200,6 +200,7 @@ const StudentStudio: React.FC = () => {
           showDashboard={showDashboard}
           onToggleDashboard={() => setShowDashboard(!showDashboard)}
           compact
+          workMode={effectiveWorkMode}
         />
 
         {/* Tab Content — all panels stay mounted, hidden via CSS */}
