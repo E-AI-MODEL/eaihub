@@ -376,34 +376,61 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 </div>
               )}
 
-              {/* Herkenbaar gedrag — pure SSOT lookup via getBand() */}
+              {/* Herkenbaar gedrag — meerdere relevante bands uit SSOT */}
               {allBands.length > 0 && (() => {
-                const primaryBand = allBands.find(b => b.startsWith('K') && b !== 'K0')
-                  || allBands.find(b => b.startsWith('C'))
-                  || allBands.find(b => b.startsWith('TD'))
-                  || allBands[0];
-                const bandData = primaryBand ? getBand(primaryBand) : null;
-                if (!bandData || !bandData.learner_obs?.length) return null;
+                // Select up to 3 bands from different dimensions, skip "0" bands (unassessed)
+                const seen = new Set<string>();
+                const relevantBands: { id: string; data: ReturnType<typeof getBand> }[] = [];
+                const priorityOrder = [
+                  ...allBands.filter(b => b.startsWith('K') && b !== 'K0'),
+                  ...allBands.filter(b => b.startsWith('C') && b !== 'C0'),
+                  ...allBands.filter(b => b.startsWith('TD') && b !== 'TD0'),
+                  ...allBands.filter(b => !b.startsWith('K') && !b.startsWith('C') && !b.startsWith('TD') && !b.endsWith('0')),
+                ];
+                for (const bandId of priorityOrder) {
+                  const dim = bandId.replace(/\d+$/, '');
+                  if (seen.has(dim)) continue;
+                  const data = getBand(bandId);
+                  if (data?.learner_obs?.length) {
+                    seen.add(dim);
+                    relevantBands.push({ id: bandId, data });
+                    if (relevantBands.length >= 3) break;
+                  }
+                }
+                if (relevantBands.length === 0) return null;
                 return (
                   <div className="px-4 py-3 border-b border-slate-800">
                     <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Herkenbaar Gedrag</span>
-                    <div className="mt-1.5 space-y-1">
-                      {bandData.learner_obs.slice(0, 3).map((obs, i) => (
-                        <div key={i} className="flex items-start gap-1.5">
-                          <span className="text-[8px] text-slate-600 mt-0.5">•</span>
-                          <span className="text-[9px] text-slate-400 leading-relaxed">{obs}</span>
+                    <div className="mt-2 space-y-3">
+                      {relevantBands.map(({ id, data }) => (
+                        <div key={id}>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-[8px] font-mono text-slate-500">{translateBand(id)}</span>
+                            <span className="text-[7px] font-mono text-slate-700">({id})</span>
+                          </div>
+                          <div className="space-y-0.5 pl-2 border-l border-slate-800">
+                            {data!.learner_obs!.slice(0, 2).map((obs, i) => (
+                              <div key={i} className="flex items-start gap-1.5">
+                                <span className="text-[8px] text-slate-600 mt-0.5">•</span>
+                                <span className="text-[9px] text-slate-400 leading-relaxed">{obs}</span>
+                              </div>
+                            ))}
+                          </div>
+                          {data!.fix && (
+                            <div className="mt-1 pl-2">
+                              <span className="text-[8px] text-indigo-400/70 italic">Tip: {data!.fix}</span>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
-                    {bandData.didactic_principle && (
-                      <div className="mt-2 px-2 py-1.5 border border-indigo-500/15 bg-indigo-500/5">
+                    {/* Show didactic principle from the primary (first) band */}
+                    {relevantBands[0]?.data?.didactic_principle && (
+                      <div className="mt-2.5 px-2 py-1.5 border border-indigo-500/15 bg-indigo-500/5">
                         <span className="text-[7px] font-mono text-indigo-400/60 uppercase tracking-widest">Didactisch Principe</span>
-                        <p className="text-[9px] text-indigo-300/80 mt-0.5 leading-relaxed">{bandData.didactic_principle}</p>
+                        <p className="text-[9px] text-indigo-300/80 mt-0.5 leading-relaxed">{relevantBands[0].data!.didactic_principle}</p>
                       </div>
                     )}
-                    <span className="text-[7px] font-mono text-slate-700 mt-1.5 block">
-                      Bron: {translateBand(primaryBand)} ({primaryBand})
-                    </span>
                   </div>
                 );
               })()}
