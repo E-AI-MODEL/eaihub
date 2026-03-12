@@ -461,10 +461,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
               {/* 8. Laatste bericht — icoon toegevoegd */}
               {session.last_message_preview && (
                 <div className="px-4 py-3 border-b border-slate-800">
-                  <div className="flex items-center gap-1.5">
-                    <MessageSquare className="w-3 h-3 text-slate-400" />
-                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Laatste Bericht</span>
-                  </div>
+                  <SectionLabel icon={<MessageSquare className="w-3 h-3 text-slate-400" />} label="Laatste Bericht" />
                   <p className="text-[10px] text-slate-400 mt-1.5 leading-relaxed italic">
                     "{session.last_message_preview}"
                   </p>
