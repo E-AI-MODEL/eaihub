@@ -352,7 +352,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
               <div className="grid grid-cols-2 border-b border-slate-800">
                 <MetricCell label="AI-actie" value={translateFix(analysis?.active_fix)} icon={<Zap className="w-3 h-3 text-indigo-400" />} accent={analysis?.active_fix ? 'indigo' : undefined} />
                 <MetricCell label="Kennistype" value={translateBand(analysis?.knowledge_type || analysis?.coregulation_bands?.find(c => c.startsWith('K')))} icon={<Brain className="w-3 h-3 text-yellow-400" />} />
-                <MetricCell label="Zelfstandigheid" value={agencyScore !== undefined ? `${agencyScore}%` : '—'} icon={<TrendingUp className="w-3 h-3 text-emerald-400" />} accent={agencyScore !== undefined && agencyScore < 40 ? 'red' : undefined} />
+                <MetricCell label="Zelfstandigheid" value={(() => { const al = getAgencyLabel(agencyScore); return al.label; })()} icon={<TrendingUp className="w-3 h-3 text-emerald-400" />} accent={agencyScore !== undefined && agencyScore < 40 ? 'red' : undefined} subtitle={agencyScore !== undefined ? `${agencyScore}%` : undefined} />
                 <MetricCell label="Verloop" value={translateTrend(eai?.scaffolding?.trend)} icon={<TrendingUp className="w-3 h-3 text-slate-400" />} accent={eai?.scaffolding?.trend === 'FALLING' ? 'red' : undefined} />
               </div>
 
