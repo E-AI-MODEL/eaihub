@@ -23,6 +23,8 @@ import type { EAIAnalysis, MechanicalState } from '@/types';
 import type { EAIStateLike } from '@/utils/eaiLearnAdapter';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import MetricCell from '@/components/dashboard/MetricCell';
+import { toast } from '@/hooks/use-toast';
 
 const TeacherCockpit = () => {
   const navigate = useNavigate();
