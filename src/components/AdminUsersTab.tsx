@@ -168,7 +168,7 @@ const AdminUsersTab: React.FC = () => {
       {adminSchoolId && (
         <div className="text-[10px] font-mono text-muted-foreground">
           School: <span className="text-foreground">{adminSchoolId}</span>
-          {!isSuperUser && <span className="ml-2 text-amber-500/70">(gefilterd op eigen school)</span>}
+          {!isSuperUser && <span className="ml-2 text-amber-500/70">(gefilterd op eigen school — alleen frontend)</span>}
         </div>
       )}
 
