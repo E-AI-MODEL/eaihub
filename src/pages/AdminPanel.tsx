@@ -275,9 +275,12 @@ const AdminPanel = () => {
               <Users className="w-3 h-3 mr-1 sm:mr-1.5" />
               <span className="hidden sm:inline">Gebruikers</span><span className="sm:hidden">Users</span>
             </TabsTrigger>
-            <TabsTrigger value="requests" className="text-xs sm:text-sm whitespace-nowrap">
+            <TabsTrigger value="requests" className="text-xs sm:text-sm whitespace-nowrap" onClick={fetchPendingCount}>
               <Clock className="w-3 h-3 mr-1 sm:mr-1.5" />
               <span className="hidden sm:inline">Aanvragen</span><span className="sm:hidden">Reqs</span>
+              {pendingRequestCount > 0 && (
+                <Badge variant="secondary" className="ml-1.5 text-[9px] px-1.5 py-0 min-w-[1.25rem] justify-center">{pendingRequestCount}</Badge>
+              )}
             </TabsTrigger>
             <span className="self-center mx-1 text-border">│</span>
             {/* Technisch */}
