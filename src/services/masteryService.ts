@@ -77,7 +77,10 @@ export const updateMastery = async (payload: MasteryUpdate) => {
 
   if (existingStr) {
     mastery = JSON.parse(existingStr);
-    mastery.status = payload.status;
+    // Monotonic guard: never downgrade status
+    if (STATUS_ORDER[payload.status] >= STATUS_ORDER[mastery.status as MasteryStatus]) {
+      mastery.status = payload.status;
+    }
     mastery.currentNodeId = payload.currentNodeId;
     if (payload.evidence) {
       mastery.history.push({
