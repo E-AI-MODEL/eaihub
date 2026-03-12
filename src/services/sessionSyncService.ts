@@ -192,16 +192,16 @@ export async function fetchAllSessions(filterWorkMode?: WorkMode): Promise<Stude
   return (data || []) as unknown as StudentSessionRow[];
 }
 
-export function subscribeToSessions(onUpdate: (sessions: StudentSessionRow[]) => void) {
+export function subscribeToSessions(onUpdate: (sessions: StudentSessionRow[]) => void, filterWorkMode?: WorkMode) {
   // Initial fetch
-  fetchAllSessions().then(onUpdate);
+  fetchAllSessions(filterWorkMode).then(onUpdate);
 
   const channel = supabase
     .channel('all-student-sessions')
     .on(
       'postgres_changes',
       { event: '*', schema: 'public', table: 'student_sessions' },
-      () => { fetchAllSessions().then(onUpdate); }
+      () => { fetchAllSessions(filterWorkMode).then(onUpdate); }
     )
     .subscribe();
 
