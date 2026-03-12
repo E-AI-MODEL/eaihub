@@ -416,7 +416,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 );
               })()}
 
-              {/* 3. VERDIEPING — 10. "Berichten" → "Fase" */}
+              {/* 3. VERDIEPING */}
               <div className="grid grid-cols-2 border-b border-slate-800">
                 <MetricCell label="Zelfstandigheid" value={(() => { const al = getAgencyLabel(agencyScore); return al.label; })()} icon={<TrendingUp className="w-3 h-3 text-emerald-400" />} accent={agencyScore !== undefined && agencyScore < 40 ? 'red' : undefined} subtitle={agencyScore !== undefined ? `${agencyScore}%` : undefined} />
                 <MetricCell label="Kennistype" value={translateBand(analysis?.knowledge_type || analysis?.coregulation_bands?.find(c => c.startsWith('K')))} icon={<Brain className="w-3 h-3 text-yellow-400" />} />
@@ -424,12 +424,9 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 <MetricCell label="Berichten" value={String(session.messages_count ?? 0)} icon={<MessageSquare className="w-3 h-3 text-slate-400" />} />
               </div>
 
-              {/* 11. Phase stepper — vóór sparkline geplaatst */}
+              {/* Procesfase stepper */}
               <div className="px-4 py-3 border-b border-slate-800">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Brain className="w-3 h-3 text-indigo-400" />
-                  <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Procesfase</span>
-                </div>
+                <SectionLabel icon={<Brain className="w-3 h-3 text-indigo-400" />} label="Procesfase" />
                 <div className="flex items-center gap-0.5 mb-1.5">
                   {PHASE_STEPS.map((step, i) => (
                     <div key={step} className={`flex-1 h-1.5 transition-colors ${i <= currentPhaseIdx ? 'bg-indigo-500/70' : 'bg-slate-800'}`} />
