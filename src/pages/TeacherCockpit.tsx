@@ -401,13 +401,11 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 return (
                   <div className="px-4 py-3 border-b border-slate-800">
                     <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Herkenbaar Gedrag</span>
-                    <div className="mt-2 space-y-3">
+                    <div className="mt-2 space-y-2.5">
                       {relevantBands.map(({ id, data }) => (
-                        <div key={id}>
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <span className="text-[8px] font-mono font-medium text-slate-400">{translateBand(id)}</span>
-                          </div>
-                          <div className="space-y-0.5 pl-2 border-l border-slate-800">
+                        <div key={id} className="p-2 border border-slate-800/60 bg-slate-900/30 rounded-sm">
+                          <span className="text-[8px] font-mono font-medium text-slate-400">{translateBand(id)}</span>
+                          <div className="space-y-0.5 mt-1">
                             {data!.learner_obs!.slice(0, 2).map((obs, i) => (
                               <div key={i} className="flex items-start gap-1.5">
                                 <span className="text-[8px] text-slate-600 mt-0.5">•</span>
@@ -416,18 +414,18 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                             ))}
                           </div>
                           {data!.fix && (
-                            <div className="mt-1 pl-2">
-                              <span className="text-[8px] text-indigo-400/70 italic">Tip: {data!.fix}</span>
+                            <div className="mt-1.5 px-2 py-1 bg-indigo-500/8 border-l-2 border-indigo-500/40">
+                              <span className="text-[8px] text-indigo-300/80">💡 {data!.fix}</span>
                             </div>
                           )}
                         </div>
                       ))}
                     </div>
-                    {/* Show didactic principle from the primary (first) band */}
+                    {/* Didactisch principe — alleen als aanvullend op tips */}
                     {relevantBands[0]?.data?.didactic_principle && (
-                      <div className="mt-2.5 px-2 py-1.5 border border-indigo-500/15 bg-indigo-500/5">
-                        <span className="text-[7px] font-mono text-indigo-400/60 uppercase tracking-widest">Didactisch Principe</span>
-                        <p className="text-[9px] text-indigo-300/80 mt-0.5 leading-relaxed">{relevantBands[0].data!.didactic_principle}</p>
+                      <div className="mt-2 px-2 py-1.5 border border-slate-700/40 bg-slate-900/20">
+                        <span className="text-[7px] font-mono text-slate-500 uppercase tracking-widest">Principe</span>
+                        <p className="text-[9px] text-slate-400/80 mt-0.5 leading-relaxed">{relevantBands[0].data!.didactic_principle}</p>
                       </div>
                     )}
                   </div>
