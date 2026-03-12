@@ -34,6 +34,8 @@ const FIX_LABELS: Record<string, string> = {
   '/exit':        'Sluit sessie af',
   '/quiz':        'Genereert toetsvragen',
   '/quizgen':     'Genereert toetsvragen',
+  '/leervraag':   'Stelt een kernvraag',
+  '/deeper':      'Stelt verdiepingsvragen',
   '/beeld':       'Toont een afbeelding',
   '/pauze':       'Geeft ademruimte',
   '/recap':       'Vat samen',
