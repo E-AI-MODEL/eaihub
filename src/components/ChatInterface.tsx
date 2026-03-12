@@ -129,6 +129,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         lastMessagePreview: messages.length > 0 ? messages[messages.length - 1].text.slice(0, 100) : null,
         progress: progressRef.current,
         pluginId: getActivePlugin()?.id ?? null,
+        workMode: workMode,
       });
       setSyncPulse(true);
       setTimeout(() => setSyncPulse(false), 800);
