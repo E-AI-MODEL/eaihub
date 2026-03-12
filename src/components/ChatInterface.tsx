@@ -132,7 +132,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     };
     pushState(); // immediate push
     const interval = setInterval(pushState, 10000);
-    return () => clearInterval(interval);
+    const capturedSessionId = sessionId;
+    return () => {
+      clearInterval(interval);
+      // Mark this session offline when sessionId changes or component unmounts
+      setSessionOffline(capturedSessionId);
+    };
   }, [sessionId, profile, currentAnalysis, currentMechanical, eaiState, messages.length]);
 
   // ═══ TEACHER MESSAGES: Listen for incoming messages ═══

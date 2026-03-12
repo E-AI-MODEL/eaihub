@@ -56,10 +56,10 @@ const TeacherCockpit = () => {
         setChatLog([]);
       });
 
-    // Live subscription: elke nieuwe INSERT direct appenden
+    // Live subscription: deduplicate by ID before appending
     const unsubChat = subscribeToChatMessages(
       selectedSession.session_id,
-      (msg) => setChatLog(prev => [...prev, msg])
+      (msg) => setChatLog(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg])
     );
 
     return unsubChat; // cleanup bij sessie-wissel of unmount
