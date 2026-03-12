@@ -82,7 +82,8 @@ const StudentStudio: React.FC = () => {
     setCurrentAnalysis(null);
     setCurrentMechanical(null);
     setEaiState(createInitialEAIState());
-  }, [userId]);
+    if (isMultiRole) setWorkMode(null); // re-ask mode
+  }, [userId, isMultiRole]);
 
   useEffect(() => {
     const loadProfile = async () => {
