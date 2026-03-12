@@ -34,6 +34,8 @@ const FIX_LABELS: Record<string, string> = {
   '/exit':        'Sluit sessie af',
   '/quiz':        'Genereert toetsvragen',
   '/quizgen':     'Genereert toetsvragen',
+  '/leervraag':   'Stelt een kernvraag',
+  '/deeper':      'Stelt verdiepingsvragen',
   '/beeld':       'Toont een afbeelding',
   '/pauze':       'Geeft ademruimte',
   '/recap':       'Vat samen',
@@ -49,6 +51,7 @@ export function translateFix(fixCode: string | null | undefined): string {
 // ── Process phase code → label ──
 
 const PHASE_LABEL_MAP: Record<string, string> = {
+  P0: 'Oriëntatie',
   P1: 'Start',
   P2: 'Uitleg',
   P3: 'Oefening',

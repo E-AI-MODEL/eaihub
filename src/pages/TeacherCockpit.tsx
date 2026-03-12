@@ -13,7 +13,7 @@ import {
 import { fetchChatMessages } from '@/services/adminDbService';
 import { getNodeById } from '@/data/curriculum';
 import { getDimensionColors } from '@/utils/ssotHelpers';
-import { getShortKey, getRubric, getCycleOrder } from '@/data/ssot';
+import { getShortKey, getRubric, getCycleOrder, getBand } from '@/data/ssot';
 import {
   translateBand, translateFix, translatePhase, translateTrend,
   translateAdvice, getAgencyLabel, getTeacherStatusLine,
@@ -375,6 +375,38 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                   )}
                 </div>
               )}
+
+              {/* Herkenbaar gedrag — pure SSOT lookup via getBand() */}
+              {allBands.length > 0 && (() => {
+                const primaryBand = allBands.find(b => b.startsWith('K') && b !== 'K0')
+                  || allBands.find(b => b.startsWith('C'))
+                  || allBands.find(b => b.startsWith('TD'))
+                  || allBands[0];
+                const bandData = primaryBand ? getBand(primaryBand) : null;
+                if (!bandData || !bandData.learner_obs?.length) return null;
+                return (
+                  <div className="px-4 py-3 border-b border-slate-800">
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Herkenbaar Gedrag</span>
+                    <div className="mt-1.5 space-y-1">
+                      {bandData.learner_obs.slice(0, 3).map((obs, i) => (
+                        <div key={i} className="flex items-start gap-1.5">
+                          <span className="text-[8px] text-slate-600 mt-0.5">•</span>
+                          <span className="text-[9px] text-slate-400 leading-relaxed">{obs}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {bandData.didactic_principle && (
+                      <div className="mt-2 px-2 py-1.5 border border-indigo-500/15 bg-indigo-500/5">
+                        <span className="text-[7px] font-mono text-indigo-400/60 uppercase tracking-widest">Didactisch Principe</span>
+                        <p className="text-[9px] text-indigo-300/80 mt-0.5 leading-relaxed">{bandData.didactic_principle}</p>
+                      </div>
+                    )}
+                    <span className="text-[7px] font-mono text-slate-700 mt-1.5 block">
+                      Bron: {translateBand(primaryBand)} ({primaryBand})
+                    </span>
+                  </div>
+                );
+              })()}
 
               {/* Last message preview */}
               {session.last_message_preview && (
