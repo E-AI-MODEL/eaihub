@@ -294,6 +294,7 @@ const StudentStudio: React.FC = () => {
         onToggleDashboard={() => setShowDashboard(!showDashboard)}
         showLeftPanel={showLeftPanel}
         onToggleLeftPanel={() => setShowLeftPanel(!showLeftPanel)}
+        workMode={effectiveWorkMode}
       />
 
       {/* Three-zone workspace */}
