@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, SkipForward } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import RoleRequestForm from '@/components/RoleRequestForm';
 
-type Mode = 'login' | 'signup' | 'forgot';
+type Mode = 'login' | 'signup' | 'forgot' | 'post-signup';
 
 const AuthPage: React.FC = () => {
   const [mode, setMode] = useState<Mode>('login');
@@ -56,12 +57,11 @@ const AuthPage: React.FC = () => {
     if (error) {
       toast({ title: 'Registratie mislukt', description: error.message, variant: 'destructive' });
     } else {
-      // Profile + roles are auto-created by database trigger (handle_new_user)
       toast({
         title: 'Account aangemaakt',
-        description: 'Je kunt nu inloggen.',
+        description: 'Controleer je inbox om je e-mail te bevestigen.',
       });
-      setMode('login');
+      setMode('post-signup');
     }
   };
 
@@ -94,81 +94,109 @@ const AuthPage: React.FC = () => {
           <span className="text-indigo-400 text-lg font-mono font-bold tracking-tighter">EAI</span>
         </div>
 
-        <h2 className="text-sm text-slate-200 font-medium mb-1 text-center">
-          {mode === 'login' ? 'Inloggen' : mode === 'signup' ? 'Account aanmaken' : 'Wachtwoord vergeten'}
-        </h2>
-        <p className="text-[11px] text-slate-500 mb-6 text-center">
-          {mode === 'login'
-            ? 'Log in om verder te werken'
-            : mode === 'signup'
-            ? 'Maak een account aan als leerling'
-            : 'Voer je e-mailadres in voor een reset-link'}
-        </p>
+        {mode === 'post-signup' ? (
+          /* ── Post-signup: optioneel rolverzoek ── */
+          <div className="space-y-4">
+            <h2 className="text-sm text-slate-200 font-medium text-center">Account aangemaakt ✓</h2>
+            <p className="text-[11px] text-slate-500 text-center leading-relaxed">
+              Je bent standaard geregistreerd als <span className="text-slate-300">leerling</span>. Ben je docent of beheerder? Vraag hieronder direct een rol aan.
+            </p>
+            <p className="text-[10px] text-amber-400/80 text-center">
+              Bevestig eerst je e-mail voordat je inlogt.
+            </p>
 
-        <form onSubmit={mode === 'login' ? handleLogin : mode === 'signup' ? handleSignup : handleForgotPassword}>
-          {mode === 'signup' && (
-            <input
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="Je naam"
-              required
-              className="w-full bg-slate-900 border border-slate-700 px-4 py-3 text-[16px] sm:text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 mb-3"
-            />
-          )}
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder="E-mailadres"
-            required
-            className="w-full bg-slate-900 border border-slate-700 px-4 py-3 text-[16px] sm:text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 mb-3"
-          />
-          {mode !== 'forgot' && (
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="Wachtwoord"
-              required
-              minLength={6}
-              className="w-full bg-slate-900 border border-slate-700 px-4 py-3 text-[16px] sm:text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 mb-4"
-            />
-          )}
-          {mode === 'forgot' && <div className="mb-4" />}
+            <div className="border border-slate-800 bg-slate-900/50 p-4 rounded">
+              <RoleRequestForm />
+            </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-3 border border-indigo-500/40 bg-indigo-500/15 text-indigo-300 text-xs font-mono uppercase tracking-wider hover:bg-indigo-500/25 disabled:opacity-50 transition-colors"
-          >
-            {isLoading
-              ? 'Bezig...'
-              : mode === 'login'
-              ? 'Inloggen'
-              : mode === 'signup'
-              ? 'Registreren'
-              : 'Verstuur reset-link'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center space-y-2">
-          {mode === 'login' && (
-            <>
-              <button onClick={() => setMode('signup')} className="text-[10px] text-slate-500 hover:text-indigo-400 transition-colors block mx-auto">
-                Nog geen account? Registreren
-              </button>
-              <button onClick={() => setMode('forgot')} className="text-[10px] text-slate-500 hover:text-indigo-400 transition-colors block mx-auto">
-                Wachtwoord vergeten?
-              </button>
-            </>
-          )}
-          {(mode === 'signup' || mode === 'forgot') && (
-            <button onClick={() => setMode('login')} className="text-[10px] text-slate-500 hover:text-indigo-400 transition-colors block mx-auto">
-              Terug naar inloggen
+            <button
+              onClick={() => setMode('login')}
+              className="w-full py-3 border border-slate-700 bg-slate-800/30 text-slate-400 text-xs font-mono uppercase tracking-wider hover:bg-slate-800/60 transition-colors flex items-center justify-center gap-2"
+            >
+              <SkipForward className="w-3 h-3" />
+              Doorgaan naar inloggen
             </button>
-          )}
-        </div>
+          </div>
+        ) : (
+          /* ── Login / Signup / Forgot forms ── */
+          <>
+            <h2 className="text-sm text-slate-200 font-medium mb-1 text-center">
+              {mode === 'login' ? 'Inloggen' : mode === 'signup' ? 'Account aanmaken' : 'Wachtwoord vergeten'}
+            </h2>
+            <p className="text-[11px] text-slate-500 mb-6 text-center">
+              {mode === 'login'
+                ? 'Log in om verder te werken'
+                : mode === 'signup'
+                ? 'Maak een account aan als leerling'
+                : 'Voer je e-mailadres in voor een reset-link'}
+            </p>
+
+            <form onSubmit={mode === 'login' ? handleLogin : mode === 'signup' ? handleSignup : handleForgotPassword}>
+              {mode === 'signup' && (
+                <input
+                  type="text"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="Je naam"
+                  required
+                  className="w-full bg-slate-900 border border-slate-700 px-4 py-3 text-[16px] sm:text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 mb-3"
+                />
+              )}
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="E-mailadres"
+                required
+                className="w-full bg-slate-900 border border-slate-700 px-4 py-3 text-[16px] sm:text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 mb-3"
+              />
+              {mode !== 'forgot' && (
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Wachtwoord"
+                  required
+                  minLength={6}
+                  className="w-full bg-slate-900 border border-slate-700 px-4 py-3 text-[16px] sm:text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 mb-4"
+                />
+              )}
+              {mode === 'forgot' && <div className="mb-4" />}
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3 border border-indigo-500/40 bg-indigo-500/15 text-indigo-300 text-xs font-mono uppercase tracking-wider hover:bg-indigo-500/25 disabled:opacity-50 transition-colors"
+              >
+                {isLoading
+                  ? 'Bezig...'
+                  : mode === 'login'
+                  ? 'Inloggen'
+                  : mode === 'signup'
+                  ? 'Registreren'
+                  : 'Verstuur reset-link'}
+              </button>
+            </form>
+
+            <div className="mt-6 text-center space-y-2">
+              {mode === 'login' && (
+                <>
+                  <button onClick={() => setMode('signup')} className="text-[10px] text-slate-500 hover:text-indigo-400 transition-colors block mx-auto">
+                    Nog geen account? Registreren
+                  </button>
+                  <button onClick={() => setMode('forgot')} className="text-[10px] text-slate-500 hover:text-indigo-400 transition-colors block mx-auto">
+                    Wachtwoord vergeten?
+                  </button>
+                </>
+              )}
+              {(mode === 'signup' || mode === 'forgot') && (
+                <button onClick={() => setMode('login')} className="text-[10px] text-slate-500 hover:text-indigo-400 transition-colors block mx-auto">
+                  Terug naar inloggen
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

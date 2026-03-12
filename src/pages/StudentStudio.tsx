@@ -14,7 +14,9 @@ import { getOrCreateUserId } from '@/services/identity';
 import { useAuth } from '@/hooks/useAuth';
 import { createInitialEAIState, updateStateFromAnalysis, EAIStateLike } from '@/utils/eaiLearnAdapter';
 import { setSessionOffline, type WorkMode } from '@/services/sessionSyncService';
-import { PanelLeftClose, PanelLeftOpen, Settings, BarChart3, Home, GraduationCap, Shield } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, Settings, BarChart3, Home, GraduationCap, Shield, UserPlus } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import RoleRequestForm from '@/components/RoleRequestForm';
 import { useNavigate } from 'react-router-dom';
 import type { LearnerProfile, EAIAnalysis, MechanicalState, Message } from '@/types';
 
