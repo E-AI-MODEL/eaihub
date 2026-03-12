@@ -489,11 +489,11 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                   {msg.analysis && (
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       {(msg.analysis as EAIAnalysis).process_phases?.map((p: string) => (
-                        <span key={p} className="text-[7px] font-mono px-1 py-0.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">{p}</span>
+                        <span key={p} className="text-[7px] font-mono px-1 py-0.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">{translatePhase(p)}</span>
                       ))}
                       {(msg.analysis as EAIAnalysis).active_fix && (
                         <span className="text-[7px] font-mono px-1 py-0.5 bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                          {(msg.analysis as EAIAnalysis).active_fix}
+                          {translateFix((msg.analysis as EAIAnalysis).active_fix)}
                         </span>
                       )}
                       {(msg.analysis as EAIAnalysis).confidence != null && (
@@ -503,7 +503,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                       )}
                       {(msg.analysis as EAIAnalysis).borderline_dimensions?.map((dim: string) => (
                         <span key={dim} className="text-[7px] font-mono px-1 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          {dim} ↔
+                          {translateBand(dim)} ↔
                         </span>
                       ))}
                     </div>
