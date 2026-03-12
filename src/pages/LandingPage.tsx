@@ -23,36 +23,7 @@ const LandingPage = () => {
               to="/concept" 
               className="text-muted-foreground hover:text-foreground transition-colors border-b border-transparent hover:border-primary pb-0.5"
             >
-              Architectuur & Uitleg
-            </Link>
-          </li>
-          
-          <li className="hidden sm:block" aria-hidden="true">
-            <div className="h-4 w-px bg-border" />
-          </li>
-
-          <li>
-            <Link 
-              to="/student" 
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              Leerling
-            </Link>
-          </li>
-          <li>
-            <Link 
-              to="/teacher" 
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              Docent
-            </Link>
-          </li>
-          <li className="hidden sm:block">
-            <Link 
-              to="/admin" 
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              Admin
+              Hoe werkt het?
             </Link>
           </li>
           <li>
