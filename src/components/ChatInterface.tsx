@@ -93,6 +93,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           mechanical: r.mechanical as unknown as MechanicalState | undefined,
         }));
         setMessages(loaded);
+        // Seed AI model context from loaded history
+        seedSessionHistory(sessionId, rows.map(r => ({ role: r.role, content: r.content })));
         // Restore latest analysis to parent
         const lastModel = [...loaded].reverse().find(m => m.role === 'model' && m.analysis);
         if (lastModel?.analysis && onAnalysisUpdate) {
