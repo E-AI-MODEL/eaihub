@@ -237,6 +237,7 @@ export type Database = {
           subject: string | null
           updated_at: string | null
           user_id: string
+          work_mode: string
         }
         Insert: {
           analysis?: Json | null
@@ -257,6 +258,7 @@ export type Database = {
           subject?: string | null
           updated_at?: string | null
           user_id: string
+          work_mode?: string
         }
         Update: {
           analysis?: Json | null
@@ -277,6 +279,7 @@ export type Database = {
           subject?: string | null
           updated_at?: string | null
           user_id?: string
+          work_mode?: string
         }
         Relationships: []
       }
