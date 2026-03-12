@@ -330,6 +330,7 @@ const StudentStudio: React.FC = () => {
                   currentMechanical={currentMechanical}
                   eaiState={eaiState}
                   onResetSession={handleResetSession}
+                  workMode={effectiveWorkMode}
                 />
               )}
             </div>
