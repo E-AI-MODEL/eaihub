@@ -406,6 +406,10 @@ const StudioHeader: React.FC<StudioHeaderProps> = ({
 }) => {
   const navigate = useNavigate();
   const { roles } = useAuth();
+  const [showRoleDialog, setShowRoleDialog] = useState(false);
+
+  // Show role request button if user can request higher roles
+  const canRequestRole = !roles.includes('ADMIN') && !roles.includes('SUPERUSER');
 
   return (
     <div className="h-12 px-3 flex items-center justify-between border-b border-slate-700 bg-slate-900 shrink-0">
