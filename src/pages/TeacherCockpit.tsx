@@ -145,13 +145,12 @@ const TeacherCockpit = () => {
                 <span className="text-[9px] text-slate-700 mt-1">Leerlingen verschijnen hier zodra ze starten</span>
               </div>
             ) : (
-              sessions.map(session => {
+              sortByUrgency(sessions).map(session => {
                 const analysis = session.analysis as EAIAnalysis | null;
                 const eai = session.eai_state as EAIStateLike | null;
                 const isSelected = selectedSession?.session_id === session.session_id;
                 const isOnline = session.status === 'ONLINE';
-                const agencyScore = eai?.scaffolding?.agency_score;
-                const isStruggling = agencyScore !== undefined && agencyScore < 40;
+                const urgency = getUrgencyLevel(session);
                 const node = session.current_node_id ? getNodeById(session.current_node_id) : null;
 
                 return (
@@ -164,11 +163,11 @@ const TeacherCockpit = () => {
                   >
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
-                        <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-slate-600'}`} />
+                        <div className={`w-2 h-2 rounded-full ${urgency.dot} ${isOnline ? '' : 'opacity-40'}`} title={urgency.level === 'high' ? 'Hulp nodig' : urgency.level === 'medium' ? 'Even checken' : 'Gaat goed'} />
                         <span className="text-[11px] font-medium text-slate-200 truncate max-w-[140px]">
                           {session.name || 'Anoniem'}
                         </span>
-                        {isStruggling && (
+                        {urgency.level === 'high' && (
                           <span className="text-[8px] px-1.5 py-0.5 bg-red-500/20 text-red-300 border border-red-500/30 font-mono uppercase">
                             Hulp
                           </span>
@@ -184,17 +183,17 @@ const TeacherCockpit = () => {
                     <div className="flex items-center gap-3 mt-1.5">
                       {analysis?.process_phases?.[0] && (
                         <span className="text-[8px] font-mono px-1.5 py-0.5 border border-slate-700 bg-slate-900 text-cyan-400">
-                          {analysis.process_phases[0]}
+                          {translatePhase(analysis.process_phases[0])}
                         </span>
                       )}
                       {analysis?.active_fix && (
-                        <span className="text-[8px] font-mono px-1.5 py-0.5 border border-indigo-500/30 bg-indigo-500/10 text-indigo-300">
-                          {analysis.active_fix}
+                        <span className="text-[8px] px-1.5 py-0.5 border border-indigo-500/30 bg-indigo-500/10 text-indigo-300" title={analysis.active_fix}>
+                          {translateFix(analysis.active_fix)}
                         </span>
                       )}
-                      {agencyScore !== undefined && (
-                        <span className={`text-[8px] font-mono ${agencyScore >= 60 ? 'text-emerald-400' : agencyScore >= 40 ? 'text-slate-400' : 'text-red-400'}`}>
-                          Agency: {agencyScore}%
+                      {eai?.scaffolding?.trend && eai.scaffolding.trend !== 'STABLE' && (
+                        <span className={`text-[8px] ${urgency.color}`}>
+                          {translateTrend(eai.scaffolding.trend)}
                         </span>
                       )}
                       <span className="text-[8px] font-mono text-slate-600 ml-auto">
