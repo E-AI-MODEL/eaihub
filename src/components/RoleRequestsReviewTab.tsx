@@ -83,10 +83,10 @@ const RoleRequestsReviewTab = () => {
     try {
       if (approve) {
         // 1. Add role to user_roles
-        const { error: roleErr } = await supabase.from('user_roles').insert({
+        const { error: roleErr } = await supabase.from('user_roles').insert([{
           user_id: req.user_id,
-          role: req.requested_role,
-        });
+          role: req.requested_role as 'DOCENT' | 'ADMIN' | 'LEERLING' | 'SUPERUSER',
+        }]);
         if (roleErr) throw roleErr;
       }
 
