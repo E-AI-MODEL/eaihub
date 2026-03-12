@@ -14,7 +14,9 @@ import { getOrCreateUserId } from '@/services/identity';
 import { useAuth } from '@/hooks/useAuth';
 import { createInitialEAIState, updateStateFromAnalysis, EAIStateLike } from '@/utils/eaiLearnAdapter';
 import { setSessionOffline, type WorkMode } from '@/services/sessionSyncService';
-import { PanelLeftClose, PanelLeftOpen, Settings, BarChart3, Home, GraduationCap, Shield } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, Settings, BarChart3, Home, GraduationCap, Shield, UserPlus } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import RoleRequestForm from '@/components/RoleRequestForm';
 import { useNavigate } from 'react-router-dom';
 import type { LearnerProfile, EAIAnalysis, MechanicalState, Message } from '@/types';
 
@@ -404,6 +406,10 @@ const StudioHeader: React.FC<StudioHeaderProps> = ({
 }) => {
   const navigate = useNavigate();
   const { roles } = useAuth();
+  const [showRoleDialog, setShowRoleDialog] = useState(false);
+
+  // Show role request button if user can request higher roles
+  const canRequestRole = !roles.includes('ADMIN') && !roles.includes('SUPERUSER');
 
   return (
     <div className="h-12 px-3 flex items-center justify-between border-b border-slate-700 bg-slate-900 shrink-0">
@@ -488,6 +494,15 @@ const StudioHeader: React.FC<StudioHeaderProps> = ({
         >
           <Settings className="w-3 h-3" />
         </button>
+        {canRequestRole && (
+          <button
+            onClick={() => setShowRoleDialog(true)}
+            className="h-7 px-2.5 text-[9px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-700 transition-colors"
+            title="Rol aanvragen"
+          >
+            <UserPlus className="w-3 h-3" />
+          </button>
+        )}
         <button
           onClick={onToggleDashboard}
           className={`h-7 px-2.5 text-[9px] font-mono uppercase tracking-wider transition-colors border ${
@@ -499,6 +514,18 @@ const StudioHeader: React.FC<StudioHeaderProps> = ({
           <BarChart3 className="w-3 h-3" />
         </button>
       </div>
+
+      <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
+        <DialogContent className="max-w-md bg-slate-900 border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-slate-200">Rol aanvragen</DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Vraag een extra rol aan. Een beheerder beoordeelt je aanvraag.
+            </DialogDescription>
+          </DialogHeader>
+          <RoleRequestForm />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
