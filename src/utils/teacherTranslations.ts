@@ -148,12 +148,12 @@ export function getAgencyLabel(score: number | undefined): AgencyLabel {
 export function getTeacherStatusLine(session: StudentSessionRow): string {
   const eai = session.eai_state as EAIStateLike | null;
   const agency = eai?.scaffolding?.agency_score;
-  const trend = eai?.scaffolding?.trend;
+  const trend = eai?.scaffolding?.trend as string | undefined;
 
   // K-band from analysis
-  const analysis = session.analysis as Record<string, unknown> | null;
-  const kBand = (analysis as any)?.knowledge_type
-    || ((analysis as any)?.coregulation_bands as string[] | undefined)?.find((c: string) => c.startsWith('K'));
+  const a = session.analysis as unknown as EAIAnalysis | null;
+  const kBand = a?.knowledge_type
+    || a?.coregulation_bands?.find((c: string) => c.startsWith('K'));
 
   if (agency !== undefined && agency < 40) return 'Heeft hulp nodig';
   if (trend === 'FALLING') return 'Wordt afhankelijker';
