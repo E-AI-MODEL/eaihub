@@ -449,7 +449,6 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 <div className="flex items-center gap-4 text-[9px] font-mono text-slate-600">
                   <span><Clock className="w-3 h-3 inline mr-1" />Actief: {getTimeSince(session.last_active_at)} geleden</span>
                   <span>Berichten: {session.messages_count}</span>
-                  {mechanical?.latencyMs && <span>Latency: {mechanical.latencyMs}ms</span>}
                 </div>
               </div>
             </div>
