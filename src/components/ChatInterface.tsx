@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Send, RotateCcw } from 'lucide-react';
 import MessageBubble from '@/components/MessageBubble';
 import type { Message, LearnerProfile, EAIAnalysis, MechanicalState } from '@/types';
-import { sendChat } from '@/services/chatService';
+import { sendChat, seedSessionHistory } from '@/services/chatService';
 import { getOrCreateUserId } from '@/services/identity';
 import { useAuth } from '@/hooks/useAuth';
 import { calculateDynamicTTL } from '@/utils/eaiLearnAdapter';

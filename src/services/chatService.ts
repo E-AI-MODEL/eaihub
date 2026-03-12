@@ -44,6 +44,19 @@ interface ChatMessage {
 
 const sessionHistory: Map<string, ChatMessage[]> = new Map();
 
+/** Seed session history from DB-loaded messages (call once after history fetch) */
+export function seedSessionHistory(sessionId: string, messages: Array<{ role: string; content: string }>) {
+  if (sessionHistory.has(sessionId) && sessionHistory.get(sessionId)!.length > 0) return; // already populated
+  const mapped: ChatMessage[] = messages
+    .filter(m => m.role === 'user' || m.role === 'model')
+    .map(m => ({
+      role: (m.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
+      content: m.content,
+    }))
+    .slice(-HISTORY_LIMIT);
+  sessionHistory.set(sessionId, mapped);
+}
+
 // ═══ SESSION CONTEXT TRACKER ═══
 const sessionContexts: Map<string, SessionContext> = new Map();
 
