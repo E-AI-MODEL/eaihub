@@ -177,12 +177,17 @@ export interface StudentSessionRow {
   work_mode: WorkMode;
 }
 
-export async function fetchAllSessions(): Promise<StudentSessionRow[]> {
-  const { data, error } = await supabase
+export async function fetchAllSessions(filterWorkMode?: WorkMode): Promise<StudentSessionRow[]> {
+  let query = supabase
     .from('student_sessions')
     .select('*')
     .order('last_active_at', { ascending: false });
 
+  if (filterWorkMode) {
+    query = query.eq('work_mode', filterWorkMode);
+  }
+
+  const { data, error } = await query;
   if (error) { console.error('[SessionSync] Fetch sessions error:', error); return []; }
   return (data || []) as unknown as StudentSessionRow[];
 }
