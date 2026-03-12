@@ -326,59 +326,37 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
         {/* Overview tab */}
         <TabsContent value="overview" className="flex-1 overflow-y-auto mt-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
-            {/* Left: Live metrics */}
+            {/* Left: Didactisch overzicht */}
             <div className="border-r border-slate-800">
-              {/* Phase stepper */}
+
+              {/* 1. SITUATIE — wat is er aan de hand */}
               <div className="px-4 py-3 border-b border-slate-800">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Brain className="w-3 h-3 text-indigo-400" />
-                  <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Procesfase</span>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <AlertTriangle className="w-3 h-3 text-slate-400" />
+                  <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Situatie</span>
                 </div>
-                <div className="flex items-center gap-0.5 mb-1.5">
-                  {PHASE_STEPS.map((step, i) => (
-                    <div key={step} className={`flex-1 h-1.5 transition-colors ${i <= currentPhaseIdx ? 'bg-indigo-500/70' : 'bg-slate-800'}`} />
-                  ))}
-                </div>
-                <div className="flex justify-between">
-                  {PHASE_LABELS.map((label, i) => (
-                    <span key={label} className={`text-[7px] font-mono uppercase ${i === currentPhaseIdx ? 'text-indigo-300' : 'text-slate-700'}`}>
-                      {label}
+                <p className={`text-[11px] font-medium ${getUrgencyLevel(session).color}`}>
+                  {getTeacherStatusLine(session)}
+                </p>
+                {eai?.scaffolding?.advice && (
+                  <p className="text-[9px] text-amber-300/80 mt-1">{translateAdvice(eai.scaffolding.advice)}</p>
+                )}
+                <div className="flex items-center gap-3 mt-2 text-[9px] text-slate-500">
+                  {analysis?.process_phases?.[0] && (
+                    <span className="px-1.5 py-0.5 border border-slate-700 bg-slate-900 text-cyan-400 text-[8px] font-mono">
+                      {translatePhase(analysis.process_phases[0])}
                     </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Metrics grid — didactically relevant only */}
-              <div className="grid grid-cols-2 border-b border-slate-800">
-                <MetricCell label="AI-actie" value={translateFix(analysis?.active_fix)} icon={<Zap className="w-3 h-3 text-indigo-400" />} accent={analysis?.active_fix ? 'indigo' : undefined} />
-                <MetricCell label="Kennistype" value={translateBand(analysis?.knowledge_type || analysis?.coregulation_bands?.find(c => c.startsWith('K')))} icon={<Brain className="w-3 h-3 text-yellow-400" />} />
-                <MetricCell label="Zelfstandigheid" value={(() => { const al = getAgencyLabel(agencyScore); return al.label; })()} icon={<TrendingUp className="w-3 h-3 text-emerald-400" />} accent={agencyScore !== undefined && agencyScore < 40 ? 'red' : undefined} subtitle={agencyScore !== undefined ? `${agencyScore}%` : undefined} />
-                <MetricCell label="Verloop" value={translateTrend(eai?.scaffolding?.trend)} icon={<TrendingUp className="w-3 h-3 text-slate-400" />} accent={eai?.scaffolding?.trend === 'FALLING' ? 'red' : undefined} />
-              </div>
-
-              {/* Scaffolding sparkline */}
-              {eai?.scaffolding && (
-                <div className="px-4 py-3 border-b border-slate-800">
-                  <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Agency Verloop</span>
-                  <div className="h-6 flex items-end gap-0.5 mt-2">
-                    {eai.scaffolding.history_window.map((score: number, i: number) => (
-                      <div key={i} className="flex-1 bg-slate-800 relative overflow-hidden rounded-sm">
-                        <div
-                          className={`absolute bottom-0 w-full rounded-sm ${score >= 60 ? 'bg-emerald-600' : score >= 40 ? 'bg-slate-600' : 'bg-red-600'}`}
-                          style={{ height: `${Math.max(score, 5)}%` }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  {eai.scaffolding.advice && (
-                    <div className="text-[8px] text-amber-300 mt-2">{translateAdvice(eai.scaffolding.advice)}</div>
+                  )}
+                  {analysis?.active_fix && (
+                    <span className="px-1.5 py-0.5 border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-[8px]">
+                      {translateFix(analysis.active_fix)}
+                    </span>
                   )}
                 </div>
-              )}
+              </div>
 
-              {/* Herkenbaar gedrag — meerdere relevante bands uit SSOT */}
+              {/* 2. HERKENBAAR GEDRAG — observaties + tips uit SSOT */}
               {allBands.length > 0 && (() => {
-                // Select up to 3 bands from different dimensions, skip "0" bands (unassessed)
                 const seen = new Set<string>();
                 const relevantBands: { id: string; data: ReturnType<typeof getBand> }[] = [];
                 const priorityOrder = [
@@ -401,7 +379,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 return (
                   <div className="px-4 py-3 border-b border-slate-800">
                     <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Herkenbaar Gedrag</span>
-                    <div className="mt-2 space-y-2.5">
+                    <div className="mt-2 space-y-2">
                       {relevantBands.map(({ id, data }) => (
                         <div key={id} className="p-2 border border-slate-800/60 bg-slate-900/30 rounded-sm">
                           <span className="text-[8px] font-mono font-medium text-slate-400">{translateBand(id)}</span>
@@ -421,18 +399,61 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                         </div>
                       ))}
                     </div>
-                    {/* Didactisch principe — alleen als aanvullend op tips */}
                     {relevantBands[0]?.data?.didactic_principle && (
-                      <div className="mt-2 px-2 py-1.5 border border-slate-700/40 bg-slate-900/20">
-                        <span className="text-[7px] font-mono text-slate-500 uppercase tracking-widest">Principe</span>
-                        <p className="text-[9px] text-slate-400/80 mt-0.5 leading-relaxed">{relevantBands[0].data!.didactic_principle}</p>
-                      </div>
+                      <p className="text-[8px] text-slate-500 mt-2 italic leading-relaxed">
+                        {relevantBands[0].data!.didactic_principle}
+                      </p>
                     )}
                   </div>
                 );
               })()}
 
-              {/* Last message preview */}
+              {/* 3. VERDIEPING — metrics + sparkline */}
+              <div className="grid grid-cols-2 border-b border-slate-800">
+                <MetricCell label="Zelfstandigheid" value={(() => { const al = getAgencyLabel(agencyScore); return al.label; })()} icon={<TrendingUp className="w-3 h-3 text-emerald-400" />} accent={agencyScore !== undefined && agencyScore < 40 ? 'red' : undefined} subtitle={agencyScore !== undefined ? `${agencyScore}%` : undefined} />
+                <MetricCell label="Kennistype" value={translateBand(analysis?.knowledge_type || analysis?.coregulation_bands?.find(c => c.startsWith('K')))} icon={<Brain className="w-3 h-3 text-yellow-400" />} />
+                <MetricCell label="Verloop" value={translateTrend(eai?.scaffolding?.trend)} icon={<TrendingUp className="w-3 h-3 text-slate-400" />} accent={eai?.scaffolding?.trend === 'FALLING' ? 'red' : undefined} />
+                <MetricCell label="Berichten" value={String(session.messages_count || 0)} icon={<MessageSquare className="w-3 h-3 text-slate-400" />} />
+              </div>
+
+              {/* Sparkline — zelfstandigheid over tijd */}
+              {eai?.scaffolding && (
+                <div className="px-4 py-3 border-b border-slate-800">
+                  <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Zelfstandigheid over tijd</span>
+                  <div className="h-6 flex items-end gap-0.5 mt-2">
+                    {eai.scaffolding.history_window.map((score: number, i: number) => (
+                      <div key={i} className="flex-1 bg-slate-800 relative overflow-hidden rounded-sm">
+                        <div
+                          className={`absolute bottom-0 w-full rounded-sm ${score >= 60 ? 'bg-emerald-600' : score >= 40 ? 'bg-slate-600' : 'bg-red-600'}`}
+                          style={{ height: `${Math.max(score, 5)}%` }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Phase stepper */}
+              <div className="px-4 py-3 border-b border-slate-800">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Brain className="w-3 h-3 text-indigo-400" />
+                  <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Procesfase</span>
+                </div>
+                <div className="flex items-center gap-0.5 mb-1.5">
+                  {PHASE_STEPS.map((step, i) => (
+                    <div key={step} className={`flex-1 h-1.5 transition-colors ${i <= currentPhaseIdx ? 'bg-indigo-500/70' : 'bg-slate-800'}`} />
+                  ))}
+                </div>
+                <div className="flex justify-between">
+                  {PHASE_LABELS.map((label, i) => (
+                    <span key={label} className={`text-[7px] font-mono uppercase ${i === currentPhaseIdx ? 'text-indigo-300' : 'text-slate-700'}`}>
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Laatste bericht */}
               {session.last_message_preview && (
                 <div className="px-4 py-3 border-b border-slate-800">
                   <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Laatste Bericht</span>
@@ -443,11 +464,10 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
               )}
 
               {/* Timing */}
-              <div className="px-4 py-3 border-b border-slate-800">
-                <div className="flex items-center gap-4 text-[9px] font-mono text-slate-600">
-                  <span><Clock className="w-3 h-3 inline mr-1" />Actief: {getTimeSince(session.last_active_at)} geleden</span>
-                  <span>Berichten: {session.messages_count}</span>
-                </div>
+              <div className="px-4 py-2.5 border-b border-slate-800">
+                <span className="text-[9px] font-mono text-slate-600">
+                  <Clock className="w-3 h-3 inline mr-1" />Actief: {getTimeSince(session.last_active_at)} geleden
+                </span>
               </div>
             </div>
 
