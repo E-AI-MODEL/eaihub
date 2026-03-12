@@ -399,6 +399,7 @@ const StudioHeader: React.FC<StudioHeaderProps> = ({
   showLeftPanel,
   onToggleLeftPanel,
   compact,
+  workMode,
 }) => {
   const navigate = useNavigate();
   const { roles } = useAuth();
