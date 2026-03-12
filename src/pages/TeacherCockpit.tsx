@@ -335,14 +335,14 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
             <div className="border-r border-slate-800">
 
               {/* 1. SITUATIE — 3. neutraal icoon; AlertTriangle alleen bij high */}
-              <div className="px-4 py-3 border-b border-slate-800">
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  {getUrgencyLevel(session).level === 'high'
-                    ? <AlertTriangle className="w-3 h-3 text-red-400" />
-                    : <Activity className="w-3 h-3 text-slate-400" />
-                  }
-                  <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Situatie</span>
-                </div>
+                <div className="px-4 py-3 border-b border-slate-800">
+                  <SectionLabel
+                    icon={getUrgencyLevel(session).level === 'high'
+                      ? <AlertTriangle className="w-3 h-3 text-red-400" />
+                      : <Activity className="w-3 h-3 text-slate-400" />
+                    }
+                    label="Situatie"
+                  />
                 <p className={`text-[11px] font-medium ${getUrgencyLevel(session).color}`}>
                   {getTeacherStatusLine(session)}
                 </p>
