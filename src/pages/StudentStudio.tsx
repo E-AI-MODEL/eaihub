@@ -430,6 +430,13 @@ const StudioHeader: React.FC<StudioHeaderProps> = ({
           ))}
         </div>
 
+        {/* Work mode indicator */}
+        {workMode === 'TEST' && (
+          <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 border border-amber-500/40 bg-amber-500/10 text-amber-400 tracking-wider">
+            Test
+          </span>
+        )}
+
         {/* Topic selector */}
         {profile && !compact && (
           <div className="w-44 ml-2">
