@@ -12,6 +12,8 @@ import { upsertSessionState, subscribeToTeacherMessages, fetchTeacherMessages, m
 import { getActivePlugin } from '@/lib/ssotRuntime';
 import { fetchChatMessages } from '@/services/adminDbService';
 
+import type { WorkMode } from '@/services/sessionSyncService';
+
 interface ChatInterfaceProps {
   profile: LearnerProfile;
   onAnalysisUpdate?: (analysis: EAIAnalysis, mechanical?: MechanicalState) => void;
@@ -22,6 +24,7 @@ interface ChatInterfaceProps {
   currentMechanical?: MechanicalState | null;
   eaiState?: any;
   onResetSession?: () => void;
+  workMode?: WorkMode;
 }
 
 // Idle nudge messages by escalation level
@@ -53,6 +56,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   currentMechanical,
   eaiState,
   onResetSession,
+  workMode,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -126,6 +130,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         lastMessagePreview: messages.length > 0 ? messages[messages.length - 1].text.slice(0, 100) : null,
         progress: progressRef.current,
         pluginId: getActivePlugin()?.id ?? null,
+        workMode: workMode,
       });
       setSyncPulse(true);
       setTimeout(() => setSyncPulse(false), 800);

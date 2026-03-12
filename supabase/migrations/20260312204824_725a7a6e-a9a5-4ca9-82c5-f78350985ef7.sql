@@ -1,0 +1,1 @@
+ALTER TABLE public.student_sessions ADD COLUMN IF NOT EXISTS work_mode text NOT NULL DEFAULT 'LEARN';

@@ -24,6 +24,8 @@ export interface TeacherMessage {
  * - pluginId: per sessie. null = base SSOT (geen plugin geladen), string = actief plugin ID.
  * - progress: per sessie, afgeleid van mastery sync.
  */
+export type WorkMode = 'LEARN' | 'TEST';
+
 export async function upsertSessionState(params: {
   userId: string;
   sessionId: string;
@@ -35,6 +37,7 @@ export async function upsertSessionState(params: {
   lastMessagePreview: string | null;
   progress?: number;
   pluginId?: string | null;
+  workMode?: WorkMode;
 }) {
   const { error } = await supabase
     .from('student_sessions')
@@ -53,6 +56,7 @@ export async function upsertSessionState(params: {
       last_message_preview: params.lastMessagePreview,
       progress: params.progress ?? 0,
       plugin_id: params.pluginId ?? null,
+      work_mode: params.workMode ?? 'LEARN',
       last_active_at: new Date().toISOString(),
     }, { onConflict: 'session_id' });
 
@@ -170,28 +174,34 @@ export interface StudentSessionRow {
   last_active_at: string;
   created_at: string;
   updated_at: string;
+  work_mode: WorkMode;
 }
 
-export async function fetchAllSessions(): Promise<StudentSessionRow[]> {
-  const { data, error } = await supabase
+export async function fetchAllSessions(filterWorkMode?: WorkMode): Promise<StudentSessionRow[]> {
+  let query = supabase
     .from('student_sessions')
     .select('*')
     .order('last_active_at', { ascending: false });
 
+  if (filterWorkMode) {
+    query = query.eq('work_mode', filterWorkMode);
+  }
+
+  const { data, error } = await query;
   if (error) { console.error('[SessionSync] Fetch sessions error:', error); return []; }
   return (data || []) as unknown as StudentSessionRow[];
 }
 
-export function subscribeToSessions(onUpdate: (sessions: StudentSessionRow[]) => void) {
+export function subscribeToSessions(onUpdate: (sessions: StudentSessionRow[]) => void, filterWorkMode?: WorkMode) {
   // Initial fetch
-  fetchAllSessions().then(onUpdate);
+  fetchAllSessions(filterWorkMode).then(onUpdate);
 
   const channel = supabase
     .channel('all-student-sessions')
     .on(
       'postgres_changes',
       { event: '*', schema: 'public', table: 'student_sessions' },
-      () => { fetchAllSessions().then(onUpdate); }
+      () => { fetchAllSessions(filterWorkMode).then(onUpdate); }
     )
     .subscribe();
 

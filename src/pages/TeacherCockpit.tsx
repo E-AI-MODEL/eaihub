@@ -43,7 +43,7 @@ const TeacherCockpit = () => {
     const unsub = subscribeToSessions((data) => {
       setSessions(data);
       setLastRefresh(new Date());
-    });
+    }, 'LEARN');
     return unsub;
   }, []);
 

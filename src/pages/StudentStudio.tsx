@@ -13,7 +13,7 @@ import { fetchProfile, updateProfile } from '@/services/profileService';
 import { getOrCreateUserId } from '@/services/identity';
 import { useAuth } from '@/hooks/useAuth';
 import { createInitialEAIState, updateStateFromAnalysis, EAIStateLike } from '@/utils/eaiLearnAdapter';
-import { setSessionOffline } from '@/services/sessionSyncService';
+import { setSessionOffline, type WorkMode } from '@/services/sessionSyncService';
 import { PanelLeftClose, PanelLeftOpen, Settings, BarChart3, Home, GraduationCap, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { LearnerProfile, EAIAnalysis, MechanicalState, Message } from '@/types';
@@ -57,6 +57,7 @@ const StudentStudio: React.FC = () => {
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [mobileTab, setMobileTab] = useState<MobileTab>('chat');
   const [pendingCommand, setPendingCommand] = useState<string | null>(null);
+  const [workMode, setWorkMode] = useState<WorkMode | null>(null);
 
   const isMobile = useIsMobile();
   const isTablet = !isMobile && typeof window !== 'undefined' && window.innerWidth < 1024;
@@ -69,6 +70,8 @@ const StudentStudio: React.FC = () => {
   }, [profile]);
 
   const { user } = useAuth();
+  const { roles } = useAuth();
+  const isMultiRole = roles.length > 1;
   const userId = user?.id || getOrCreateUserId();
   const [sessionId, setSessionId] = useState(() => getStableSessionId(userId));
 
@@ -79,7 +82,8 @@ const StudentStudio: React.FC = () => {
     setCurrentAnalysis(null);
     setCurrentMechanical(null);
     setEaiState(createInitialEAIState());
-  }, [userId]);
+    if (isMultiRole) setWorkMode(null); // re-ask mode
+  }, [userId, isMultiRole]);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -145,6 +149,42 @@ const StudentStudio: React.FC = () => {
     );
   }
 
+  // Auto-set LEARN for single-role users; show picker for multi-role
+  const effectiveWorkMode: WorkMode = isMultiRole ? (workMode ?? 'LEARN') : 'LEARN';
+
+  // Mode picker for multi-role users who haven't chosen yet
+  if (isMultiRole && workMode === null) {
+    return (
+      <div className="h-screen bg-slate-950 flex items-center justify-center">
+        <div className="max-w-sm text-center px-6">
+          <div className="w-14 h-14 border border-slate-700 bg-slate-800/40 flex items-center justify-center mb-6 mx-auto">
+            <span className="text-indigo-400 text-lg font-mono font-bold tracking-tighter">EAI</span>
+          </div>
+          <h2 className="text-sm text-slate-200 font-medium mb-1">Werkmodus kiezen</h2>
+          <p className="text-[11px] text-slate-500 mb-6">
+            Je hebt meerdere rollen. Kies hoe je deze sessie wilt gebruiken.
+          </p>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => setWorkMode('LEARN')}
+              className="px-4 py-3 border border-indigo-500/40 bg-indigo-500/10 text-indigo-300 text-sm font-medium hover:bg-indigo-500/20 transition-colors"
+            >
+              🎓 Leren
+              <span className="block text-[10px] text-slate-500 mt-0.5">Echte leersessie — zichtbaar voor docenten</span>
+            </button>
+            <button
+              onClick={() => setWorkMode('TEST')}
+              className="px-4 py-3 border border-slate-700 bg-slate-800/40 text-slate-300 text-sm font-medium hover:bg-slate-800/60 transition-colors"
+            >
+              🧪 Testen
+              <span className="block text-[10px] text-slate-500 mt-0.5">Testsessie — niet zichtbaar in docentoverzicht</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ═══════════════════════════════════════════════════════════════
   // MOBILE LAYOUT — Tabbed interface
   // ═══════════════════════════════════════════════════════════════
@@ -160,6 +200,7 @@ const StudentStudio: React.FC = () => {
           showDashboard={showDashboard}
           onToggleDashboard={() => setShowDashboard(!showDashboard)}
           compact
+          workMode={effectiveWorkMode}
         />
 
         {/* Tab Content — all panels stay mounted, hidden via CSS */}
@@ -187,6 +228,7 @@ const StudentStudio: React.FC = () => {
                 currentMechanical={currentMechanical}
                 eaiState={eaiState}
                 onResetSession={handleResetSession}
+                workMode={effectiveWorkMode}
               />
             )}
           </div>
@@ -252,6 +294,7 @@ const StudentStudio: React.FC = () => {
         onToggleDashboard={() => setShowDashboard(!showDashboard)}
         showLeftPanel={showLeftPanel}
         onToggleLeftPanel={() => setShowLeftPanel(!showLeftPanel)}
+        workMode={effectiveWorkMode}
       />
 
       {/* Three-zone workspace */}
@@ -289,6 +332,7 @@ const StudentStudio: React.FC = () => {
                   currentMechanical={currentMechanical}
                   eaiState={eaiState}
                   onResetSession={handleResetSession}
+                  workMode={effectiveWorkMode}
                 />
               )}
             </div>
@@ -344,6 +388,7 @@ interface StudioHeaderProps {
   showLeftPanel?: boolean;
   onToggleLeftPanel?: () => void;
   compact?: boolean;
+  workMode?: WorkMode;
 }
 
 const StudioHeader: React.FC<StudioHeaderProps> = ({
@@ -356,6 +401,7 @@ const StudioHeader: React.FC<StudioHeaderProps> = ({
   showLeftPanel,
   onToggleLeftPanel,
   compact,
+  workMode,
 }) => {
   const navigate = useNavigate();
   const { roles } = useAuth();
@@ -385,6 +431,13 @@ const StudioHeader: React.FC<StudioHeaderProps> = ({
             </React.Fragment>
           ))}
         </div>
+
+        {/* Work mode indicator */}
+        {workMode === 'TEST' && (
+          <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 border border-amber-500/40 bg-amber-500/10 text-amber-400 tracking-wider">
+            Test
+          </span>
+        )}
 
         {/* Topic selector */}
         {profile && !compact && (
