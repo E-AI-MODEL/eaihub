@@ -24,6 +24,7 @@ import type { EAIStateLike } from '@/utils/eaiLearnAdapter';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import MetricCell from '@/components/dashboard/MetricCell';
+import SectionLabel from '@/components/dashboard/SectionLabel';
 
 const TeacherCockpit = () => {
   const navigate = useNavigate();
@@ -334,14 +335,14 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
             <div className="border-r border-slate-800">
 
               {/* 1. SITUATIE — 3. neutraal icoon; AlertTriangle alleen bij high */}
-              <div className="px-4 py-3 border-b border-slate-800">
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  {getUrgencyLevel(session).level === 'high'
-                    ? <AlertTriangle className="w-3 h-3 text-red-400" />
-                    : <Activity className="w-3 h-3 text-slate-400" />
-                  }
-                  <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Situatie</span>
-                </div>
+                <div className="px-4 py-3 border-b border-slate-800">
+                  <SectionLabel
+                    icon={getUrgencyLevel(session).level === 'high'
+                      ? <AlertTriangle className="w-3 h-3 text-red-400" />
+                      : <Activity className="w-3 h-3 text-slate-400" />
+                    }
+                    label="Situatie"
+                  />
                 <p className={`text-[11px] font-medium ${getUrgencyLevel(session).color}`}>
                   {getTeacherStatusLine(session)}
                 </p>
@@ -384,11 +385,8 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 }
                 if (relevantBands.length === 0) return null;
                 return (
-                  <div className="px-4 py-3 border-b border-slate-800">
-                    <div className="flex items-center gap-1.5">
-                      <Eye className="w-3 h-3 text-slate-400" />
-                      <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Herkenbaar Gedrag</span>
-                    </div>
+                    <div className="px-4 py-3 border-b border-slate-800">
+                      <SectionLabel icon={<Eye className="w-3 h-3 text-slate-400" />} label="Herkenbaar Gedrag" />
                     <div className="mt-2 space-y-2">
                       {relevantBands.map(({ id, data }) => (
                         <div key={id} className="p-2 border border-slate-800/60 bg-slate-900/30 rounded-sm">
@@ -418,7 +416,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 );
               })()}
 
-              {/* 3. VERDIEPING — 10. "Berichten" → "Fase" */}
+              {/* 3. VERDIEPING */}
               <div className="grid grid-cols-2 border-b border-slate-800">
                 <MetricCell label="Zelfstandigheid" value={(() => { const al = getAgencyLabel(agencyScore); return al.label; })()} icon={<TrendingUp className="w-3 h-3 text-emerald-400" />} accent={agencyScore !== undefined && agencyScore < 40 ? 'red' : undefined} subtitle={agencyScore !== undefined ? `${agencyScore}%` : undefined} />
                 <MetricCell label="Kennistype" value={translateBand(analysis?.knowledge_type || analysis?.coregulation_bands?.find(c => c.startsWith('K')))} icon={<Brain className="w-3 h-3 text-yellow-400" />} />
@@ -426,12 +424,9 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 <MetricCell label="Berichten" value={String(session.messages_count ?? 0)} icon={<MessageSquare className="w-3 h-3 text-slate-400" />} />
               </div>
 
-              {/* 11. Phase stepper — vóór sparkline geplaatst */}
+              {/* Procesfase stepper */}
               <div className="px-4 py-3 border-b border-slate-800">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Brain className="w-3 h-3 text-indigo-400" />
-                  <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Procesfase</span>
-                </div>
+                <SectionLabel icon={<Brain className="w-3 h-3 text-indigo-400" />} label="Procesfase" />
                 <div className="flex items-center gap-0.5 mb-1.5">
                   {PHASE_STEPS.map((step, i) => (
                     <div key={step} className={`flex-1 h-1.5 transition-colors ${i <= currentPhaseIdx ? 'bg-indigo-500/70' : 'bg-slate-800'}`} />
@@ -449,10 +444,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
               {/* 7. Sparkline — icoon toegevoegd */}
               {eai?.scaffolding && (
                 <div className="px-4 py-3 border-b border-slate-800">
-                  <div className="flex items-center gap-1.5">
-                    <TrendingUp className="w-3 h-3 text-slate-400" />
-                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Zelfstandigheid over tijd</span>
-                  </div>
+                  <SectionLabel icon={<TrendingUp className="w-3 h-3 text-slate-400" />} label="Zelfstandigheid over tijd" />
                   <div className="h-6 flex items-end gap-0.5 mt-2">
                     {eai.scaffolding.history_window.map((score: number, i: number) => (
                       <div key={i} className="flex-1 bg-slate-800 relative overflow-hidden rounded-sm">
@@ -469,10 +461,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
               {/* 8. Laatste bericht — icoon toegevoegd */}
               {session.last_message_preview && (
                 <div className="px-4 py-3 border-b border-slate-800">
-                  <div className="flex items-center gap-1.5">
-                    <MessageSquare className="w-3 h-3 text-slate-400" />
-                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Laatste Bericht</span>
-                  </div>
+                  <SectionLabel icon={<MessageSquare className="w-3 h-3 text-slate-400" />} label="Laatste Bericht" />
                   <p className="text-[10px] text-slate-400 mt-1.5 leading-relaxed italic">
                     "{session.last_message_preview}"
                   </p>
