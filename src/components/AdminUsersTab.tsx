@@ -159,10 +159,10 @@ const AdminUsersTab: React.FC = () => {
     <div className="space-y-6">
       {/* Metrics overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <MetricCell label="Gebruikers" value={totalUsers} />
-        <MetricCell label="Leerlingen" value={totalLeerlingen} />
-        <MetricCell label="Docenten" value={totalDocenten} />
-        <MetricCell label="Admins" value={totalAdmins} />
+        <MetricCell label="Gebruikers" value={String(totalUsers)} icon={<Users className="w-3 h-3 text-primary" />} />
+        <MetricCell label="Leerlingen" value={String(totalLeerlingen)} icon={<BookOpen className="w-3 h-3 text-emerald-400" />} />
+        <MetricCell label="Docenten" value={String(totalDocenten)} icon={<GraduationCap className="w-3 h-3 text-blue-400" />} />
+        <MetricCell label="Admins" value={String(totalAdmins)} icon={<Shield className="w-3 h-3 text-amber-400" />} />
       </div>
 
       {adminSchoolId && (
