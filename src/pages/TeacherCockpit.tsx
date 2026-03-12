@@ -25,6 +25,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import MetricCell from '@/components/dashboard/MetricCell';
 import SectionLabel from '@/components/dashboard/SectionLabel';
+import SessionListItem from '@/components/dashboard/SessionListItem';
 
 const TeacherCockpit = () => {
   const navigate = useNavigate();
