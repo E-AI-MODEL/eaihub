@@ -341,18 +341,12 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 </div>
               </div>
 
-              {/* Metrics grid */}
+              {/* Metrics grid — didactically relevant only */}
               <div className="grid grid-cols-2 border-b border-slate-800">
-                <MetricCell label="Interventie" value={analysis?.active_fix || '—'} icon={<Zap className="w-3 h-3 text-slate-500" />} accent={analysis?.active_fix ? 'indigo' : undefined} />
-                <MetricCell label="Kennistype" value={analysis?.knowledge_type || analysis?.coregulation_bands?.find(c => c.startsWith('K')) || '—'} icon={<Brain className="w-3 h-3 text-yellow-400" />} />
+                <MetricCell label="AI-actie" value={translateFix(analysis?.active_fix)} icon={<Zap className="w-3 h-3 text-indigo-400" />} accent={analysis?.active_fix ? 'indigo' : undefined} />
+                <MetricCell label="Kennistype" value={translateBand(analysis?.knowledge_type || analysis?.coregulation_bands?.find(c => c.startsWith('K')))} icon={<Brain className="w-3 h-3 text-yellow-400" />} />
                 <MetricCell label="Zelfstandigheid" value={agencyScore !== undefined ? `${agencyScore}%` : '—'} icon={<TrendingUp className="w-3 h-3 text-emerald-400" />} accent={agencyScore !== undefined && agencyScore < 40 ? 'red' : undefined} />
-                <MetricCell label="G-Factor" value={gFactor !== undefined ? `${Math.round(gFactor * 100)}%` : '—'} icon={<Cpu className="w-3 h-3 text-slate-400" />} />
-                <MetricCell label="Alignment" value={mechanical?.semanticValidation?.alignment_status || '—'} icon={<Activity className="w-3 h-3 text-cyan-400" />} accent={mechanical?.semanticValidation?.alignment_status === 'CRITICAL' ? 'red' : undefined} />
-                <MetricCell label="Epistemic Guard" value={mechanical?.epistemicGuardResult?.label || '—'} icon={<AlertTriangle className="w-3 h-3 text-amber-400" />} accent={mechanical?.epistemicGuardResult?.label === 'VERIFY' ? 'red' : undefined} />
-                <MetricCell label="Repairs" value={mechanical?.repairAttempts != null ? String(mechanical.repairAttempts) : '—'} icon={<RefreshCw className="w-3 h-3 text-slate-400" />} accent={mechanical?.repairAttempts && mechanical.repairAttempts > 0 ? 'red' : undefined} />
-              <MetricCell label="Trend" value={eai?.scaffolding?.trend || '—'} icon={<TrendingUp className="w-3 h-3 text-slate-400" />} accent={eai?.scaffolding?.trend === 'FALLING' ? 'red' : undefined} />
-              <MetricCell label="Confidence" value={analysis?.confidence != null ? `${Math.round(analysis.confidence * 100)}%` : '—'} icon={<Eye className="w-3 h-3 text-slate-400" />} accent={analysis?.confidence != null && analysis.confidence < 0.4 ? 'red' : undefined} />
-              <MetricCell label="Borderline" value={analysis?.borderline_dimensions?.length ? analysis.borderline_dimensions.join(', ') : '—'} icon={<AlertTriangle className="w-3 h-3 text-slate-400" />} accent={analysis?.borderline_dimensions?.length ? 'indigo' : undefined} />
+                <MetricCell label="Verloop" value={translateTrend(eai?.scaffolding?.trend)} icon={<TrendingUp className="w-3 h-3 text-slate-400" />} accent={eai?.scaffolding?.trend === 'FALLING' ? 'red' : undefined} />
               </div>
 
               {/* Scaffolding sparkline */}
