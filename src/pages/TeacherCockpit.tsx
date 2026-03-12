@@ -385,11 +385,8 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 }
                 if (relevantBands.length === 0) return null;
                 return (
-                  <div className="px-4 py-3 border-b border-slate-800">
-                    <div className="flex items-center gap-1.5">
-                      <Eye className="w-3 h-3 text-slate-400" />
-                      <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Herkenbaar Gedrag</span>
-                    </div>
+                    <div className="px-4 py-3 border-b border-slate-800">
+                      <SectionLabel icon={<Eye className="w-3 h-3 text-slate-400" />} label="Herkenbaar Gedrag" />
                     <div className="mt-2 space-y-2">
                       {relevantBands.map(({ id, data }) => (
                         <div key={id} className="p-2 border border-slate-800/60 bg-slate-900/30 rounded-sm">
