@@ -16,6 +16,7 @@ import { getDimensionColors } from '@/utils/ssotHelpers';
 import { getShortKey, getRubric, getCycleOrder } from '@/data/ssot';
 import {
   translateBand, translateFix, translatePhase, translateTrend,
+  translateAdvice, getAgencyLabel, getTeacherStatusLine,
   getUrgencyLevel, sortByUrgency,
 } from '@/utils/teacherTranslations';
 import type { EAIAnalysis, MechanicalState } from '@/types';
@@ -180,7 +181,7 @@ const TeacherCockpit = () => {
                       <span className="text-slate-700">·</span>
                       <span>{node?.title || '—'}</span>
                     </div>
-                    <div className="flex items-center gap-3 mt-1.5">
+                    <div className="flex items-center gap-3 mt-1">
                       {analysis?.process_phases?.[0] && (
                         <span className="text-[8px] font-mono px-1.5 py-0.5 border border-slate-700 bg-slate-900 text-cyan-400">
                           {translatePhase(analysis.process_phases[0])}
@@ -198,6 +199,12 @@ const TeacherCockpit = () => {
                       )}
                       <span className="text-[8px] font-mono text-slate-600 ml-auto">
                         <MessageSquare className="w-2.5 h-2.5 inline mr-0.5" />{session.messages_count}
+                      </span>
+                    </div>
+                    {/* Compact teacher status line */}
+                    <div className="mt-1">
+                      <span className={`text-[8px] italic ${urgency.color}`}>
+                        {getTeacherStatusLine(session)}
                       </span>
                     </div>
                   </button>
@@ -345,7 +352,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
               <div className="grid grid-cols-2 border-b border-slate-800">
                 <MetricCell label="AI-actie" value={translateFix(analysis?.active_fix)} icon={<Zap className="w-3 h-3 text-indigo-400" />} accent={analysis?.active_fix ? 'indigo' : undefined} />
                 <MetricCell label="Kennistype" value={translateBand(analysis?.knowledge_type || analysis?.coregulation_bands?.find(c => c.startsWith('K')))} icon={<Brain className="w-3 h-3 text-yellow-400" />} />
-                <MetricCell label="Zelfstandigheid" value={agencyScore !== undefined ? `${agencyScore}%` : '—'} icon={<TrendingUp className="w-3 h-3 text-emerald-400" />} accent={agencyScore !== undefined && agencyScore < 40 ? 'red' : undefined} />
+                <MetricCell label="Zelfstandigheid" value={(() => { const al = getAgencyLabel(agencyScore); return al.label; })()} icon={<TrendingUp className="w-3 h-3 text-emerald-400" />} accent={agencyScore !== undefined && agencyScore < 40 ? 'red' : undefined} subtitle={agencyScore !== undefined ? `${agencyScore}%` : undefined} />
                 <MetricCell label="Verloop" value={translateTrend(eai?.scaffolding?.trend)} icon={<TrendingUp className="w-3 h-3 text-slate-400" />} accent={eai?.scaffolding?.trend === 'FALLING' ? 'red' : undefined} />
               </div>
 
@@ -364,7 +371,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                     ))}
                   </div>
                   {eai.scaffolding.advice && (
-                    <div className="text-[8px] text-amber-300 mt-2">💡 {eai.scaffolding.advice}</div>
+                    <div className="text-[8px] text-amber-300 mt-2">{translateAdvice(eai.scaffolding.advice)}</div>
                   )}
                 </div>
               )}
@@ -482,11 +489,11 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                   {msg.analysis && (
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       {(msg.analysis as EAIAnalysis).process_phases?.map((p: string) => (
-                        <span key={p} className="text-[7px] font-mono px-1 py-0.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">{p}</span>
+                        <span key={p} className="text-[7px] font-mono px-1 py-0.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">{translatePhase(p)}</span>
                       ))}
                       {(msg.analysis as EAIAnalysis).active_fix && (
                         <span className="text-[7px] font-mono px-1 py-0.5 bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                          {(msg.analysis as EAIAnalysis).active_fix}
+                          {translateFix((msg.analysis as EAIAnalysis).active_fix)}
                         </span>
                       )}
                       {(msg.analysis as EAIAnalysis).confidence != null && (
@@ -496,7 +503,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                       )}
                       {(msg.analysis as EAIAnalysis).borderline_dimensions?.map((dim: string) => (
                         <span key={dim} className="text-[7px] font-mono px-1 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          {dim} ↔
+                          {translateBand(dim)} ↔
                         </span>
                       ))}
                     </div>
@@ -606,7 +613,8 @@ const MetricCell: React.FC<{
   value: string;
   icon: React.ReactNode;
   accent?: 'indigo' | 'red';
-}> = ({ label, value, icon, accent }) => (
+  subtitle?: string;
+}> = ({ label, value, icon, accent, subtitle }) => (
   <div className="px-3 py-2.5 border-b border-r border-slate-800">
     <div className="flex items-center gap-1.5 mb-1">
       {icon}
@@ -619,6 +627,7 @@ const MetricCell: React.FC<{
     }`}>
       {value}
     </span>
+    {subtitle && <span className="text-[8px] font-mono text-slate-600 ml-1.5">{subtitle}</span>}
   </div>
 );
 
