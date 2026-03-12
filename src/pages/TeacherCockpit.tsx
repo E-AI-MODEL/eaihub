@@ -14,6 +14,10 @@ import { fetchChatMessages } from '@/services/adminDbService';
 import { getNodeById } from '@/data/curriculum';
 import { getDimensionColors } from '@/utils/ssotHelpers';
 import { getShortKey, getRubric, getCycleOrder } from '@/data/ssot';
+import {
+  translateBand, translateFix, translatePhase, translateTrend,
+  getUrgencyLevel, sortByUrgency,
+} from '@/utils/teacherTranslations';
 import type { EAIAnalysis, MechanicalState } from '@/types';
 import type { EAIStateLike } from '@/utils/eaiLearnAdapter';
 import { useAuth } from '@/hooks/useAuth';
@@ -141,13 +145,12 @@ const TeacherCockpit = () => {
                 <span className="text-[9px] text-slate-700 mt-1">Leerlingen verschijnen hier zodra ze starten</span>
               </div>
             ) : (
-              sessions.map(session => {
+              sortByUrgency(sessions).map(session => {
                 const analysis = session.analysis as EAIAnalysis | null;
                 const eai = session.eai_state as EAIStateLike | null;
                 const isSelected = selectedSession?.session_id === session.session_id;
                 const isOnline = session.status === 'ONLINE';
-                const agencyScore = eai?.scaffolding?.agency_score;
-                const isStruggling = agencyScore !== undefined && agencyScore < 40;
+                const urgency = getUrgencyLevel(session);
                 const node = session.current_node_id ? getNodeById(session.current_node_id) : null;
 
                 return (
@@ -160,11 +163,11 @@ const TeacherCockpit = () => {
                   >
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
-                        <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-slate-600'}`} />
+                        <div className={`w-2 h-2 rounded-full ${urgency.dot} ${isOnline ? '' : 'opacity-40'}`} title={urgency.level === 'high' ? 'Hulp nodig' : urgency.level === 'medium' ? 'Even checken' : 'Gaat goed'} />
                         <span className="text-[11px] font-medium text-slate-200 truncate max-w-[140px]">
                           {session.name || 'Anoniem'}
                         </span>
-                        {isStruggling && (
+                        {urgency.level === 'high' && (
                           <span className="text-[8px] px-1.5 py-0.5 bg-red-500/20 text-red-300 border border-red-500/30 font-mono uppercase">
                             Hulp
                           </span>
@@ -180,17 +183,17 @@ const TeacherCockpit = () => {
                     <div className="flex items-center gap-3 mt-1.5">
                       {analysis?.process_phases?.[0] && (
                         <span className="text-[8px] font-mono px-1.5 py-0.5 border border-slate-700 bg-slate-900 text-cyan-400">
-                          {analysis.process_phases[0]}
+                          {translatePhase(analysis.process_phases[0])}
                         </span>
                       )}
                       {analysis?.active_fix && (
-                        <span className="text-[8px] font-mono px-1.5 py-0.5 border border-indigo-500/30 bg-indigo-500/10 text-indigo-300">
-                          {analysis.active_fix}
+                        <span className="text-[8px] px-1.5 py-0.5 border border-indigo-500/30 bg-indigo-500/10 text-indigo-300" title={analysis.active_fix}>
+                          {translateFix(analysis.active_fix)}
                         </span>
                       )}
-                      {agencyScore !== undefined && (
-                        <span className={`text-[8px] font-mono ${agencyScore >= 60 ? 'text-emerald-400' : agencyScore >= 40 ? 'text-slate-400' : 'text-red-400'}`}>
-                          Agency: {agencyScore}%
+                      {eai?.scaffolding?.trend && eai.scaffolding.trend !== 'STABLE' && (
+                        <span className={`text-[8px] ${urgency.color}`}>
+                          {translateTrend(eai.scaffolding.trend)}
                         </span>
                       )}
                       <span className="text-[8px] font-mono text-slate-600 ml-auto">
@@ -338,18 +341,12 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 </div>
               </div>
 
-              {/* Metrics grid */}
+              {/* Metrics grid — didactically relevant only */}
               <div className="grid grid-cols-2 border-b border-slate-800">
-                <MetricCell label="Interventie" value={analysis?.active_fix || '—'} icon={<Zap className="w-3 h-3 text-slate-500" />} accent={analysis?.active_fix ? 'indigo' : undefined} />
-                <MetricCell label="Kennistype" value={analysis?.knowledge_type || analysis?.coregulation_bands?.find(c => c.startsWith('K')) || '—'} icon={<Brain className="w-3 h-3 text-yellow-400" />} />
+                <MetricCell label="AI-actie" value={translateFix(analysis?.active_fix)} icon={<Zap className="w-3 h-3 text-indigo-400" />} accent={analysis?.active_fix ? 'indigo' : undefined} />
+                <MetricCell label="Kennistype" value={translateBand(analysis?.knowledge_type || analysis?.coregulation_bands?.find(c => c.startsWith('K')))} icon={<Brain className="w-3 h-3 text-yellow-400" />} />
                 <MetricCell label="Zelfstandigheid" value={agencyScore !== undefined ? `${agencyScore}%` : '—'} icon={<TrendingUp className="w-3 h-3 text-emerald-400" />} accent={agencyScore !== undefined && agencyScore < 40 ? 'red' : undefined} />
-                <MetricCell label="G-Factor" value={gFactor !== undefined ? `${Math.round(gFactor * 100)}%` : '—'} icon={<Cpu className="w-3 h-3 text-slate-400" />} />
-                <MetricCell label="Alignment" value={mechanical?.semanticValidation?.alignment_status || '—'} icon={<Activity className="w-3 h-3 text-cyan-400" />} accent={mechanical?.semanticValidation?.alignment_status === 'CRITICAL' ? 'red' : undefined} />
-                <MetricCell label="Epistemic Guard" value={mechanical?.epistemicGuardResult?.label || '—'} icon={<AlertTriangle className="w-3 h-3 text-amber-400" />} accent={mechanical?.epistemicGuardResult?.label === 'VERIFY' ? 'red' : undefined} />
-                <MetricCell label="Repairs" value={mechanical?.repairAttempts != null ? String(mechanical.repairAttempts) : '—'} icon={<RefreshCw className="w-3 h-3 text-slate-400" />} accent={mechanical?.repairAttempts && mechanical.repairAttempts > 0 ? 'red' : undefined} />
-              <MetricCell label="Trend" value={eai?.scaffolding?.trend || '—'} icon={<TrendingUp className="w-3 h-3 text-slate-400" />} accent={eai?.scaffolding?.trend === 'FALLING' ? 'red' : undefined} />
-              <MetricCell label="Confidence" value={analysis?.confidence != null ? `${Math.round(analysis.confidence * 100)}%` : '—'} icon={<Eye className="w-3 h-3 text-slate-400" />} accent={analysis?.confidence != null && analysis.confidence < 0.4 ? 'red' : undefined} />
-              <MetricCell label="Borderline" value={analysis?.borderline_dimensions?.length ? analysis.borderline_dimensions.join(', ') : '—'} icon={<AlertTriangle className="w-3 h-3 text-slate-400" />} accent={analysis?.borderline_dimensions?.length ? 'indigo' : undefined} />
+                <MetricCell label="Verloop" value={translateTrend(eai?.scaffolding?.trend)} icon={<TrendingUp className="w-3 h-3 text-slate-400" />} accent={eai?.scaffolding?.trend === 'FALLING' ? 'red' : undefined} />
               </div>
 
               {/* Scaffolding sparkline */}
@@ -510,9 +507,20 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
           )}
         </TabsContent>
 
-        {/* 10D Analysis tab */}
+        {/* 10D Analysis tab — includes technical metrics moved from overview */}
         <TabsContent value="analysis" className="flex-1 overflow-y-auto mt-0 px-4 py-3">
           <div className="max-w-2xl mx-auto">
+            {/* Technical metrics (moved from overview) */}
+            <h3 className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-2">Systeemkwaliteit</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-0 border border-slate-800 mb-4">
+              <MetricCell label="G-Factor" value={gFactor !== undefined ? `${Math.round(gFactor * 100)}%` : '—'} icon={<Cpu className="w-3 h-3 text-slate-400" />} />
+              <MetricCell label="Alignment" value={mechanical?.semanticValidation?.alignment_status || '—'} icon={<Activity className="w-3 h-3 text-cyan-400" />} accent={mechanical?.semanticValidation?.alignment_status === 'CRITICAL' ? 'red' : undefined} />
+              <MetricCell label="Epistemic Guard" value={mechanical?.epistemicGuardResult?.label || '—'} icon={<AlertTriangle className="w-3 h-3 text-amber-400" />} accent={mechanical?.epistemicGuardResult?.label === 'VERIFY' ? 'red' : undefined} />
+              <MetricCell label="Repairs" value={mechanical?.repairAttempts != null ? String(mechanical.repairAttempts) : '—'} icon={<RefreshCw className="w-3 h-3 text-slate-400" />} accent={mechanical?.repairAttempts && mechanical.repairAttempts > 0 ? 'red' : undefined} />
+              <MetricCell label="Confidence" value={analysis?.confidence != null ? `${Math.round(analysis.confidence * 100)}%` : '—'} icon={<Eye className="w-3 h-3 text-slate-400" />} accent={analysis?.confidence != null && analysis.confidence < 0.4 ? 'red' : undefined} />
+              <MetricCell label="Borderline" value={analysis?.borderline_dimensions?.length ? analysis.borderline_dimensions.join(', ') : '—'} icon={<AlertTriangle className="w-3 h-3 text-slate-400" />} accent={analysis?.borderline_dimensions?.length ? 'indigo' : undefined} />
+            </div>
+
             <h3 className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-3">Alle 10 Dimensies — Live Status</h3>
             <div className="grid grid-cols-2 gap-2">
               {getCycleOrder().map(rubricId => {
