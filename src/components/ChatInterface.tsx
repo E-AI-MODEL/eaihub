@@ -2,13 +2,13 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Send, RotateCcw } from 'lucide-react';
 import MessageBubble from '@/components/MessageBubble';
 import type { Message, LearnerProfile, EAIAnalysis, MechanicalState } from '@/types';
-import { sendChat } from '@/services/chatService';
+import { sendChat, seedSessionHistory } from '@/services/chatService';
 import { getOrCreateUserId } from '@/services/identity';
 import { useAuth } from '@/hooks/useAuth';
 import { calculateDynamicTTL } from '@/utils/eaiLearnAdapter';
 import { pushTrace } from '@/lib/reliabilityPipeline';
 import { getNodeById } from '@/data/curriculum';
-import { upsertSessionState, subscribeToTeacherMessages, fetchTeacherMessages, markMessageRead } from '@/services/sessionSyncService';
+import { upsertSessionState, subscribeToTeacherMessages, fetchTeacherMessages, markMessageRead, setSessionOffline } from '@/services/sessionSyncService';
 import { getActivePlugin } from '@/lib/ssotRuntime';
 import { fetchChatMessages } from '@/services/adminDbService';
 
@@ -93,6 +93,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           mechanical: r.mechanical as unknown as MechanicalState | undefined,
         }));
         setMessages(loaded);
+        // Seed AI model context from loaded history
+        seedSessionHistory(sessionId, rows.map(r => ({ role: r.role, content: r.content })));
         // Restore latest analysis to parent
         const lastModel = [...loaded].reverse().find(m => m.role === 'model' && m.analysis);
         if (lastModel?.analysis && onAnalysisUpdate) {
@@ -130,7 +132,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     };
     pushState(); // immediate push
     const interval = setInterval(pushState, 10000);
-    return () => clearInterval(interval);
+    const capturedSessionId = sessionId;
+    return () => {
+      clearInterval(interval);
+      // Mark this session offline when sessionId changes or component unmounts
+      setSessionOffline(capturedSessionId);
+    };
   }, [sessionId, profile, currentAnalysis, currentMechanical, eaiState, messages.length]);
 
   // ═══ TEACHER MESSAGES: Listen for incoming messages ═══
