@@ -24,6 +24,8 @@ export interface TeacherMessage {
  * - pluginId: per sessie. null = base SSOT (geen plugin geladen), string = actief plugin ID.
  * - progress: per sessie, afgeleid van mastery sync.
  */
+export type WorkMode = 'LEARN' | 'TEST';
+
 export async function upsertSessionState(params: {
   userId: string;
   sessionId: string;
@@ -35,6 +37,7 @@ export async function upsertSessionState(params: {
   lastMessagePreview: string | null;
   progress?: number;
   pluginId?: string | null;
+  workMode?: WorkMode;
 }) {
   const { error } = await supabase
     .from('student_sessions')
@@ -53,6 +56,7 @@ export async function upsertSessionState(params: {
       last_message_preview: params.lastMessagePreview,
       progress: params.progress ?? 0,
       plugin_id: params.pluginId ?? null,
+      work_mode: params.workMode ?? 'LEARN',
       last_active_at: new Date().toISOString(),
     }, { onConflict: 'session_id' });
 
