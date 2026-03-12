@@ -57,6 +57,7 @@ const StudentStudio: React.FC = () => {
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [mobileTab, setMobileTab] = useState<MobileTab>('chat');
   const [pendingCommand, setPendingCommand] = useState<string | null>(null);
+  const [workMode, setWorkMode] = useState<WorkMode | null>(null);
 
   const isMobile = useIsMobile();
   const isTablet = !isMobile && typeof window !== 'undefined' && window.innerWidth < 1024;
