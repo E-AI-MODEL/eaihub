@@ -13,7 +13,7 @@ import {
 import { fetchChatMessages } from '@/services/adminDbService';
 import { getNodeById } from '@/data/curriculum';
 import { getDimensionColors } from '@/utils/ssotHelpers';
-import { getShortKey, getRubric, getCycleOrder } from '@/data/ssot';
+import { getShortKey, getRubric, getCycleOrder, getBand } from '@/data/ssot';
 import {
   translateBand, translateFix, translatePhase, translateTrend,
   translateAdvice, getAgencyLabel, getTeacherStatusLine,
