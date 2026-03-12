@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Users, Activity, Clock, RefreshCw, AlertTriangle, Send, X,
-  Brain, Zap, TrendingUp, Cpu, ChevronRight, Home, MessageSquare, Eye, ArrowLeft
+  Users, Activity, Clock, RefreshCw, Send, X,
+  Brain, Zap, TrendingUp, Cpu, ChevronRight, Home, MessageSquare, Eye, ArrowLeft, AlertTriangle
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -108,13 +108,15 @@ const TeacherCockpit = () => {
           <button onClick={() => navigate('/')} className="p-1.5 text-slate-500 hover:text-slate-300 transition-colors">
             <Home className="w-4 h-4" />
           </button>
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Docentencockpit</span>
+          {/* 1. Docentencockpit → Docentcockpit */}
+          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Docentcockpit</span>
           <div className="flex items-center gap-1.5 ml-2">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-[10px] font-mono text-emerald-400">{onlineSessions.length} online</span>
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {/* 2. "INTERVENTIE NODIG" → rustiger "Hulp nodig" */}
           {needsAttention.length > 0 && (
             <button
               onClick={() => setSelectedSession(needsAttention[0])}
@@ -122,7 +124,7 @@ const TeacherCockpit = () => {
               title={`Spring naar ${needsAttention[0]?.name || 'leerling'}`}
             >
               <AlertTriangle className="w-3 h-3 text-amber-400" />
-              <span className="text-[9px] font-mono text-amber-300">{needsAttention.length} INTERVENTIE NODIG</span>
+              <span className="text-[9px] font-mono text-amber-300">{needsAttention.length} Hulp nodig</span>
             </button>
           )}
           <span className="text-[9px] font-mono text-slate-600">
@@ -164,6 +166,7 @@ const TeacherCockpit = () => {
                   >
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
+                        {/* 3. Neutraal icoon standaard; AlertTriangle alleen bij high urgency */}
                         <div className={`w-2 h-2 rounded-full ${urgency.dot} ${isOnline ? '' : 'opacity-40'}`} title={urgency.level === 'high' ? 'Hulp nodig' : urgency.level === 'medium' ? 'Even checken' : 'Gaat goed'} />
                         <span className="text-[11px] font-medium text-slate-200 truncate max-w-[140px]">
                           {session.name || 'Anoniem'}
@@ -287,7 +290,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
 
   return (
     <div className="flex-1 flex flex-col">
-      {/* Detail header */}
+      {/* Detail header — 15. subject+level ook op mobile */}
       <div className="h-10 px-3 sm:px-4 flex items-center justify-between border-b border-slate-700 bg-slate-900/60 shrink-0">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {/* Mobile back button */}
@@ -296,7 +299,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
           </button>
           <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${session.status === 'ONLINE' ? 'bg-emerald-500' : 'bg-slate-600'}`} />
           <span className="text-[11px] font-medium text-slate-200 truncate">{session.name || 'Anoniem'}</span>
-          <span className="text-[9px] text-slate-500 font-mono shrink-0 hidden sm:inline">{session.subject} {session.level}</span>
+          <span className="text-[9px] text-slate-500 font-mono shrink-0">{session.subject} {session.level}</span>
           {node && (
             <>
               <ChevronRight className="w-3 h-3 text-slate-700 shrink-0 hidden sm:block" />
@@ -329,10 +332,13 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
             {/* Left: Didactisch overzicht */}
             <div className="border-r border-slate-800">
 
-              {/* 1. SITUATIE — wat is er aan de hand */}
+              {/* 1. SITUATIE — 3. neutraal icoon; AlertTriangle alleen bij high */}
               <div className="px-4 py-3 border-b border-slate-800">
                 <div className="flex items-center gap-1.5 mb-1.5">
-                  <AlertTriangle className="w-3 h-3 text-slate-400" />
+                  {getUrgencyLevel(session).level === 'high'
+                    ? <AlertTriangle className="w-3 h-3 text-red-400" />
+                    : <Activity className="w-3 h-3 text-slate-400" />
+                  }
                   <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Situatie</span>
                 </div>
                 <p className={`text-[11px] font-medium ${getUrgencyLevel(session).color}`}>
@@ -355,7 +361,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 </div>
               </div>
 
-              {/* 2. HERKENBAAR GEDRAG — observaties + tips uit SSOT */}
+              {/* 2. HERKENBAAR GEDRAG — 6. icoon toegevoegd */}
               {allBands.length > 0 && (() => {
                 const seen = new Set<string>();
                 const relevantBands: { id: string; data: ReturnType<typeof getBand> }[] = [];
@@ -378,7 +384,10 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 if (relevantBands.length === 0) return null;
                 return (
                   <div className="px-4 py-3 border-b border-slate-800">
-                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Herkenbaar Gedrag</span>
+                    <div className="flex items-center gap-1.5">
+                      <Eye className="w-3 h-3 text-slate-400" />
+                      <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Herkenbaar Gedrag</span>
+                    </div>
                     <div className="mt-2 space-y-2">
                       {relevantBands.map(({ id, data }) => (
                         <div key={id} className="p-2 border border-slate-800/60 bg-slate-900/30 rounded-sm">
@@ -408,32 +417,15 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 );
               })()}
 
-              {/* 3. VERDIEPING — metrics + sparkline */}
+              {/* 3. VERDIEPING — 10. "Berichten" → "Fase" */}
               <div className="grid grid-cols-2 border-b border-slate-800">
                 <MetricCell label="Zelfstandigheid" value={(() => { const al = getAgencyLabel(agencyScore); return al.label; })()} icon={<TrendingUp className="w-3 h-3 text-emerald-400" />} accent={agencyScore !== undefined && agencyScore < 40 ? 'red' : undefined} subtitle={agencyScore !== undefined ? `${agencyScore}%` : undefined} />
                 <MetricCell label="Kennistype" value={translateBand(analysis?.knowledge_type || analysis?.coregulation_bands?.find(c => c.startsWith('K')))} icon={<Brain className="w-3 h-3 text-yellow-400" />} />
                 <MetricCell label="Verloop" value={translateTrend(eai?.scaffolding?.trend)} icon={<TrendingUp className="w-3 h-3 text-slate-400" />} accent={eai?.scaffolding?.trend === 'FALLING' ? 'red' : undefined} />
-                <MetricCell label="Berichten" value={String(session.messages_count || 0)} icon={<MessageSquare className="w-3 h-3 text-slate-400" />} />
+                <MetricCell label="Fase" value={translatePhase(phase)} icon={<Brain className="w-3 h-3 text-cyan-400" />} />
               </div>
 
-              {/* Sparkline — zelfstandigheid over tijd */}
-              {eai?.scaffolding && (
-                <div className="px-4 py-3 border-b border-slate-800">
-                  <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Zelfstandigheid over tijd</span>
-                  <div className="h-6 flex items-end gap-0.5 mt-2">
-                    {eai.scaffolding.history_window.map((score: number, i: number) => (
-                      <div key={i} className="flex-1 bg-slate-800 relative overflow-hidden rounded-sm">
-                        <div
-                          className={`absolute bottom-0 w-full rounded-sm ${score >= 60 ? 'bg-emerald-600' : score >= 40 ? 'bg-slate-600' : 'bg-red-600'}`}
-                          style={{ height: `${Math.max(score, 5)}%` }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Phase stepper */}
+              {/* 11. Phase stepper — vóór sparkline geplaatst */}
               <div className="px-4 py-3 border-b border-slate-800">
                 <div className="flex items-center gap-1.5 mb-2">
                   <Brain className="w-3 h-3 text-indigo-400" />
@@ -453,20 +445,43 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 </div>
               </div>
 
-              {/* Laatste bericht */}
+              {/* 7. Sparkline — icoon toegevoegd */}
+              {eai?.scaffolding && (
+                <div className="px-4 py-3 border-b border-slate-800">
+                  <div className="flex items-center gap-1.5">
+                    <TrendingUp className="w-3 h-3 text-slate-400" />
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Zelfstandigheid over tijd</span>
+                  </div>
+                  <div className="h-6 flex items-end gap-0.5 mt-2">
+                    {eai.scaffolding.history_window.map((score: number, i: number) => (
+                      <div key={i} className="flex-1 bg-slate-800 relative overflow-hidden rounded-sm">
+                        <div
+                          className={`absolute bottom-0 w-full rounded-sm ${score >= 60 ? 'bg-emerald-600' : score >= 40 ? 'bg-slate-600' : 'bg-red-600'}`}
+                          style={{ height: `${Math.max(score, 5)}%` }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 8. Laatste bericht — icoon toegevoegd */}
               {session.last_message_preview && (
                 <div className="px-4 py-3 border-b border-slate-800">
-                  <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Laatste Bericht</span>
+                  <div className="flex items-center gap-1.5">
+                    <MessageSquare className="w-3 h-3 text-slate-400" />
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Laatste Bericht</span>
+                  </div>
                   <p className="text-[10px] text-slate-400 mt-1.5 leading-relaxed italic">
                     "{session.last_message_preview}"
                   </p>
                 </div>
               )}
 
-              {/* Timing */}
+              {/* 9. Timing — "Actief:" → "Laatst actief" */}
               <div className="px-4 py-2.5 border-b border-slate-800">
                 <span className="text-[9px] font-mono text-slate-600">
-                  <Clock className="w-3 h-3 inline mr-1" />Actief: {getTimeSince(session.last_active_at)} geleden
+                  <Clock className="w-3 h-3 inline mr-1" />Laatst actief: {getTimeSince(session.last_active_at)} geleden
                 </span>
               </div>
             </div>
@@ -503,14 +518,14 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                   </div>
                 )}
               </div>
-              {/* Message input */}
+              {/* 14. Placeholder volledig Nederlands */}
               <div className="px-3 py-2 border-t border-slate-800 bg-slate-950">
                 <div className="flex items-end gap-2">
                   <textarea
                     value={messageInput}
                     onChange={e => onMessageInputChange(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSendMessage(); } }}
-                    placeholder="Bericht aan leerling (read-only in chat)..."
+                    placeholder="Typ een bericht aan de leerling..."
                     rows={2}
                     className="flex-1 bg-slate-900 border border-slate-700 px-2.5 py-2 text-slate-200 text-[16px] sm:text-[11px] placeholder:text-slate-600 focus:outline-none focus:border-amber-500/50 resize-none"
                   />
@@ -523,14 +538,14 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                   </button>
                 </div>
                 <p className="text-[8px] text-slate-700 mt-1">
-                  ⚠️ Dit bericht verschijnt als read-only melding in de chat. De AI ontvangt het niet.
+                  ⚠️ Dit bericht verschijnt als melding in de chat van de leerling. De AI ontvangt het niet.
                 </p>
               </div>
             </div>
           </div>
         </TabsContent>
 
-        {/* Chatlog tab */}
+        {/* 4 + 5. Chatlog tab — confidence en borderline verwijderd uit primair zicht */}
         <TabsContent value="chatlog" className="flex-1 overflow-y-auto mt-0 px-4 py-3">
           {chatLog.length === 0 ? (
             <div className="text-center py-12 text-slate-700">
@@ -571,16 +586,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                           {translateFix((msg.analysis as EAIAnalysis).active_fix)}
                         </span>
                       )}
-                      {(msg.analysis as EAIAnalysis).confidence != null && (
-                        <span className="text-[7px] font-mono px-1 py-0.5 bg-slate-800 text-slate-400 border border-slate-700">
-                          Zekerheid: {Math.round(((msg.analysis as EAIAnalysis).confidence!) * 100)}%
-                        </span>
-                      )}
-                      {(msg.analysis as EAIAnalysis).borderline_dimensions?.map((dim: string) => (
-                        <span key={dim} className="text-[7px] font-mono px-1 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          {translateBand(dim)} ↔
-                        </span>
-                      ))}
+                      {/* confidence + borderline verwijderd — beschikbaar in 10D Analyse tab */}
                     </div>
                   )}
                 </div>
@@ -589,18 +595,18 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
           )}
         </TabsContent>
 
-        {/* 10D Analysis tab — includes technical metrics moved from overview */}
+        {/* 12 + 13. 10D Analysis tab — labels vertaald naar Nederlands */}
         <TabsContent value="analysis" className="flex-1 overflow-y-auto mt-0 px-4 py-3">
           <div className="max-w-2xl mx-auto">
-            {/* Technical metrics (moved from overview) */}
+            {/* Technical metrics */}
             <h3 className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-2">Systeemkwaliteit</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-0 border border-slate-800 mb-4">
               <MetricCell label="G-Factor" value={gFactor !== undefined ? `${Math.round(gFactor * 100)}%` : '—'} icon={<Cpu className="w-3 h-3 text-slate-400" />} />
-              <MetricCell label="Alignment" value={mechanical?.semanticValidation?.alignment_status || '—'} icon={<Activity className="w-3 h-3 text-cyan-400" />} accent={mechanical?.semanticValidation?.alignment_status === 'CRITICAL' ? 'red' : undefined} />
-              <MetricCell label="Epistemic Guard" value={mechanical?.epistemicGuardResult?.label || '—'} icon={<AlertTriangle className="w-3 h-3 text-amber-400" />} accent={mechanical?.epistemicGuardResult?.label === 'VERIFY' ? 'red' : undefined} />
-              <MetricCell label="Repairs" value={mechanical?.repairAttempts != null ? String(mechanical.repairAttempts) : '—'} icon={<RefreshCw className="w-3 h-3 text-slate-400" />} accent={mechanical?.repairAttempts && mechanical.repairAttempts > 0 ? 'red' : undefined} />
-              <MetricCell label="Confidence" value={analysis?.confidence != null ? `${Math.round(analysis.confidence * 100)}%` : '—'} icon={<Eye className="w-3 h-3 text-slate-400" />} accent={analysis?.confidence != null && analysis.confidence < 0.4 ? 'red' : undefined} />
-              <MetricCell label="Borderline" value={analysis?.borderline_dimensions?.length ? analysis.borderline_dimensions.join(', ') : '—'} icon={<AlertTriangle className="w-3 h-3 text-slate-400" />} accent={analysis?.borderline_dimensions?.length ? 'indigo' : undefined} />
+              <MetricCell label="Afstemming" value={mechanical?.semanticValidation?.alignment_status || '—'} icon={<Activity className="w-3 h-3 text-cyan-400" />} accent={mechanical?.semanticValidation?.alignment_status === 'CRITICAL' ? 'red' : undefined} />
+              <MetricCell label="Epistemische Controle" value={mechanical?.epistemicGuardResult?.label || '—'} icon={<Eye className="w-3 h-3 text-amber-400" />} accent={mechanical?.epistemicGuardResult?.label === 'VERIFY' ? 'red' : undefined} />
+              <MetricCell label="Herstelacties" value={mechanical?.repairAttempts != null ? String(mechanical.repairAttempts) : '—'} icon={<RefreshCw className="w-3 h-3 text-slate-400" />} accent={mechanical?.repairAttempts && mechanical.repairAttempts > 0 ? 'red' : undefined} />
+              <MetricCell label="Zekerheid" value={analysis?.confidence != null ? `${Math.round(analysis.confidence * 100)}%` : '—'} icon={<Eye className="w-3 h-3 text-slate-400" />} accent={analysis?.confidence != null && analysis.confidence < 0.4 ? 'red' : undefined} />
+              <MetricCell label="Grensgevallen" value={analysis?.borderline_dimensions?.length ? analysis.borderline_dimensions.join(', ') : '—'} icon={<AlertTriangle className="w-3 h-3 text-slate-400" />} accent={analysis?.borderline_dimensions?.length ? 'indigo' : undefined} />
             </div>
 
             <h3 className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-3">Alle 10 Dimensies — Live Status</h3>
@@ -624,13 +630,13 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                       <div className="flex items-center gap-1.5">
                         <span className={`text-[10px] font-mono font-bold ${colors.text}`}>{shortKey}</span>
                         {isBorderline && (
-                          <span className="text-[7px] font-mono px-1 py-0.5 bg-amber-500/15 text-amber-400 border border-amber-500/25 uppercase">Borderline</span>
+                          <span className="text-[7px] font-mono px-1 py-0.5 bg-amber-500/15 text-amber-400 border border-amber-500/25 uppercase">Grensgeval</span>
                         )}
                       </div>
                       <div className="flex items-center gap-1.5">
                         <span className={`text-[9px] font-mono ${colors.text}`}>{currentBand}</span>
                         {secondaryBand && (
-                          <span className="text-[8px] font-mono text-slate-500" title="Secondary band">↔ {secondaryBand}</span>
+                          <span className="text-[8px] font-mono text-slate-500" title="Secundaire band">↔ {secondaryBand}</span>
                         )}
                       </div>
                     </div>
@@ -653,12 +659,12 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
               })}
             </div>
 
-            {/* Confidence + Reasoning */}
+            {/* 13. Confidence + Reasoning — vertaald */}
             {(analysis?.confidence != null || analysis?.reasoning) && (
               <div className="mt-4 p-3 border border-slate-800 bg-slate-900/40">
                 {analysis?.confidence != null && (
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Confidence</span>
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Zekerheid</span>
                     <span className={`text-[10px] font-mono ${analysis.confidence >= 0.7 ? 'text-emerald-400' : analysis.confidence >= 0.4 ? 'text-slate-300' : 'text-amber-400'}`}>
                       {Math.round(analysis.confidence * 100)}%
                     </span>
@@ -666,7 +672,7 @@ const StudentDetailPanel: React.FC<StudentDetailPanelProps> = ({
                 )}
                 {analysis?.reasoning && (
                   <>
-                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Analyse Reasoning</span>
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Analyse-redenering</span>
                     <p className="text-[10px] text-slate-400 mt-1 font-mono">{analysis.reasoning}</p>
                   </>
                 )}
