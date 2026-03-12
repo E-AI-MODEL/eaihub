@@ -23,36 +23,7 @@ const LandingPage = () => {
               to="/concept" 
               className="text-muted-foreground hover:text-foreground transition-colors border-b border-transparent hover:border-primary pb-0.5"
             >
-              Architectuur & Uitleg
-            </Link>
-          </li>
-          
-          <li className="hidden sm:block" aria-hidden="true">
-            <div className="h-4 w-px bg-border" />
-          </li>
-
-          <li>
-            <Link 
-              to="/student" 
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              Leerling
-            </Link>
-          </li>
-          <li>
-            <Link 
-              to="/teacher" 
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              Docent
-            </Link>
-          </li>
-          <li className="hidden sm:block">
-            <Link 
-              to="/admin" 
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              Admin
+              Hoe werkt het?
             </Link>
           </li>
           <li>
@@ -122,7 +93,7 @@ const LandingPage = () => {
               
               {/* Leerling Card */}
               <Link 
-                to="/student" 
+                to="/auth" 
                 className="group relative block eai-card-gradient border border-border rounded-3xl overflow-hidden hover:border-primary/50 transition-all hover:shadow-2xl hover:shadow-primary/10 focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <article className="p-6 sm:p-10 h-full flex flex-col">
@@ -144,7 +115,7 @@ const LandingPage = () => {
 
               {/* Teacher Card */}
               <Link 
-                to="/teacher" 
+                to="/auth" 
                 className="group relative block eai-card-gradient border border-border rounded-3xl overflow-hidden hover:border-eai-purple/50 transition-all hover:shadow-2xl hover:shadow-eai-purple/10 focus:outline-none focus:ring-2 focus:ring-eai-purple"
               >
                 <article className="p-6 sm:p-10 h-full flex flex-col">
@@ -166,7 +137,7 @@ const LandingPage = () => {
 
               {/* Admin Card */}
               <Link 
-                to="/admin" 
+                to="/auth" 
                 className="group relative block eai-card-gradient border border-border rounded-3xl overflow-hidden hover:border-primary/50 transition-all hover:shadow-2xl hover:shadow-primary/10 focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <article className="p-6 sm:p-10 h-full flex flex-col">
