@@ -111,3 +111,53 @@ export function sortByUrgency(sessions: StudentSessionRow[]): StudentSessionRow[
     return new Date(b.last_active_at).getTime() - new Date(a.last_active_at).getTime();
   });
 }
+
+// ── scaffolding.advice → Dutch (3 fixed strings) ──
+
+const ADVICE_TRANSLATIONS: Record<string, string> = {
+  'CRITICAL DEPENDENCY DETECTED. INITIATE FADING (FORCE TD2/TD3).':
+    '⚠️ Leerling leunt zwaar op AI. Geleidelijk loslaten nodig.',
+  'AGENCY DROPPING. REDUCE SUPPORT LEVEL.':
+    '↓ Zelfstandigheid daalt. Minder ondersteuning bieden.',
+  'HIGH AGENCY. INCREASE COMPLEXITY (E4/S5).':
+    '↑ Werkt zelfstandig. Complexiteit kan omhoog.',
+};
+
+export function translateAdvice(advice: string | null | undefined): string {
+  if (!advice) return '—';
+  return ADVICE_TRANSLATIONS[advice] || advice;
+}
+
+// ── Qualitative agency label ──
+
+export interface AgencyLabel {
+  label: string;
+  color: string;
+}
+
+export function getAgencyLabel(score: number | undefined): AgencyLabel {
+  if (score === undefined) return { label: '—', color: 'text-slate-400' };
+  if (score < 40) return { label: 'Laag', color: 'text-red-400' };
+  if (score <= 70) return { label: 'Matig', color: 'text-amber-400' };
+  return { label: 'Goed', color: 'text-emerald-400' };
+}
+
+// ── Compact teacher status line per student ──
+// Thin derivation from existing agency + trend + K-band. No weighting model.
+
+export function getTeacherStatusLine(session: StudentSessionRow): string {
+  const eai = session.eai_state as EAIStateLike | null;
+  const agency = eai?.scaffolding?.agency_score;
+  const trend = eai?.scaffolding?.trend;
+
+  // K-band from analysis
+  const analysis = session.analysis as Record<string, unknown> | null;
+  const kBand = (analysis as any)?.knowledge_type
+    || ((analysis as any)?.coregulation_bands as string[] | undefined)?.find((c: string) => c.startsWith('K'));
+
+  if (agency !== undefined && agency < 40) return 'Heeft hulp nodig';
+  if (trend === 'FALLING') return 'Wordt afhankelijker';
+  if (agency !== undefined && agency > 70 && trend !== 'FALLING') return 'Werkt zelfstandig';
+  if ((kBand === 'K0' || kBand === 'K1') && agency !== undefined && agency >= 40 && agency <= 70) return 'Check begrip';
+  return 'Actief';
+}
