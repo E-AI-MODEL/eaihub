@@ -5,11 +5,20 @@ import { supabase } from '@/integrations/supabase/client';
 
 const MASTERY_STORAGE_PREFIX = 'eai_mastery_local_';
 
+export type MasteryStatus = 'INTRO' | 'WORKING' | 'CHECKING' | 'MASTERED';
+
+const STATUS_ORDER: Record<MasteryStatus, number> = {
+  INTRO: 0,
+  WORKING: 1,
+  CHECKING: 2,
+  MASTERED: 3,
+};
+
 export type MasteryUpdate = {
   userId: string;
   pathId: string;
   currentNodeId: string | null;
-  status: 'INTRO' | 'WORKING' | 'CHECKING' | 'MASTERED';
+  status: MasteryStatus;
   evidence?: {
     nodeId: string;
     evidence: string;
