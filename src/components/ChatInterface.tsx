@@ -56,6 +56,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   currentMechanical,
   eaiState,
   onResetSession,
+  workMode,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
