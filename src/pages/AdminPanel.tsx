@@ -57,6 +57,7 @@ const CollapsibleSection = ({ title, defaultOpen = false, nested = false, childr
 const AdminPanel = () => {
   const { isSuperUser, user } = useAuth();
   const [adminSchoolId, setAdminSchoolId] = useState<string | null>(null);
+  const [pendingRequestCount, setPendingRequestCount] = useState(0);
   const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
   const [storageItems, setStorageItems] = useState<StorageItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -103,6 +104,17 @@ const AdminPanel = () => {
     };
     resolveSchoolId();
   }, [user, isSuperUser]);
+
+  // Fetch pending role request count
+  const fetchPendingCount = async () => {
+    const { count } = await supabase
+      .from('role_requests')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'PENDING');
+    setPendingRequestCount(count ?? 0);
+  };
+
+  useEffect(() => { fetchPendingCount(); }, []);
 
   // Load system data on mount
   useEffect(() => {
@@ -263,9 +275,12 @@ const AdminPanel = () => {
               <Users className="w-3 h-3 mr-1 sm:mr-1.5" />
               <span className="hidden sm:inline">Gebruikers</span><span className="sm:hidden">Users</span>
             </TabsTrigger>
-            <TabsTrigger value="requests" className="text-xs sm:text-sm whitespace-nowrap">
+            <TabsTrigger value="requests" className="text-xs sm:text-sm whitespace-nowrap" onClick={fetchPendingCount}>
               <Clock className="w-3 h-3 mr-1 sm:mr-1.5" />
               <span className="hidden sm:inline">Aanvragen</span><span className="sm:hidden">Reqs</span>
+              {pendingRequestCount > 0 && (
+                <Badge variant="secondary" className="ml-1.5 text-[9px] px-1.5 py-0 min-w-[1.25rem] justify-center">{pendingRequestCount}</Badge>
+              )}
             </TabsTrigger>
             <span className="self-center mx-1 text-border">│</span>
             {/* Technisch */}
