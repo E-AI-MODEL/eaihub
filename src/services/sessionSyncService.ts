@@ -174,6 +174,7 @@ export interface StudentSessionRow {
   last_active_at: string;
   created_at: string;
   updated_at: string;
+  work_mode: WorkMode;
 }
 
 export async function fetchAllSessions(): Promise<StudentSessionRow[]> {
