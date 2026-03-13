@@ -11,6 +11,7 @@ import StudentStudio from "@/pages/StudentStudio";
 import TeacherCockpit from "@/pages/TeacherCockpit";
 import AdminPanel from "@/pages/AdminPanel";
 import ConceptPage from "@/pages/ConceptPage";
+import LearningPage from "@/pages/LearningPage";
 import AuthPage from "@/pages/AuthPage";
 import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/concept" element={<ConceptPage />} />
+              <Route path="/leren" element={<LearningPage />} />
               <Route path="/student" element={
                 <AuthGuard>
                   <StudentStudio />

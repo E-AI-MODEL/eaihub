@@ -10,7 +10,7 @@ const TopNav = () => {
   const location = useLocation();
   const { user, roles, signOut } = useAuth();
   const [showRoleDialog, setShowRoleDialog] = useState(false);
-  const isHidden = location.pathname === '/' || location.pathname === '/concept' || location.pathname === '/student' || location.pathname === '/auth' || location.pathname === '/reset-password';
+  const isHidden = location.pathname === '/' || location.pathname === '/concept' || location.pathname === '/leren' || location.pathname === '/student' || location.pathname === '/auth' || location.pathname === '/reset-password';
 
   if (isHidden) return null;
 
