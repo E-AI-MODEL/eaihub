@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Send, RotateCcw } from 'lucide-react';
+import { Send, RotateCcw, X } from 'lucide-react';
 import MessageBubble from '@/components/MessageBubble';
 import type { Message, LearnerProfile, EAIAnalysis, MechanicalState } from '@/types';
 import { sendChat, seedSessionHistory } from '@/services/chatService';
