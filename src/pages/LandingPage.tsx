@@ -20,6 +20,14 @@ const LandingPage = () => {
         <ul className="flex gap-2 sm:gap-6 text-[10px] sm:text-xs font-bold tracking-widest uppercase items-center list-none m-0 p-0">
           <li className="hidden sm:block">
             <Link 
+              to="/leren" 
+              className="text-muted-foreground hover:text-foreground transition-colors border-b border-transparent hover:border-primary pb-0.5"
+            >
+              Leren met EAIHUB
+            </Link>
+          </li>
+          <li className="hidden sm:block">
+            <Link 
               to="/concept" 
               className="text-muted-foreground hover:text-foreground transition-colors border-b border-transparent hover:border-primary pb-0.5"
             >

@@ -331,7 +331,7 @@ const LearningPage = () => {
           <div className="text-center md:text-left">
             <span className="font-bold text-foreground tracking-tight">EAIHUB</span>
             <span className="mx-2 text-border">·</span>
-            Een product van EAI Analys&amp;Advies — H. Visser
+            Een product van EAI Analys&Advies — H. Visser
           </div>
           <div className="flex gap-4">
             <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
