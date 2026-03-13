@@ -130,7 +130,7 @@ const GoalPicker: React.FC<GoalPickerProps> = ({ profile, onSelect, onDismiss })
   );
 };
 
-
+export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   profile,
   onAnalysisUpdate,
   sessionId: externalSessionId,
