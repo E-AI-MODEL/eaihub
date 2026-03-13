@@ -148,6 +148,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const [syncPulse, setSyncPulse] = useState(false);
   const [showGoalPicker, setShowGoalPicker] = useState(true);
+  const [goalPickerDismissing, setGoalPickerDismissing] = useState(false);
   const [internalSessionId] = useState(() => `session_${crypto.randomUUID()}`);
   const sessionId = externalSessionId || internalSessionId;
   const { user } = useAuth();
@@ -356,7 +357,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     nudgeLevelRef.current = 0;
     analysisRef.current = null;
     setHistoryLoaded(false);
+    setShowGoalPicker(true);
+    setGoalPickerDismissing(false);
     onResetSession?.();
+  };
+
+  const handleDismissGoalPicker = () => {
+    setGoalPickerDismissing(true);
+    setTimeout(() => {
+      setShowGoalPicker(false);
+      setGoalPickerDismissing(false);
+    }, 200);
   };
 
   return (
@@ -390,11 +401,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
               {/* Goal picker */}
               {showGoalPicker && (
-                <GoalPicker
-                  profile={profile}
-                  onSelect={(goal) => handleSend(`Ik wil werken aan: ${goal}`)}
-                  onDismiss={() => setShowGoalPicker(false)}
-                />
+                <div className={goalPickerDismissing ? 'goal-picker-exit' : 'goal-picker-enter'}>
+                  <GoalPicker
+                    profile={profile}
+                    onSelect={(goal) => handleSend(`Ik wil werken aan: ${goal}`)}
+                    onDismiss={handleDismissGoalPicker}
+                  />
+                </div>
               )}
             </div>
           </div>

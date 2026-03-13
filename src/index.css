@@ -155,3 +155,22 @@
 .shimmer-bar {
   animation: shimmer 1.5s ease-in-out infinite;
 }
+
+/* Goal Picker animations */
+@keyframes goal-picker-enter {
+  from { opacity: 0; transform: scale(0.98) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes goal-picker-exit {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to { opacity: 0; transform: scale(0.98) translateY(-8px); }
+}
+
+.goal-picker-enter {
+  animation: goal-picker-enter 0.25s ease-out forwards;
+}
+
+.goal-picker-exit {
+  animation: goal-picker-exit 0.2s ease-out forwards;
+}
