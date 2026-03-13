@@ -401,11 +401,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
               {/* Goal picker */}
               {showGoalPicker && (
-                <GoalPicker
-                  profile={profile}
-                  onSelect={(goal) => handleSend(`Ik wil werken aan: ${goal}`)}
-                  onDismiss={() => setShowGoalPicker(false)}
-                />
+                <div className={goalPickerDismissing ? 'goal-picker-exit' : 'goal-picker-enter'}>
+                  <GoalPicker
+                    profile={profile}
+                    onSelect={(goal) => handleSend(`Ik wil werken aan: ${goal}`)}
+                    onDismiss={handleDismissGoalPicker}
+                  />
+                </div>
               )}
             </div>
           </div>
