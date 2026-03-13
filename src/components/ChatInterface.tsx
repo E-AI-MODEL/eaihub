@@ -357,7 +357,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     nudgeLevelRef.current = 0;
     analysisRef.current = null;
     setHistoryLoaded(false);
+    setShowGoalPicker(true);
+    setGoalPickerDismissing(false);
     onResetSession?.();
+  };
+
+  const handleDismissGoalPicker = () => {
+    setGoalPickerDismissing(true);
+    setTimeout(() => {
+      setShowGoalPicker(false);
+      setGoalPickerDismissing(false);
+    }, 200);
   };
 
   return (
