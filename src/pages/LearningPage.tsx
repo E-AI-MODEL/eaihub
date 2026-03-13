@@ -49,7 +49,7 @@ const journey = [
   {
     phase: 'Toepassen',
     student: 'De leerling gebruikt kennis in nieuwe of onbekende contexten.',
-    eaihub: 'EAIHUB daagt uit met scenario's die transfer vragen, zonder het antwoord voor te kauwen.',
+    eaihub: "EAIHUB daagt uit met scenario's die transfer vragen, zonder het antwoord voor te kauwen.",
   },
   {
     phase: 'Reflecteren',
