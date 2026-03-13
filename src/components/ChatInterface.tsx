@@ -293,67 +293,25 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 Hoi {profile.name || 'daar'}
               </h2>
               {profile.currentNodeId ? (
-                <p className="text-[11px] text-slate-500 leading-relaxed mb-6">
+                <p className="text-[11px] text-slate-500 leading-relaxed mb-4">
                   Je werkt aan <span className="text-slate-300">{getNodeById(profile.currentNodeId)?.title || profile.subject}</span>
                   <span className="text-slate-600"> · {profile.subject} {profile.level}</span>
                 </p>
               ) : (
-                <p className="text-[11px] text-slate-500 leading-relaxed mb-6">
+                <p className="text-[11px] text-slate-500 leading-relaxed mb-4">
                   Klaar om te werken aan <span className="text-slate-300">{profile.subject || 'je lesstof'}</span>
                   {profile.level && <span className="text-slate-600"> · {profile.level}</span>}
                 </p>
               )}
 
-              {/* Starter cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <button
-                  onClick={() => {
-                    if (profile.currentNodeId) {
-                      const node = getNodeById(profile.currentNodeId);
-                      handleSend(`Leg het concept '${node?.title || profile.subject}' uit`);
-                    } else if (profile.subject) {
-                      handleSend(`Leg uit waar we mee bezig zijn bij ${profile.subject}`);
-                    } else {
-                      setInput("Ik begrijp dit concept niet: ");
-                    }
-                  }}
-                  className="p-3 border border-slate-800 bg-slate-900/60 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-left group"
-                >
-                  <span className="text-sm mb-1 block">📐</span>
-                  <span className="text-xs text-slate-300 group-hover:text-slate-100 block">Concept uitleggen</span>
-                  <span className="text-[10px] text-slate-600 block">Leg een begrip stap voor stap uit</span>
-                </button>
-                <button
-                  onClick={() => {
-                    if (profile.currentNodeId) {
-                      const node = getNodeById(profile.currentNodeId);
-                      handleSend(`/checkin ${node?.title || ''}`);
-                    } else {
-                      handleSend("/checkin");
-                    }
-                  }}
-                  className="p-3 border border-slate-800 bg-slate-900/60 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-left group"
-                >
-                  <span className="text-sm mb-1 block">📍</span>
-                  <span className="text-xs text-slate-300 group-hover:text-slate-100 block">Check-in starten</span>
-                  <span className="text-[10px] text-slate-600 block">Bepaal samen je leerdoel</span>
-                </button>
-                <button
-                  onClick={() => {
-                    if (profile.currentNodeId) {
-                      const node = getNodeById(profile.currentNodeId);
-                      handleSend(`/quizgen ${node?.title || ''}`);
-                    } else {
-                      handleSend("/quizgen");
-                    }
-                  }}
-                  className="p-3 border border-slate-800 bg-slate-900/60 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-left group"
-                >
-                  <span className="text-sm mb-1 block">📝</span>
-                  <span className="text-xs text-slate-300 group-hover:text-slate-100 block">Test mijn kennis</span>
-                  <span className="text-[10px] text-slate-600 block">Krijg 3 vragen over de stof</span>
-                </button>
-              </div>
+              {/* Goal picker */}
+              {showGoalPicker && (
+                <GoalPicker
+                  profile={profile}
+                  onSelect={(goal) => handleSend(`Ik wil werken aan: ${goal}`)}
+                  onDismiss={() => setShowGoalPicker(false)}
+                />
+              )}
             </div>
           </div>
         ) : (
