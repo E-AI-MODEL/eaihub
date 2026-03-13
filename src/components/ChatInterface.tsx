@@ -63,6 +63,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const [syncPulse, setSyncPulse] = useState(false);
+  const [showGoalPicker, setShowGoalPicker] = useState(true);
   const [internalSessionId] = useState(() => `session_${crypto.randomUUID()}`);
   const sessionId = externalSessionId || internalSessionId;
   const { user } = useAuth();
