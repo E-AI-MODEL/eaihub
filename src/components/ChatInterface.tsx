@@ -46,7 +46,91 @@ const IDLE_NUDGES: Record<number, string[]> = {
   ],
 };
 
-export const ChatInterface: React.FC<ChatInterfaceProps> = ({
+// ═══ Goal Picker Component ═══
+interface GoalPickerProps {
+  profile: LearnerProfile;
+  onSelect: (goal: string) => void;
+  onDismiss: () => void;
+}
+
+interface GoalItem {
+  label: string;
+  description: string;
+}
+
+const GoalPicker: React.FC<GoalPickerProps> = ({ profile, onSelect, onDismiss }) => {
+  const goals = useMemo<GoalItem[]>(() => {
+    const node = profile.currentNodeId ? getNodeById(profile.currentNodeId) : undefined;
+
+    if (node) {
+      // Find sibling nodes for transfer goal
+      let siblingTitle = '';
+      for (const path of CURRICULUM_PATHS) {
+        const idx = path.nodes.findIndex(n => n.id === node.id);
+        if (idx >= 0) {
+          const next = path.nodes[idx + 1];
+          const prev = path.nodes[idx - 1];
+          siblingTitle = next?.title || prev?.title || '';
+          break;
+        }
+      }
+
+      return [
+        { label: `Begrijp ${node.title}`, description: 'Bouw stap voor stap begrip op' },
+        { label: `Oefen: ${node.mastery_criteria}`, description: 'Pas toe wat je geleerd hebt' },
+        { label: `Vermijd fouten bij ${node.title}`, description: 'Herken veelgemaakte misconcepties' },
+        ...(siblingTitle
+          ? [{ label: `Verbind ${node.title} met ${siblingTitle}`, description: 'Leg verbanden tussen onderwerpen' }]
+          : [{ label: `Reflecteer op ${node.title}`, description: 'Kijk terug op wat je al weet' }]),
+      ];
+    }
+
+    // Try path-based goals
+    const path = profile.subject && profile.level
+      ? getLearningPath(profile.subject, profile.level)
+      : undefined;
+
+    if (path && path.nodes.length >= 4) {
+      return path.nodes.slice(0, 4).map(n => ({
+        label: n.title,
+        description: n.description,
+      }));
+    }
+
+    // Generic fallback
+    return [
+      { label: 'Begrip opbouwen', description: 'Begin met de kern van het onderwerp' },
+      { label: 'Oefenen', description: 'Pas toe wat je al weet' },
+      { label: 'Fouten herkennen', description: 'Leer van veelgemaakte fouten' },
+      { label: 'Reflecteren', description: 'Kijk terug op je voortgang' },
+    ];
+  }, [profile.currentNodeId, profile.subject, profile.level]);
+
+  return (
+    <div className="relative border border-slate-700/60 bg-slate-900/50 p-3 text-left">
+      <div className="flex items-center justify-between mb-2.5">
+        <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Kies een leerdoel</span>
+        <button onClick={onDismiss} className="text-slate-600 hover:text-slate-300 transition-colors p-0.5">
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+        {goals.map((goal, i) => (
+          <button
+            key={i}
+            onClick={() => onSelect(goal.label)}
+            className="p-2.5 border border-slate-800 bg-slate-800/30 hover:border-indigo-500/40 hover:bg-slate-800/60 transition-all text-left group"
+          >
+            <span className="text-xs text-slate-300 group-hover:text-slate-100 block leading-snug line-clamp-1">{goal.label}</span>
+            <span className="text-[10px] text-slate-600 block mt-0.5 line-clamp-1">{goal.description}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
   profile,
   onAnalysisUpdate,
   sessionId: externalSessionId,
