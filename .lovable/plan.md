@@ -1,130 +1,73 @@
+## Plan: Interactieve chat-UX verbeteringen — meerkeuze-knoppen + meer
 
-# Strategische roadmap — EAIHUB
+### Overzicht
 
-## Status
+Drie kleine UI/UX aanpassingen die de chatervaring lichter en sneller maken, zonder grote architectuurwijzigingen:
 
-Stap 1–7 afgerond. Fase 1–5 afgerond. Alle observability-metrics (edge/client ratio, plugin-usage, healing frequentie, knowledge_type distributie) live en correct aangesloten. `analysisSource`-bug gefixt (mechanical i.p.v. analysis).
-
----
-
-## Huidige architectuur
-
-1. `eai-classify` edge function — primaire 10D-classificatie via Gemini (tool-calling schema)
-2. `generateAnalysis()` in `chatService.ts` — client-side fallback via regex/heuristics
-3. `reliabilityPipeline.ts` — enige bron voor SSOT-healing, G-factor, logic gates, epistemic guard
-4. `eaiLearnAdapter.ts` — state-/viewmodel-laag (scaffolding, TTL, history)
-5. `ssot_v15.json` + `ssot.ts` — statische SSOT singleton met typed helpers, **nu via `getEffectiveSSOT()`**
-6. `ssotRuntime.ts` — runtime loader + whitelist merge voor school plugin overlays
-7. `ssotValidator.ts` — drielaags Zod-validatie (schema, referentieel, runtime)
-8. Auth via Supabase: `user_roles` (LEERLING/DOCENT/ADMIN), `has_role()` SECURITY DEFINER, `AuthGuard`
-9. Persistentie: `chat_messages`, `student_sessions`, `mastery`, `teacher_messages`, `profiles`, `school_ssot`
+1. **Meerkeuze-knoppen bij AI-vragen** — Als de LLM een meerkeuzevraag stelt, worden de opties automatisch als klikbare knoppen getoond onder het bericht
+2. **Collapsible lange berichten** — Model-berichten boven een bepaalde lengte worden ingeklapt met "Lees meer"
+3. **Typing indicator verbetering** — Subtielere shimmer met contextuele tekst
 
 ---
 
-## Afgeronde stappen
+### 1. Meerkeuze-knoppen (grootste impact)
 
-### Stap 1 — Analyse naar edge function ✅
-### Stap 2 — Dubbele validatie opschonen ✅
-### Stap 3 — EAIAnalysis uitbreiden met nuancevelden ✅
-### Stap 4 — UI aanpassen op rijkere analyse ✅
-### Stap 5 — Leerlingervaring en Leskaart-context ✅
-### Stap 6 — Kwaliteitszichtbaarheid per rol ✅
-### Stap 7 — Veilig rollenmodel en Auth ✅
+**Hoe het werkt:**
 
----
+- De LLM stuurt al regelmatig meerkeuzevragen in markdown (bijv. `A)`, `B)`, `1.`, `2.` patronen, of lijsten met opties)
+- `MessageBubble.tsx` detecteert deze patronen in het **laatste** model-bericht via regex
+- Wanneer gedetecteerd: toon klikbare knoppen onder het bericht
+- Bij klik: roep `onOptionSelect(optionText)` aan → dit stuurt het antwoord als gebruikersbericht via `handleSend`
 
-## Implementatieplan — 5 fasen
+**Detectiepatronen:**
 
-### Fase 1 — Stabilisatie (security + healing) ✅
+```
+/^[A-D][).]\s+/gm        → A) Zwaartekracht  B) Wrijving
+/^\d+[).]\s+/gm          → 1) Eerste optie   2) Tweede optie
+```
 
-| # | Taak | Status |
-|---|------|--------|
-| 1.1 | RLS verscherpen | ✅ DONE |
-| 1.2 | Healing consolideren | ✅ DONE |
-| 1.3 | Defensieve role-check | ✅ DONE |
+**Wijzigingen:**
 
-### Fase 2 — Analyse-consistentie ✅
+- `**src/types/index.ts**` — Voeg `options?: string[]` toe aan `Message` interface
+- `**src/components/MessageBubble.tsx**`:
+  - Voeg een `extractOptions(text)` functie toe die opties uit de tekst haalt
+  - Render knoppen onder het bericht als opties gevonden zijn EN het het laatste bericht is
+  - Accepteer nieuwe prop `onOptionSelect?: (text: string) => void` en `isLast?: boolean`
+- `**src/components/ChatInterface.tsx**`:
+  - Geef `onOptionSelect={handleSend}` en `isLast` door aan de laatste `MessageBubble`
 
-| # | Taak | Status |
-|---|------|--------|
-| 2.1 | Edge-classify uitbreiden met secondary_dimensions | ✅ DONE |
-| 2.2 | E-dimensie aansluiten op SSOT | ✅ DONE |
-| 2.3 | Logic gate check vereenvoudigen | ✅ DONE |
+**UI:** Compacte knoppen in een flex-wrap layout, stijl consistent met GoalPicker (border-slate-800, hover:border-indigo-500/40). Na klik verdwijnen de knoppen (eenmalig gebruik).
 
-### Fase 3.x — Auth consolidatie & governance hardening ✅
+### 2. Collapsible lange berichten
 
-| # | Taak | Status |
-|---|------|--------|
-| 3.x.1 | `useAuth()` refactor naar `AuthProvider` context (één listener, gedeelde state) | ✅ DONE |
-| 3.x.2 | RLS tightening: `user_roles` en `school_ssot` van ADMIN ALL → SUPERUSER ALL + ADMIN/DOCENT SELECT | ✅ DONE |
+**Wat:** Model-berichten langer dan ~600 tekens worden ingeklapt tot ~300 tekens met een "Lees meer ↓" knop.
 
+**Wijzigingen:** Alleen in `MessageBubble.tsx`:
 
-### Fase 3 — EITL: SSOT plug-in architectuur ✅
+- `isExpanded` state, default `false`
+- Toon truncated tekst + gradient overlay + "Lees meer" knop
+- Laatste bericht altijd volledig getoond (niet inklapbaar)
 
-| # | Taak | Status |
-|---|------|--------|
-| 3.1 | `school_ssot` tabel + RLS (admins CRUD, docenten SELECT) | ✅ DONE |
-| 3.2 | `ssotValidator.ts` — drielaags Zod-validatie (schema, referentieel, runtime) | ✅ DONE |
-| 3.3 | `ssotRuntime.ts` — `whitelistMerge` + `loadEffectiveSSOT` + cache | ✅ DONE |
-| 3.4 | `ssot.ts` refactor — `SSOT_DATA` → `BASE_SSOT` + `getEffectiveSSOT()` | ✅ DONE |
-| 3.5 | Component updates — alle directe `SSOT_DATA` refs vervangen | ✅ DONE |
-| 3.6 | Read-only EITL preview tab in Admin Panel | ✅ DONE |
+### 3. Typing indicator met context
 
-#### MVP Plugin Whitelist
-- **Toegestaan**: band `label`, `description`, `didactic_principle`, `fix` (tekst); command descriptions; SRL `label`/`goal`; gate annotations (rationale, teacher_note)
-- **Immutable**: `band_id`, `fix_ref`, `score_range`, `mechanistic`, `enforcement`, command keys, `cycle.order`, `trigger_band`, `learner_obs`, `ai_obs`, `nl_profile`, `trace_tags`, `band_weight`, `fix_type`, `band_ref`
-- **Niet in MVP**: rubric `name`, rubric `goal`
+**Wat:** De huidige "Verwerken..." tekst vervangen door iets informatiever: "Even denken hoor" bij deep model, "Verwerken..." bij flash. En "Aan het tekenen..." bij flash image. 
 
-### Fase 3.5 — EITL Wizard (edit-flow)
-
-| # | Taak | Status |
-|---|------|--------|
-| 3.5.1 | 5-staps wizard in Admin Panel voor plugin CRUD (SUPERUSER-only) | ✅ DONE |
-| 3.5.2 | Plugin versioning met `change_notes` en `based_on_version` | ✅ DONE |
-
-### Fase 4 — Governance ✅
-
-| # | Taak | Status |
-|---|------|--------|
-| 4.1 | Versioning afronden (dedup save, change_notes verplicht bij edits) | ✅ DONE |
-| 4.2 | Rollback — SUPERUSER kan eerdere plugin-versie activeren via PluginVersionHistory | ✅ DONE |
-| 4.3 | Audit log — `ssot_changes` tabel met SUPERUSER ALL + ADMIN SELECT | ✅ DONE |
-| 4.4 | Diff-view — versiegeschiedenis + audit trail in EITL tab | ✅ DONE |
-
-### Fase 5 — Observability ✅
-
-| # | Taak | Status |
-|---|------|--------|
-| 5.1 | Edge vs client analyse-ratio in dashboard | ✅ DONE |
-| 5.2 | Plugin-usage metrics per school | ✅ DONE |
-| 5.3 | Logic gate breach rate trending | ✅ DONE |
-| 5.4 | Healing event frequentie | ✅ DONE |
+**Wijziging:** Kleine aanpassing in `ChatInterface.tsx` — de loading indicator krijgt een tekst op basis van de huidige context.
 
 ---
 
-## Bekende technische schuld
+### Bestanden die wijzigen
 
-| # | Issue | Impact | Fase |
-|---|-------|--------|------|
-| 4 | Mixed dimensions in `coregulation_bands` veld | Low | documenteren of refactor bij EITL wizard |
-| 7 | Token schatting is character-based proxy | Low | 5.x of labelen |
-| 8 | `COMMAND_INTENTS` hardcoded in `ssotHelpers.ts` | Low | 3.5 (verplaatsen naar plugin-laag) |
 
----
+| Bestand                            | Wijziging                             |
+| ---------------------------------- | ------------------------------------- |
+| `src/types/index.ts`               | `options?: string[]` op Message       |
+| `src/components/MessageBubble.tsx` | Optie-extractie, knoppen, collapsible |
+| `src/components/ChatInterface.tsx` | Props doorgeven, typing indicator     |
 
-## Wat expliciet buiten scope blijft
 
-- Volledige vervanging van de SSOT per school (alleen overlay)
-- Generieke deep merge (alleen whitelisted paden)
-- Structurele of machinekritische velden in de plugin-laag
-- Meerdere fasen tegelijk uitvoeren
-- `tiktoken` (Python-only) — indien nodig: `gpt-tokenizer` (npm) of proxy-label
+### Wat niet verandert
 
----
-
-## Kernprincipe
-
-Constatering → Interpretatie → Beslissing.
-De base SSOT blijft constitutieve bronlaag.
-De plugin annoteert, maar herdefinieert niet.
-Stabilisatie vóór uitbreiding.
+- chatService, edge functions, systeemprompt — ongewijzigd
+- GoalPicker, LeskaartPanel — ongewijzigd
+- Geen database-wijzigingen
