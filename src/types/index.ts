@@ -181,6 +181,7 @@ export interface Message {
   analysis?: EAIAnalysis;
   mechanical?: MechanicalState;
   teacherName?: string;
+  options?: string[];
 }
 
 export type DidacticTheme = 
