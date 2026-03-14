@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { Message } from '../types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -8,6 +9,8 @@ import 'katex/dist/katex.min.css';
 
 interface MessageBubbleProps {
   message: Message;
+  isLast?: boolean;
+  onOptionSelect?: (text: string) => void;
 }
 
 // Presentation Guard
@@ -29,7 +32,35 @@ const sanitizeForPresentation = (text: string): string => {
   return cleaned;
 };
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
+// ═══ Option extraction from AI messages ═══
+const OPTION_PATTERNS = [
+  /^([A-D])[).]\s+(.+)$/gm,     // A) Option text
+  /^(\d+)[).]\s+(.+)$/gm,       // 1) Option text
+];
+
+function extractOptions(text: string): string[] | null {
+  for (const pattern of OPTION_PATTERNS) {
+    const regex = new RegExp(pattern.source, pattern.flags);
+    const matches: string[] = [];
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      const optionText = match[2].trim();
+      // Skip if it looks like a numbered explanation rather than a choice
+      if (optionText.length > 0 && optionText.length < 120) {
+        matches.push(optionText);
+      }
+    }
+    if (matches.length >= 2 && matches.length <= 6) {
+      return matches;
+    }
+  }
+  return null;
+}
+
+const COLLAPSE_THRESHOLD = 600;
+const TRUNCATE_LENGTH = 300;
+
+const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isLast = false, onOptionSelect }) => {
   const isUser = message.role === 'user';
   const isTeacher = message.role === 'teacher';
   const wasRepaired = message.mechanical?.repairAttempts && message.mechanical.repairAttempts > 0;
@@ -37,8 +68,24 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const hasWarning = gFactor !== undefined && gFactor < 0.8;
   const displayText = isUser || isTeacher ? message.text : sanitizeForPresentation(message.text);
 
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [optionsUsed, setOptionsUsed] = useState(false);
+
+  // Collapsible: only for non-last model messages over threshold
+  const isCollapsible = !isUser && !isTeacher && !isLast && displayText.length > COLLAPSE_THRESHOLD;
+  const showTruncated = isCollapsible && !isExpanded;
+  const renderedText = showTruncated ? displayText.slice(0, TRUNCATE_LENGTH) + '…' : displayText;
+
+  // Options: only for last model message with detected options
+  const detectedOptions = (!isUser && !isTeacher && isLast && !optionsUsed) ? extractOptions(displayText) : null;
+
+  const handleOptionClick = (option: string) => {
+    setOptionsUsed(true);
+    onOptionSelect?.(option);
+  };
+
   // ═══════════════════════════════════════════════════════════
-  // TEACHER MESSAGE — amber accent stripe, read-only notice
+  // TEACHER MESSAGE — amber accent stripe
   // ═══════════════════════════════════════════════════════════
   if (isTeacher) {
     return (
@@ -71,7 +118,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     return (
       <div className="max-w-2xl mb-4">
         <div className="border border-slate-700 bg-slate-800/40 flex">
-          {/* Accent stripe */}
           <div className="w-[3px] bg-indigo-500/60 shrink-0" />
 
           <div className="flex-1 min-w-0">
@@ -93,9 +139,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
             </div>
 
             {/* Content */}
-            <div className="px-5 py-3 text-slate-100 text-sm leading-relaxed">
+            <div className={`px-5 py-3 text-slate-100 text-sm leading-relaxed relative ${showTruncated ? 'max-h-40 overflow-hidden' : ''}`}>
               {message.isError ? (
-                <p className="text-red-300">{displayText}</p>
+                <p className="text-red-300">{renderedText}</p>
               ) : (
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm, remarkMath]}
@@ -143,10 +189,43 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                     ),
                   }}
                 >
-                  {displayText}
+                  {renderedText}
                 </ReactMarkdown>
               )}
+
+              {/* Gradient overlay for truncated content */}
+              {showTruncated && (
+                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-slate-800/90 to-transparent pointer-events-none" />
+              )}
             </div>
+
+            {/* Expand/collapse toggle */}
+            {isCollapsible && (
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="w-full h-7 flex items-center justify-center gap-1.5 border-t border-slate-800 bg-slate-900/40 text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                <span className="text-[10px] font-mono uppercase tracking-wider">
+                  {isExpanded ? 'Minder' : 'Lees meer'}
+                </span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+              </button>
+            )}
+
+            {/* Multiple-choice option buttons */}
+            {detectedOptions && (
+              <div className="px-3 pb-3 pt-1.5 flex flex-wrap gap-1.5 border-t border-slate-800">
+                {detectedOptions.map((option, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleOptionClick(option)}
+                    className="px-3 py-1.5 text-xs text-slate-300 border border-slate-700 bg-slate-800/30 hover:border-indigo-500/40 hover:bg-slate-800/60 hover:text-slate-100 transition-all"
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Mechanical footer */}
             {message.mechanical && (
@@ -169,7 +248,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // STUDENT MESSAGE — Clean right-aligned bubble, hover timestamp
+  // STUDENT MESSAGE — Clean right-aligned bubble
   // ═══════════════════════════════════════════════════════════
   return (
     <div className="max-w-xl ml-auto mb-4 group">

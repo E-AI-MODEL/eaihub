@@ -414,8 +414,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         ) : (
           /* Message list */
           <div className="max-w-2xl mx-auto space-y-4">
-            {messages.map((message) => (
-              <MessageBubble key={message.id} message={message} />
+            {messages.map((message, idx) => (
+              <MessageBubble
+                key={message.id}
+                message={message}
+                isLast={idx === messages.length - 1}
+                onOptionSelect={(text) => handleSend(text)}
+              />
             ))}
             {isLoading && (
               <div className="max-w-2xl overflow-hidden">
@@ -423,7 +428,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   <div className="h-1 flex-1 bg-slate-800 overflow-hidden rounded-full">
                     <div className="h-full w-1/3 bg-indigo-500/60 shimmer-bar" />
                   </div>
-                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest shrink-0">Verwerken...</span>
+                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest shrink-0">
+                    {currentMechanical?.model?.includes('pro') ? 'Even denken hoor…' : 'Verwerken…'}
+                  </span>
                 </div>
               </div>
             )}
