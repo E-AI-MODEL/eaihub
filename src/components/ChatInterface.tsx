@@ -414,8 +414,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         ) : (
           /* Message list */
           <div className="max-w-2xl mx-auto space-y-4">
-            {messages.map((message) => (
-              <MessageBubble key={message.id} message={message} />
+            {messages.map((message, idx) => (
+              <MessageBubble
+                key={message.id}
+                message={message}
+                isLast={idx === messages.length - 1}
+                onOptionSelect={(text) => handleSend(text)}
+              />
             ))}
             {isLoading && (
               <div className="max-w-2xl overflow-hidden">
