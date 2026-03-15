@@ -68,7 +68,7 @@ function mapNode(raw: RawNode): LearningNode {
     id: raw.id,
     title: raw.title,
     description: raw.description,
-    didactic_focus: raw.tags.theme?.[0] || 'Kerndoel',
+    didactic_focus: raw.tags.theme?.length > 0 ? raw.tags.theme.join(' | ') : 'Kerndoel',
     mastery_criteria: raw.mastery.can_demonstrate?.length > 0
       ? raw.mastery.can_demonstrate.join(' | ')
       : raw.description,
@@ -157,19 +157,6 @@ export function getAllSubjects(): { code: string; name: string; pathCount: numbe
   return subjects.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/**
- * Compatibility wrapper: find a learning path by subject + level
- * Returns the first matching path (for backward compat with old getLearningPath)
- */
-export function getLearningPath(subject: string, level: string): LearningPath | undefined {
-  const subjectLower = subject.toLowerCase();
-  for (const [, path] of PATH_INDEX) {
-    if (path.subject.toLowerCase() === subjectLower) {
-      return path;
-    }
-  }
-  return undefined;
-}
 
 /** Get all raw path records (for admin counts) */
 export function getAllPaths(): LearningPath[] {

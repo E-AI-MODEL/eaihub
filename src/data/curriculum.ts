@@ -8,7 +8,6 @@ export type { LearningNode, LearningPath };
 
 export {
   getNodeById,
-  getLearningPath,
   getAllSubjects,
   getPathsBySubject,
   getPathById,
