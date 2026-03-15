@@ -20,7 +20,7 @@ import {
   type TraceEvent 
 } from '@/lib/reliabilityPipeline';
 import { persistChatMessage } from '@/services/adminDbService';
-import { getNodeById, CURRICULUM_PATHS } from '@/data/curriculum';
+import { getNodeById, CURRICULUM_PATHS, getLearningPath } from '@/data/curriculum';
 import { updateMastery } from '@/services/masteryService';
 import { supabase } from '@/integrations/supabase/client';
 
