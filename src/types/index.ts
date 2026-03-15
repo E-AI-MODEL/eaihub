@@ -60,6 +60,7 @@ export interface LearningNode {
 }
 
 export interface LearningPath {
+  id: string;
   subject: string;
   level: string;
   topic: string;

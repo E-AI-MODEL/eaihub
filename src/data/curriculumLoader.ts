@@ -69,7 +69,9 @@ function mapNode(raw: RawNode): LearningNode {
     title: raw.title,
     description: raw.description,
     didactic_focus: raw.tags.theme?.[0] || 'Kerndoel',
-    mastery_criteria: raw.mastery.can_demonstrate?.[0] || raw.description,
+    mastery_criteria: raw.mastery.can_demonstrate?.length > 0
+      ? raw.mastery.can_demonstrate.join(' | ')
+      : raw.description,
     common_misconceptions: raw.misconceptions?.length > 0 ? raw.misconceptions : undefined,
     micro_steps: raw.microsteps?.length > 0 ? raw.microsteps : undefined,
     illustrations: raw.illustrations?.length > 0 ? raw.illustrations : undefined,
