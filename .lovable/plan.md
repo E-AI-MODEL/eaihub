@@ -100,7 +100,17 @@ Stap 1–7 afgerond. Fase 1–5 afgerond. Alle observability-metrics (edge/clien
 | 5.3 | Logic gate breach rate trending | ✅ DONE |
 | 5.4 | Healing event frequentie | ✅ DONE |
 
----
+### Fase 6 — OB nieuw pilot_core curriculum ✅
+
+| # | Taak | Status |
+|---|------|--------|
+| 6.1 | Drie pilot JSON-bestanden plaatsen in `src/data/curriculum/` | ✅ DONE |
+| 6.2 | `LearningNode` uitbreiden met `illustrations`, `evidence_types` | ✅ DONE |
+| 6.3 | `curriculumLoader.ts` — JSON → runtime mapper met indexes | ✅ DONE |
+| 6.4 | `curriculum.ts` → re-export compatibiliteitslaag | ✅ DONE |
+| 6.5 | Consumers aanpassen (TopicSelector, ProfileSetup, LeskaartPanel, ChatInterface, ssotHelpers, adminService) | ✅ DONE |
+| 6.6 | `study_load_minutes` geneutraliseerd (uit UI + prompt, optioneel behouden in types) | ✅ DONE |
+| 6.7 | PVA opgeslagen als `.lovable/pva-ob-nieuw-pilot-core.md` | ✅ DONE |
 
 ## Bekende technische schuld
 
