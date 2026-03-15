@@ -254,6 +254,13 @@ function generateCurriculumContext(profile: ProfileData): string {
     `**Beschrijving:** ${node.description}`,
     `**Didactische Focus:** ${node.didactic_focus}`,
     `**Beheersingscriteria:** ${node.mastery_criteria}`,
+    '',
+    '### ⚓ ANKERREGEL (VERPLICHT)',
+    `KRITIEK: Elk antwoord MOET inhoudelijk verwijzen naar het actieve leerdoel: "${node.title}".`,
+    'Gebruik de microsteps hieronder als gespreksstructuur.',
+    'Generieke leerstijltaal of coachtaal zonder vakinhoudelijke verankering is NIET TOEGESTAAN',
+    'tenzij de leerling expliciet om metacognitieve reflectie vraagt.',
+    'Verwijs bij elke uitleg, vraag of hint concreet naar het actieve leerdoel.',
   ];
 
   if (node.slo_ref) {

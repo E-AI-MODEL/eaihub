@@ -1,11 +1,32 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, BarChart3, ShieldCheck } from 'lucide-react';
+import { ArrowRight, BookOpen, BarChart3, ShieldCheck, Sparkles, X } from 'lucide-react';
 import FactoryDiagram from '@/components/FactoryDiagram';
+import { useState } from 'react';
+import { PILOT_NODE_COUNT, PILOT_PATH_COUNT } from '@/data/curriculumLoader';
 
 const LandingPage = () => {
+  const [showBanner, setShowBanner] = useState(true);
+
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 selection:text-primary overflow-x-hidden flex flex-col">
       
+      {/* UPDATE BANNER */}
+      {showBanner && (
+        <div className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground px-4 py-2.5 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium shadow-lg animate-in slide-in-from-top duration-500">
+          <Sparkles className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+          <span>
+            <strong>Nieuw:</strong> SLO Kerndoelen 2025 curriculum geladen — {PILOT_NODE_COUNT} leerdoelen, {PILOT_PATH_COUNT} kerndoelen, 9 leergebieden
+          </span>
+          <button
+            onClick={() => setShowBanner(false)}
+            className="ml-2 p-0.5 rounded hover:bg-primary-foreground/20 transition-colors flex-shrink-0"
+            aria-label="Melding sluiten"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* NAVIGATION */}
       <nav 
         className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center bg-gradient-to-b from-background via-background/90 to-transparent backdrop-blur-sm border-b border-border/50" 

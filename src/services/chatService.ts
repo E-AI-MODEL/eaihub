@@ -20,7 +20,7 @@ import {
   type TraceEvent 
 } from '@/lib/reliabilityPipeline';
 import { persistChatMessage } from '@/services/adminDbService';
-import { getNodeById, CURRICULUM_PATHS, getLearningPath } from '@/data/curriculum';
+import { getNodeById, getPathForNode } from '@/data/curriculumLoader';
 import { updateMastery } from '@/services/masteryService';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -104,10 +104,12 @@ function updateSessionContext(sessionId: string, analysis: EAIAnalysis, profile:
 // Veilige fase 1: INTRO → WORKING → CHECKING (geen auto-MASTERED)
 // Returns progress percentage (0-100) for session sync
 function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, sessionId: string, userId: string): number {
-  if (!profile.currentNodeId || !profile.subject || !profile.level) return 0;
+  if (!profile.currentNodeId) return 0;
 
-  // Look up curriculum path by subject+level — generate pathId from subject+level
-  const pathId = `${profile.subject}_${profile.level}`.toUpperCase().replace(/\s/g, '');
+  // Derive pathId from the actual curriculum path the node belongs to
+  const pathInfo = getPathForNode(profile.currentNodeId);
+  if (!pathInfo) return 0;
+  const pathId = pathInfo.pathId;
   
   const ctx = getSessionContext(sessionId);
   const turnCount = ctx.turn_count;
@@ -148,9 +150,7 @@ function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, se
         completedNodes.add(entry.nodeId);
       }
     }
-    // Use path from loader for node count
-    const currPath = getLearningPath(profile.subject!, profile.level!);
-    const totalNodes = currPath?.nodes.length || 1;
+    const totalNodes = pathInfo.path.nodes.length || 1;
     return Math.round((completedNodes.size / totalNodes) * 100);
   } catch {
     return 0;

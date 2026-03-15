@@ -7,8 +7,7 @@ import { getOrCreateUserId } from '@/services/identity';
 import { useAuth } from '@/hooks/useAuth';
 import { calculateDynamicTTL } from '@/utils/eaiLearnAdapter';
 import { pushTrace } from '@/lib/reliabilityPipeline';
-import { getNodeById, getPathForNode } from '@/data/curriculumLoader';
-import { CURRICULUM_PATHS } from '@/data/curriculum';
+import { getNodeById, getPathForNode, getPathsBySubject } from '@/data/curriculumLoader';
 import { upsertSessionState, subscribeToTeacherMessages, fetchTeacherMessages, markMessageRead, setSessionOffline } from '@/services/sessionSyncService';
 import { getActivePlugin } from '@/lib/ssotRuntime';
 import { fetchChatMessages } from '@/services/adminDbService';
@@ -86,11 +85,12 @@ const GoalPicker: React.FC<GoalPickerProps> = ({ profile, onSelect, onDismiss })
       ];
     }
 
-    // Try path-based goals from CURRICULUM_PATHS
+    // Try path-based goals from curriculum loader
     if (profile.subject) {
-      const matchingPath = CURRICULUM_PATHS.find(p => p.subject.toLowerCase() === profile.subject!.toLowerCase());
-      if (matchingPath && matchingPath.nodes.length >= 4) {
-        return matchingPath.nodes.slice(0, 4).map(n => ({
+      const subjectPaths = getPathsBySubject(profile.subject);
+      const firstPath = subjectPaths[0];
+      if (firstPath && firstPath.nodes.length >= 4) {
+        return firstPath.nodes.slice(0, 4).map(n => ({
           label: n.title,
           description: n.description,
         }));
