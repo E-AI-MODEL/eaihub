@@ -97,6 +97,7 @@ for (const raw of rawPaths) {
   }
 
   const path: LearningPath = {
+    id: raw.id,
     subject: raw.subject,
     level: raw.level_scope.join('/'),
     topic: raw.title,
