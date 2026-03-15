@@ -68,7 +68,7 @@ function mapNode(raw: RawNode): LearningNode {
     id: raw.id,
     title: raw.title,
     description: raw.description,
-    didactic_focus: raw.tags.theme?.[0] || 'Kerndoel',
+    didactic_focus: raw.tags.theme?.length > 0 ? raw.tags.theme.join(' | ') : 'Kerndoel',
     mastery_criteria: raw.mastery.can_demonstrate?.length > 0
       ? raw.mastery.can_demonstrate.join(' | ')
       : raw.description,
