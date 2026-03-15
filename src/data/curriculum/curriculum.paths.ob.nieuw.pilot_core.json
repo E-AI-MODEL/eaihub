@@ -1,0 +1,1310 @@
+{
+  "meta": {
+    "schema_version": "1.0",
+    "split_bucket": "ob.nieuw",
+    "variant": "pilot_ob_nieuw_core",
+    "notes": "Paths filtered to learner-facing core OB nieuw nodes."
+  },
+  "paths": [
+    {
+      "id": "PATH-NIEUW_OB-BEWEGEN_EN-43",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BEWEGE",
+      "subject": "Bewegen en sport",
+      "title": "Bewegen en sport — Ontwikkelt zich in het bewegen",
+      "source_refs": [
+        "OB/NIEUW/BEWEGE/43_A",
+        "OB/NIEUW/BEWEGE/43_B",
+        "OB/NIEUW/BEWEGE/43_C"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_BEWEGE_43_A-01",
+        "NODE-OB_NIEUW_BEWEGE_43_B-01",
+        "NODE-OB_NIEUW_BEWEGE_43_C-01"
+      ],
+      "end_goal": "De leerling ontwikkelt zich in het bewegen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-BEWEGEN_EN-44",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BEWEGE",
+      "subject": "Bewegen en sport",
+      "title": "Bewegen en sport — Beweegt samen met anderen",
+      "source_refs": [
+        "OB/NIEUW/BEWEGE/44_A",
+        "OB/NIEUW/BEWEGE/44_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_BEWEGE_44_A-01",
+        "NODE-OB_NIEUW_BEWEGE_44_B-01"
+      ],
+      "end_goal": "De leerling beweegt samen met anderen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-BEWEGEN_EN-45",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BEWEGE",
+      "subject": "Bewegen en sport",
+      "title": "Bewegen en sport — Geeft betekenis aan bewegen",
+      "source_refs": [
+        "OB/NIEUW/BEWEGE/45_A",
+        "OB/NIEUW/BEWEGE/45_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_BEWEGE_45_A-01",
+        "NODE-OB_NIEUW_BEWEGE_45_B-01"
+      ],
+      "end_goal": "De leerling geeft betekenis aan bewegen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-BURGERSCHA-19",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BURGER",
+      "subject": "Burgerschap",
+      "title": "Burgerschap — Leert over samenleven in een democratische rechtsstaat",
+      "source_refs": [
+        "OB/NIEUW/BURGER/19_A",
+        "OB/NIEUW/BURGER/19_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_BURGER_19_A-01",
+        "NODE-OB_NIEUW_BURGER_19_B-01"
+      ],
+      "end_goal": "De leerling leert over samenleven in een democratische rechtsstaat.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-BURGERSCHA-20",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BURGER",
+      "subject": "Burgerschap",
+      "title": "Burgerschap — Doet ervaringen op met democratische en maatschappelijke betrokkenheid",
+      "source_refs": [
+        "OB/NIEUW/BURGER/20_A",
+        "OB/NIEUW/BURGER/20_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_BURGER_20_A-01",
+        "NODE-OB_NIEUW_BURGER_20_B-01"
+      ],
+      "end_goal": "De leerling doet ervaringen op met democratische en maatschappelijke betrokkenheid.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-DIGITALE_G-21",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DIGITA",
+      "subject": "Digitale geletterdheid",
+      "title": "Digitale geletterdheid — Zet digitale technologie en digitale media kundig in",
+      "source_refs": [
+        "OB/NIEUW/DIGITA/21_A",
+        "OB/NIEUW/DIGITA/21_B",
+        "OB/NIEUW/DIGITA/21_C",
+        "OB/NIEUW/DIGITA/21_D"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_DIGITA_21_A-01",
+        "NODE-OB_NIEUW_DIGITA_21_B-01",
+        "NODE-OB_NIEUW_DIGITA_21_C-01",
+        "NODE-OB_NIEUW_DIGITA_21_D-01"
+      ],
+      "end_goal": "De leerling zet digitale technologie en digitale media kundig in.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-DIGITALE_G-22",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DIGITA",
+      "subject": "Digitale geletterdheid",
+      "title": "Digitale geletterdheid — Creëert digitale producten",
+      "source_refs": [
+        "OB/NIEUW/DIGITA/22_A",
+        "OB/NIEUW/DIGITA/22_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_DIGITA_22_A-01",
+        "NODE-OB_NIEUW_DIGITA_22_B-01"
+      ],
+      "end_goal": "De leerling creëert digitale producten.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-DIGITALE_G-23",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DIGITA",
+      "subject": "Digitale geletterdheid",
+      "title": "Digitale geletterdheid — Participeert in de gedigitaliseerde wereld",
+      "source_refs": [
+        "OB/NIEUW/DIGITA/23_A",
+        "OB/NIEUW/DIGITA/23_B",
+        "OB/NIEUW/DIGITA/23_C"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_DIGITA_23_A-01",
+        "NODE-OB_NIEUW_DIGITA_23_B-01",
+        "NODE-OB_NIEUW_DIGITA_23_C-01"
+      ],
+      "end_goal": "De leerling participeert in de gedigitaliseerde wereld.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-DUITS-37",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DUITS",
+      "subject": "Duits",
+      "title": "Duits — Kerdoel 37",
+      "source_refs": [
+        "OB/NIEUW/DUITS/37_A",
+        "OB/NIEUW/DUITS/37_B",
+        "OB/NIEUW/DUITS/37_C"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_DUITS_37_A-01",
+        "NODE-OB_NIEUW_DUITS_37_B-01",
+        "NODE-OB_NIEUW_DUITS_37_C-01"
+      ],
+      "end_goal": "De leerling gebruikt de […..] taal in rijke en betekenisvolle contexten.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-DUITS-38",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DUITS",
+      "subject": "Duits",
+      "title": "Duits — Communiceert in de [….] taal",
+      "source_refs": [
+        "OB/NIEUW/DUITS/38_A",
+        "OB/NIEUW/DUITS/38_B",
+        "OB/NIEUW/DUITS/38_C",
+        "OB/NIEUW/DUITS/38_D"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_DUITS_38_A-01",
+        "NODE-OB_NIEUW_DUITS_38_B-01",
+        "NODE-OB_NIEUW_DUITS_38_C-01",
+        "NODE-OB_NIEUW_DUITS_38_D-01"
+      ],
+      "end_goal": "De leerling communiceert in de [….] taal.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-DUITS-39",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DUITS",
+      "subject": "Duits",
+      "title": "Duits — Ontwikkelt zich als taal- en cultuurbewuste gebruiker van de [….] taal",
+      "source_refs": [
+        "OB/NIEUW/DUITS/39_A",
+        "OB/NIEUW/DUITS/39_B",
+        "OB/NIEUW/DUITS/39_C"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_DUITS_39_A-01",
+        "NODE-OB_NIEUW_DUITS_39_B-01",
+        "NODE-OB_NIEUW_DUITS_39_C-01"
+      ],
+      "end_goal": "De leerling ontwikkelt zich als taal- en cultuurbewuste gebruiker van de [….] taal",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-ENGELS-34",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "ENGELS",
+      "subject": "Engels",
+      "title": "Engels — Gebruikt de Engelse taal in rijke en betekenisvolle contexten",
+      "source_refs": [
+        "OB/NIEUW/ENGELS/34_34A",
+        "OB/NIEUW/ENGELS/34_34B",
+        "OB/NIEUW/ENGELS/34_34C"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_ENGELS_34_34A-01",
+        "NODE-OB_NIEUW_ENGELS_34_34B-01",
+        "NODE-OB_NIEUW_ENGELS_34_34C-01"
+      ],
+      "end_goal": "De leerling gebruikt de Engelse taal in rijke en betekenisvolle contexten.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-ENGELS-35",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "ENGELS",
+      "subject": "Engels",
+      "title": "Engels — Communiceert in het Engels",
+      "source_refs": [
+        "OB/NIEUW/ENGELS/35_35A",
+        "OB/NIEUW/ENGELS/35_35B",
+        "OB/NIEUW/ENGELS/35_35C",
+        "OB/NIEUW/ENGELS/35_35D"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_ENGELS_35_35A-01",
+        "NODE-OB_NIEUW_ENGELS_35_35B-01",
+        "NODE-OB_NIEUW_ENGELS_35_35C-01",
+        "NODE-OB_NIEUW_ENGELS_35_35D-01"
+      ],
+      "end_goal": "De leerling communiceert in het Engels.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-ENGELS-36",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "ENGELS",
+      "subject": "Engels",
+      "title": "Engels — Ontwikkelt zich als taal- en cultuurbewuste gebruiker van de Engelse taal",
+      "source_refs": [
+        "OB/NIEUW/ENGELS/36_36A",
+        "OB/NIEUW/ENGELS/36_36B",
+        "OB/NIEUW/ENGELS/36_36C"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_ENGELS_36_36A-01",
+        "NODE-OB_NIEUW_ENGELS_36_36B-01",
+        "NODE-OB_NIEUW_ENGELS_36_36C-01"
+      ],
+      "end_goal": "De leerling ontwikkelt zich als taal- en cultuurbewuste gebruiker van de Engelse taal.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-KUNST_EN_C-40",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "KUNST",
+      "subject": "Kunst en cultuur",
+      "title": "Kunst en cultuur — Ontwikkelt artistiek creatief vermogen",
+      "source_refs": [
+        "OB/NIEUW/KUNST/40_A",
+        "OB/NIEUW/KUNST/40_B",
+        "OB/NIEUW/KUNST/40_C"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_KUNST_40_A-01",
+        "NODE-OB_NIEUW_KUNST_40_B-01",
+        "NODE-OB_NIEUW_KUNST_40_C-01"
+      ],
+      "end_goal": "De leerling ontwikkelt artistiek creatief vermogen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-KUNST_EN_C-41",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "KUNST",
+      "subject": "Kunst en cultuur",
+      "title": "Kunst en cultuur — Maakt kunstzinnige uitingen",
+      "source_refs": [
+        "OB/NIEUW/KUNST/41_A",
+        "OB/NIEUW/KUNST/41_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_KUNST_41_A-01",
+        "NODE-OB_NIEUW_KUNST_41_B-01"
+      ],
+      "end_goal": "De leerling maakt kunstzinnige uitingen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-KUNST_EN_C-42",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "KUNST",
+      "subject": "Kunst en cultuur",
+      "title": "Kunst en cultuur — Maakt kunst en cultuur mee",
+      "source_refs": [
+        "OB/NIEUW/KUNST/42_A",
+        "OB/NIEUW/KUNST/42_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_KUNST_42_A-01",
+        "NODE-OB_NIEUW_KUNST_42_B-01"
+      ],
+      "end_goal": "De leerling maakt kunst en cultuur mee.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-MENS_EN_MA-24",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "title": "Mens en maatschappij — Onderzoekt vraagstukken over mens en samenleving",
+      "source_refs": [
+        "OB/NIEUW/MENSE/24_A",
+        "OB/NIEUW/MENSE/24_B",
+        "OB/NIEUW/MENSE/24_C"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_MENSE_24_A-01",
+        "NODE-OB_NIEUW_MENSE_24_B-01",
+        "NODE-OB_NIEUW_MENSE_24_C-01"
+      ],
+      "end_goal": "De leerling onderzoekt vraagstukken over mens en samenleving",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-MENS_EN_MA-25",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "title": "Mens en maatschappij — Onderzoekt geografische verschijnselen",
+      "source_refs": [
+        "OB/NIEUW/MENSE/25_A",
+        "OB/NIEUW/MENSE/25_B",
+        "OB/NIEUW/MENSE/25_C"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_MENSE_25_A-01",
+        "NODE-OB_NIEUW_MENSE_25_B-01",
+        "NODE-OB_NIEUW_MENSE_25_C-01"
+      ],
+      "end_goal": "De leerling onderzoekt geografische verschijnselen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-MENS_EN_MA-26",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "title": "Mens en maatschappij — Onderzoekt historische verschijnselen",
+      "source_refs": [
+        "OB/NIEUW/MENSE/26_A",
+        "OB/NIEUW/MENSE/26_B",
+        "OB/NIEUW/MENSE/26_C"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_MENSE_26_A-01",
+        "NODE-OB_NIEUW_MENSE_26_B-01",
+        "NODE-OB_NIEUW_MENSE_26_C-01"
+      ],
+      "end_goal": "De leerling onderzoekt historische verschijnselen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-MENS_EN_MA-27",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "title": "Mens en maatschappij — Onderzoekt economische verschijnselen",
+      "source_refs": [
+        "OB/NIEUW/MENSE/27_A",
+        "OB/NIEUW/MENSE/27_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_MENSE_27_A-01",
+        "NODE-OB_NIEUW_MENSE_27_B-01"
+      ],
+      "end_goal": "De leerling onderzoekt economische verschijnselen",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-MENS_EN_MA-28",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "title": "Mens en maatschappij — Onderzoekt hoe mensen met elkaar samenleven",
+      "source_refs": [
+        "OB/NIEUW/MENSE/28_A",
+        "OB/NIEUW/MENSE/28_B",
+        "OB/NIEUW/MENSE/28_C",
+        "OB/NIEUW/MENSE/28_D"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_MENSE_28_A-01",
+        "NODE-OB_NIEUW_MENSE_28_B-01",
+        "NODE-OB_NIEUW_MENSE_28_C-01"
+      ],
+      "end_goal": "De leerling onderzoekt hoe mensen met elkaar samenleven.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-MENS_EN_NA-29",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "title": "Mens en natuur — Verkent en verklaart de wereld vanuit natuurwetenschappelijk en technologisch perspectief",
+      "source_refs": [
+        "OB/NIEUW/MENSE/29_A",
+        "OB/NIEUW/MENSE/29_B",
+        "OB/NIEUW/MENSE/29_C",
+        "OB/NIEUW/MENSE/29_D",
+        "OB/NIEUW/MENSE/29_E"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_MENSE_29_A-01",
+        "NODE-OB_NIEUW_MENSE_29_B-01",
+        "NODE-OB_NIEUW_MENSE_29_C-01",
+        "NODE-OB_NIEUW_MENSE_29_D-01",
+        "NODE-OB_NIEUW_MENSE_29_E-01"
+      ],
+      "end_goal": "De leerling verkent en verklaart de wereld vanuit natuurwetenschappelijk en technologisch perspectief.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-MENS_EN_NA-30",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "title": "Mens en natuur — Inzicht in en experimenteert met natuurkundige verschijnselen en technische systemen",
+      "source_refs": [
+        "OB/NIEUW/MENSE/30_A",
+        "OB/NIEUW/MENSE/30_B",
+        "OB/NIEUW/MENSE/30_C"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_MENSE_30_A-01",
+        "NODE-OB_NIEUW_MENSE_30_B-01",
+        "NODE-OB_NIEUW_MENSE_30_C-01"
+      ],
+      "end_goal": "De leerling toont inzicht in en experimenteert met natuurkundige verschijnselen en technische systemen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-MENS_EN_NA-31",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "title": "Mens en natuur — Inzicht in en experimenteert met materie, processen en circulaire productie",
+      "source_refs": [
+        "OB/NIEUW/MENSE/31_A",
+        "OB/NIEUW/MENSE/31_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_MENSE_31_A-01",
+        "NODE-OB_NIEUW_MENSE_31_B-01"
+      ],
+      "end_goal": "De leerling toont inzicht in en experimenteert met materie, processen en circulaire productie.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-MENS_EN_NA-32",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "title": "Mens en natuur — Inzicht in organismen en hun gezondheid",
+      "source_refs": [
+        "OB/NIEUW/MENSE/32_A",
+        "OB/NIEUW/MENSE/32_B",
+        "OB/NIEUW/MENSE/32_C",
+        "OB/NIEUW/MENSE/32_D"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_MENSE_32_A-01",
+        "NODE-OB_NIEUW_MENSE_32_B-01",
+        "NODE-OB_NIEUW_MENSE_32_C-01",
+        "NODE-OB_NIEUW_MENSE_32_D-01"
+      ],
+      "end_goal": "De leerling toont inzicht in organismen en hun gezondheid.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-MENS_EN_NA-33",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "title": "Mens en natuur — Inzicht in en verkent systeem aarde",
+      "source_refs": [
+        "OB/NIEUW/MENSE/33_33C",
+        "OB/NIEUW/MENSE/33_A",
+        "OB/NIEUW/MENSE/33_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_MENSE_33_33C-01",
+        "NODE-OB_NIEUW_MENSE_33_A-01",
+        "NODE-OB_NIEUW_MENSE_33_B-01"
+      ],
+      "end_goal": "De leerling toont inzicht in en verkent systeem aarde.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-NEDERLANDS-2",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlandse gebarentaal",
+      "title": "Nederlandse gebarentaal — Begrijpt informatie in de Nederlandse Gebarentaal",
+      "source_refs": [
+        "OB/NIEUW/NEDERL/2_A_1",
+        "OB/NIEUW/NEDERL/2_B_1",
+        "OB/NIEUW/NEDERL/2_C"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_NEDERL_2_A_1-01",
+        "NODE-OB_NIEUW_NEDERL_2_B_1-01",
+        "NODE-OB_NIEUW_NEDERL_2_C-01"
+      ],
+      "end_goal": "De leerling begrijpt informatie in de Nederlandse Gebarentaal.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-NEDERLANDS-3",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlandse gebarentaal",
+      "title": "Nederlandse gebarentaal — Drukt zich uit in de Nederlandse Gebarentaal",
+      "source_refs": [
+        "OB/NIEUW/NEDERL/3_A_1",
+        "OB/NIEUW/NEDERL/3_B_1",
+        "OB/NIEUW/NEDERL/3_C"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_NEDERL_3_A_1-01",
+        "NODE-OB_NIEUW_NEDERL_3_B_1-01",
+        "NODE-OB_NIEUW_NEDERL_3_C-01"
+      ],
+      "end_goal": "De leerling drukt zich uit in de Nederlandse Gebarentaal.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-NEDERLANDS-4",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlandse gebarentaal",
+      "title": "Nederlandse gebarentaal — Gesprekken voeren in de Nederlandse Gebarentaal",
+      "source_refs": [
+        "OB/NIEUW/NEDERL/4_A_1",
+        "OB/NIEUW/NEDERL/4_B_1"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_NEDERL_4_A_1-01",
+        "NODE-OB_NIEUW_NEDERL_4_B_1-01"
+      ],
+      "end_goal": "De leerling voert gesprekken in de Nederlandse Gebarentaal.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-NEDERLANDS-5",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlandse gebarentaal",
+      "title": "Nederlandse gebarentaal — Ontwikkelt zich als bewuste taalgebruiker",
+      "source_refs": [
+        "OB/NIEUW/NEDERL/5_A_1"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_NEDERL_5_A_1-01"
+      ],
+      "end_goal": "De leerling ontwikkelt zich als bewuste taalgebruiker.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-NEDERLANDS-6",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlandse gebarentaal",
+      "title": "Nederlandse gebarentaal — Inzicht in de Nederlandse Gebarentaal als systeem",
+      "source_refs": [
+        "OB/NIEUW/NEDERL/6_A_1",
+        "OB/NIEUW/NEDERL/6_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_NEDERL_6_A_1-01",
+        "NODE-OB_NIEUW_NEDERL_6_B-01"
+      ],
+      "end_goal": "De leerling toont inzicht in de Nederlandse Gebarentaal als systeem.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-NEDERLANDS-7",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlandse gebarentaal",
+      "title": "Nederlandse gebarentaal — Verkent het gebruik van de Nederlandse Gebarentaal",
+      "source_refs": [
+        "OB/NIEUW/NEDERL/7_A_1",
+        "OB/NIEUW/NEDERL/7_B_1"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_NEDERL_7_A_1-01",
+        "NODE-OB_NIEUW_NEDERL_7_B_1-01"
+      ],
+      "end_goal": "De leerling verkent het gebruik van de Nederlandse Gebarentaal.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-NEDERLANDS-8",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlandse gebarentaal",
+      "title": "Nederlandse gebarentaal — Inzicht in visueel-manuele literatuur",
+      "source_refs": [
+        "OB/NIEUW/NEDERL/8_A",
+        "OB/NIEUW/NEDERL/8_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_NEDERL_8_A-01",
+        "NODE-OB_NIEUW_NEDERL_8_B-01"
+      ],
+      "end_goal": "De leerling toont inzicht in visueel-manuele literatuur.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-NEDERLANDS-9",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "title": "Nederlands — Inzicht in literatuur",
+      "source_refs": [
+        "OB/NIEUW/NEDERL/9_A",
+        "OB/NIEUW/NEDERL/9_B",
+        "OB/NIEUW/NEDERL/9_C"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_NEDERL_9_A-01",
+        "NODE-OB_NIEUW_NEDERL_9_B-01",
+        "NODE-OB_NIEUW_NEDERL_9_C-01"
+      ],
+      "end_goal": "De leerling toont inzicht in literatuur.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-REKENEN_EN-10",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "title": "Rekenen en wiskunde — Redeneren met getallen, grootheden en vergelijkingen",
+      "source_refs": [
+        "OB/NIEUW/REKENE/10_A",
+        "OB/NIEUW/REKENE/10_A_1",
+        "OB/NIEUW/REKENE/10_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_REKENE_10_A-01",
+        "NODE-OB_NIEUW_REKENE_10_A_1-01",
+        "NODE-OB_NIEUW_REKENE_10_B-01"
+      ],
+      "end_goal": "De leerling redeneert en rekent met getallen, grootheden en vergelijkingen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-REKENEN_EN-11",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "title": "Rekenen en wiskunde — Interpreteert data en kansen",
+      "source_refs": [
+        "OB/NIEUW/REKENE/11_A",
+        "OB/NIEUW/REKENE/11_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_REKENE_11_A-01",
+        "NODE-OB_NIEUW_REKENE_11_B-01"
+      ],
+      "end_goal": "De leerling interpreteert data en kansen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-REKENEN_EN-12",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "title": "Rekenen en wiskunde — Inzicht in patronen en verbanden",
+      "source_refs": [
+        "OB/NIEUW/REKENE/12_A"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_REKENE_12_A-01"
+      ],
+      "end_goal": "De leerling toont inzicht in patronen en verbanden.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-REKENEN_EN-13",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "title": "Rekenen en wiskunde — Toont inzicht bij meetkundig handelen",
+      "source_refs": [
+        "OB/NIEUW/REKENE/13_A"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_REKENE_13_A-01"
+      ],
+      "end_goal": "De leerling toont inzicht bij meetkundig handelen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-REKENEN_EN-14",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "title": "Rekenen en wiskunde — Gebruikt wiskundige denk-werkwijzen",
+      "source_refs": [
+        "OB/NIEUW/REKENE/14_A",
+        "OB/NIEUW/REKENE/14_B",
+        "OB/NIEUW/REKENE/14_C",
+        "OB/NIEUW/REKENE/14_D"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_REKENE_14_A-01",
+        "NODE-OB_NIEUW_REKENE_14_B-01",
+        "NODE-OB_NIEUW_REKENE_14_C-01",
+        "NODE-OB_NIEUW_REKENE_14_D-01"
+      ],
+      "end_goal": "De leerling gebruikt wiskundige denk-werkwijzen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-REKENEN_EN-15",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "title": "Rekenen en wiskunde — Gebruikt wiksunde taal en wiskundig gereedschap",
+      "source_refs": [
+        "OB/NIEUW/REKENE/15_A",
+        "OB/NIEUW/REKENE/15_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_REKENE_15_A-01",
+        "NODE-OB_NIEUW_REKENE_15_B-01"
+      ],
+      "end_goal": "De leerling gebruikt wiksunde taal en wiskundig gereedschap.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    },
+    {
+      "id": "PATH-NIEUW_OB-REKENEN_EN-17",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "title": "Rekenen en wiskunde — Past wiskunde toe in bekende en nieuwe situaties",
+      "source_refs": [
+        "OB/NIEUW/REKENE/17_A",
+        "OB/NIEUW/REKENE/17_B"
+      ],
+      "node_ids": [
+        "NODE-OB_NIEUW_REKENE_17_A-01"
+      ],
+      "end_goal": "De leerling past wiskunde toe in bekende en nieuwe situaties.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_BEWEGE_43_A-01",
+      "to": "NODE-OB_NIEUW_BEWEGE_43_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_BEWEGE_43_B-01",
+      "to": "NODE-OB_NIEUW_BEWEGE_43_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_BEWEGE_44_A-01",
+      "to": "NODE-OB_NIEUW_BEWEGE_44_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_BEWEGE_45_A-01",
+      "to": "NODE-OB_NIEUW_BEWEGE_45_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_BURGER_19_A-01",
+      "to": "NODE-OB_NIEUW_BURGER_19_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_BURGER_20_A-01",
+      "to": "NODE-OB_NIEUW_BURGER_20_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_DIGITA_21_A-01",
+      "to": "NODE-OB_NIEUW_DIGITA_21_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_DIGITA_21_B-01",
+      "to": "NODE-OB_NIEUW_DIGITA_21_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_DIGITA_21_C-01",
+      "to": "NODE-OB_NIEUW_DIGITA_21_D-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_DIGITA_22_A-01",
+      "to": "NODE-OB_NIEUW_DIGITA_22_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_DIGITA_23_A-01",
+      "to": "NODE-OB_NIEUW_DIGITA_23_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_DIGITA_23_B-01",
+      "to": "NODE-OB_NIEUW_DIGITA_23_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_DUITS_37_A-01",
+      "to": "NODE-OB_NIEUW_DUITS_37_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_DUITS_37_B-01",
+      "to": "NODE-OB_NIEUW_DUITS_37_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_DUITS_38_A-01",
+      "to": "NODE-OB_NIEUW_DUITS_38_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_DUITS_38_B-01",
+      "to": "NODE-OB_NIEUW_DUITS_38_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_DUITS_38_C-01",
+      "to": "NODE-OB_NIEUW_DUITS_38_D-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_DUITS_39_A-01",
+      "to": "NODE-OB_NIEUW_DUITS_39_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_DUITS_39_B-01",
+      "to": "NODE-OB_NIEUW_DUITS_39_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_ENGELS_34_34A-01",
+      "to": "NODE-OB_NIEUW_ENGELS_34_34B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_ENGELS_34_34B-01",
+      "to": "NODE-OB_NIEUW_ENGELS_34_34C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_ENGELS_35_35A-01",
+      "to": "NODE-OB_NIEUW_ENGELS_35_35B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_ENGELS_35_35B-01",
+      "to": "NODE-OB_NIEUW_ENGELS_35_35C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_ENGELS_35_35C-01",
+      "to": "NODE-OB_NIEUW_ENGELS_35_35D-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_ENGELS_36_36A-01",
+      "to": "NODE-OB_NIEUW_ENGELS_36_36B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_ENGELS_36_36B-01",
+      "to": "NODE-OB_NIEUW_ENGELS_36_36C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_KUNST_40_A-01",
+      "to": "NODE-OB_NIEUW_KUNST_40_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_KUNST_40_B-01",
+      "to": "NODE-OB_NIEUW_KUNST_40_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_KUNST_41_A-01",
+      "to": "NODE-OB_NIEUW_KUNST_41_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_KUNST_42_A-01",
+      "to": "NODE-OB_NIEUW_KUNST_42_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_24_A-01",
+      "to": "NODE-OB_NIEUW_MENSE_24_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_24_B-01",
+      "to": "NODE-OB_NIEUW_MENSE_24_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_25_A-01",
+      "to": "NODE-OB_NIEUW_MENSE_25_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_25_B-01",
+      "to": "NODE-OB_NIEUW_MENSE_25_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_26_A-01",
+      "to": "NODE-OB_NIEUW_MENSE_26_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_26_B-01",
+      "to": "NODE-OB_NIEUW_MENSE_26_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_27_A-01",
+      "to": "NODE-OB_NIEUW_MENSE_27_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_28_A-01",
+      "to": "NODE-OB_NIEUW_MENSE_28_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_28_B-01",
+      "to": "NODE-OB_NIEUW_MENSE_28_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_29_A-01",
+      "to": "NODE-OB_NIEUW_MENSE_29_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_29_B-01",
+      "to": "NODE-OB_NIEUW_MENSE_29_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_29_C-01",
+      "to": "NODE-OB_NIEUW_MENSE_29_D-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_29_D-01",
+      "to": "NODE-OB_NIEUW_MENSE_29_E-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_30_A-01",
+      "to": "NODE-OB_NIEUW_MENSE_30_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_30_B-01",
+      "to": "NODE-OB_NIEUW_MENSE_30_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_31_A-01",
+      "to": "NODE-OB_NIEUW_MENSE_31_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_32_A-01",
+      "to": "NODE-OB_NIEUW_MENSE_32_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_32_B-01",
+      "to": "NODE-OB_NIEUW_MENSE_32_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_32_C-01",
+      "to": "NODE-OB_NIEUW_MENSE_32_D-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_33_33C-01",
+      "to": "NODE-OB_NIEUW_MENSE_33_A-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_MENSE_33_A-01",
+      "to": "NODE-OB_NIEUW_MENSE_33_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_NEDERL_2_B_1-01",
+      "to": "NODE-OB_NIEUW_NEDERL_2_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_NEDERL_3_B_1-01",
+      "to": "NODE-OB_NIEUW_NEDERL_3_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_NEDERL_6_A_1-01",
+      "to": "NODE-OB_NIEUW_NEDERL_6_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_NEDERL_8_A-01",
+      "to": "NODE-OB_NIEUW_NEDERL_8_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_NEDERL_9_A-01",
+      "to": "NODE-OB_NIEUW_NEDERL_9_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_NEDERL_9_B-01",
+      "to": "NODE-OB_NIEUW_NEDERL_9_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_REKENE_10_A-01",
+      "to": "NODE-OB_NIEUW_REKENE_10_A_1-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_REKENE_10_A_1-01",
+      "to": "NODE-OB_NIEUW_REKENE_10_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_REKENE_11_A-01",
+      "to": "NODE-OB_NIEUW_REKENE_11_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_REKENE_14_A-01",
+      "to": "NODE-OB_NIEUW_REKENE_14_B-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_REKENE_14_B-01",
+      "to": "NODE-OB_NIEUW_REKENE_14_C-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_REKENE_14_C-01",
+      "to": "NODE-OB_NIEUW_REKENE_14_D-01"
+    },
+    {
+      "type": "precedes",
+      "from": "NODE-OB_NIEUW_REKENE_15_A-01",
+      "to": "NODE-OB_NIEUW_REKENE_15_B-01"
+    }
+  ]
+}
