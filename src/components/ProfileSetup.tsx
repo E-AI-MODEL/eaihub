@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronRight, ArrowLeft } from 'lucide-react';
 import type { LearnerProfile } from '../types';
-import { getLearningPath, CURRICULUM_PATHS } from '@/data/curriculum';
+import { getAllSubjects, getPathsBySubject } from '@/data/curriculumLoader';
+import type { LearningPath } from '@/types';
 
 interface ProfileSetupProps {
   onComplete: (profile: LearnerProfile) => void;
@@ -9,20 +10,8 @@ interface ProfileSetupProps {
   onCancel?: () => void;
 }
 
-// SLO modules mapped by level
-const SLO_MODULES: Record<string, { subject: string; desc: string; icon: string }[]> = {
-  VWO: [
-    { subject: 'Biologie', desc: 'Eiwitsynthese', icon: '🧬' },
-    { subject: 'Wiskunde B', desc: 'Differentiëren', icon: '📐' },
-  ],
-  HAVO: [
-    { subject: 'Economie', desc: 'Marktwerking', icon: '💰' },
-  ],
-  VMBO: [],
-};
-
 const LEVELS = ['VMBO', 'HAVO', 'VWO'] as const;
-const STEP_LABELS = ['Naam', 'Niveau & Leerjaar', 'Vak', 'Leerdoel'];
+const STEP_LABELS = ['Naam', 'Niveau & Leerjaar', 'Leergebied', 'Leerdoel'];
 
 const GRADE_OPTIONS: Record<string, string[]> = {
   VMBO: ['1', '2', '3', '4'],
@@ -30,29 +19,41 @@ const GRADE_OPTIONS: Record<string, string[]> = {
   VWO: ['1', '2', '3', '4', '5', '6'],
 };
 
+// Subject icons for visual appeal
+const SUBJECT_ICONS: Record<string, string> = {
+  BEWEGE: '⚽', BURGER: '🏛️', DIGITA: '💻', ENGELS: '🇬🇧',
+  KUNSTE: '🎨', MENSE: '🌍', MENSMA: '👥', NEDER: '📝',
+  REKENE: '📐',
+};
+
 const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile, onCancel }) => {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [name, setName] = useState('');
   const [level, setLevel] = useState<string | null>(null);
   const [subject, setSubject] = useState<string | null>(null);
+  const [subjectCode, setSubjectCode] = useState<string | null>(null);
   const [customSubject, setCustomSubject] = useState('');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedPathTopic, setSelectedPathTopic] = useState<string | null>(null);
   const [grade, setGrade] = useState<string | null>(null);
   const [isSLO, setIsSLO] = useState(false);
   const [isFading, setIsFading] = useState(false);
 
-  // Curriculum nodes for the chosen SLO subject+level
-  const curriculumNodes = useMemo(() => {
-    if (!subject || !level || !isSLO) return [];
-    const path = getLearningPath(subject, level);
-    return path?.nodes || [];
-  }, [subject, level, isSLO]);
+  // Get available subjects from pilot data
+  const availableSubjects = useMemo(() => getAllSubjects(), []);
 
-  // Available SLO modules for current level
-  const availableSLO = useMemo(() => {
-    if (!level) return [];
-    return SLO_MODULES[level] || [];
-  }, [level]);
+  // Get paths for selected subject
+  const subjectPaths = useMemo(() => {
+    if (!subject) return [];
+    return getPathsBySubject(subject);
+  }, [subject]);
+
+  // Get nodes for selected path
+  const pathNodes = useMemo(() => {
+    if (!selectedPathTopic) return [];
+    const path = subjectPaths.find(p => p.topic === selectedPathTopic);
+    return path?.nodes || [];
+  }, [selectedPathTopic, subjectPaths]);
 
   useEffect(() => {
     if (initialProfile) {
