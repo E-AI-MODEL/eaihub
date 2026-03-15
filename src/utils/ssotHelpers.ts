@@ -16,7 +16,8 @@ import {
   type LogicGate
 } from '@/data/ssot';
 import { getEffectiveSSOT } from '@/lib/ssotRuntime';
-import { getNodeById, getLearningPath, type LearningNode } from '@/data/curriculum';
+import { getNodeById } from '@/data/curriculumLoader';
+import type { LearningNode } from '@/types';
 import type { SessionContext } from '@/types';
 
 // ============= TYPE DEFINITIONS =============
