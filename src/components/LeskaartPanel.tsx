@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { BookOpen, Target, AlertTriangle, Clock, ChevronLeft, ChevronRight, Lightbulb } from 'lucide-react';
-import { getLearningPath } from '@/data/curriculum';
-import type { LearnerProfile, EAIAnalysis, DidacticTheme } from '@/types';
+import { BookOpen, Target, AlertTriangle, ChevronLeft, ChevronRight, Lightbulb, List } from 'lucide-react';
+import { getPathForNode, getNodeById } from '@/data/curriculumLoader';
+import type { LearnerProfile, EAIAnalysis, DidacticTheme, LearningNode, LearningPath } from '@/types';
 
 // Learner-facing phase descriptions (no technical terms)
 const PHASE_CONTEXT: Record<string, { label: string; hint: string }> = {
@@ -65,20 +65,21 @@ const LeskaartPanel: React.FC<LeskaartPanelProps> = ({
 
   const [activeTab, setActiveTab] = useState(autoTab);
 
-  const learningPath = useMemo(() => {
-    if (!profile.subject || !profile.level) return null;
-    return getLearningPath(profile.subject, profile.level);
-  }, [profile.subject, profile.level]);
+  // Resolve path info from current node
+  const pathInfo = useMemo(() => {
+    if (!profile.currentNodeId) return null;
+    return getPathForNode(profile.currentNodeId) || null;
+  }, [profile.currentNodeId]);
 
   const currentNode = useMemo(() => {
-    if (!profile.currentNodeId || !learningPath) return null;
-    return learningPath.nodes.find(n => n.id === profile.currentNodeId) || null;
-  }, [profile.currentNodeId, learningPath]);
+    if (!profile.currentNodeId) return null;
+    return getNodeById(profile.currentNodeId) || null;
+  }, [profile.currentNodeId]);
 
   const currentNodeIndex = useMemo(() => {
-    if (!profile.currentNodeId || !learningPath) return -1;
-    return learningPath.nodes.findIndex(n => n.id === profile.currentNodeId);
-  }, [profile.currentNodeId, learningPath]);
+    if (!profile.currentNodeId || !pathInfo) return -1;
+    return pathInfo.path.nodes.findIndex(n => n.id === profile.currentNodeId);
+  }, [profile.currentNodeId, pathInfo]);
 
   // Session timer
   const [elapsed, setElapsed] = useState(0);
@@ -93,10 +94,10 @@ const LeskaartPanel: React.FC<LeskaartPanelProps> = ({
   React.useEffect(() => { setActiveTab(autoTab); }, [autoTab]);
 
   const navigateNode = (direction: -1 | 1) => {
-    if (!learningPath) return;
+    if (!pathInfo) return;
     const newIdx = currentNodeIndex + direction;
-    if (newIdx >= 0 && newIdx < learningPath.nodes.length) {
-      onNodeChange(learningPath.nodes[newIdx].id);
+    if (newIdx >= 0 && newIdx < pathInfo.path.nodes.length) {
+      onNodeChange(pathInfo.path.nodes[newIdx].id);
     }
   };
 
@@ -121,11 +122,34 @@ const LeskaartPanel: React.FC<LeskaartPanelProps> = ({
             <h3 className="text-sm font-semibold text-slate-100">{currentNode.title}</h3>
             <p className="text-[11px] text-slate-400 leading-relaxed">{currentNode.description}</p>
 
+            {/* SLO ref badge */}
+            {currentNode.slo_ref && (
+              <span className="text-[8px] font-mono text-slate-500 border border-slate-700 px-1.5 py-0.5 inline-block">{currentNode.slo_ref}</span>
+            )}
+
             {/* Mastery */}
             <div className="flex items-start gap-2 pt-1">
               <Target className="w-3 h-3 text-emerald-400 mt-0.5 shrink-0" />
               <p className="text-[10px] text-emerald-300">{currentNode.mastery_criteria}</p>
             </div>
+
+            {/* Microsteps */}
+            {currentNode.micro_steps && currentNode.micro_steps.length > 0 && (
+              <div className="flex items-start gap-2 pt-1">
+                <List className="w-3 h-3 text-cyan-400 mt-0.5 shrink-0" />
+                <div>
+                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider">Stappen</span>
+                  <ul className="text-[10px] text-cyan-300/80 space-y-0.5">
+                    {currentNode.micro_steps.slice(0, 3).map((step, i) => (
+                      <li key={i}>• {step}</li>
+                    ))}
+                    {currentNode.micro_steps.length > 3 && (
+                      <li className="text-slate-500">+ {currentNode.micro_steps.length - 3} meer</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            )}
 
             {/* Misconceptions */}
             {currentNode.common_misconceptions && currentNode.common_misconceptions.length > 0 && (
@@ -142,37 +166,50 @@ const LeskaartPanel: React.FC<LeskaartPanelProps> = ({
               </div>
             )}
 
-            {/* Study load + session time */}
-            <div className="flex items-center justify-between pt-2 border-t border-slate-800">
-              <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                <Clock className="w-3 h-3" />
-                <span>~{currentNode.study_load_minutes} min</span>
+            {/* Illustrations */}
+            {currentNode.illustrations && currentNode.illustrations.length > 0 && (
+              <div className="flex items-start gap-2 pt-1">
+                <Lightbulb className="w-3 h-3 text-indigo-400 mt-0.5 shrink-0" />
+                <div>
+                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider">Voorbeelden</span>
+                  <ul className="text-[10px] text-indigo-300/80 space-y-0.5">
+                    {currentNode.illustrations.slice(0, 2).map((ill, i) => (
+                      <li key={i}>• {ill}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
+            )}
+
+            {/* Session time */}
+            <div className="flex items-center justify-end pt-2 border-t border-slate-800">
               <span className="text-[10px] font-mono text-slate-600">
                 sessie: {elapsed} min
               </span>
             </div>
 
             {/* Navigation */}
-            <div className="flex items-center justify-between pt-2">
-              <button
-                onClick={() => navigateNode(-1)}
-                disabled={currentNodeIndex <= 0}
-                className="flex items-center gap-1 text-[10px] text-slate-500 hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronLeft className="w-3 h-3" /> Vorige
-              </button>
-              <span className="text-[9px] font-mono text-slate-600">
-                {currentNodeIndex + 1}/{learningPath?.nodes.length || 0}
-              </span>
-              <button
-                onClick={() => navigateNode(1)}
-                disabled={!learningPath || currentNodeIndex >= learningPath.nodes.length - 1}
-                className="flex items-center gap-1 text-[10px] text-slate-500 hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              >
-                Volgende <ChevronRight className="w-3 h-3" />
-              </button>
-            </div>
+            {pathInfo && (
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  onClick={() => navigateNode(-1)}
+                  disabled={currentNodeIndex <= 0}
+                  className="flex items-center gap-1 text-[10px] text-slate-500 hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-3 h-3" /> Vorige
+                </button>
+                <span className="text-[9px] font-mono text-slate-600">
+                  {currentNodeIndex + 1}/{pathInfo.path.nodes.length}
+                </span>
+                <button
+                  onClick={() => navigateNode(1)}
+                  disabled={currentNodeIndex >= pathInfo.path.nodes.length - 1}
+                  className="flex items-center gap-1 text-[10px] text-slate-500 hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  Volgende <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <p className="text-[11px] text-slate-600 italic">Selecteer een lesonderwerp via de header.</p>
@@ -231,17 +268,17 @@ const LeskaartPanel: React.FC<LeskaartPanelProps> = ({
       </div>
 
       {/* Section: Voortgang */}
-      {learningPath && currentNodeIndex >= 0 && (
+      {pathInfo && currentNodeIndex >= 0 && (
         <div className="p-4">
           <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-2 block">Voortgang</span>
           <div className="h-1.5 w-full bg-slate-800 overflow-hidden">
             <div
               className="h-full bg-indigo-500/60 transition-all duration-500"
-              style={{ width: `${((currentNodeIndex + 1) / learningPath.nodes.length) * 100}%` }}
+              style={{ width: `${((currentNodeIndex + 1) / pathInfo.path.nodes.length) * 100}%` }}
             />
           </div>
           <span className="text-[9px] font-mono text-slate-600 mt-1 block">
-            {currentNodeIndex + 1} van {learningPath.nodes.length} onderwerpen
+            {currentNodeIndex + 1} van {pathInfo.path.nodes.length} leerdoelen
           </span>
         </div>
       )}
