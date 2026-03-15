@@ -85,11 +85,12 @@ const GoalPicker: React.FC<GoalPickerProps> = ({ profile, onSelect, onDismiss })
       ];
     }
 
-    // Try path-based goals from CURRICULUM_PATHS
+    // Try path-based goals from curriculum loader
     if (profile.subject) {
-      const matchingPath = CURRICULUM_PATHS.find(p => p.subject.toLowerCase() === profile.subject!.toLowerCase());
-      if (matchingPath && matchingPath.nodes.length >= 4) {
-        return matchingPath.nodes.slice(0, 4).map(n => ({
+      const subjectPaths = getPathsBySubject(profile.subject);
+      const firstPath = subjectPaths[0];
+      if (firstPath && firstPath.nodes.length >= 4) {
+        return firstPath.nodes.slice(0, 4).map(n => ({
           label: n.title,
           description: n.description,
         }));
