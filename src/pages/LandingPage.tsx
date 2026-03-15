@@ -12,7 +12,7 @@ const LandingPage = () => {
       
       {/* UPDATE BANNER */}
       {showBanner && (
-        <div className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground px-4 py-2.5 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium shadow-lg animate-in slide-in-from-top duration-500">
+        <div className="sticky top-0 z-[60] bg-primary text-primary-foreground px-4 py-2.5 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium shadow-lg animate-in slide-in-from-top duration-500">
           <Sparkles className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
           <span>
             <strong>Nieuw:</strong> SLO Kerndoelen 2025 curriculum geladen — {PILOT_NODE_COUNT} leerdoelen, {PILOT_PATH_COUNT} kerndoelen, 9 leergebieden

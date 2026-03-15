@@ -1,60 +1,140 @@
 
+# Strategische roadmap — EAIHUB
 
-# Code Check Rapport — EAIHUB Pilot
+## Status
 
-## Oordeel: Publiceerbaar met 2 kleine fixes
-
-De codebase is architecturaal solide en de 4 must-fixes zijn correct geïmplementeerd. Er zijn 2 kleine issues die aandacht verdienen vóór publicatie.
-
----
-
-## Wat is bevestigd correct
-
-| Check | Status | Bewijs |
-|-------|--------|--------|
-| `LearningPath.id` aanwezig | ✅ | `types/index.ts` r61: `id: string` |
-| Loader vult `id` | ✅ | `curriculumLoader.ts` r102: `id: raw.id` |
-| `pathId` via `getPathForNode` | ✅ | `chatService.ts` r110-112 |
-| `mastery_criteria` alle items | ✅ | `curriculumLoader.ts` r72-73: `.join(' | ')` |
-| `didactic_focus` alle themes | ✅ | `curriculumLoader.ts` r71: `.join(' | ')` |
-| Prompt ankerregel | ✅ | `ssotHelpers.ts` r258-263: harde KRITIEK regel |
-| `getLearningPath` verwijderd | ✅ | Search: 0 resultaten in hele repo |
-| `curriculum.ts` schone re-export | ✅ | Geen legacy functies meer |
-| `buildCurriculumContext` verrijkt | ✅ | `chatService.ts` r212-221: bevat micro_steps, illustrations, evidence_types |
-| ChatInterface gebruikt loader | ✅ | r10: import uit `curriculumLoader` |
-| MessageBubble scroll + letters | ✅ | r217: `max-h-44 overflow-y-auto`, r224: letter-prefix |
-| Update banner op landing | ✅ | `LandingPage.tsx` r14-28 |
+Stap 1–7 afgerond. Fase 1–5 afgerond. Alle observability-metrics (edge/client ratio, plugin-usage, healing frequentie, knowledge_type distributie) live en correct aangesloten. `analysisSource`-bug gefixt (mechanical i.p.v. analysis).
 
 ---
 
-## Issues gevonden
+## Huidige architectuur
 
-### 1. Console warnings (laag risico, cosmetisch)
-
-**Bron:** `StudentStudio.tsx` r60 en `BootSequence.tsx` r25
-**Probleem:** React waarschuwt "Function components cannot be given refs" — er wordt een `ref` doorgegeven aan een function component zonder `forwardRef`.
-**Impact:** Geen functioneel effect, maar vervuilt de console en is onprofessioneel bij inspectie.
-**Fix:** Wrap `StudentStudio` en/of `BootSequence` met `React.forwardRef`, of verwijder de ref-prop.
-
-### 2. Banner overlapt navigatie (UX)
-
-**Bron:** `LandingPage.tsx` r14-28 en r31-67
-**Probleem:** De update banner is `fixed top-0 z-[60]` en de navigatie is `fixed top-0 z-50`. De banner overlapt de nav correct qua z-index, maar wanneer de banner zichtbaar is duwt niets de nav naar beneden — ze liggen over elkaar.
-**Impact:** Op mobiel (393px viewport) kan de nav gedeeltelijk onzichtbaar zijn achter de banner.
-**Fix:** Voeg `top-10` (of dynamische offset) toe aan de nav wanneer de banner zichtbaar is, of maak de banner niet-fixed (sticky).
+1. `eai-classify` edge function — primaire 10D-classificatie via Gemini (tool-calling schema)
+2. `generateAnalysis()` in `chatService.ts` — client-side fallback via regex/heuristics
+3. `reliabilityPipeline.ts` — enige bron voor SSOT-healing, G-factor, logic gates, epistemic guard
+4. `eaiLearnAdapter.ts` — state-/viewmodel-laag (scaffolding, TTL, history)
+5. `ssot_v15.json` + `ssot.ts` — statische SSOT singleton met typed helpers, **nu via `getEffectiveSSOT()`**
+6. `ssotRuntime.ts` — runtime loader + whitelist merge voor school plugin overlays
+7. `ssotValidator.ts` — drielaags Zod-validatie (schema, referentieel, runtime)
+8. Auth via Supabase: `user_roles` (LEERLING/DOCENT/ADMIN), `has_role()` SECURITY DEFINER, `AuthGuard`
+9. Persistentie: `chat_messages`, `student_sessions`, `mastery`, `teacher_messages`, `profiles`, `school_ssot`
 
 ---
 
-## Architecturale gezondheid
+## Afgeronde stappen
 
-- **Type-integriteit:** `LearningNode` en `LearningPath` zijn eenmalig gedefinieerd in `types/index.ts`, correct gebruikt overal
-- **Data-integriteit:** Loader is enige bron, geen legacy imports, geen supplementary lekkage
-- **Prompt-kwaliteit:** Ankerregel aanwezig, microsteps als structuur, misconcepties proactief
-- **Mastery-koppeling:** `pathId` correct afgeleid via `getPathForNode`
-- **Streaming:** Zowel `sendChat` als `streamChat` gebruiken dezelfde correcte pipeline
-- **Legacy:** `getLearningPath` volledig verwijderd, `CURRICULUM_PATHS` bestaat nog als compat-export maar wordt nergens meer geïmporteerd in actieve code
+### Stap 1 — Analyse naar edge function ✅
+### Stap 2 — Dubbele validatie opschonen ✅
+### Stap 3 — EAIAnalysis uitbreiden met nuancevelden ✅
+### Stap 4 — UI aanpassen op rijkere analyse ✅
+### Stap 5 — Leerlingervaring en Leskaart-context ✅
+### Stap 6 — Kwaliteitszichtbaarheid per rol ✅
+### Stap 7 — Veilig rollenmodel en Auth ✅
 
-## Eindoordeel
+---
 
-**Publiceerbaar: JA**, mits de banner-overlap op mobiel wordt getest/gefixt. De `forwardRef` warning is cosmetisch en kan na publicatie.
+## Implementatieplan — 5 fasen
 
+### Fase 1 — Stabilisatie (security + healing) ✅
+
+| # | Taak | Status |
+|---|------|--------|
+| 1.1 | RLS verscherpen | ✅ DONE |
+| 1.2 | Healing consolideren | ✅ DONE |
+| 1.3 | Defensieve role-check | ✅ DONE |
+
+### Fase 2 — Analyse-consistentie ✅
+
+| # | Taak | Status |
+|---|------|--------|
+| 2.1 | Edge-classify uitbreiden met secondary_dimensions | ✅ DONE |
+| 2.2 | E-dimensie aansluiten op SSOT | ✅ DONE |
+| 2.3 | Logic gate check vereenvoudigen | ✅ DONE |
+
+### Fase 3.x — Auth consolidatie & governance hardening ✅
+
+| # | Taak | Status |
+|---|------|--------|
+| 3.x.1 | `useAuth()` refactor naar `AuthProvider` context (één listener, gedeelde state) | ✅ DONE |
+| 3.x.2 | RLS tightening: `user_roles` en `school_ssot` van ADMIN ALL → SUPERUSER ALL + ADMIN/DOCENT SELECT | ✅ DONE |
+
+
+### Fase 3 — EITL: SSOT plug-in architectuur ✅
+
+| # | Taak | Status |
+|---|------|--------|
+| 3.1 | `school_ssot` tabel + RLS (admins CRUD, docenten SELECT) | ✅ DONE |
+| 3.2 | `ssotValidator.ts` — drielaags Zod-validatie (schema, referentieel, runtime) | ✅ DONE |
+| 3.3 | `ssotRuntime.ts` — `whitelistMerge` + `loadEffectiveSSOT` + cache | ✅ DONE |
+| 3.4 | `ssot.ts` refactor — `SSOT_DATA` → `BASE_SSOT` + `getEffectiveSSOT()` | ✅ DONE |
+| 3.5 | Component updates — alle directe `SSOT_DATA` refs vervangen | ✅ DONE |
+| 3.6 | Read-only EITL preview tab in Admin Panel | ✅ DONE |
+
+#### MVP Plugin Whitelist
+- **Toegestaan**: band `label`, `description`, `didactic_principle`, `fix` (tekst); command descriptions; SRL `label`/`goal`; gate annotations (rationale, teacher_note)
+- **Immutable**: `band_id`, `fix_ref`, `score_range`, `mechanistic`, `enforcement`, command keys, `cycle.order`, `trigger_band`, `learner_obs`, `ai_obs`, `nl_profile`, `trace_tags`, `band_weight`, `fix_type`, `band_ref`
+- **Niet in MVP**: rubric `name`, rubric `goal`
+
+### Fase 3.5 — EITL Wizard (edit-flow)
+
+| # | Taak | Status |
+|---|------|--------|
+| 3.5.1 | 5-staps wizard in Admin Panel voor plugin CRUD (SUPERUSER-only) | ✅ DONE |
+| 3.5.2 | Plugin versioning met `change_notes` en `based_on_version` | ✅ DONE |
+
+### Fase 4 — Governance ✅
+
+| # | Taak | Status |
+|---|------|--------|
+| 4.1 | Versioning afronden (dedup save, change_notes verplicht bij edits) | ✅ DONE |
+| 4.2 | Rollback — SUPERUSER kan eerdere plugin-versie activeren via PluginVersionHistory | ✅ DONE |
+| 4.3 | Audit log — `ssot_changes` tabel met SUPERUSER ALL + ADMIN SELECT | ✅ DONE |
+| 4.4 | Diff-view — versiegeschiedenis + audit trail in EITL tab | ✅ DONE |
+
+### Fase 5 — Observability ✅
+
+| # | Taak | Status |
+|---|------|--------|
+| 5.1 | Edge vs client analyse-ratio in dashboard | ✅ DONE |
+| 5.2 | Plugin-usage metrics per school | ✅ DONE |
+| 5.3 | Logic gate breach rate trending | ✅ DONE |
+| 5.4 | Healing event frequentie | ✅ DONE |
+
+### Fase 6 — OB nieuw pilot_core curriculum ✅
+
+| # | Taak | Status |
+|---|------|--------|
+| 6.1 | Drie pilot JSON-bestanden plaatsen in `src/data/curriculum/` | ✅ DONE |
+| 6.2 | `LearningNode` uitbreiden met `illustrations`, `evidence_types` | ✅ DONE |
+| 6.3 | `curriculumLoader.ts` — JSON → runtime mapper met indexes | ✅ DONE |
+| 6.4 | `curriculum.ts` → re-export compatibiliteitslaag | ✅ DONE |
+| 6.5 | Consumers aanpassen (TopicSelector, ProfileSetup, LeskaartPanel, ChatInterface, ssotHelpers, adminService) | ✅ DONE |
+| 6.6 | `study_load_minutes` geneutraliseerd (uit UI + prompt, optioneel behouden in types) | ✅ DONE |
+| 6.7 | PVA opgeslagen als `.lovable/pva-ob-nieuw-pilot-core.md` | ✅ DONE |
+
+## Bekende technische schuld
+
+| # | Issue | Impact | Fase |
+|---|-------|--------|------|
+| 4 | Mixed dimensions in `coregulation_bands` veld | Low | documenteren of refactor bij EITL wizard |
+| 7 | Token schatting is character-based proxy | Low | 5.x of labelen |
+| 8 | `COMMAND_INTENTS` hardcoded in `ssotHelpers.ts` | Low | 3.5 (verplaatsen naar plugin-laag) |
+
+---
+
+## Wat expliciet buiten scope blijft
+
+- Volledige vervanging van de SSOT per school (alleen overlay)
+- Generieke deep merge (alleen whitelisted paden)
+- Structurele of machinekritische velden in de plugin-laag
+- Meerdere fasen tegelijk uitvoeren
+- `tiktoken` (Python-only) — indien nodig: `gpt-tokenizer` (npm) of proxy-label
+
+---
+
+## Kernprincipe
+
+Constatering → Interpretatie → Beslissing.
+De base SSOT blijft constitutieve bronlaag.
+De plugin annoteert, maar herdefinieert niet.
+Stabilisatie vóór uitbreiding.
