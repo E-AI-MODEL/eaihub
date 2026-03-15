@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, BarChart3, ShieldCheck } from 'lucide-react';
+import { ArrowRight, BookOpen, BarChart3, ShieldCheck, Sparkles, X } from 'lucide-react';
 import FactoryDiagram from '@/components/FactoryDiagram';
+import { useState } from 'react';
+import { PILOT_NODE_COUNT, PILOT_PATH_COUNT } from '@/data/curriculumLoader';
 
 const LandingPage = () => {
   return (
