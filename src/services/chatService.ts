@@ -106,12 +106,8 @@ function updateSessionContext(sessionId: string, analysis: EAIAnalysis, profile:
 function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, sessionId: string, userId: string): number {
   if (!profile.currentNodeId || !profile.subject || !profile.level) return 0;
 
-  // Look up curriculum path by subject+level instead of string construction
-  const path = CURRICULUM_PATHS.find(
-    p => p.subject.toLowerCase() === profile.subject!.toLowerCase() &&
-         p.level.toLowerCase() === profile.level!.toLowerCase()
-  );
-  const pathId = path?.id || `${profile.subject}_${profile.level}`.toUpperCase().replace(/\s/g, '');
+  // Look up curriculum path by subject+level — generate pathId from subject+level
+  const pathId = `${profile.subject}_${profile.level}`.toUpperCase().replace(/\s/g, '');
   
   const ctx = getSessionContext(sessionId);
   const turnCount = ctx.turn_count;
