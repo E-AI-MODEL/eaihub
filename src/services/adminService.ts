@@ -3,7 +3,7 @@
 
 import { getEAICore } from '../utils/ssotHelpers';
 import { validateAnalysisAgainstSSOT } from '../lib/reliabilityPipeline';
-import { CURRICULUM_PATHS } from '../data/curriculum';
+import { PILOT_NODE_COUNT, PILOT_PATH_COUNT } from '../data/curriculumLoader';
 import { getOrCreateUserId } from './identity';
 
 export type GovernanceMetric = {
