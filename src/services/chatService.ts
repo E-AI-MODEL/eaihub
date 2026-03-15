@@ -136,8 +136,6 @@ function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, se
   }).catch(err => console.error('[Mastery] Update failed:', err));
 
   // Calculate progress from localStorage mastery data
-  if (!path) return 0;
-  
   const masteryKey = `eai_mastery_local_${userId}_${pathId}`;
   const stored = localStorage.getItem(masteryKey);
   if (!stored) return 0;
@@ -150,7 +148,10 @@ function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, se
         completedNodes.add(entry.nodeId);
       }
     }
-    return Math.round((completedNodes.size / path.nodes.length) * 100);
+    // Use path from loader for node count
+    const currPath = getLearningPath(profile.subject!, profile.level!);
+    const totalNodes = currPath?.nodes.length || 1;
+    return Math.round((completedNodes.size / totalNodes) * 100);
   } catch {
     return 0;
   }
