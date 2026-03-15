@@ -3,7 +3,7 @@
 
 import { getEAICore } from '../utils/ssotHelpers';
 import { validateAnalysisAgainstSSOT } from '../lib/reliabilityPipeline';
-import { CURRICULUM_PATHS } from '../data/curriculum';
+import { PILOT_NODE_COUNT, PILOT_PATH_COUNT } from '../data/curriculumLoader';
 import { getOrCreateUserId } from './identity';
 
 export type GovernanceMetric = {
@@ -227,8 +227,8 @@ export const runSystemAudit = async (): Promise<SystemHealth> => {
     issues.push(`WARNING: ${storage.corruptKeys.length} corrupt data keys found in local storage.`);
   }
 
-  const totalNodes = CURRICULUM_PATHS.reduce((acc, path) => acc + path.nodes.length, 0);
-  const totalMinutes = CURRICULUM_PATHS.reduce((acc, path) => acc + path.nodes.reduce((nAcc, n) => nAcc + (n.study_load_minutes || 0), 0), 0);
+  const totalNodes = PILOT_NODE_COUNT;
+  const totalMinutes = 0; // study_load_minutes no longer tracked
 
   if (totalNodes === 0) {
     issues.push("WARNING: Curriculum appears empty.");

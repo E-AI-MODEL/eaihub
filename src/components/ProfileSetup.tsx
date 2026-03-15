@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronRight, ArrowLeft } from 'lucide-react';
 import type { LearnerProfile } from '../types';
-import { getLearningPath, CURRICULUM_PATHS } from '@/data/curriculum';
+import { getAllSubjects, getPathsBySubject } from '@/data/curriculumLoader';
+import type { LearningPath } from '@/types';
 
 interface ProfileSetupProps {
   onComplete: (profile: LearnerProfile) => void;
@@ -9,20 +10,8 @@ interface ProfileSetupProps {
   onCancel?: () => void;
 }
 
-// SLO modules mapped by level
-const SLO_MODULES: Record<string, { subject: string; desc: string; icon: string }[]> = {
-  VWO: [
-    { subject: 'Biologie', desc: 'Eiwitsynthese', icon: '🧬' },
-    { subject: 'Wiskunde B', desc: 'Differentiëren', icon: '📐' },
-  ],
-  HAVO: [
-    { subject: 'Economie', desc: 'Marktwerking', icon: '💰' },
-  ],
-  VMBO: [],
-};
-
 const LEVELS = ['VMBO', 'HAVO', 'VWO'] as const;
-const STEP_LABELS = ['Naam', 'Niveau & Leerjaar', 'Vak', 'Leerdoel'];
+const STEP_LABELS = ['Naam', 'Niveau & Leerjaar', 'Leergebied', 'Leerdoel'];
 
 const GRADE_OPTIONS: Record<string, string[]> = {
   VMBO: ['1', '2', '3', '4'],
@@ -30,29 +19,41 @@ const GRADE_OPTIONS: Record<string, string[]> = {
   VWO: ['1', '2', '3', '4', '5', '6'],
 };
 
+// Subject icons for visual appeal
+const SUBJECT_ICONS: Record<string, string> = {
+  BEWEGE: '⚽', BURGER: '🏛️', DIGITA: '💻', ENGELS: '🇬🇧',
+  KUNSTE: '🎨', MENSE: '🌍', MENSMA: '👥', NEDER: '📝',
+  REKENE: '📐',
+};
+
 const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile, onCancel }) => {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [name, setName] = useState('');
   const [level, setLevel] = useState<string | null>(null);
   const [subject, setSubject] = useState<string | null>(null);
+  const [subjectCode, setSubjectCode] = useState<string | null>(null);
   const [customSubject, setCustomSubject] = useState('');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedPathTopic, setSelectedPathTopic] = useState<string | null>(null);
   const [grade, setGrade] = useState<string | null>(null);
   const [isSLO, setIsSLO] = useState(false);
   const [isFading, setIsFading] = useState(false);
 
-  // Curriculum nodes for the chosen SLO subject+level
-  const curriculumNodes = useMemo(() => {
-    if (!subject || !level || !isSLO) return [];
-    const path = getLearningPath(subject, level);
-    return path?.nodes || [];
-  }, [subject, level, isSLO]);
+  // Get available subjects from pilot data
+  const availableSubjects = useMemo(() => getAllSubjects(), []);
 
-  // Available SLO modules for current level
-  const availableSLO = useMemo(() => {
-    if (!level) return [];
-    return SLO_MODULES[level] || [];
-  }, [level]);
+  // Get paths for selected subject
+  const subjectPaths = useMemo(() => {
+    if (!subject) return [];
+    return getPathsBySubject(subject);
+  }, [subject]);
+
+  // Get nodes for selected path
+  const pathNodes = useMemo(() => {
+    if (!selectedPathTopic) return [];
+    const path = subjectPaths.find(p => p.topic === selectedPathTopic);
+    return path?.nodes || [];
+  }, [selectedPathTopic, subjectPaths]);
 
   useEffect(() => {
     if (initialProfile) {
@@ -72,8 +73,10 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
     setLevel(lvl);
     setGrade(null);
     setSubject(null);
+    setSubjectCode(null);
     setCustomSubject('');
     setSelectedNodeId(null);
+    setSelectedPathTopic(null);
     setIsSLO(false);
   };
 
@@ -82,11 +85,13 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
     handleStepChange(3);
   };
 
-  const handleSLOSelect = (mod: { subject: string }) => {
-    setSubject(mod.subject);
+  const handleSubjectSelect = (subj: { code: string; name: string }) => {
+    setSubject(subj.name);
+    setSubjectCode(subj.code);
     setIsSLO(true);
     setCustomSubject('');
     setSelectedNodeId(null);
+    setSelectedPathTopic(null);
     handleStepChange(4);
   };
 
@@ -117,8 +122,8 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
     else if (step === 2) handleStepChange(1);
   };
 
-  // How many steps are visible in the indicator
-  const totalSteps = isSLO ? 4 : 3;
+  // Always 4 steps when subjects available
+  const totalSteps = availableSubjects.length > 0 ? 4 : 3;
   const visibleLabels = STEP_LABELS.slice(0, totalSteps);
 
   return (
@@ -245,31 +250,31 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
             </div>
           )}
 
-          {/* STEP 3 — Vak kiezen */}
+          {/* STEP 3 — Leergebied kiezen */}
           {step === 3 && level && (
             <div className="text-center">
-              <h2 className="text-sm text-slate-200 font-medium mb-1">Kies je vak</h2>
+              <h2 className="text-sm text-slate-200 font-medium mb-1">Kies je leergebied</h2>
               <p className="text-[11px] text-slate-500 mb-6">
-                <span className="text-slate-300">{level}</span> — welk vak wil je oefenen?
+                <span className="text-slate-300">{level}</span> — welk leergebied wil je oefenen?
               </p>
 
-              {/* SLO Modules (if available for this level) */}
-              {availableSLO.length > 0 && (
+              {/* SLO Leergebieden */}
+              {availableSubjects.length > 0 && (
                 <div className="mb-5">
-                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-2 block">SLO Modules</span>
-                  <div className={`grid gap-2 max-w-md mx-auto ${availableSLO.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                    {availableSLO.map(mod => (
+                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-2 block">Kerndoelen (SLO)</span>
+                  <div className="grid gap-2 max-w-md mx-auto grid-cols-2 sm:grid-cols-3">
+                    {availableSubjects.map(subj => (
                       <button
-                        key={mod.subject}
-                        onClick={() => handleSLOSelect(mod)}
+                        key={subj.code}
+                        onClick={() => handleSubjectSelect(subj)}
                         className="p-3 border border-slate-800 bg-slate-900/60 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-left group"
                       >
                         <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-sm">{mod.icon}</span>
+                          <span className="text-sm">{SUBJECT_ICONS[subj.code] || '📚'}</span>
                           <span className="text-[9px] font-mono text-indigo-400 border border-indigo-500/30 px-1.5 py-0.5">SLO</span>
                         </div>
-                        <span className="text-xs text-slate-300 group-hover:text-slate-100 block font-medium">{mod.subject}</span>
-                        <span className="text-[10px] text-slate-600 block">{mod.desc}</span>
+                        <span className="text-xs text-slate-300 group-hover:text-slate-100 block font-medium truncate">{subj.name}</span>
+                        <span className="text-[10px] text-slate-600 block">{subj.pathCount} kerndoelen</span>
                       </button>
                     ))}
                   </div>
@@ -278,15 +283,13 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
 
               {/* Custom subject input */}
               <div>
-                {availableSLO.length > 0 && (
-                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-2 block">Of typ een ander vak</span>
-                )}
+                <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-2 block">Of typ een ander vak</span>
                 <form onSubmit={(e) => { e.preventDefault(); handleCustomSubjectSubmit(); }}>
                   <input
                     type="text"
                     value={customSubject}
                     onChange={e => setCustomSubject(e.target.value)}
-                    placeholder="Bijv. Nederlands, Scheikunde, Geschiedenis…"
+                    placeholder="Bijv. Scheikunde, Geschiedenis…"
                     className="w-full max-w-sm mx-auto block bg-slate-900 border border-slate-700 px-4 py-3 text-[16px] sm:text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-colors text-center"
                   />
                   <div className="mt-6 flex items-center justify-center gap-3">
@@ -303,25 +306,45 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
                   </div>
                 </form>
               </div>
-
-              <div className="mt-4 flex justify-center">
-              </div>
             </div>
           )}
 
-          {/* STEP 4 — Leerdoel kiezen (SLO only) */}
-          {step === 4 && subject && level && (
+          {/* STEP 4 — Leerdoel kiezen (kerndoel → node) */}
+          {step === 4 && subject && (
             <div>
               <h2 className="text-sm text-slate-200 font-medium mb-1 text-center">Kies je leerdoel</h2>
               <p className="text-[11px] text-slate-500 mb-1 text-center">
-                <span className="text-slate-300">{subject} {level}</span> — waar wil je aan werken?
+                <span className="text-slate-300">{subject}</span> — waar wil je aan werken?
               </p>
-              <p className="text-[10px] text-slate-600 mb-6 text-center">
+              <p className="text-[10px] text-slate-600 mb-4 text-center">
                 Je kunt dit later altijd wijzigen via de header.
               </p>
 
-              <div className="space-y-2 max-h-[50vh] overflow-y-auto">
-                {curriculumNodes.map((node, i) => (
+              {/* Path selector (kerndoel) */}
+              {subjectPaths.length > 1 && (
+                <div className="mb-4">
+                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-2 block text-center">Kerndoel</span>
+                  <div className="flex flex-wrap gap-1.5 justify-center">
+                    {subjectPaths.map((p, i) => (
+                      <button
+                        key={p.topic}
+                        onClick={() => { setSelectedPathTopic(p.topic); setSelectedNodeId(null); }}
+                        className={`px-2.5 py-1.5 text-[10px] border transition-all ${
+                          selectedPathTopic === p.topic
+                            ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-200'
+                            : 'border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-300'
+                        }`}
+                      >
+                        {p.topic.length > 40 ? p.topic.slice(0, 40) + '…' : p.topic}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Node list */}
+              <div className="space-y-2 max-h-[45vh] overflow-y-auto">
+                {(selectedPathTopic ? pathNodes : subjectPaths.length === 1 ? subjectPaths[0].nodes : []).map((node, i) => (
                   <button
                     key={node.id}
                     onClick={() => setSelectedNodeId(node.id)}
@@ -343,15 +366,12 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete, initialProfile,
                         }`}>
                           {node.title}
                         </span>
-                        <span className="text-[10px] text-slate-500 block mt-0.5">{node.description}</span>
-                        <div className="flex items-center gap-3 mt-1.5">
-                          <span className="text-[9px] font-mono text-slate-600">~{node.study_load_minutes} min</span>
-                          {node.common_misconceptions && node.common_misconceptions.length > 0 && (
-                            <span className="text-[9px] font-mono text-amber-500/60">
-                              {node.common_misconceptions.length} aandachtspunten
-                            </span>
-                          )}
-                        </div>
+                        <span className="text-[10px] text-slate-500 block mt-0.5 line-clamp-2">{node.description}</span>
+                        {node.common_misconceptions && node.common_misconceptions.length > 0 && (
+                          <span className="text-[9px] font-mono text-amber-500/60 mt-1 block">
+                            {node.common_misconceptions.length} aandachtspunten
+                          </span>
+                        )}
                       </div>
                     </div>
                   </button>

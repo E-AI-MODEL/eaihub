@@ -20,7 +20,7 @@ import {
   type TraceEvent 
 } from '@/lib/reliabilityPipeline';
 import { persistChatMessage } from '@/services/adminDbService';
-import { getNodeById, CURRICULUM_PATHS } from '@/data/curriculum';
+import { getNodeById, CURRICULUM_PATHS, getLearningPath } from '@/data/curriculum';
 import { updateMastery } from '@/services/masteryService';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -106,12 +106,8 @@ function updateSessionContext(sessionId: string, analysis: EAIAnalysis, profile:
 function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, sessionId: string, userId: string): number {
   if (!profile.currentNodeId || !profile.subject || !profile.level) return 0;
 
-  // Look up curriculum path by subject+level instead of string construction
-  const path = CURRICULUM_PATHS.find(
-    p => p.subject.toLowerCase() === profile.subject!.toLowerCase() &&
-         p.level.toLowerCase() === profile.level!.toLowerCase()
-  );
-  const pathId = path?.id || `${profile.subject}_${profile.level}`.toUpperCase().replace(/\s/g, '');
+  // Look up curriculum path by subject+level — generate pathId from subject+level
+  const pathId = `${profile.subject}_${profile.level}`.toUpperCase().replace(/\s/g, '');
   
   const ctx = getSessionContext(sessionId);
   const turnCount = ctx.turn_count;
@@ -140,8 +136,6 @@ function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, se
   }).catch(err => console.error('[Mastery] Update failed:', err));
 
   // Calculate progress from localStorage mastery data
-  if (!path) return 0;
-  
   const masteryKey = `eai_mastery_local_${userId}_${pathId}`;
   const stored = localStorage.getItem(masteryKey);
   if (!stored) return 0;
@@ -154,7 +148,10 @@ function triggerMasteryUpdate(profile: LearnerProfile, analysis: EAIAnalysis, se
         completedNodes.add(entry.nodeId);
       }
     }
-    return Math.round((completedNodes.size / path.nodes.length) * 100);
+    // Use path from loader for node count
+    const currPath = getLearningPath(profile.subject!, profile.level!);
+    const totalNodes = currPath?.nodes.length || 1;
+    return Math.round((completedNodes.size / totalNodes) * 100);
   } catch {
     return 0;
   }

@@ -1,0 +1,4009 @@
+{
+  "meta": {
+    "schema_version": "1.0",
+    "source": "SLO",
+    "curriculum_version": "2025.2",
+    "description": "Canonieke curriculumbron VO: vier lagen — huidig_ob (kerndoelen), huidig_bb (examenprogramma eindtermen versie 2020), nieuw_ob (conceptkerndoelen nieuw curriculum), nieuw_bb (concepteindtermen nieuw curriculum). Veld curriculum_layer bepaalt filterbaarheid per toggle in EAIHUB.",
+    "layers": {
+      "huidig_ob": "Geldende VO-kerndoelen onderbouw (vastgesteld, schooljaar 2025-2026 en eerder)",
+      "huidig_bb": "Geldende examenprogramma-eindtermen bovenbouw versie 2020 (cohort 2025-2026)",
+      "nieuw_ob": "Conceptkerndoelen onderbouw nieuw curriculum (definitief concept, cohort 2026-2027)",
+      "nieuw_bb": "Concepteindtermen bovenbouw nieuw curriculum (concept, cohort 2026-2027 e.v.)"
+    },
+    "split_bucket": "ob.nieuw",
+    "variant": "pilot_ob_nieuw_core",
+    "notes": "Core OB nieuw pilotset for EAIHUB; supplementary publications and school offer goals split out."
+  },
+  "items": [
+    {
+      "id": "OB/NIEUW/MENSE/33_33C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 33",
+      "item_code": "KD33-33C",
+      "title": "Ecosystemen",
+      "description": "De leerling toont inzicht in ecosystemen en verkent de relatie tussen mens en ecosysteem.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "15441e2e-9ebf-4a9a-842b-ca6ff45f7cee",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3687,
+        "fo_doelzin_title": "Doelzin 33C - Ecosystemen",
+        "fo_root_titles": [
+          "Kerndoelen mens en natuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/ENGELS/34_34A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "ENGELS",
+      "subject": "Engels",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 34",
+      "item_code": "KD34-34A",
+      "title": "Ervaringen met rijk taalaanbod",
+      "description": "De leerling doet ervaring op met een rijk aanbod aan bronnen in de Engelse taal op een passend beheersingsniveau.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "2f39de64-5fed-4472-aafb-cdd5a19f663c",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3719,
+        "fo_doelzin_title": "Doelzin 34A - Ervaringen met rijk taalaanbod",
+        "fo_root_titles": [
+          "Kerndoelen Engels"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/ENGELS/34_34B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "ENGELS",
+      "subject": "Engels",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 34",
+      "item_code": "KD34-34B",
+      "title": "Creatieve expressie",
+      "description": "De leerling gebruikt de Engelse taal op een creatieve manier.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "b3dd762c-55bc-4df4-847a-39324eb2eb1f",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3725,
+        "fo_doelzin_title": "Doelzin 34B - Creatieve expressie",
+        "fo_root_titles": [
+          "Kerndoelen Engels"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/ENGELS/34_34C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "ENGELS",
+      "subject": "Engels",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 34",
+      "item_code": "KD34-34C",
+      "title": "Doelgerichte informatieverwerving",
+      "description": "De leerling verwerkt Engelstalige teksten mondeling en schriftelijk om tot kennisopbouw en begrip te komen.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "c51c9e42-8f7e-4749-bf1b-71d7603d8aed",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3724,
+        "fo_doelzin_title": "Doelzin 34C - Doelgerichte informatieverwerving",
+        "fo_root_titles": [
+          "Kerndoelen Engels"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/ENGELS/35_35A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "ENGELS",
+      "subject": "Engels",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 35",
+      "item_code": "KD35-35A",
+      "title": "Kijk- en luistervaardigheid",
+      "description": "De leerling toont begrip van auditieve en audiovisuele Engelstalige teksten.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "bd7df69a-acaa-402e-847d-fa8318195535",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3720,
+        "fo_doelzin_title": "Doelzin 35A - Kijk- en luistervaardigheid",
+        "fo_root_titles": [
+          "Kerndoelen Engels"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/ENGELS/35_35B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "ENGELS",
+      "subject": "Engels",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 35",
+      "item_code": "KD35-35B",
+      "title": "Leesvaardigheid",
+      "description": "De leerling toont begrip van schriftelijke Engelstalige teksten.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "0b4e852e-a8b1-40c7-85ce-9933b612b7ec",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3721,
+        "fo_doelzin_title": "Doelzin 35B - Leesvaardigheid",
+        "fo_root_titles": [
+          "Kerndoelen Engels"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/ENGELS/35_35C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "ENGELS",
+      "subject": "Engels",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 35",
+      "item_code": "KD35-35C",
+      "title": "Mondelinge communicatie",
+      "description": "De leerling spreekt en voert gesprekken in de Engelse taal, afgestemd op doel, publiek en context.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "823488c4-e930-4d8b-bb04-0cf26d0c0af1",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3722,
+        "fo_doelzin_title": "Doelzin 35C - Mondelinge communicatie",
+        "fo_root_titles": [
+          "Kerndoelen Engels"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/ENGELS/35_35D",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "ENGELS",
+      "subject": "Engels",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 35",
+      "item_code": "KD35-35D",
+      "title": "Schriftelijke communicatie",
+      "description": "De leerling schrijft in de Engelse taal, afgestemd op doel, publiek en context.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "7f9e29c7-dfed-452c-88b9-71b8ba641c6d",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3723,
+        "fo_doelzin_title": "Doelzin 35D - Schriftelijke communicatie",
+        "fo_root_titles": [
+          "Kerndoelen Engels"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/ENGELS/36_36A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "ENGELS",
+      "subject": "Engels",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 36",
+      "item_code": "KD36-36A",
+      "title": "Taalleerproces en meertaligheid",
+      "description": "De leerling kiest passende aanpakken voor het leren van Engels.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "ec448971-49e4-4f59-a34d-a7bbc95faf50",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3728,
+        "fo_doelzin_title": "Doelzin 36A - Taalleerproces en meertaligheid",
+        "fo_root_titles": [
+          "Kerndoelen Engels"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/ENGELS/36_36B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "ENGELS",
+      "subject": "Engels",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 36",
+      "item_code": "KD36-36B",
+      "title": "Culturele aspecten en culturele diversiteit",
+      "description": "De leerling verkent culturele aspecten en culturele diversiteit in fictie en non-fictie.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "42d0bf52-57e1-45bc-90b6-25687c8236d2",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3729,
+        "fo_doelzin_title": "Doelzin 34B - Culturele aspecten en culturele diversiteit",
+        "fo_root_titles": [
+          "Kerndoelen Engels"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/ENGELS/36_36C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "ENGELS",
+      "subject": "Engels",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 36",
+      "item_code": "KD36-36C",
+      "title": "Interculturele communicatieve competentie",
+      "description": "De leerling gebruikt culturele kennis in interculturele communicatieve situaties.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "ddeb1548-126b-4d19-9442-b488b63457de",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3730,
+        "fo_doelzin_title": "Doelzin 36C -  Interculturele communicatieve competentie",
+        "fo_root_titles": [
+          "Kerndoelen Engels"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/BURGER/18_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BURGER",
+      "subject": "Burgerschap",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 18",
+      "item_code": "KD18-A",
+      "title": "Stimuleert sociale en maatschappelijke competenties van leerlingen",
+      "description": "De school stimuleert sociale en maatschappelijke competenties van leerlingen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "261981f8-61ee-44e9-bd82-61369f7a11e8",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3487,
+        "fo_doelzin_title": "Doelzin 18A",
+        "fo_root_titles": [
+          "Kerndoelen burgerschap"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "school",
+      "goal_type": "aanbod",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/BURGER/19_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BURGER",
+      "subject": "Burgerschap",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 19",
+      "item_code": "KD19-A",
+      "title": "Inzicht in het belang van basiswaarden van de democratische rechtsstaat",
+      "description": "De leerling toont inzicht in het belang van basiswaarden van de democratische rechtsstaat.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "ecd7cac1-b278-4cdb-a288-9c1d144c3242",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3489,
+        "fo_doelzin_title": "Doelzin 19A",
+        "fo_root_titles": [
+          "Kerndoelen burgerschap"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/BURGER/20_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BURGER",
+      "subject": "Burgerschap",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 20",
+      "item_code": "KD20-A",
+      "title": "Verkent en reflecteert op mogelijkheden om democratisch te handelen",
+      "description": "De leerling verkent en reflecteert op mogelijkheden om democratisch te handelen",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "b4589d82-005e-4b81-8c5c-a685e1e24eca",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3494,
+        "fo_doelzin_title": "Doelzin 20A",
+        "fo_root_titles": [
+          "Kerndoelen burgerschap"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/10_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 10",
+      "item_code": "KD10-A",
+      "title": "Redeneren en rekenen met getallen en grootheden",
+      "description": "De leerling redeneert en rekent met getallen en grootheden.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "a46beeca-0dc7-453b-8ca7-bacb12499850",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3537,
+        "fo_doelzin_title": "Doelzin 10A",
+        "fo_root_titles": [
+          "Kerndoelen rekenen en wiskunde"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/10_A_1",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 10",
+      "item_code": "KD10-A",
+      "title": "Redeneren met getallen, grootheden, variabelen en algebraïsche uitdrukkingen",
+      "description": "De leerling redeneert en rekent met getallen, grootheden, variabelen en algebraïsche uitdrukkingen.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "572ce34c-1476-462a-96eb-7bdb5975fdfc",
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "source_enrichment": {
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/11_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 11",
+      "item_code": "KD11-A",
+      "title": "Interpreteert, representeert en analyseert data",
+      "description": "De leerling interpreteert, representeert en analyseert data.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "1de4ac3b-6a2e-45a7-9565-8f6574c235cb",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3540,
+        "fo_doelzin_title": "Doelzin 11A",
+        "fo_root_titles": [
+          "Kerndoelen rekenen en wiskunde"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/12_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 12",
+      "item_code": "KD12-A",
+      "title": "Patronen en verbanden analyseren en beredeneren",
+      "description": "De leerling analyseert en redeneert over patronen en verbanden.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "3f0a2119-07e5-4c34-987d-b0b59134689c",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3542,
+        "fo_doelzin_title": "Doelzin 12A",
+        "fo_root_titles": [
+          "Kerndoelen rekenen en wiskunde"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/13_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 13",
+      "item_code": "KD13-A",
+      "title": "De twee- en driedimensionale ruimte analyseren en beredeneren",
+      "description": "De leerling analyseert en redeneert over de twee- en driedimensionale ruimte.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "6aff8a54-6da8-4a2d-ba74-fd2fe8e0dcfa",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3543,
+        "fo_doelzin_title": "Doelzin 13A",
+        "fo_root_titles": [
+          "Kerndoelen rekenen en wiskunde"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/14_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 14",
+      "item_code": "KD14-A",
+      "title": "Lost wiskundige problemen en toepassingsproblemen op",
+      "description": "De leerling lost wiskundige problemen en toepassingsproblemen op.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "d963ad9f-c066-485b-9150-18960ab8ddaa",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3651,
+        "fo_doelzin_title": "Doelzin 15A",
+        "fo_root_titles": [
+          "Kerndoelen rekenen en wiskunde"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/15_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 15",
+      "item_code": "KD15-A",
+      "title": "Gebruikt wiskundetaal en wiskundige representaties",
+      "description": "De leerling gebruikt wiskundetaal en wiskundige representaties.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "a0764ed9-3b5e-48fc-96dc-d45a5b761009",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3546,
+        "fo_doelzin_title": "Doelzin 15A",
+        "fo_root_titles": [
+          "Kerndoelen rekenen en wiskunde"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/17_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 17",
+      "item_code": "KD17-A",
+      "title": "Herkent en gebruikt wiskunde in alledaagse, maatschappelijke en beroepsmatige situaties",
+      "description": "De leerling herkent en gebruikt wiskunde in alledaagse, maatschappelijke en beroepsmatige situaties.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "7201cd53-40be-496a-87d7-1f4a08ddf3f7",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3548,
+        "fo_doelzin_title": "Doelzin 17A",
+        "fo_root_titles": [
+          "Kerndoelen rekenen en wiskunde"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/1_A_1",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 1",
+      "item_code": "KD1-A",
+      "title": "Zorgt voor een rijke taal- en leesomgeving",
+      "description": "De school zorgt voor een rijke taal- en leesomgeving.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "9265243c-13f3-4e8a-aadf-7287840a36ab",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3549,
+        "fo_doelzin_title": "Doelzin 1A",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "school",
+      "goal_type": "aanbod",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/2_A_1",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 2",
+      "item_code": "KD2-A",
+      "title": "Begrip van zakelijke en literaire teksten",
+      "description": "De leerling toont begrip van zakelijke en literaire teksten.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "7314dd15-405e-4117-854a-be4e98230997",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3551,
+        "fo_doelzin_title": "Doelzin 2A",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/3_A_1",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 3",
+      "item_code": "KD3-A",
+      "title": "Spreekt en schrijft afgestemd op doel, publiek en context",
+      "description": "De leerling spreekt en schrijft afgestemd op doel, publiek en context.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "8eabfceb-22e9-4595-a97b-a813244eab9e",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3553,
+        "fo_doelzin_title": "Doelzin 3A",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/4_A_1",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 4",
+      "item_code": "KD4-A",
+      "title": "Voert gesprekken afgestemd op doel, gesprekspartner(s) en context",
+      "description": "De leerling voert gesprekken afgestemd op doel, gesprekspartner(s) en context.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "f9960892-a4e5-439b-aead-dee2dd24e2d3",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3593,
+        "fo_doelzin_title": "Doelzin 4A",
+        "fo_root_titles": [
+          "Functionele kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/6_A_1",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 6",
+      "item_code": "KD6-A",
+      "title": "Beschouwt de relatie tussen vorm en betekenis van taal",
+      "description": "De leerling beschouwt de relatie tussen vorm en betekenis van taal.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "b77886a1-80ab-4edd-8932-3e554d7bccb1",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3558,
+        "fo_doelzin_title": "Doelzin 6A",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/7_A_1",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 7",
+      "item_code": "KD7-A",
+      "title": "Verkent hoe je met taal uiting geeft aan identiteit",
+      "description": "De leerling verkent hoe je met taal uiting geeft aan identiteit.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "f877c0be-c025-4ecf-988b-7014778f5848",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3648,
+        "fo_doelzin_title": "Doelzin 7A",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/8_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 8",
+      "item_code": "KD8-A",
+      "title": "Ontwikkelt een eigen leesvoorkeur",
+      "description": "De leerling ontwikkelt een eigen leesvoorkeur.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "8708a4d7-e20e-40b4-8187-d6c57a43da7d",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3611,
+        "fo_doelzin_title": "Doelzin 8A",
+        "fo_root_titles": [
+          "Functionele kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/9_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 9",
+      "item_code": "KD9-A",
+      "title": "Inzicht in verhalende teksten",
+      "description": "De leerling toont inzicht in verhalende teksten.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "3959af23-0d0f-447b-947a-c4758b4bbfd6",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3563,
+        "fo_doelzin_title": "Doelzin 9A",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DIGITA/21_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DIGITA",
+      "subject": "Digitale geletterdheid",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 21",
+      "item_code": "KD21-A",
+      "title": "Zet digitale systemen functioneel in",
+      "description": "De leerling zet digitale systemen functioneel in.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "e128c4a5-55dd-4b3c-87d5-26999b69aaee",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3574,
+        "fo_doelzin_title": "Doelzin 21A",
+        "fo_root_titles": [
+          "Kerndoelen digitale geletterdheid"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DIGITA/23_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DIGITA",
+      "subject": "Digitale geletterdheid",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 23",
+      "item_code": "KD23-A",
+      "title": "Gaat veilig om met digitale systemen, data en de privacy van zichzelf en anderen",
+      "description": "De leerling gaat veilig om met digitale systemen, data en de privacy van zichzelf en anderen.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "ebb3b7b0-702e-4c7c-91a2-07646b9928c9",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3576,
+        "fo_doelzin_title": "Doelzin 23A",
+        "fo_root_titles": [
+          "Kerndoelen digitale geletterdheid"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DIGITA/22_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DIGITA",
+      "subject": "Digitale geletterdheid",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 22",
+      "item_code": "KD22-A",
+      "title": "Gebruikt passende werkwijzen bij het creëren en gebruiken van verschillende typen digitale producten",
+      "description": "De leerling gebruikt passende werkwijzen bij het creëren en gebruiken van verschillende typen digitale producten.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "5a3e2b59-c1fd-443c-b66a-a7ec909da4ff",
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "source_enrichment": {
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/16_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 16",
+      "item_code": "KD16-A",
+      "title": "Stimuleert de ontwikkeling van een wiskundige attitude van leerlingen",
+      "description": "De school stimuleert de ontwikkeling van een wiskundige attitude van leerlingen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "bd2d2581-8f0a-40be-a26a-8b3c8962be88",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3655,
+        "fo_doelzin_title": "Doelzin 16A",
+        "fo_root_titles": [
+          "Kerndoelen rekenen en wiskunde"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "school",
+      "goal_type": "aanbod",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/5_A_1",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 5",
+      "item_code": "KD5-A",
+      "title": "Reflecteren op het proces en evalueert het product van een taalactiviteit",
+      "description": "De leerling reflecteert op het proces en evalueert het product van een taalactiviteit.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "c83f3f8f-e2bd-4980-8260-9c6ac3f8ef66",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3658,
+        "fo_doelzin_title": "Doelzin 5A",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/29_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 29",
+      "item_code": "KD29-A",
+      "title": "Vraagstukken",
+      "description": "De leerling verkent de leefomgeving en onderzoekt vraagstukken uit de wereld.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "935258e3-2288-41ae-ae26-29527c602fef",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3665,
+        "fo_doelzin_title": "Doelzin 29A - Vraagstukken",
+        "fo_root_titles": [
+          "Kerndoelen mens en natuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/30_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 30",
+      "item_code": "KD30-A",
+      "title": "Technische systemen",
+      "description": "De leerling toont inzicht in en experimenteert met voorwerpen en technische systemen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "faa37759-7d21-4f59-b640-a6d4fcc836c4",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3673,
+        "fo_doelzin_title": "Doelzin 30A - Technische systemen",
+        "fo_root_titles": [
+          "Kerndoelen mens en natuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/31_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 31",
+      "item_code": "KD31-A",
+      "title": "Deeltjes",
+      "description": "De leerling toont inzicht in deeltjes, faseovergangen, scheidingsmethoden en chemische reacties en experimenteert met deze verschijnselen en methoden.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "500ab0ab-1fff-4a96-bd07-6043757dcbec",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3677,
+        "fo_doelzin_title": "Doelzin 31A - Deeltjes",
+        "fo_root_titles": [
+          "Kerndoelen mens en natuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/32_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 32",
+      "item_code": "KD32-A",
+      "title": "Inzicht in de bouw, werking en het gebruik van bacteriën, schimmels, planten en dieren en verkent de diversiteit aan organismen",
+      "description": "De leerling toont inzicht in de bouw, werking en het gebruik van bacteriën, schimmels, planten en dieren en verkent de diversiteit aan organismen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "f767d699-f3b4-4e21-89f8-91d7cbf8f91f",
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "source_enrichment": {
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/33_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 33",
+      "item_code": "KD33-A",
+      "title": "Inzicht in en verkent veranderingen in fysische omstandigheden op aarde op verschillende tijdschalen",
+      "description": "De leerling toont inzicht in en verkent veranderingen in fysische omstandigheden op aarde op verschillende tijdschalen.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "ea19f8a0-8498-4d7d-bcf9-25cf7e08d894",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3685,
+        "fo_doelzin_title": "Doelzin 33A - Aarde",
+        "fo_root_titles": [
+          "Kerndoelen mens en natuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/24_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 24",
+      "item_code": "KD24-A",
+      "title": "Denkwijzen",
+      "description": "De leerling analyseert maatschappelijke verschijnselen en ontwikkelingen en weegt waarden en belangen af.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "bec92148-8ecf-4548-901a-18d65cb882a8",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3692,
+        "fo_doelzin_title": "Doelzin 24A - Denkwijzen",
+        "fo_root_titles": [
+          "Kerndoelen mens en maatschappij"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/25_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 25",
+      "item_code": "KD25-A",
+      "title": "Wereldbeeld",
+      "description": "De leerling analyseert de wereld vanuit geografische kenmerken en verkent haar vanuit verschillende perspectieven.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "15977802-f395-4598-a582-141caf9e8c8f",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3696,
+        "fo_doelzin_title": "Doelzin 25A - Wereldbeeld",
+        "fo_root_titles": [
+          "Kerndoelen mens en maatschappij"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/26_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 26",
+      "item_code": "KD26-A",
+      "title": "Historische ontwikkelingen",
+      "description": "De leerling beschrijft historische ontwikkelingen aan de hand van gebeurtenissen, personen en voorwerpen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "f0fdc0ad-5197-4a11-b656-8933ea120a1b",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3702,
+        "fo_doelzin_title": "Doelzin 26A - Historische ontwikkelingen",
+        "fo_root_titles": [
+          "Kerndoelen mens en maatschappij"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/28_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 28",
+      "item_code": "KD28-A",
+      "title": "Samenleving",
+      "description": "De leerling beschrijft de samenleving als sociaal systeem.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "2370471f-b18e-4246-a2c4-513995d241a1",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3708,
+        "fo_doelzin_title": "Doelzin 28A - Samenleving",
+        "fo_root_titles": [
+          "Kerndoelen mens en maatschappij"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/27_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 27",
+      "item_code": "KD27-A",
+      "title": "Economische systemen",
+      "description": "De leerling toont begrip van de structuur en de werking van het Nederlandse economische systeem.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "68928596-7d65-4172-a27c-d48074853558",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3709,
+        "fo_doelzin_title": "Doelzin 27A -  Economische systemen",
+        "fo_root_titles": [
+          "Kerndoelen mens en maatschappij"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DUITS/37_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DUITS",
+      "subject": "Duits",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerdoel 37",
+      "item_code": "KD37-A",
+      "title": "Doet ervaring op met een rijk aanbod aan bronnen in de de doeltaal taal op een passend beheersingsniveau",
+      "description": "De leerling doet ervaring op met een rijk aanbod aan bronnen in de […..] taal op een passend beheersingsniveau.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "d0cc45c7-d8d9-445c-b74b-1bf7c316cb1c",
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "source_enrichment": {
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DUITS/38_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DUITS",
+      "subject": "Duits",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 38",
+      "item_code": "KD38-A",
+      "title": "Begrip van auditieve en audiovisuele talige teksten",
+      "description": "De leerling toont begrip van auditieve en audiovisuele […] talige teksten.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "401560af-e903-4c87-8695-544e4507c394",
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "source_enrichment": {
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DUITS/39_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DUITS",
+      "subject": "Duits",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 39",
+      "item_code": "KD39-A",
+      "title": "Passende aanpakken kiezen voor het leren van de doeltaal",
+      "description": "De leerling kiest passende aanpakken voor het leren van de doeltaal.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "abf87eed-9279-42df-a391-304b9654b725",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3736,
+        "fo_doelzin_title": "Doelzin 39A Taalleerproces en meertaligheid",
+        "fo_root_titles": [
+          "Kerndoelen moderne vreemde talen"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/KUNST/40_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "KUNST",
+      "subject": "Kunst en cultuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 40",
+      "item_code": "KD40-A",
+      "title": "Gebruikt creatieve maak- en denkstrategieën in een iteratief kunstzinnig proces en reflecteert op gemaakte keuzes",
+      "description": "De leerling gebruikt creatieve maak- en denkstrategieën in een iteratief kunstzinnig proces en reflecteert op gemaakte keuzes.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "06270727-29d3-4e82-a8fb-e93776234024",
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "source_enrichment": {
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/KUNST/41_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "KUNST",
+      "subject": "Kunst en cultuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 41",
+      "item_code": "KD41-A",
+      "title": "Verbeelden en creëren",
+      "description": "De leerling drukt zich zowel individueel als in samenwerking met anderen, betekenisvol uit in vormen van kunst.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "2b81b719-3f34-4d4d-8568-15b9f8b6d88c",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3745,
+        "fo_doelzin_title": "Doelzin 41A - Verbeelden en creÃ«ren",
+        "fo_root_titles": [
+          "Kerndoelen kunst en cultuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/KUNST/42_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "KUNST",
+      "subject": "Kunst en cultuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 42",
+      "item_code": "KD42-A",
+      "title": "Kunst en cultuur actief meemaken",
+      "description": "De leerling neemt deel aan diverse kunstzinnige en culturele activiteiten en toont inzicht in kunst- en cultuuruitingen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "7181a5e2-6363-413e-ac31-e517fed930b4",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3749,
+        "fo_doelzin_title": "Doelzin 42A - Kunst en cultuur actief meemaken",
+        "fo_root_titles": [
+          "Kerndoelen kunst en cultuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/BEWEGE/43_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BEWEGE",
+      "subject": "Bewegen en sport",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 43",
+      "item_code": "KD43-A",
+      "title": "Deelnemen aan bewegen",
+      "description": "De leerling neemt deel aan beweegactiviteiten in uiteenlopende beweegthema's.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "bc8cce30-61f7-46e1-ab99-74dd05e8b1f6",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3755,
+        "fo_doelzin_title": "Doelzin 38A - Deelnemen aan bewegen",
+        "fo_root_titles": [
+          "Kerndoelen bewegen en sport"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/BEWEGE/44_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BEWEGE",
+      "subject": "Bewegen en sport",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 44",
+      "item_code": "KD44-A",
+      "title": "Bewegen met anderen",
+      "description": "De leerling neemt verantwoordelijkheid voor het samen deelnemen aan beweegactiviteiten.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "7a1c69a6-0d99-4d9a-8de1-1f48de7e3802",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3761,
+        "fo_doelzin_title": "Doelzin 39A - Bewegen met anderen",
+        "fo_root_titles": [
+          "Kerndoelen bewegen en sport"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/BEWEGE/45_A",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BEWEGE",
+      "subject": "Bewegen en sport",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 45",
+      "item_code": "KD45-A",
+      "title": "Zich oriënteren op beweegcontexten",
+      "description": "De leerling oriënteert zich op beweegcontexten.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "bec40ddc-1326-4aba-8f2c-dc27a8eefe4c",
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "source_enrichment": {
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/BURGER/19_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BURGER",
+      "subject": "Burgerschap",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 19",
+      "item_code": "KD19-B",
+      "title": "Verkent en reflecteert op hoe die kan omgaan met diversiteit in de samenleving",
+      "description": "De leerling verkent en reflecteert op hoe die kan omgaan met diversiteit in de samenleving.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "5bcb1242-bbbd-45f3-a2b5-ff93b666e870",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3490,
+        "fo_doelzin_title": "Doelzin 19B",
+        "fo_root_titles": [
+          "Kerndoelen burgerschap"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/BURGER/20_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BURGER",
+      "subject": "Burgerschap",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 20",
+      "item_code": "KD20-B",
+      "title": "Verkent en reflecteert op mogelijkheden om bij te dragen aan de samenleving",
+      "description": "De leerling verkent en reflecteert op mogelijkheden om bij te dragen aan de samenleving.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "8791d789-490d-4beb-be93-19b430807c8e",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3495,
+        "fo_doelzin_title": "Doelzin 20B",
+        "fo_root_titles": [
+          "Kerndoelen burgerschap"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/10_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 10",
+      "item_code": "KD10-B",
+      "title": "Gebruikt wiskundige vergelijkingen",
+      "description": "De leerling gebruikt wiskundige vergelijkingen",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "fb879a00-6fee-4392-b2ef-a992e3e6240d",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3539,
+        "fo_doelzin_title": "Doelzin 10B",
+        "fo_root_titles": [
+          "Kerndoelen rekenen en wiskunde"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/11_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 11",
+      "item_code": "KD11-B",
+      "title": "Redeneren en rekenen met kansen",
+      "description": "De leerling redeneert en rekent met kansen.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "8f782e78-f137-49c8-a377-057b684cc6bc",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3541,
+        "fo_doelzin_title": "Doelzin 11B",
+        "fo_root_titles": [
+          "Kerndoelen rekenen en wiskunde"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/15_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 15",
+      "item_code": "KD15-B",
+      "title": "Gebruikt meetinstrumenten en andere wiskundige instrumenten",
+      "description": "De leerling gebruikt meetinstrumenten en andere wiskundige instrumenten.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "57cdd39e-6c46-4fdd-9f39-32d5285479b1",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3644,
+        "fo_doelzin_title": "Doelzin 12B",
+        "fo_root_titles": [
+          "Functionele kerndoelen rekenen en wiskunde"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/1_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 1",
+      "item_code": "KD1-B",
+      "title": "Stimuleert de taalontwikkeling van de leerling in alle leergebieden",
+      "description": "De school stimuleert de taalontwikkeling van de leerling in alle leergebieden.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "79f215d4-7873-4d4d-bf38-8c8d8863640a",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3550,
+        "fo_doelzin_title": "Doelzin 1B",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "school",
+      "goal_type": "aanbod",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/2_B_1",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 2",
+      "item_code": "KD2-B",
+      "title": "Evalueert en reflecteert op zakelijke en literaire teksten",
+      "description": "De leerling evalueert en reflecteert op zakelijke en literaire teksten.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "d1871a23-7c4c-4d78-8d94-78ea574a4c73",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3552,
+        "fo_doelzin_title": "Doelzin 2B",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/3_B_1",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 3",
+      "item_code": "KD3-B",
+      "title": "Taal creatief gebruiken",
+      "description": "De leerling gebruikt taal op een creatieve manier.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "5624425f-1a65-439b-a7cf-c60b13b9fcf2",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3645,
+        "fo_doelzin_title": "Doelzin 3B",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/4_B_1",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 4",
+      "item_code": "KD4-B",
+      "title": "Voert gesprekken om tot kennisopbouw, begrip of een aanpak te komen",
+      "description": "De leerling voert gesprekken om tot kennisopbouw, begrip of een aanpak te komen.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "a4001a12-0e63-44cd-8dca-59495c2751a0",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3596,
+        "fo_doelzin_title": "Doelzin 4B",
+        "fo_root_titles": [
+          "Functionele kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/6_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 6",
+      "item_code": "KD6-B",
+      "title": "Inzicht in regels en procedures voor spelling, formulering en interpunctie",
+      "description": "De leerling toont inzicht in regels en procedures voor spelling, formulering en interpunctie.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "83fd0588-2ffa-4607-8d34-4ba48a9f4ed1",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3559,
+        "fo_doelzin_title": "Doelzin 6B",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/7_B_1",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 7",
+      "item_code": "KD7-B",
+      "title": "Verkent taalvariatie en taalverandering in het Nederlandse taalgebied",
+      "description": "De leerling verkent taalvariatie en taalverandering in het Nederlandse taalgebied.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "b317449b-5a97-4799-abd6-d96e9646d5c7",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3561,
+        "fo_doelzin_title": "Doelzin 7B",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DIGITA/21_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DIGITA",
+      "subject": "Digitale geletterdheid",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 21",
+      "item_code": "KD21-B",
+      "title": "Navigeert doelgericht in het digitale media- en informatielandschap voor het verwerven en verwerken van informatie",
+      "description": "De leerling navigeert doelgericht in het digitale media- en informatielandschap voor het verwerven en verwerken van informatie.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "547264c5-f9eb-4ed4-8120-9c58444ca26b",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3575,
+        "fo_doelzin_title": "Doelzin 21B",
+        "fo_root_titles": [
+          "Kerndoelen digitale geletterdheid"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DIGITA/22_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DIGITA",
+      "subject": "Digitale geletterdheid",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 22",
+      "item_code": "KD22-B",
+      "title": "Programmeren met computationele denkstrategieën",
+      "description": "De leerling programmeert een computerprogramma met behulp van computationele denkstrategieën.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "f52e6fa6-72d8-46c4-96a3-87d7184ff773",
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "source_enrichment": {
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DIGITA/23_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DIGITA",
+      "subject": "Digitale geletterdheid",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 23",
+      "item_code": "KD23-B",
+      "title": "Maakt weloverwogen keuzes bij het gebruik van digitale technologie en digitale media",
+      "description": "De leerling maakt weloverwogen keuzes bij het gebruik van digitale technologie en digitale media.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "2bae7ce0-6fc1-4f4e-8331-60efa245489e",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3581,
+        "fo_doelzin_title": "Doelzin 23B",
+        "fo_root_titles": [
+          "Kerndoelen digitale geletterdheid"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/14_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 14",
+      "item_code": "KD14-B",
+      "title": "Maakt en gebruikt wiskundige modellen",
+      "description": "De leerling maakt en gebruikt wiskundige modellen.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "f10b611a-5ee0-400e-a70f-883ecd02f029",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3654,
+        "fo_doelzin_title": "Doelzin 14B",
+        "fo_root_titles": [
+          "Kerndoelen rekenen en wiskunde"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/17_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 17",
+      "item_code": "KD17-B",
+      "title": "Ondersteunt het gebruik van wiskunde in verschillende leergebieden",
+      "description": "De school ondersteunt het gebruik van wiskunde in verschillende leergebieden.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "39ae5235-eb8e-4c02-bea6-7b52307aa6d3",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3656,
+        "fo_doelzin_title": "Doelzin 17B",
+        "fo_root_titles": [
+          "Kerndoelen rekenen en wiskunde"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "school",
+      "goal_type": "aanbod",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/8_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 8",
+      "item_code": "KD8-B",
+      "title": "Verkent de waarde van literatuur",
+      "description": "De leerling verkent de waarde van literatuur.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "02233d3a-aaf6-4955-bb18-3ad1770dc716",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3659,
+        "fo_doelzin_title": "Doelzin 8B",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/9_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 9",
+      "item_code": "KD9-B",
+      "title": "Inzicht in genrekenmerken van literatuur",
+      "description": "De leerling toont inzicht in genrekenmerken van literatuur.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "64586c2e-7ea4-4491-bd39-6fb0f8986a84",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3660,
+        "fo_doelzin_title": "Doelzin 9B",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/29_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 29",
+      "item_code": "KD29-B",
+      "title": "Denkwijzen",
+      "description": "De leerling gebruikt natuurwetenschappelijke en technologische denkwijzen bij het ontdekken en verklaren van de wereld.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "751e7a41-3cba-4ab8-aa87-f99289162da4",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3666,
+        "fo_doelzin_title": "Doelzin 29B - Denkwijzen",
+        "fo_root_titles": [
+          "Kerndoelen mens en natuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/30_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 30",
+      "item_code": "KD30-B",
+      "title": "Krachten",
+      "description": "De leerling toont inzicht in en experimenteert met krachten en beweging.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "a31cd5f3-978e-45d0-8898-c92e945e5b8a",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3674,
+        "fo_doelzin_title": "Doelzin 30B - Krachten",
+        "fo_root_titles": [
+          "Kerndoelen mens en natuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/31_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 31",
+      "item_code": "KD31-B",
+      "title": "Processen",
+      "description": "De leerling toont inzicht in chemische processen en circulariteit en verkent de impact van processen op de omgeving.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "6f89b77d-7b02-42d0-9e35-05c1a2f4dcf5",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3678,
+        "fo_doelzin_title": "Doelzin 31B - Processen",
+        "fo_root_titles": [
+          "Kerndoelen mens en natuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/32_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 32",
+      "item_code": "KD32-B",
+      "title": "Voortbestaan van leven op aarde",
+      "description": "De leerling toont inzicht in het voortbestaan van leven op aarde.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "29e499f6-dc17-4714-b566-6da1ff53d9df",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3682,
+        "fo_doelzin_title": "Doelzin 32B - Voortbestaan van leven op aarde",
+        "fo_root_titles": [
+          "Kerndoelen mens en natuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/33_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 33",
+      "item_code": "KD33-B",
+      "title": "Weer, klimaat en water",
+      "description": "De leerling toont inzicht in en verkent weer, klimaat en watersystemen en hun veranderingen.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "2dfa939b-aa71-4d10-9761-e5f70dc868e4",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3686,
+        "fo_doelzin_title": "Doelzin 33B - Weer, klimaat en water",
+        "fo_root_titles": [
+          "Kerndoelen mens en natuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/24_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 24",
+      "item_code": "KD24-B",
+      "title": "Vraagstukken",
+      "description": "De leerling onderzoekt maatschappelijke vraagstukken en evalueert mogelijke oplossingen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "f7a99cfb-62d1-4c62-9365-a93a87daeafe",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3693,
+        "fo_doelzin_title": "Doelzin 24B - Vraagstukken",
+        "fo_root_titles": [
+          "Kerndoelen mens en maatschappij"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/25_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 25",
+      "item_code": "KD25-B",
+      "title": "Menselijk handelen en de leefomgeving elkaar beïnvloeden en evalueert hoe mensen omgaan met de gevolgen analyseren",
+      "description": "De leerling analyseert hoe menselijk handelen en de leefomgeving elkaar beïnvloeden en evalueert hoe mensen omgaan met de gevolgen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "2781fe9e-5fe0-4fa7-8d75-0b274b2a6838",
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "source_enrichment": {
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/26_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 26",
+      "item_code": "KD26-B",
+      "title": "Redendeert over historische ontwikkelingen met gebruik van tijdsaanduidingen en bronnen",
+      "description": "De leerling redendeert over historische ontwikkelingen met gebruik van tijdsaanduidingen en bronnen.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "a92f83df-0125-4d2b-9259-ed4722493aaf",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3703,
+        "fo_doelzin_title": "Doelzin 26B - Tijd",
+        "fo_root_titles": [
+          "Kerndoelen mens en maatschappij"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/27_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 27",
+      "item_code": "KD27-B",
+      "title": "Economische keuzes",
+      "description": "De leerling toont begrip van economische keuzes en beschrijft hun mogelijke gevolgen.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "82364f34-2ff3-49cb-8083-214a44040d72",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3710,
+        "fo_doelzin_title": "Doelzin 27B - Economische keuzes",
+        "fo_root_titles": [
+          "Kerndoelen mens en maatschappij"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/28_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 28",
+      "item_code": "KD28-B",
+      "title": "Invloed en macht",
+      "description": "De leerling toont inzicht in de werking en de gevolgen van invloed en macht in de samenleving.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "35268334-3c97-4406-a6ad-92616000a4f9",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3711,
+        "fo_doelzin_title": "Doelzin 28B - Invloed en macht",
+        "fo_root_titles": [
+          "Kerndoelen mens en maatschappij"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DUITS/37_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DUITS",
+      "subject": "Duits",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerdoel 37",
+      "item_code": "KD37-B",
+      "title": "Creatieve expressie",
+      "description": "De leerling gebruikt de [...] taal op een creatieve manier.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "7c26f1ae-99a3-4f07-89f9-5008c15c83f7",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3732,
+        "fo_doelzin_title": "Doelzin 37B - Creatieve expressie",
+        "fo_root_titles": [
+          "Kerndoelen moderne vreemde talen"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DUITS/38_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DUITS",
+      "subject": "Duits",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 38",
+      "item_code": "KD38-B",
+      "title": "Begrip van schriftelijke talige teksten",
+      "description": "De leerling toont begrip van schriftelijke […] talige teksten.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "9226f588-7ff8-4fa2-9998-9022e3976dc6",
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "source_enrichment": {
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DUITS/39_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DUITS",
+      "subject": "Duits",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 39",
+      "item_code": "KD39-B",
+      "title": "Culturele aspecten en culturele diversiteit",
+      "description": "De leerling verkent culturele aspecten en culturele diversiteit in fictie en non-fictie.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "4939a1ee-c4ac-497e-8274-b53a34148d70",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3737,
+        "fo_doelzin_title": "Doelzin 39B - Culturele aspecten en culturele diversiteit",
+        "fo_root_titles": [
+          "Kerndoelen moderne vreemde talen"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/KUNST/40_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "KUNST",
+      "subject": "Kunst en cultuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 40",
+      "item_code": "KD40-B",
+      "title": "Ontwikkelen van creatieve vermogens",
+      "description": "De leerling onderzoekt het eigen artistiek creatief vermogen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "8c603236-e378-4fef-aa55-ebc645c3d91e",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3743,
+        "fo_doelzin_title": "Doelzin 35B - Ontwikkelen van creatieve vermogens",
+        "fo_root_titles": [
+          "Kerndoelen kunst en cultuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/KUNST/41_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "KUNST",
+      "subject": "Kunst en cultuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 41",
+      "item_code": "KD41-B",
+      "title": "Kunstzinnige technieken en vaardigheden",
+      "description": "De leerling kiest en gebruikt bekende en nieuwe technieken en vaardigheden bij het maken van individueel en gezamenlijk werk.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "8bbb4157-b3c2-4ddd-8f6a-8eff5d753549",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3746,
+        "fo_doelzin_title": "Doelzin 41B - Kunstzinnige technieken en vaardigheden",
+        "fo_root_titles": [
+          "Kerndoelen kunst en cultuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/KUNST/42_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "KUNST",
+      "subject": "Kunst en cultuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 42",
+      "item_code": "KD42-B",
+      "title": "Kunst en cultuur in context",
+      "description": "De leerling onderzoekt de achtergrond van kunstzinnige en cultuurhistorische uitingen en de functie van kunst en cultuur op de samenleving.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "8ae2f63a-5a52-442e-9dcc-d75bc80bae39",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3750,
+        "fo_doelzin_title": "Doelzin 42B - Kunst en cultuur in context",
+        "fo_root_titles": [
+          "Kerndoelen kunst en cultuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/BEWEGE/43_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BEWEGE",
+      "subject": "Bewegen en sport",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 43",
+      "item_code": "KD43-B",
+      "title": "Verbeteren beweegvaardigheid",
+      "description": "De leerling verbetert de beweegvaardigheid.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "301efd5f-b842-4621-a7d7-b725cca5b249",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3756,
+        "fo_doelzin_title": "Doelzin 38B - Verbeteren beweegvaardigheid",
+        "fo_root_titles": [
+          "Kerndoelen bewegen en sport"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/BEWEGE/44_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BEWEGE",
+      "subject": "Bewegen en sport",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 44",
+      "item_code": "KD44-B",
+      "title": "Bewegen regelen",
+      "description": "De leerling regelt beweegactiviteiten.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "97060365-e7c2-4d0e-9f88-c7b515681b64",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3762,
+        "fo_doelzin_title": "Doelzin 39B - Bewegen regelen",
+        "fo_root_titles": [
+          "Kerndoelen bewegen en sport"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/BEWEGE/45_B",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BEWEGE",
+      "subject": "Bewegen en sport",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 45",
+      "item_code": "KD45-B",
+      "title": "Beweegidentiteit ontwikkelen",
+      "description": "De leerling onderzoekt welke vormen van bewegen passen bij eigen voorkeuren.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "2d309801-3055-4d61-b698-4ae614000b23",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3766,
+        "fo_doelzin_title": "Doelzin 40 B - Beweegidentiteit ontwikkelen",
+        "fo_root_titles": [
+          "Kerndoelen bewegen en sport"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/14_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 14",
+      "item_code": "KD14-C",
+      "title": "Toont de juistheid van wiskundige beweringen en redeneringen aan",
+      "description": "De leerling toont de juistheid van wiskundige beweringen en redeneringen aan.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "b5951438-ff09-46c8-95bf-1b9ddf44b5dc",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3545,
+        "fo_doelzin_title": "Doelzin 14C",
+        "fo_root_titles": [
+          "Kerndoelen rekenen en wiskunde"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/3_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 3",
+      "item_code": "KD3-C",
+      "title": "Schrijft om tot kennisopbouw of begrip te komen",
+      "description": "De leerling schrijft om tot kennisopbouw of begrip te komen.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "376e9ceb-2f18-4c92-890e-2abcac579362",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3555,
+        "fo_doelzin_title": "Doelzin 3C",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/9_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 9",
+      "item_code": "KD9-C",
+      "title": "Verkent literatuur die geschreven is in verschillende periodes en contexten",
+      "description": "De leerling verkent literatuur die geschreven is in verschillende periodes en contexten.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "c1e786b8-2ea8-4437-a71d-33c13a5c3961",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3564,
+        "fo_doelzin_title": "Doelzin 9C",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DIGITA/21_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DIGITA",
+      "subject": "Digitale geletterdheid",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 21",
+      "item_code": "KD21-C",
+      "title": "Verkent het gebruik van data en dataverwerking",
+      "description": "De leerling verkent het gebruik van data en dataverwerking.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "200f505d-4b3c-42ef-8db5-e6240a43df57",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3577,
+        "fo_doelzin_title": "Doelzin 21C",
+        "fo_root_titles": [
+          "Kerndoelen digitale geletterdheid"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DIGITA/23_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DIGITA",
+      "subject": "Digitale geletterdheid",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 23",
+      "item_code": "KD23-C",
+      "title": "Digitale technologie, digitale media en de samenleving elkaar wederzijds beïnvloeden analyseren",
+      "description": "De leerling analyseert hoe digitale technologie, digitale media en de samenleving elkaar wederzijds beïnvloeden.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "4908c3c7-9004-4686-9bdd-e150af7e19fb",
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "source_enrichment": {
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/NEDERL/2_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "NEDERL",
+      "subject": "Nederlands",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 2",
+      "item_code": "KD2-C",
+      "title": "Verkent de betrouwbaarheid van verschillende bronnen",
+      "description": "De leerling verkent de betrouwbaarheid van verschillende bronnen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "7ee1572c-2eb5-4811-8a5c-e88609d8c587",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3657,
+        "fo_doelzin_title": "Doelzin 2C",
+        "fo_root_titles": [
+          "Kerndoelen Nederlands"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/29_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 29",
+      "item_code": "KD29-C",
+      "title": "Werkwijzen",
+      "description": "De leerling gebruikt natuurwetenschappelijke en technologische werkwijzen bij het ontdekken en verklaren van de wereld.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "5e5ac821-5cd4-4350-961a-665c4521cbca",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3667,
+        "fo_doelzin_title": "Doelzin 29C - Werkwijzen",
+        "fo_root_titles": [
+          "Kerndoelen mens en natuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/30_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 30",
+      "item_code": "KD30-C",
+      "title": "Inzicht in elektrische schakelingen en energiesystemen, en experimenteert met elektrische schakelingen",
+      "description": "De leerling toont inzicht in elektrische schakelingen en energiesystemen, en experimenteert met elektrische schakelingen",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "bb0f433a-08a8-4ecf-8ed5-a8475293f3f2",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3675,
+        "fo_doelzin_title": "Doelzin 30C - Energie",
+        "fo_root_titles": [
+          "Kerndoelen mens en natuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/32_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 32",
+      "item_code": "KD32-C",
+      "title": "Gezond leven",
+      "description": "De leerling toont inzicht in leefstijl, lichamelijke- en mentale gezondheid en reflecteert hierop.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "498a491c-87f2-4c9a-aed2-c4c44f3ca0aa",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3688,
+        "fo_doelzin_title": "Doelzin 32C - Gezond leven",
+        "fo_root_titles": [
+          "Kerndoelen mens en natuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/25_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 25",
+      "item_code": "KD25-C",
+      "title": "Ruimtelijke inrichting",
+      "description": "De leerling evalueert toekomstscenario's voor ruimtelijke inrichting van Nederland.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "6fbd49f4-e91f-43c4-a182-0156a21ef838",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3698,
+        "fo_doelzin_title": "Doelzin 25C - Ruimtelijke inrichting",
+        "fo_root_titles": [
+          "Kerndoelen mens en maatschappij"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/26_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 26",
+      "item_code": "KD26-C",
+      "title": "Doorwerking van het verleden",
+      "description": "De leerling toont inzicht in verbanden tussen historische ontwikkelingen en ontwikkelingen in het heden en redeneert over betekenissen die mensen en groepen geven aan het verleden.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "70273048-f10e-4404-ac1e-c89431c22106",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3704,
+        "fo_doelzin_title": "Doelzin 26C - Doorwerking van het verleden",
+        "fo_root_titles": [
+          "Kerndoelen mens en maatschappij"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/28_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 28",
+      "item_code": "KD28-C",
+      "title": "Diversiteit",
+      "description": "De leerling toont inzicht in hoe mensen omgaan met diversiteit in de samenleving.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "8c873507-9ac1-40ba-91c9-dab9dc4809db",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3712,
+        "fo_doelzin_title": "Doelzin 28C - Diversiteit",
+        "fo_root_titles": [
+          "Kerndoelen mens en maatschappij"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DUITS/37_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DUITS",
+      "subject": "Duits",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerdoel 37",
+      "item_code": "KD37-C",
+      "title": "Talige teksten mondeling en schriftelijk verwerken",
+      "description": "De leerling verwerkt […]talige teksten mondeling en schriftelijk om tot kennisopbouw en begrip te komen.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "aa09db61-2b33-491f-b6d8-d1cde87f2385",
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "source_enrichment": {
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DUITS/39_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DUITS",
+      "subject": "Duits",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 39",
+      "item_code": "KD39-C",
+      "title": "Interculturele communicatieve competentie",
+      "description": "De leerling gebruikt culturele kennis in interculturele communicatieve situaties.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "3b35e270-151d-4ea0-878f-6924fa5d0bda",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3738,
+        "fo_doelzin_title": "Doelzin 39C - Interculturele communicatieve competentie",
+        "fo_root_titles": [
+          "Kerndoelen moderne vreemde talen"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/KUNST/40_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "KUNST",
+      "subject": "Kunst en cultuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 40",
+      "item_code": "KD40-C",
+      "title": "Betekenis geven",
+      "description": "De leerling onderzoekt en waardeert betekenissen van kunst en cultuur.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "ba9b2cf3-0c22-4036-9c3c-10e9d66b1534",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3741,
+        "fo_doelzin_title": "Doelzin 40C - Betekenis geven",
+        "fo_root_titles": [
+          "Kerndoelen kunst en cultuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/BEWEGE/43_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "BEWEGE",
+      "subject": "Bewegen en sport",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 43",
+      "item_code": "KD43-C",
+      "title": "Beweegactiviteit passend maken",
+      "description": "De leerling stemt beweegactiviteiten af op de eigen mogelijkheden.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "65e08b92-4a0b-4f0e-a288-5f561b4b4b19",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3758,
+        "fo_doelzin_title": "Doelzin 38C - Beweegactiviteit passend maken",
+        "fo_root_titles": [
+          "Kerndoelen bewegen en sport"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/24_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 24",
+      "item_code": "KD24-C",
+      "title": "De omgeving van de school",
+      "description": "De leerling beschrijft de omgeving van de school vanuit geografische, historische, economische en sociale invalshoeken.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "c14538c7-03db-4ebb-abd2-e9ae0de6d894",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3782,
+        "fo_doelzin_title": "Doelzin 24C - De omgeving van de school",
+        "fo_root_titles": [
+          "Kerndoelen mens en maatschappij"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DUITS/38_C",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DUITS",
+      "subject": "Duits",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 38",
+      "item_code": "KD38-C",
+      "title": "Gesprekken voeren in de taal, afgestemd op doel, publiek en context",
+      "description": "De leerling voert gesprekken in de […] taal, afgestemd op doel, publiek en context.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "8085e45b-2143-46f6-a13a-944f986271d0",
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "source_enrichment": {
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DIGITA/21_D",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DIGITA",
+      "subject": "Digitale geletterdheid",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 21",
+      "item_code": "KD21-D",
+      "title": "Verkent mogelijkheden en beperkingen van AI",
+      "description": "De leerling verkent mogelijkheden en beperkingen van AI.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "5244dbf9-e723-4294-8958-aedb1b50edf9",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3578,
+        "fo_doelzin_title": "Doelzin 21D",
+        "fo_root_titles": [
+          "Kerndoelen digitale geletterdheid"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/29_D",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 29",
+      "item_code": "KD29-D",
+      "title": "Aard van natuurwetenschappen en technologie",
+      "description": "De leerling verkent de aard van natuurwetenschappen en technologie.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "7620a64b-a1fd-4055-9cec-fd0ef66d84f0",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3668,
+        "fo_doelzin_title": "Doelzin 29D - Aard van natuurwetenschappen en technologie",
+        "fo_root_titles": [
+          "Kerndoelen mens en natuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/32_D",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 32",
+      "item_code": "KD32-D",
+      "title": "Relationele en seksuele gezondheid",
+      "description": "De leerling toont inzicht in relationele en seksuele gezondheid en draagt bij aan een veilige en respectvolle omgeving rondom gedrag, diversiteit en seksualiteit.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "98082185-5cc7-49d5-95c3-da063198cd7b",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3689,
+        "fo_doelzin_title": "Doelzin 32D - Relationele en seksuele gezondheid",
+        "fo_root_titles": [
+          "Kerndoelen mens en natuur"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/28_D",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en maatschappij",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 28",
+      "item_code": "KD28-D",
+      "title": "Sociale omgeving",
+      "description": "De school draagt bij aan de sociale en emotionele ontwikkeling van leerlingen en bevordert respectvolle omgang met anderen.",
+      "level_scope": [
+        "vmbo",
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "dd0bc998-c1f6-4f9f-8bd1-339ab208a2af",
+      "source_enrichment": {
+        "fo_doelzin_ref": 3715,
+        "fo_doelzin_title": "Doelzin 28D - Sociale omgeving",
+        "fo_root_titles": [
+          "Kerndoelen mens en maatschappij"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo"
+        ]
+      },
+      "actor": "school",
+      "goal_type": "aanbod",
+      "is_havo_vwo_extension": false,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/DUITS/38_D",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "DUITS",
+      "subject": "Duits",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 38",
+      "item_code": "KD38-D",
+      "title": "Schriftelijke communicatie",
+      "description": "De leerling schrijft in de [...] taal, afgestemd op doel, publiek en context.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "a32c4698-f059-41e8-9590-43e773763e73",
+      "source_enrichment": {
+        "fo_doelzin_ref": 4045,
+        "fo_doelzin_title": "Doelzin 38D - Schriftelijke communicatie",
+        "fo_root_titles": [
+          "Kerndoelen moderne vreemde talen"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/REKENE/14_D",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "REKENE",
+      "subject": "Rekenen en wiskunde",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 14",
+      "item_code": "KD14-D",
+      "title": "Bedenkt en beschrijft algoritmes",
+      "description": "De leerling bedenkt en beschrijft algoritmes.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "dbc3ca07-c03e-420d-a3d3-493dd8b02fe3",
+      "source_enrichment": {
+        "fo_doelzin_ref": 4177,
+        "fo_doelzin_title": "Doelzin 14D",
+        "fo_root_titles": [
+          "Kerndoelen rekenen en wiskunde"
+        ],
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    },
+    {
+      "id": "OB/NIEUW/MENSE/29_E",
+      "curriculum_layer": "nieuw_ob",
+      "build": "OB",
+      "subject_code": "MENSE",
+      "subject": "Mens en natuur",
+      "framework_type": "kerndoel",
+      "framework_code": "Kerndoel 29",
+      "item_code": "KD29-E",
+      "title": "Begrip van gevaren van fysische, geologische, chemische en biologische verschijnselen, mogelijke voorzorgsmaatregelen en hoe te handelen in geval van nood",
+      "description": "De leerling toont begrip van gevaren van fysische, geologische, chemische en biologische verschijnselen, mogelijke voorzorgsmaatregelen en hoe te handelen in geval van nood.",
+      "level_scope": [
+        "havo",
+        "vwo"
+      ],
+      "status": "definitief concept",
+      "source_uuid": "8667d300-61bf-43d3-ba61-fbc55a3cf173",
+      "actor": "leerling",
+      "goal_type": "leerling",
+      "source_enrichment": {
+        "original_level_scope": [
+          "vso",
+          "ob vo",
+          "3 h/v"
+        ]
+      },
+      "is_havo_vwo_extension": true,
+      "supplementary_publication": false,
+      "legal_alignment": "main_bundle"
+    }
+  ]
+}

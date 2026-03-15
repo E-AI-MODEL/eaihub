@@ -7,7 +7,8 @@ import { getOrCreateUserId } from '@/services/identity';
 import { useAuth } from '@/hooks/useAuth';
 import { calculateDynamicTTL } from '@/utils/eaiLearnAdapter';
 import { pushTrace } from '@/lib/reliabilityPipeline';
-import { getNodeById, getLearningPath, CURRICULUM_PATHS } from '@/data/curriculum';
+import { getNodeById, getPathForNode } from '@/data/curriculumLoader';
+import { CURRICULUM_PATHS } from '@/data/curriculum';
 import { upsertSessionState, subscribeToTeacherMessages, fetchTeacherMessages, markMessageRead, setSessionOffline } from '@/services/sessionSyncService';
 import { getActivePlugin } from '@/lib/ssotRuntime';
 import { fetchChatMessages } from '@/services/adminDbService';
@@ -65,13 +66,13 @@ const GoalPicker: React.FC<GoalPickerProps> = ({ profile, onSelect, onDismiss })
     if (node) {
       // Find sibling nodes for transfer goal
       let siblingTitle = '';
-      for (const path of CURRICULUM_PATHS) {
-        const idx = path.nodes.findIndex(n => n.id === node.id);
+      const pathInfo = getPathForNode(node.id);
+      if (pathInfo) {
+        const idx = pathInfo.path.nodes.findIndex(n => n.id === node.id);
         if (idx >= 0) {
-          const next = path.nodes[idx + 1];
-          const prev = path.nodes[idx - 1];
+          const next = pathInfo.path.nodes[idx + 1];
+          const prev = pathInfo.path.nodes[idx - 1];
           siblingTitle = next?.title || prev?.title || '';
-          break;
         }
       }
 
@@ -85,16 +86,15 @@ const GoalPicker: React.FC<GoalPickerProps> = ({ profile, onSelect, onDismiss })
       ];
     }
 
-    // Try path-based goals
-    const path = profile.subject && profile.level
-      ? getLearningPath(profile.subject, profile.level)
-      : undefined;
-
-    if (path && path.nodes.length >= 4) {
-      return path.nodes.slice(0, 4).map(n => ({
-        label: n.title,
-        description: n.description,
-      }));
+    // Try path-based goals from CURRICULUM_PATHS
+    if (profile.subject) {
+      const matchingPath = CURRICULUM_PATHS.find(p => p.subject.toLowerCase() === profile.subject!.toLowerCase());
+      if (matchingPath && matchingPath.nodes.length >= 4) {
+        return matchingPath.nodes.slice(0, 4).map(n => ({
+          label: n.title,
+          description: n.description,
+        }));
+      }
     }
 
     // Generic fallback

@@ -16,7 +16,8 @@ import {
   type LogicGate
 } from '@/data/ssot';
 import { getEffectiveSSOT } from '@/lib/ssotRuntime';
-import { getNodeById, getLearningPath, type LearningNode } from '@/data/curriculum';
+import { getNodeById } from '@/data/curriculumLoader';
+import type { LearningNode } from '@/types';
 import type { SessionContext } from '@/types';
 
 // ============= TYPE DEFINITIONS =============
@@ -254,6 +255,17 @@ function generateCurriculumContext(profile: ProfileData): string {
     `**Didactische Focus:** ${node.didactic_focus}`,
     `**Beheersingscriteria:** ${node.mastery_criteria}`,
   ];
+
+  if (node.slo_ref) {
+    lines.push(`**SLO Referentie:** ${node.slo_ref}`);
+  }
+
+  if (node.micro_steps && node.micro_steps.length > 0) {
+    lines.push('\n**Leerstappen (microsteps):**');
+    node.micro_steps.forEach((step, i) => {
+      lines.push(`${i + 1}. ${step}`);
+    });
+  }
   
   if (node.common_misconceptions && node.common_misconceptions.length > 0) {
     lines.push('\n**Veelvoorkomende Misconcepties (LET OP!):**');
@@ -262,8 +274,17 @@ function generateCurriculumContext(profile: ProfileData): string {
     });
     lines.push('\n*Wees alert op deze misconcepties en corrigeer ze proactief.*');
   }
-  
-  lines.push(`\n**Geschatte studielast:** ${node.study_load_minutes} minuten`);
+
+  if (node.illustrations && node.illustrations.length > 0) {
+    lines.push('\n**Voorbeeldopdrachten (ter inspiratie):**');
+    node.illustrations.slice(0, 3).forEach((ill, i) => {
+      lines.push(`${i + 1}. ${ill}`);
+    });
+  }
+
+  if (node.evidence_types && node.evidence_types.length > 0) {
+    lines.push(`\n**Bewijsvormen:** ${node.evidence_types.join(', ')}`);
+  }
   
   return lines.join('\n');
 }

@@ -1,105 +1,140 @@
 
+# Strategische roadmap — EAIHUB
 
-## Plan: Implementatie OB nieuw pilot_core curriculum
+## Status
 
-### Kwaliteitsoordeel van het PVA
+Stap 1–7 afgerond. Fase 1–5 afgerond. Alle observability-metrics (edge/client ratio, plugin-usage, healing frequentie, knowledge_type distributie) live en correct aangesloten. `analysisSource`-bug gefixt (mechanical i.p.v. analysis).
 
-Het PVA is gedegen en sluit goed aan op de huidige codebase. De drie JSON-bestanden zijn schoon gestructureerd (7393 regels nodes, 1310 regels paths, 4009 regels source). De aanpak — JSON als bron, TypeScript als loader — is een duidelijke upgrade ten opzichte van de huidige hardcoded demo-data. Het PVA klopt inhoudelijk; hieronder de aangepaste uitvoeringsstappen voor Lovable.
+---
 
-### Wat er verandert
+## Huidige architectuur
 
-De huidige demo-curriculumlaag (3 hardcoded paden, 11 nodes) wordt volledig vervangen door de SLO pilot_core dataset (~100+ nodes, ~50 paths, 9 leergebieden). De architectuur verschuift van "één TS-bestand met alles" naar "JSON-bronnen + TypeScript loader/mapper".
+1. `eai-classify` edge function — primaire 10D-classificatie via Gemini (tool-calling schema)
+2. `generateAnalysis()` in `chatService.ts` — client-side fallback via regex/heuristics
+3. `reliabilityPipeline.ts` — enige bron voor SSOT-healing, G-factor, logic gates, epistemic guard
+4. `eaiLearnAdapter.ts` — state-/viewmodel-laag (scaffolding, TTL, history)
+5. `ssot_v15.json` + `ssot.ts` — statische SSOT singleton met typed helpers, **nu via `getEffectiveSSOT()`**
+6. `ssotRuntime.ts` — runtime loader + whitelist merge voor school plugin overlays
+7. `ssotValidator.ts` — drielaags Zod-validatie (schema, referentieel, runtime)
+8. Auth via Supabase: `user_roles` (LEERLING/DOCENT/ADMIN), `has_role()` SECURITY DEFINER, `AuthGuard`
+9. Persistentie: `chat_messages`, `student_sessions`, `mastery`, `teacher_messages`, `profiles`, `school_ssot`
 
-### Stap 1 — JSON-bestanden plaatsen
+---
 
-Kopieer de drie pilot-bestanden naar `src/data/curriculum/`:
-- `curriculum.source.ob.nieuw.pilot_core.json`
-- `curriculum.nodes.ob.nieuw.pilot_core.json`
-- `curriculum.paths.ob.nieuw.pilot_core.json`
+## Afgeronde stappen
 
-De `school_goals` JSON wordt **niet** opgenomen (buiten pilot scope).
+### Stap 1 — Analyse naar edge function ✅
+### Stap 2 — Dubbele validatie opschonen ✅
+### Stap 3 — EAIAnalysis uitbreiden met nuancevelden ✅
+### Stap 4 — UI aanpassen op rijkere analyse ✅
+### Stap 5 — Leerlingervaring en Leskaart-context ✅
+### Stap 6 — Kwaliteitszichtbaarheid per rol ✅
+### Stap 7 — Veilig rollenmodel en Auth ✅
 
-### Stap 2 — Types uitbreiden (src/types/index.ts)
+---
 
-Voeg JSON-bronmodel types toe:
+## Implementatieplan — 5 fasen
 
-```typescript
-// JSON bron-types (corresponderend met de drie JSON-bestanden)
-interface CurriculumSourceItem { id, curriculum_layer, subject_code, subject, title, description, level_scope, ... }
-interface CurriculumNodeRecord { id, source_refs, path_ref, title, description, mastery: { can_demonstrate, evidence_types }, microsteps, misconceptions, illustrations, tags, ... }
-interface CurriculumPathRecord { id, subject_code, subject, title, node_ids, end_goal, level_scope, ... }
-```
+### Fase 1 — Stabilisatie (security + healing) ✅
 
-Bestaande `LearningNode` in `src/types/index.ts` wordt het **runtime-type** en krijgt extra optionele velden:
-- `illustrations?: string[]`
-- `evidence_types?: string[]`
+| # | Taak | Status |
+|---|------|--------|
+| 1.1 | RLS verscherpen | ✅ DONE |
+| 1.2 | Healing consolideren | ✅ DONE |
+| 1.3 | Defensieve role-check | ✅ DONE |
 
-De dubbele `LearningNode` interface in `src/data/curriculum.ts` wordt verwijderd.
+### Fase 2 — Analyse-consistentie ✅
 
-### Stap 3 — Loader bouwen (src/data/curriculumLoader.ts)
+| # | Taak | Status |
+|---|------|--------|
+| 2.1 | Edge-classify uitbreiden met secondary_dimensions | ✅ DONE |
+| 2.2 | E-dimensie aansluiten op SSOT | ✅ DONE |
+| 2.3 | Logic gate check vereenvoudigen | ✅ DONE |
 
-Nieuw bestand dat:
-1. De drie JSON-bestanden importeert
-2. Indexes bouwt (`Map<string, node>`, `Map<string, path>`)
-3. Pilot JSON-nodes mapt naar runtime `LearningNode`:
-   - `mastery.can_demonstrate[0]` → `mastery_criteria`
-   - `misconceptions` → `common_misconceptions`
-   - `microsteps` → `micro_steps`
-   - `mastery.evidence_types` → `evidence_types`
-   - `illustrations` → `illustrations`
-   - `didactic_focus` → afgeleid uit `tags.theme[0]` of fallback
-4. Exporteert:
-   - `getNodeById(nodeId)` — vervangt huidige
-   - `getPathById(pathId)` — nieuw, primaire lookup
-   - `getPathsBySubject(subjectCode)` — voor UI
-   - `getAllSubjects()` — voor ProfileSetup dropdown
-   - `PILOT_PATHS` / `PILOT_NODES` — voor admin tellingen
+### Fase 3.x — Auth consolidatie & governance hardening ✅
 
-### Stap 4 — curriculum.ts omzetten naar re-export
+| # | Taak | Status |
+|---|------|--------|
+| 3.x.1 | `useAuth()` refactor naar `AuthProvider` context (één listener, gedeelde state) | ✅ DONE |
+| 3.x.2 | RLS tightening: `user_roles` en `school_ssot` van ADMIN ALL → SUPERUSER ALL + ADMIN/DOCENT SELECT | ✅ DONE |
 
-`src/data/curriculum.ts` wordt een dunne compatibiliteitslaag die re-exporteert vanuit `curriculumLoader.ts`. Alle bestaande imports (`getNodeById`, `getLearningPath`, `CURRICULUM_PATHS`) blijven werken maar lezen nu uit de pilot-data.
 
-### Stap 5 — Consumers aanpassen
+### Fase 3 — EITL: SSOT plug-in architectuur ✅
 
-**6 bestanden** die curriculum importeren:
+| # | Taak | Status |
+|---|------|--------|
+| 3.1 | `school_ssot` tabel + RLS (admins CRUD, docenten SELECT) | ✅ DONE |
+| 3.2 | `ssotValidator.ts` — drielaags Zod-validatie (schema, referentieel, runtime) | ✅ DONE |
+| 3.3 | `ssotRuntime.ts` — `whitelistMerge` + `loadEffectiveSSOT` + cache | ✅ DONE |
+| 3.4 | `ssot.ts` refactor — `SSOT_DATA` → `BASE_SSOT` + `getEffectiveSSOT()` | ✅ DONE |
+| 3.5 | Component updates — alle directe `SSOT_DATA` refs vervangen | ✅ DONE |
+| 3.6 | Read-only EITL preview tab in Admin Panel | ✅ DONE |
 
-| Bestand | Wijziging |
-|---|---|
-| `TopicSelector.tsx` | Twee-staps selectie: eerst leergebied, dan node. Verwijder `study_load_minutes` weergave. Toon `illustrations` en `microsteps`. |
-| `ProfileSetup.tsx` | Vervang hardcoded `SLO_MODULES` door `getAllSubjects()`. Stap 3 wordt leergebied-keuze, stap 4 wordt pad/node-keuze. |
-| `ChatInterface.tsx` | Import aanpassen naar loader. GoalPicker werkt al via `getNodeById` — geen structurele wijziging. |
-| `ssotHelpers.ts` | `generateCurriculumContext()` verrijken met `microsteps`, `misconceptions`, `illustrations`, `evidence_types`. Verwijder `study_load_minutes` regel. |
-| `LeskaartPanel.tsx` | Verwijder `study_load_minutes` weergave. Voeg `microsteps` en `illustrations` secties toe. |
-| `adminService.ts` | Vervang `CURRICULUM_PATHS.reduce(...)` door `PILOT_PATHS.length` / `PILOT_NODES.size`. Verwijder `totalStudyTime`. |
-| `SessionListItem.tsx` | Import aanpassen — geen structurele wijziging. |
+#### MVP Plugin Whitelist
+- **Toegestaan**: band `label`, `description`, `didactic_principle`, `fix` (tekst); command descriptions; SRL `label`/`goal`; gate annotations (rationale, teacher_note)
+- **Immutable**: `band_id`, `fix_ref`, `score_range`, `mechanistic`, `enforcement`, command keys, `cycle.order`, `trigger_band`, `learner_obs`, `ai_obs`, `nl_profile`, `trace_tags`, `band_weight`, `fix_type`, `band_ref`
+- **Niet in MVP**: rubric `name`, rubric `goal`
 
-### Stap 6 — study_load_minutes neutraliseren
+### Fase 3.5 — EITL Wizard (edit-flow)
 
-- Verwijder uit UI-renders (TopicSelector, LeskaartPanel, ProfileSetup)
-- Verwijder uit promptcontext (ssotHelpers)
-- Behoud als optioneel veld in `src/types/index.ts` voor backward compat
+| # | Taak | Status |
+|---|------|--------|
+| 3.5.1 | 5-staps wizard in Admin Panel voor plugin CRUD (SUPERUSER-only) | ✅ DONE |
+| 3.5.2 | Plugin versioning met `change_notes` en `based_on_version` | ✅ DONE |
 
-### Wat niet verandert
+### Fase 4 — Governance ✅
 
-- SSOT, fixes, promptlogica (ssot.ts, ssotRuntime, ssotValidator)
-- Edge functions (eai-chat, eai-classify)
-- chatService structuur
-- Database/mastery tabellen
-- MessageBubble, GoalPicker mechanisme
+| # | Taak | Status |
+|---|------|--------|
+| 4.1 | Versioning afronden (dedup save, change_notes verplicht bij edits) | ✅ DONE |
+| 4.2 | Rollback — SUPERUSER kan eerdere plugin-versie activeren via PluginVersionHistory | ✅ DONE |
+| 4.3 | Audit log — `ssot_changes` tabel met SUPERUSER ALL + ADMIN SELECT | ✅ DONE |
+| 4.4 | Diff-view — versiegeschiedenis + audit trail in EITL tab | ✅ DONE |
 
-### Aanpassing op het PVA-document
+### Fase 5 — Observability ✅
 
-Het PVA is grotendeels correct. Twee kleine punten ter aanvulling in het .md-bestand:
-1. **Fase C3** — `getLearningPath(subject, level)` hoeft niet volledig te verdwijnen maar wordt een compatibiliteitswrapper die intern `getPathsBySubject` aanroept
-2. **Fase D2** — `LearnerProfile.subject` en `level` kunnen blijven bestaan maar worden gevuld vanuit de gekozen path in plaats van handmatige invoer
+| # | Taak | Status |
+|---|------|--------|
+| 5.1 | Edge vs client analyse-ratio in dashboard | ✅ DONE |
+| 5.2 | Plugin-usage metrics per school | ✅ DONE |
+| 5.3 | Logic gate breach rate trending | ✅ DONE |
+| 5.4 | Healing event frequentie | ✅ DONE |
 
-### Uitvoeringsvolgorde
+### Fase 6 — OB nieuw pilot_core curriculum ✅
 
-1. JSON-bestanden kopiëren naar `src/data/curriculum/`
-2. Types uitbreiden in `src/types/index.ts`
-3. `curriculumLoader.ts` bouwen
-4. `curriculum.ts` omzetten naar re-export
-5. Alle consumers aanpassen (6 bestanden)
-6. `study_load_minutes` uit UI verwijderen
-7. PVA .md opslaan in `.lovable/` als referentie
+| # | Taak | Status |
+|---|------|--------|
+| 6.1 | Drie pilot JSON-bestanden plaatsen in `src/data/curriculum/` | ✅ DONE |
+| 6.2 | `LearningNode` uitbreiden met `illustrations`, `evidence_types` | ✅ DONE |
+| 6.3 | `curriculumLoader.ts` — JSON → runtime mapper met indexes | ✅ DONE |
+| 6.4 | `curriculum.ts` → re-export compatibiliteitslaag | ✅ DONE |
+| 6.5 | Consumers aanpassen (TopicSelector, ProfileSetup, LeskaartPanel, ChatInterface, ssotHelpers, adminService) | ✅ DONE |
+| 6.6 | `study_load_minutes` geneutraliseerd (uit UI + prompt, optioneel behouden in types) | ✅ DONE |
+| 6.7 | PVA opgeslagen als `.lovable/pva-ob-nieuw-pilot-core.md` | ✅ DONE |
 
+## Bekende technische schuld
+
+| # | Issue | Impact | Fase |
+|---|-------|--------|------|
+| 4 | Mixed dimensions in `coregulation_bands` veld | Low | documenteren of refactor bij EITL wizard |
+| 7 | Token schatting is character-based proxy | Low | 5.x of labelen |
+| 8 | `COMMAND_INTENTS` hardcoded in `ssotHelpers.ts` | Low | 3.5 (verplaatsen naar plugin-laag) |
+
+---
+
+## Wat expliciet buiten scope blijft
+
+- Volledige vervanging van de SSOT per school (alleen overlay)
+- Generieke deep merge (alleen whitelisted paden)
+- Structurele of machinekritische velden in de plugin-laag
+- Meerdere fasen tegelijk uitvoeren
+- `tiktoken` (Python-only) — indien nodig: `gpt-tokenizer` (npm) of proxy-label
+
+---
+
+## Kernprincipe
+
+Constatering → Interpretatie → Beslissing.
+De base SSOT blijft constitutieve bronlaag.
+De plugin annoteert, maar herdefinieert niet.
+Stabilisatie vóór uitbreiding.
