@@ -55,6 +55,8 @@ export interface LearningNode {
   prerequisite_ids?: string[];
   micro_steps?: string[];
   common_misconceptions?: string[];
+  illustrations?: string[];
+  evidence_types?: string[];
 }
 
 export interface LearningPath {
