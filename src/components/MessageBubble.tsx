@@ -214,13 +214,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isLast = false, 
 
             {/* Multiple-choice option buttons */}
             {detectedOptions && (
-              <div className="px-3 pb-3 pt-1.5 flex flex-wrap gap-1.5 border-t border-slate-800">
+              <div className="px-3 pb-3 pt-1.5 border-t border-slate-800 max-h-44 overflow-y-auto space-y-1.5">
                 {detectedOptions.map((option, i) => (
                   <button
                     key={i}
                     onClick={() => handleOptionClick(option)}
-                    className="px-3 py-1.5 text-xs text-slate-300 border border-slate-700 bg-slate-800/30 hover:border-indigo-500/40 hover:bg-slate-800/60 hover:text-slate-100 transition-all"
+                    className="w-full text-left px-3 py-2 text-xs text-slate-300 border border-slate-700 bg-slate-800/30 hover:border-indigo-500/40 hover:bg-slate-800/60 hover:text-slate-100 transition-all leading-relaxed"
                   >
+                    <span className="text-indigo-400 font-mono mr-1.5">{String.fromCharCode(65 + i)}.</span>
                     {option}
                   </button>
                 ))}

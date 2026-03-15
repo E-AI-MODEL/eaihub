@@ -215,6 +215,9 @@ function buildCurriculumContext(profile: LearnerProfile) {
     didactic_focus: node.didactic_focus,
     mastery_criteria: node.mastery_criteria,
     common_misconceptions: node.common_misconceptions,
+    micro_steps: node.micro_steps,
+    illustrations: node.illustrations,
+    evidence_types: node.evidence_types,
   };
 }
 

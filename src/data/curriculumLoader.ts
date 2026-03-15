@@ -157,19 +157,6 @@ export function getAllSubjects(): { code: string; name: string; pathCount: numbe
   return subjects.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/**
- * Compatibility wrapper: find a learning path by subject + level
- * Returns the first matching path (for backward compat with old getLearningPath)
- */
-export function getLearningPath(subject: string, level: string): LearningPath | undefined {
-  const subjectLower = subject.toLowerCase();
-  for (const [, path] of PATH_INDEX) {
-    if (path.subject.toLowerCase() === subjectLower) {
-      return path;
-    }
-  }
-  return undefined;
-}
 
 /** Get all raw path records (for admin counts) */
 export function getAllPaths(): LearningPath[] {

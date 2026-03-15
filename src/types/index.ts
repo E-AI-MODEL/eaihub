@@ -50,8 +50,6 @@ export interface LearningNode {
   slo_ref?: string;
   didactic_focus: string;
   mastery_criteria: string;
-  example_question?: string;
-  study_load_minutes?: number;
   prerequisite_ids?: string[];
   micro_steps?: string[];
   common_misconceptions?: string[];
